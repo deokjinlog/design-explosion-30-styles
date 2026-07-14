@@ -1,0 +1,40 @@
+<svg viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="design-kit — 30 styles, one screen">
+  <rect width="1200" height="400" fill="#0b0d12"/>
+  <text x="60" y="152" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="74" font-weight="800" letter-spacing="-2.5">
+    <tspan fill="#f5f5f7">design</tspan><tspan fill="#ec4899">-kit</tspan>
+  </text>
+  <text x="64" y="202" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="25" font-weight="500" fill="#c7ccd6">One domain &#8594; 30 distinct UI styles, side by side.</text>
+  <text x="64" y="236" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="600" fill="#6b7280" letter-spacing="2.5">30 STYLES &#183; 1 SCREEN &#183; COMPARE &amp; DECIDE</text>
+  <g>
+    <rect x="0" y="286" width="40" height="114" fill="#00e5ff"/>
+    <rect x="40" y="286" width="40" height="114" fill="#0052cc"/>
+    <rect x="80" y="286" width="40" height="114" fill="#6366f1"/>
+    <rect x="120" y="286" width="40" height="114" fill="#33ff66"/>
+    <rect x="160" y="286" width="40" height="114" fill="#ffde00"/>
+    <rect x="200" y="286" width="40" height="114" fill="#a0c4ff"/>
+    <rect x="240" y="286" width="40" height="114" fill="#d4d4d4"/>
+    <rect x="280" y="286" width="40" height="114" fill="#c9a227"/>
+    <rect x="320" y="286" width="40" height="114" fill="#ff4d6d"/>
+    <rect x="360" y="286" width="40" height="114" fill="#e63946"/>
+    <rect x="400" y="286" width="40" height="114" fill="#52b788"/>
+    <rect x="440" y="286" width="40" height="114" fill="#cdd3da"/>
+    <rect x="480" y="286" width="40" height="114" fill="#b388ff"/>
+    <rect x="520" y="286" width="40" height="114" fill="#ff9f1c"/>
+    <rect x="560" y="286" width="40" height="114" fill="#ff8fab"/>
+    <rect x="600" y="286" width="40" height="114" fill="#2196f3"/>
+    <rect x="640" y="286" width="40" height="114" fill="#ff00c8"/>
+    <rect x="680" y="286" width="40" height="114" fill="#ef4444"/>
+    <rect x="720" y="286" width="40" height="114" fill="#f72585"/>
+    <rect x="760" y="286" width="40" height="114" fill="#22d3ee"/>
+    <rect x="800" y="286" width="40" height="114" fill="#8b5cf6"/>
+    <rect x="840" y="286" width="40" height="114" fill="#4cc9f0"/>
+    <rect x="880" y="286" width="40" height="114" fill="#1e3a8a"/>
+    <rect x="920" y="286" width="40" height="114" fill="#06b6d4"/>
+    <rect x="960" y="286" width="40" height="114" fill="#ff6b35"/>
+    <rect x="1000" y="286" width="40" height="114" fill="#64748b"/>
+    <rect x="1040" y="286" width="40" height="114" fill="#d97706"/>
+    <rect x="1080" y="286" width="40" height="114" fill="#fbbf24"/>
+    <rect x="1120" y="286" width="40" height="114" fill="#ec4899"/>
+    <rect x="1160" y="286" width="40" height="114" fill="#0ea5e9"/>
+  </g>
+</svg>
