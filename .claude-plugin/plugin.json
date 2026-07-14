@@ -1,13 +1,13 @@
 {
-  "name": "design-kit",
-  "description": "도메인 하나로 같은 화면을 30가지 디자인 스타일 시안으로 — 방향 결정용 병렬 디자인 탐색",
-  "version": "1.0.0",
+  "name": "design-explosion-30-styles",
+  "description": "하나의 화면을 30가지 디자인 스타일로 폭발시켜 나란히 비교 — 도메인 하나로 방향을 정하는 디자인 탐색",
+  "version": "1.1.0",
   "author": {
     "name": "djchoi",
     "email": "deokjinlog@users.noreply.github.com"
   },
-  "homepage": "https://github.com/deokjinlog/design-kit",
-  "repository": "https://github.com/deokjinlog/design-kit",
+  "homepage": "https://github.com/deokjinlog/design-explosion-30-styles",
+  "repository": "https://github.com/deokjinlog/design-explosion-30-styles",
   "license": "MIT",
   "keywords": [
     "design",
