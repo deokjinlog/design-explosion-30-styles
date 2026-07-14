@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 에디터
+.vscode/
+.idea/
+
+# 참고: docs/ 의 라이브 데모 갤러리는 일부러 커밋합니다 (쇼케이스).
+# 사용자가 자기 프로젝트에서 생성하는 시안은 그 프로젝트의 .gitignore 로 관리됩니다.

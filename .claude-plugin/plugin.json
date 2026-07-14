@@ -1,0 +1,22 @@
+{
+  "name": "design-kit",
+  "description": "도메인 하나로 같은 화면을 30가지 디자인 스타일 시안으로 — 방향 결정용 병렬 디자인 탐색",
+  "version": "1.0.0",
+  "author": {
+    "name": "djchoi",
+    "email": "deokjinlog@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/deokjinlog/design-kit",
+  "repository": "https://github.com/deokjinlog/design-kit",
+  "license": "MIT",
+  "keywords": [
+    "design",
+    "ui",
+    "design-exploration",
+    "html",
+    "mockup",
+    "gallery",
+    "claude-code",
+    "claude-code-plugin"
+  ]
+}

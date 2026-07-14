@@ -1,0 +1,23 @@
+{
+  "name": "design-kit",
+  "description": "도메인 하나로 30가지 디자인 스타일 시안을 한 번에",
+  "owner": {
+    "name": "djchoi",
+    "email": "deokjinlog@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/deokjinlog/design-kit",
+  "plugins": [
+    {
+      "name": "design-kit",
+      "description": "도메인 하나로 같은 화면을 30가지 디자인 스타일 시안으로 — 방향 결정용 병렬 디자인 탐색",
+      "version": "1.0.0",
+      "source": "./",
+      "homepage": "https://github.com/deokjinlog/design-kit",
+      "repository": "https://github.com/deokjinlog/design-kit",
+      "author": {
+        "name": "djchoi",
+        "email": "deokjinlog@users.noreply.github.com"
+      }
+    }
+  ]
+}
