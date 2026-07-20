@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 — 대화</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F1E8;
+    --surface:#EEEADB;
+    --surface-warm:#E6DCC6;
+    --ink:#2B2A26;
+    --ink-soft:#4A4638;
+    --border:rgba(43,42,38,.14);
+    --border-strong:rgba(43,42,38,.24);
+
+    --green:#2D4A3E;
+    --green-hover:#243D33;
+    --green-text:#1F332B;
+    --green-tint:rgba(45,74,62,.10);
+
+    --sage:#8BA888;
+    --sage-dark:#45603F;
+    --sage-tint:rgba(139,168,136,.20);
+
+    --terracotta:#C4704B;
+    --terracotta-text:#8B4A30;
+    --terracotta-tint:rgba(196,112,75,.15);
+
+    --gold:#C9A66B;
+    --gold-text:#7A5A22;
+    --gold-tint:rgba(201,166,107,.20);
+
+    --clay:#8B5A44;
+
+    --radius-lg:24px 40px 24px 40px;
+    --radius-md:16px 28px 16px 28px;
+    --radius-sm:10px 16px 10px 16px;
+    --radius-xs:8px 12px 8px 12px;
+
+    --font-serif:'Gowun Batang', 'Pretendard', serif;
+    --font-sans:'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background-color:var(--bg);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.17 0 0 0 0 0.15 0 0 0 0 0.13 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat:repeat;
+    background-size:240px 240px;
+    color:var(--ink);
+    font-family:var(--font-sans);
+    font-size:14px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{ margin:0; font-family:var(--font-serif); font-weight:700; color:var(--ink); letter-spacing:-0.01em; }
+  p{ margin:0; }
+  ul{ list-style:none; margin:0; padding:0; }
+  button{ font-family:inherit; }
+  .num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+
+  a{ color:inherit; }
+
+  :focus-visible{ outline:2px solid var(--green); outline-offset:2px; border-radius:4px; }
+
+  /* ---------- layout shell ---------- */
+  .nav-toggle-input{ position:absolute; opacity:0; pointer-events:none; }
+  .scrim{ display:none; position:fixed; inset:0; background:rgba(43,42,38,.35); z-index:30; }
+  #nav-toggle:checked ~ .scrim{ display:block; }
+  #nav-toggle:checked ~ .app-shell .sidebar{ transform:translateX(0); }
+
+  .app-shell{ display:flex; min-height:100vh; align-items:flex-start; }
+
+  .sidebar{
+    width:240px; flex:0 0 240px;
+    background:var(--surface);
+    border-right:1.5px solid var(--border);
+    min-height:100vh;
+    padding:24px 16px;
+    display:flex; flex-direction:column;
+    gap:32px;
+    position:sticky; top:0;
+    z-index:40;
+  }
+  .brand{
+    display:flex; align-items:center; gap:12px;
+    padding:0 8px;
+  }
+  .brand-mark{
+    width:36px; height:36px; border-radius:var(--radius-sm);
+    background:var(--green); color:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-serif); font-weight:700; font-size:16px;
+    flex:0 0 auto;
+  }
+  .brand-name{ font-family:var(--font-serif); font-size:20px; font-weight:700; }
+
+  .nav{ display:flex; flex-direction:column; gap:4px; }
+  .nav-item{
+    display:flex; align-items:center; gap:12px;
+    padding:8px 12px;
+    border-radius:var(--radius-xs);
+    color:var(--ink-soft);
+    text-decoration:none;
+    font-size:14px; font-weight:500;
+    transition:background-color .2s ease, color .2s ease;
+  }
+  .nav-item svg{ width:18px; height:18px; flex:0 0 auto; }
+  .nav-item:hover{ background:var(--surface-warm); color:var(--ink); }
+  .nav-item.active{
+    background:var(--green); color:var(--bg); font-weight:700;
+  }
+
+  .sidebar-foot{ margin-top:auto; }
+  .user-chip{
+    display:flex; align-items:center; gap:12px;
+    padding:8px 12px;
+    border-radius:var(--radius-xs);
+    border:1.5px solid var(--border);
+    background:var(--bg);
+  }
+  .avatar{
+    width:32px; height:32px; border-radius:50%;
+    background:var(--sage-tint); color:var(--green-text);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:14px; flex:0 0 auto;
+    border:1.5px solid var(--border-strong);
+  }
+  .user-meta{ display:flex; flex-direction:column; line-height:1.3; }
+  .user-name{ font-size:13px; font-weight:700; color:var(--ink); }
+  .user-role{ font-size:12px; color:var(--ink-soft); }
+
+  .main{ flex:1; min-width:0; display:flex; flex-direction:column; }
+
+  /* ---------- topbar ---------- */
+  .topbar{
+    display:flex; align-items:center; gap:16px;
+    padding:12px 32px;
+    border-bottom:1.5px solid var(--border);
+    background:rgba(244,241,232,.88);
+    backdrop-filter:blur(6px);
+    position:sticky; top:0; z-index:20;
+    flex-wrap:wrap;
+  }
+  .hamburger{
+    display:none; width:36px; height:36px; border-radius:var(--radius-xs);
+    border:1.5px solid var(--border-strong); background:var(--surface);
+    align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto;
+  }
+  .hamburger svg{ width:18px; height:18px; }
+  .topbar-title{ font-family:var(--font-serif); font-size:18px; font-weight:700; flex:0 0 auto; }
+
+  .search-wrap{
+    display:flex; align-items:center; gap:8px;
+    flex:1 1 240px; max-width:360px;
+    padding:8px 16px;
+    background:var(--surface);
+    border:1.5px solid var(--border);
+    border-radius:var(--radius-sm);
+    transition:border-color .2s ease, background-color .2s ease;
+  }
+  .search-wrap:focus-within{ border-color:var(--green); background:var(--bg); }
+  .search-wrap svg{ width:16px; height:16px; color:var(--ink-soft); flex:0 0 auto; }
+  .search-wrap input{
+    border:none; outline:none; background:transparent; width:100%;
+    font-size:14px; color:var(--ink); font-family:var(--font-sans);
+  }
+  .search-wrap input::placeholder{ color:var(--ink-soft); opacity:.85; }
+
+  .topbar-spacer{ flex:1 1 auto; }
+
+  .icon-btn{
+    position:relative; width:38px; height:38px; border-radius:var(--radius-xs);
+    border:1.5px solid var(--border); background:var(--surface);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; flex:0 0 auto;
+    transition:background-color .2s ease, border-color .2s ease;
+  }
+  .icon-btn:hover{ background:var(--surface-warm); }
+  .icon-btn svg{ width:18px; height:18px; color:var(--ink); }
+  .badge-dot{
+    position:absolute; top:-8px; right:-8px;
+    min-width:18px; height:18px; padding:0 4px;
+    border-radius:999px;
+    background:var(--terracotta); color:var(--bg);
+    font-size:11px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    border:1.5px solid var(--bg);
+  }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    height:38px; padding:0 18px;
+    border-radius:var(--radius-sm);
+    font-size:14px; font-weight:700;
+    border:1.5px solid transparent;
+    cursor:pointer; white-space:nowrap;
+    transition:background-color .2s ease, border-color .2s ease, transform .15s ease, color .2s ease;
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn-primary{ background:var(--green); color:var(--bg); }
+  .btn-primary:hover{ background:var(--green-hover); }
+  .btn-secondary{ background:transparent; color:var(--green-text); border-color:var(--border-strong); }
+  .btn-secondary:hover{ background:var(--green-tint); border-color:var(--green); }
+  .btn-ghost{
+    background:transparent; color:var(--ink-soft); border:none; height:auto; padding:0;
+    font-weight:600; text-decoration:underline; text-underline-offset:3px;
+  }
+  .btn-ghost:hover{ color:var(--green-text); }
+  .btn[disabled]{ opacity:.45; cursor:not-allowed; }
+
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 16px; border-radius:var(--radius-xs);
+    border:1.5px solid var(--border-strong);
+    background:var(--surface); color:var(--ink);
+    font-size:13px; font-weight:600; cursor:pointer;
+    transition:background-color .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .chip:hover{ background:var(--surface-warm); }
+  .chip.is-selected{ background:var(--sage-tint); border-color:var(--sage-dark); color:var(--sage-dark); }
+
+  /* ---------- content grid ---------- */
+  .content{ padding:24px 32px 48px; display:flex; flex-direction:column; gap:24px; }
+  .page-head{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .page-head h1{ font-size:24px; }
+  .page-head .date{ font-size:13px; color:var(--ink-soft); }
+
+  .content-grid{
+    display:grid; grid-template-columns:minmax(0,1fr) 380px; gap:24px; align-items:start;
+  }
+  .main-col{ display:flex; flex-direction:column; gap:24px; min-width:0; }
+  .side-col{ display:flex; flex-direction:column; gap:24px; min-width:0; position:sticky; top:78px; }
+
+  /* ---------- card base ---------- */
+  .card{
+    background:var(--surface);
+    border:1.5px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:24px;
+    transition:background-color .25s ease, border-color .25s ease;
+  }
+  .card:hover{ background:var(--surface-warm); }
+  .card-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+  .card-title{ font-size:16px; font-weight:700; font-family:var(--font-serif); }
+  .card-sub{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+
+  /* ---------- tabs + filter ---------- */
+  .tabs-row{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .tabs{ display:flex; gap:4px; background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:4px; }
+  .tab{
+    padding:8px 16px; border-radius:var(--radius-xs); font-size:13px; font-weight:600;
+    color:var(--ink-soft); cursor:pointer; border:none; background:transparent;
+    transition:background-color .2s ease, color .2s ease;
+  }
+  .tab:hover{ color:var(--ink); }
+  .tab.is-active{ background:var(--green); color:var(--bg); }
+  .filter-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 16px; border-radius:var(--radius-xs);
+    border:1.5px solid var(--border-strong); background:var(--surface);
+    font-size:13px; font-weight:600; color:var(--ink); cursor:pointer;
+    margin-left:auto;
+    transition:background-color .2s ease;
+  }
+  .filter-btn:hover{ background:var(--surface-warm); }
+
+  /* ---------- banner ---------- */
+  .banner{
+    display:flex; align-items:flex-start; gap:12px;
+    padding:12px 16px; border-radius:var(--radius-md);
+    background:var(--sage-tint); border:1.5px solid var(--sage-dark);
+    color:var(--green-text); font-size:13px; font-weight:500;
+  }
+  .banner .dot{ width:8px; height:8px; border-radius:50%; background:var(--sage-dark); margin-top:4px; flex:0 0 auto; }
+
+  /* ---------- kpi ---------- */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .kpi-card{
+    background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius-md);
+    padding:16px; display:flex; flex-direction:column; gap:8px;
+    transition:background-color .25s ease, transform .3s ease;
+  }
+  .kpi-card:hover{ background:var(--surface-warm); }
+  .kpi-card:nth-child(odd){ transform:rotate(-0.25deg); }
+  .kpi-card:nth-child(even){ transform:rotate(0.25deg); }
+  .kpi-card:hover{ transform:rotate(0deg); }
+  .kpi-label{ font-size:12px; color:var(--ink-soft); font-weight:600; }
+  .kpi-value-row{ display:flex; align-items:baseline; gap:4px; }
+  .kpi-value{ font-size:26px; font-weight:700; color:var(--ink); }
+  .kpi-unit{ font-size:13px; color:var(--ink-soft); font-weight:600; }
+  .kpi-delta{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:700; }
+  .kpi-delta.up{ color:var(--sage-dark); }
+  .kpi-delta.down{ color:var(--ink-soft); }
+  .kpi-delta .arrow{ font-size:10px; }
+
+  .spark{ display:flex; align-items:flex-end; gap:4px; height:32px; }
+  .spark .bar{
+    flex:1; border-radius:4px 4px 3px 3px; background:var(--sage);
+    transform:scaleY(1); transform-origin:bottom; height:var(--h);
+    transition:transform .7s cubic-bezier(.22,.7,.32,1);
+  }
+  .spark .bar.peak{ background:var(--green); }
+  .spark.down .bar{ background:#B9AF95; }
+  .spark.down .bar.peak{ background:var(--ink-soft); }
+
+  /* ---------- charts row ---------- */
+  .charts-row{ display:grid; grid-template-columns:1.6fr 1fr; gap:24px; align-items:stretch; }
+  .chart-card{ display:flex; flex-direction:column; }
+  .segctrl{ display:inline-flex; gap:4px; background:var(--bg); border:1.5px solid var(--border-strong); border-radius:var(--radius-xs); padding:4px; }
+  .segctrl button{
+    border:none; background:transparent; padding:8px 12px; border-radius:6px 10px 6px 10px;
+    font-size:12px; font-weight:700; color:var(--ink-soft); cursor:pointer;
+    transition:background-color .2s ease, color .2s ease;
+  }
+  .segctrl button.is-active{ background:var(--green); color:var(--bg); }
+
+  .line-chart-wrap{ width:100%; }
+  .line-chart-wrap svg{ width:100%; height:auto; display:block; }
+  .chart-y-labels{ font-size:11px; fill:var(--ink-soft); font-family:var(--font-sans); }
+  .peak-tag{ font-size:11px; font-weight:700; fill:var(--green-text); }
+
+  .grow-path{
+    stroke-dasharray:900; stroke-dashoffset:0;
+    transition:stroke-dashoffset .9s cubic-bezier(.22,.7,.32,1);
+  }
+  .grow-area{ opacity:1; transition:opacity 1s ease .1s; }
+  .grow-dot{ transform:scale(1); transform-origin:center; transition:transform .4s ease .8s, opacity .4s ease .8s; opacity:1; }
+  .point-hit{ cursor:pointer; }
+  .point-hit:hover + .point-dot, .point-dot:hover{ r:6; }
+  .point-dot{ transition:r .2s ease; }
+
+  .donut-wrap{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; justify-content:center; }
+  .donut-wrap svg{ flex:0 0 auto; }
+  .donut-seg{ transition:stroke-dashoffset .8s cubic-bezier(.22,.7,.32,1), opacity .5s ease; }
+  .donut-legend{ display:flex; flex-direction:column; gap:8px; flex:1; min-width:140px; }
+  .legend-item{ display:flex; align-items:center; gap:8px; font-size:12px; }
+  .legend-dot{ width:10px; height:10px; border-radius:3px 5px 3px 5px; flex:0 0 auto; }
+  .legend-label{ flex:1; color:var(--ink-soft); }
+  .legend-pct{ font-weight:700; color:var(--ink); }
+
+  /* ---------- goal + toplist row ---------- */
+  .insight-row{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .goal-figure{ display:flex; align-items:baseline; gap:8px; margin-bottom:12px; }
+  .goal-pct{ font-size:32px; font-weight:700; color:var(--green-text); }
+  .goal-frac{ font-size:13px; color:var(--ink-soft); }
+  .goal-track{
+    height:14px; border-radius:999px; background:var(--bg); border:1.5px solid var(--border);
+    overflow:hidden;
+  }
+  .goal-fill{
+    height:100%; border-radius:999px;
+    background:linear-gradient(90deg, var(--sage), var(--green));
+    width:0%; transition:width 1s cubic-bezier(.22,.7,.32,1) .2s;
+  }
+
+  .top-list{ display:flex; flex-direction:column; gap:8px; }
+  .top-item{ display:flex; align-items:center; gap:8px; }
+  .top-avatar{
+    width:28px; height:28px; border-radius:50%; flex:0 0 auto;
+    background:var(--gold-tint); color:var(--gold-text);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; border:1.5px solid var(--border);
+  }
+  .top-name{ flex:1; font-size:13px; color:var(--ink); }
+  .top-value{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+  .top-bar-track{ width:100%; height:5px; border-radius:999px; background:var(--bg); margin-top:4px; }
+  .top-bar-fill{ height:100%; border-radius:999px; background:var(--sage); }
+
+  /* ---------- table ---------- */
+  .table-scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; table-layout:fixed; min-width:640px; }
+  colgroup col.c-title{ width:26%; }
+  colgroup col.c-author{ width:16%; }
+  colgroup col.c-axis{ width:10%; }
+  colgroup col.c-lesson{ width:32%; }
+  colgroup col.c-status{ width:16%; }
+  thead th{
+    text-align:left; font-size:12px; font-weight:700; color:var(--ink-soft);
+    padding:0 12px 8px; border-bottom:1.5px solid var(--border-strong);
+    white-space:nowrap;
+  }
+  th.sortable{ cursor:pointer; color:var(--ink); display:table-cell; }
+  th.sortable .care{ font-size:10px; margin-left:4px; }
+  tbody td{ padding:12px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:top; }
+  tbody tr{ transition:background-color .2s ease; }
+  tbody tr:hover{ background:var(--surface-warm); }
+  tbody tr:last-child td{ border-bottom:none; }
+
+  .work-cell{ display:flex; align-items:flex-start; gap:8px; }
+  .work-initial{
+    width:24px; height:24px; border-radius:50%; flex:0 0 auto;
+    background:var(--sage-tint); color:var(--green-text);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; margin-top:1px;
+    border:1px solid var(--border);
+  }
+  .work-title{
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden; text-overflow:ellipsis; font-weight:600;
+  }
+  .muted{ color:var(--ink-soft); }
+  .row-action{
+    opacity:0; font-size:12px; font-weight:700; color:var(--green-text);
+    text-decoration:underline; text-underline-offset:2px;
+    transition:opacity .2s ease; white-space:nowrap;
+  }
+  tbody tr:hover .row-action{ opacity:1; }
+
+  .status-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:4px 12px; border-radius:var(--radius-xs);
+    font-size:12px; font-weight:700; white-space:nowrap;
+    border:1px solid transparent;
+  }
+  .status-badge .dot{ width:7px; height:7px; border-radius:50%; flex:0 0 auto; }
+  .status-heard{ background:var(--green-tint); color:var(--green-text); border-color:rgba(45,74,62,.25); }
+  .status-heard .dot{ background:var(--green); }
+  .status-hold{ background:var(--terracotta-tint); color:var(--terracotta-text); border-color:rgba(196,112,75,.3); }
+  .status-hold .dot{ background:var(--terracotta); }
+  .status-replay{ background:var(--sage-tint); color:var(--sage-dark); border-color:rgba(69,96,63,.25); }
+  .status-replay .dot{ background:var(--sage-dark); }
+  .status-new{ background:var(--gold-tint); color:var(--gold-text); border-color:rgba(122,90,34,.25); }
+  .status-new .dot{ background:var(--gold); }
+
+  /* ---------- conversation panel ---------- */
+  .convo-card{ display:flex; flex-direction:column; gap:16px; }
+  .msg{ display:flex; flex-direction:column; gap:4px; max-width:88%; }
+  .msg.from-yeonseo{ align-self:flex-start; }
+  .msg.from-me{ align-self:flex-end; align-items:flex-end; }
+  .msg-speaker{ font-size:11px; font-weight:700; color:var(--ink-soft); padding:0 4px; }
+  .bubble{
+    padding:8px 16px; font-size:13.5px; line-height:1.55;
+    border:1.5px solid var(--border);
+  }
+  .msg.from-yeonseo .bubble{
+    background:var(--green-tint); color:var(--ink); border-color:rgba(45,74,62,.2);
+    border-radius:6px 20px 20px 20px;
+  }
+  .msg.from-me .bubble{
+    background:var(--bg); color:var(--ink); border-color:var(--border-strong);
+    border-radius:20px 6px 20px 20px;
+  }
+  .option-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; align-self:flex-start; }
+
+  .diagnosis-block{
+    margin-top:4px; padding:16px; border-radius:var(--radius-md);
+    background:var(--surface-warm); border:1.5px solid var(--border-strong);
+  }
+  .diagnosis-label{ font-size:11px; font-weight:700; color:var(--sage-dark); text-transform:none; margin-bottom:8px; letter-spacing:.02em; }
+  .diagnosis-text{ font-size:13.5px; color:var(--ink); line-height:1.6; }
+
+  .story-card{
+    margin-top:12px; padding:16px; border-radius:var(--radius-md);
+    background:var(--bg); border:1.5px solid var(--sage-dark);
+    transform:rotate(-0.3deg);
+    transition:transform .3s ease, background-color .25s ease;
+  }
+  .story-card:hover{ transform:rotate(0deg); background:var(--surface-warm); }
+  .axis-badge{
+    display:inline-block; padding:4px 12px; border-radius:var(--radius-xs);
+    background:var(--sage-tint); color:var(--sage-dark); font-size:11px; font-weight:700;
+    margin-bottom:8px;
+  }
+  .story-source{ font-size:13px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+  .story-lesson{ font-size:13px; color:var(--ink-soft); line-height:1.55; }
+  .convo-cta{ text-align:center; margin-top:8px; }
+
+  /* ---------- empty state ---------- */
+  .empty-card{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; padding:32px 24px; }
+  .empty-blob{
+    width:56px; height:56px; border-radius:60% 40% 55% 45%/45% 55% 40% 60%;
+    background:var(--sage-tint); border:1.5px solid var(--sage-dark);
+    margin-bottom:4px;
+  }
+  .empty-title{ font-size:15px; font-weight:700; font-family:var(--font-serif); }
+  .empty-desc{ font-size:13px; color:var(--ink-soft); max-width:32ch; }
+
+  /* ---------- footer ---------- */
+  .site-footer{
+    margin-top:8px; padding:24px 32px 32px; text-align:center;
+    font-size:12px; color:var(--ink-soft); letter-spacing:.03em;
+  }
+
+  /* ---------- hero grow animation (pure CSS, JS-independent) ---------- */
+  html.js-anim .spark .bar{ transform:scaleY(0); }
+  html.js-anim.is-ready .spark .bar{ transform:scaleY(1); }
+  html.js-anim .grow-path{ stroke-dashoffset:900; }
+  html.js-anim.is-ready .grow-path{ stroke-dashoffset:0; transition-delay:.3s; }
+  html.js-anim .grow-area{ opacity:0; }
+  html.js-anim.is-ready .grow-area{ opacity:1; transition-delay:.6s; }
+  html.js-anim .grow-dot{ transform:scale(0); opacity:0; }
+  html.js-anim.is-ready .grow-dot{ transform:scale(1); opacity:1; }
+  html.js-anim .kpi-card{ opacity:0; transform:translateY(6px); }
+  html.js-anim.is-ready .kpi-card{ opacity:1; transform:translateY(0); transition:opacity .5s ease .5s, transform .5s ease .5s, background-color .25s ease; }
+  html.js-anim .goal-fill{ width:0%; }
+  html.js-anim.is-ready .goal-fill{ width:65%; }
+  html.js-anim .donut-seg{ opacity:0; }
+  html.js-anim.is-ready .donut-seg{ opacity:1; transition-delay:.4s; }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation:none !important; transition:none !important; }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1180px){
+    .content-grid{ grid-template-columns:1fr; }
+    .side-col{ position:static; }
+    .charts-row{ grid-template-columns:1fr; }
+  }
+  @media (max-width:900px){
+    .sidebar{
+      position:fixed; left:0; top:0; height:100vh; z-index:35;
+      transform:translateX(-100%);
+      transition:transform .25s ease;
+      box-shadow:2px 0 12px rgba(43,42,38,.15);
+    }
+    .hamburger{ display:flex; }
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+    .insight-row{ grid-template-columns:1fr; }
+    .content{ padding:16px 16px 40px; }
+    .topbar{ padding:12px 16px; }
+  }
+  @media (max-width:560px){
+    .kpi-grid{ grid-template-columns:1fr; }
+    .search-wrap{ order:5; flex-basis:100%; max-width:none; }
+    .btn span.long{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+  <input type="checkbox" id="nav-toggle" class="nav-toggle-input" aria-hidden="true">
+  <label for="nav-toggle" class="scrim" aria-hidden="true"></label>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">연</span>
+        <span class="brand-name">연서</span>
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item active" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2H8l-3.5 3v-3H5c-1.1 0-2-.9-2-2v-6Z"/></svg>
+          <span>대화</span>
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="6" rx="2"/><rect x="11" y="3" width="6" height="6" rx="2"/><rect x="3" y="11" width="6" height="6" rx="2"/><rect x="11" y="11" width="6" height="6" rx="2"/></svg>
+          <span>모아보기</span>
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 3 5v8l7 5 7-5V5l-7-3Z"/><circle cx="10" cy="9" r="2.2"/></svg>
+          <span>결핍 지도</span>
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h8l2 2v12H5V3Z"/><path d="M8 8h5M8 11h5M8 14h3"/></svg>
+          <span>작품 서가</span>
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M10 6.5V10l2.5 1.5"/></svg>
+          <span>기록</span>
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.4"/><path d="M10 3v2M10 15v2M17 10h-2M5 10H3M14.9 5.1l-1.4 1.4M6.5 13.5l-1.4 1.4M14.9 14.9l-1.4-1.4M6.5 6.5 5.1 5.1"/></svg>
+          <span>설정</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-chip">
+          <span class="avatar">ㅇ</span>
+          <div class="user-meta">
+            <span class="user-name">ㅇ</span>
+            <span class="user-role">읽는 사람</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <label for="nav-toggle" class="hamburger" aria-label="메뉴 열기">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 5h14M3 10h14M3 15h14"/></svg>
+        </label>
+        <span class="topbar-title">연서</span>
+
+        <div class="search-wrap">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M17 17l-3.8-3.8"/></svg>
+          <input type="text" placeholder="작품·교훈 검색" aria-label="작품·교훈 검색">
+        </div>
+
+        <div class="topbar-spacer"></div>
+
+        <button class="icon-btn" aria-label="알림">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a4 4 0 0 1 8 0c0 3 1 4 1 4H5s1-1 1-4Z"/><path d="M8.5 15a1.6 1.6 0 0 0 3 0"/></svg>
+          <span class="badge-dot num">3</span>
+        </button>
+        <span class="avatar" aria-hidden="true">ㅇ</span>
+        <button class="btn btn-primary"><span class="long">새</span> 대화</button>
+        <button class="btn btn-secondary"><span class="long">모아보기</span></button>
+      </header>
+
+      <div class="content">
+        <div class="page-head">
+          <h1>대화</h1>
+          <span class="date">2026년 7월 20일 · 오늘의 이야기</span>
+        </div>
+
+        <div class="content-grid">
+          <div class="main-col">
+
+            <div class="tabs-row">
+              <div class="tabs">
+                <button class="tab is-active">전체</button>
+                <button class="tab">외적</button>
+                <button class="tab">내적</button>
+                <button class="tab">최근</button>
+              </div>
+              <button class="filter-btn">시대 <span aria-hidden="true">▾</span></button>
+            </div>
+
+            <div class="banner">
+              <span class="dot" aria-hidden="true"></span>
+              <span>결핍을 짚으려면 두세 마디가 더 필요해요. 편한 만큼만 답해도 됩니다.</span>
+            </div>
+
+            <div class="kpi-grid">
+              <div class="kpi-card">
+                <span class="kpi-label">들은 스토리</span>
+                <div class="kpi-value-row">
+                  <span class="kpi-value num">1,284,000</span>
+                  <span class="kpi-unit">편</span>
+                </div>
+                <span class="kpi-delta up"><span class="arrow">▲</span><span class="num">+12.4%</span></span>
+                <div class="spark" aria-hidden="true">
+                  <span class="bar" style="--h:45%"></span>
+                  <span class="bar" style="--h:55%"></span>
+                  <span class="bar" style="--h:50%"></span>
+                  <span class="bar" style="--h:68%"></span>
+                  <span class="bar" style="--h:82%"></span>
+                  <span class="bar peak" style="--h:100%"></span>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <span class="kpi-label">짚어낸 결핍</span>
+                <div class="kpi-value-row">
+                  <span class="kpi-value num">7</span>
+                  <span class="kpi-unit">개</span>
+                </div>
+                <span class="kpi-delta down"><span class="arrow">▼</span><span class="num">-2</span></span>
+                <div class="spark down" aria-hidden="true">
+                  <span class="bar" style="--h:100%"></span>
+                  <span class="bar" style="--h:88%"></span>
+                  <span class="bar" style="--h:92%"></span>
+                  <span class="bar" style="--h:75%"></span>
+                  <span class="bar" style="--h:68%"></span>
+                  <span class="bar peak" style="--h:60%"></span>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <span class="kpi-label">평균 읽은 시간</span>
+                <div class="kpi-value-row">
+                  <span class="kpi-value num">58</span>
+                  <span class="kpi-unit">초</span>
+                </div>
+                <span class="kpi-delta up"><span class="arrow">▲</span><span class="num">+3초</span></span>
+                <div class="spark" aria-hidden="true">
+                  <span class="bar" style="--h:50%"></span>
+                  <span class="bar" style="--h:60%"></span>
+                  <span class="bar" style="--h:58%"></span>
+                  <span class="bar" style="--h:72%"></span>
+                  <span class="bar" style="--h:85%"></span>
+                  <span class="bar peak" style="--h:100%"></span>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <span class="kpi-label">이어온 날</span>
+                <div class="kpi-value-row">
+                  <span class="kpi-value num">26</span>
+                  <span class="kpi-unit">일</span>
+                </div>
+                <span class="kpi-delta up"><span class="arrow">▲</span><span class="num">+1일</span></span>
+                <div class="spark" aria-hidden="true">
+                  <span class="bar" style="--h:40%"></span>
+                  <span class="bar" style="--h:48%"></span>
+                  <span class="bar" style="--h:60%"></span>
+                  <span class="bar" style="--h:70%"></span>
+                  <span class="bar" style="--h:88%"></span>
+                  <span class="bar peak" style="--h:100%"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="charts-row">
+              <div class="card chart-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">최근 10일 청취 추이</div>
+                    <div class="card-sub">피크 8일째 · 41편</div>
+                  </div>
+                </div>
+                <div class="line-chart-wrap">
+                  <svg viewBox="0 0 620 230" role="img" aria-label="최근 10일 청취 추이 라인 차트, 8일째 41편으로 최고치">
+                    <defs>
+                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="var(--sage)" stop-opacity="0.32"/>
+                        <stop offset="100%" stop-color="var(--sage)" stop-opacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <g class="chart-y-labels">
+                      <line x1="40" y1="200" x2="595" y2="200" stroke="var(--border-strong)" stroke-width="1"/>
+                      <line x1="40" y1="128" x2="595" y2="128" stroke="var(--border)" stroke-width="1"/>
+                      <line x1="40" y1="56" x2="595" y2="56" stroke="var(--border)" stroke-width="1"/>
+                      <text x="30" y="204" text-anchor="end">0</text>
+                      <text x="30" y="132" text-anchor="end">22</text>
+                      <text x="30" y="60" text-anchor="end">45</text>
+                    </g>
+                    <path class="grow-area" fill="url(#areaGrad)" stroke="none"
+                      d="M40,152 L100,128 L160,140 L220,164 L280,104 L340,76 L400,92 L460,36 L520,68 L580,84 L580,200 L40,200 Z"/>
+                    <path class="grow-path" fill="none" stroke="var(--green)" stroke-width="4"
+                      stroke-linecap="round" stroke-linejoin="round"
+                      d="M40,152 L100,128 L160,140 L220,164 L280,104 L340,76 L400,92 L460,36 L520,68 L580,84"/>
+                    <g>
+                      <circle class="point-dot grow-dot" cx="40" cy="152" r="4" fill="var(--sage-dark)"/>
+                      <circle class="point-dot grow-dot" cx="100" cy="128" r="4" fill="var(--sage-dark)"/>
+                      <circle class="point-dot grow-dot" cx="160" cy="140" r="4" fill="var(--sage-dark)"/>
+                      <circle class="point-dot grow-dot" cx="220" cy="164" r="4" fill="var(--sage-dark)"/>
+                      <circle class="point-dot grow-dot" cx="280" cy="104" r="4" fill="var(--sage-dark)"/>
+                      <circle class="point-dot grow-dot" cx="340" cy="76" r="4" fill="var(--sage-dark)"/>
+                      <circle class="point-dot grow-dot" cx="400" cy="92" r="4" fill="var(--sage-dark)"/>
+                      <circle class="point-dot grow-dot" cx="460" cy="36" r="6" fill="var(--green)"/>
+                      <circle class="point-dot grow-dot" cx="520" cy="68" r="4" fill="var(--sage-dark)"/>
+                      <circle class="point-dot grow-dot" cx="580" cy="84" r="4" fill="var(--sage-dark)"/>
+                    </g>
+                    <text class="peak-tag" x="460" y="24" text-anchor="middle">최고 41편</text>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="card chart-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">축 구성비</div>
+                    <div class="card-sub">최근 30일</div>
+                  </div>
+                  <div class="segctrl" role="group" aria-label="관점 전환">
+                    <button class="is-active">내적</button>
+                    <button>외적</button>
+                  </div>
+                </div>
+                <div class="donut-wrap">
+                  <svg viewBox="0 0 180 180" width="150" height="150" role="img" aria-label="축 구성비 도넛 차트">
+                    <g transform="rotate(-90 90 90)">
+                      <circle class="donut-seg" cx="90" cy="90" r="70" fill="none" stroke="var(--green)" stroke-width="24" stroke-dasharray="149.54 290.28" stroke-dashoffset="0"/>
+                      <circle class="donut-seg" cx="90" cy="90" r="70" fill="none" stroke="var(--sage)" stroke-width="24" stroke-dasharray="96.76 343.06" stroke-dashoffset="-149.54"/>
+                      <circle class="donut-seg" cx="90" cy="90" r="70" fill="none" stroke="var(--gold)" stroke-width="24" stroke-dasharray="79.17 360.65" stroke-dashoffset="-246.30"/>
+                      <circle class="donut-seg" cx="90" cy="90" r="70" fill="none" stroke="var(--terracotta)" stroke-width="24" stroke-dasharray="70.37 369.45" stroke-dashoffset="-325.47"/>
+                      <circle class="donut-seg" cx="90" cy="90" r="70" fill="none" stroke="var(--clay)" stroke-width="24" stroke-dasharray="43.98 395.84" stroke-dashoffset="-395.84"/>
+                    </g>
+                  </svg>
+                  <div class="donut-legend">
+                    <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span><span class="legend-label">내적-성찰</span><span class="legend-pct num">34%</span></div>
+                    <div class="legend-item"><span class="legend-dot" style="background:var(--sage)"></span><span class="legend-label">내적-마음</span><span class="legend-pct num">22%</span></div>
+                    <div class="legend-item"><span class="legend-dot" style="background:var(--gold)"></span><span class="legend-label">내적-성품</span><span class="legend-pct num">18%</span></div>
+                    <div class="legend-item"><span class="legend-dot" style="background:var(--terracotta)"></span><span class="legend-label">외적-첫인상</span><span class="legend-pct num">16%</span></div>
+                    <div class="legend-item"><span class="legend-dot" style="background:var(--clay)"></span><span class="legend-label">외적-조건</span><span class="legend-pct num">10%</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="insight-row">
+              <div class="card">
+                <div class="card-head">
+                  <div class="card-title">이번 달 소양 목표</div>
+                </div>
+                <div class="goal-figure">
+                  <span class="goal-pct num">65%</span>
+                  <span class="goal-frac num">26 / 40편</span>
+                </div>
+                <div class="goal-track"><div class="goal-fill"></div></div>
+              </div>
+
+              <div class="card">
+                <div class="card-head">
+                  <div class="card-title">자주 나온 결핍</div>
+                </div>
+                <div class="top-list">
+                  <div class="top-item">
+                    <span class="top-avatar">ㄱ</span>
+                    <div style="flex:1">
+                      <div style="display:flex; justify-content:space-between;"><span class="top-name">기대치 어긋남</span><span class="top-value num">32</span></div>
+                      <div class="top-bar-track"><div class="top-bar-fill" style="width:100%"></div></div>
+                    </div>
+                  </div>
+                  <div class="top-item">
+                    <span class="top-avatar">ㅍ</span>
+                    <div style="flex:1">
+                      <div style="display:flex; justify-content:space-between;"><span class="top-name">표현 부족</span><span class="top-value num">27</span></div>
+                      <div class="top-bar-track"><div class="top-bar-fill" style="width:84%"></div></div>
+                    </div>
+                  </div>
+                  <div class="top-item">
+                    <span class="top-avatar">ㅈ</span>
+                    <div style="flex:1">
+                      <div style="display:flex; justify-content:space-between;"><span class="top-name">자존감</span><span class="top-value num">21</span></div>
+                      <div class="top-bar-track"><div class="top-bar-fill" style="width:66%"></div></div>
+                    </div>
+                  </div>
+                  <div class="top-item">
+                    <span class="top-avatar">ㄱ</span>
+                    <div style="flex:1">
+                      <div style="display:flex; justify-content:space-between;"><span class="top-name">거리 조절</span><span class="top-value num">15</span></div>
+                      <div class="top-bar-track"><div class="top-bar-fill" style="width:47%"></div></div>
+                    </div>
+                  </div>
+                  <div class="top-item">
+                    <span class="top-avatar">ㅅ</span>
+                    <div style="flex:1">
+                      <div style="display:flex; justify-content:space-between;"><span class="top-name">신뢰 회복</span><span class="top-value num">9</span></div>
+                      <div class="top-bar-track"><div class="top-bar-fill" style="width:28%"></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">받은 스토리</div>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <colgroup>
+                    <col class="c-title"><col class="c-author"><col class="c-axis"><col class="c-lesson"><col class="c-status">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th class="sortable">작품<span class="care" aria-hidden="true">▾</span></th>
+                      <th>작가</th>
+                      <th>축</th>
+                      <th>교훈</th>
+                      <th>상태</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="work-cell">
+                          <span class="work-initial">오</span>
+                          <span class="work-title">오만과 편견</span>
+                        </div>
+                      </td>
+                      <td>제인 오스틴</td>
+                      <td>내적</td>
+                      <td>첫인상은 자주 틀린다</td>
+                      <td><span class="status-badge status-heard"><span class="dot"></span>들음</span><span class="row-action"> 자세히</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="work-cell">
+                          <span class="work-initial">위</span>
+                          <span class="work-title">위대한 개츠비</span>
+                        </div>
+                      </td>
+                      <td>F. 스콧 피츠제럴드</td>
+                      <td>외적</td>
+                      <td>조건으로 시작한 마음은 조건에서 끝난다</td>
+                      <td><span class="status-badge status-hold"><span class="dot"></span>보류</span><span class="row-action"> 자세히</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="work-cell">
+                          <span class="work-initial">어</span>
+                          <span class="work-title" title="어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설">어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설</span>
+                        </div>
+                      </td>
+                      <td class="muted">—</td>
+                      <td>내적</td>
+                      <td>기다림은 사람을 바꾼다</td>
+                      <td><span class="status-badge status-replay"><span class="dot"></span>다시듣기</span><span class="row-action"> 자세히</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="work-cell">
+                          <span class="work-initial">폭</span>
+                          <span class="work-title">폭풍의 언덕</span>
+                        </div>
+                      </td>
+                      <td>에밀리 브론테</td>
+                      <td>내적</td>
+                      <td>집착은 사랑의 이름을 빌린다</td>
+                      <td><span class="status-badge status-heard"><span class="dot"></span>들음</span><span class="row-action"> 자세히</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="work-cell">
+                          <span class="work-initial">시</span>
+                          <span class="work-title">시라노 드 베르주라크</span>
+                        </div>
+                      </td>
+                      <td>에드몽 로스탕</td>
+                      <td>외적</td>
+                      <td>목소리는 얼굴보다 오래 남는다</td>
+                      <td><span class="status-badge status-new"><span class="dot"></span>새로움</span><span class="row-action"> 자세히</span></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="work-cell">
+                          <span class="work-initial">안</span>
+                          <span class="work-title">안나 카레니나</span>
+                        </div>
+                      </td>
+                      <td>레프 톨스토이</td>
+                      <td>내적</td>
+                      <td>불행한 사랑은 저마다의 이유로 불행하다</td>
+                      <td><span class="status-badge status-hold"><span class="dot"></span>보류</span><span class="row-action"> 자세히</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="side-col">
+            <div class="card convo-card">
+              <div class="card-head">
+                <div class="card-title">오늘의 대화</div>
+              </div>
+
+              <div class="msg from-yeonseo">
+                <span class="msg-speaker">연서</span>
+                <div class="bubble">요즘 사랑에서 어떤 게 제일 어려우세요?</div>
+              </div>
+
+              <div class="msg from-me">
+                <span class="msg-speaker">나</span>
+                <div class="bubble">연락이 오면 반갑고 안 오면 하루가 다 망가져요. 제가 너무 매달리는 것 같기도 하고, 사실은 그냥 확인받고 싶은 건지도 모르겠어요.</div>
+              </div>
+
+              <div class="msg from-yeonseo">
+                <span class="msg-speaker">연서</span>
+                <div class="bubble">기다림이 힘든 건가요, 기다리는 자신이 싫은 건가요?</div>
+                <div class="option-row">
+                  <button class="chip">기다림이 힘들다</button>
+                  <button class="chip is-selected">그런 내가 싫다</button>
+                </div>
+              </div>
+
+              <div class="msg from-me">
+                <span class="msg-speaker">나</span>
+                <div class="bubble">후자요.</div>
+              </div>
+
+              <div class="diagnosis-block">
+                <div class="diagnosis-label">진단</div>
+                <div class="diagnosis-text">확인받아야 안심되는 마음이 보여요. 없는 건 상대의 애정이 아니라 스스로에 대한 확신 같습니다.</div>
+
+                <div class="story-card">
+                  <span class="axis-badge">내적</span>
+                  <div class="story-source">오만과 편견 · 제인 오스틴</div>
+                  <div class="story-lesson">첫인상은 자주 틀린다 — 나에 대한 첫인상도 마찬가지다.</div>
+                </div>
+              </div>
+
+              <div class="convo-cta">
+                <button class="btn-ghost">다른 이야기도 들어볼래요?</button>
+              </div>
+            </div>
+
+            <div class="card empty-card">
+              <div class="empty-blob" aria-hidden="true"></div>
+              <div class="empty-title">아직 이 축의 이야기가 없어요</div>
+              <p class="empty-desc">대화를 두어 마디 더 나누면 맞는 이야기를 찾아드릴게요.</p>
+              <button class="btn btn-primary">대화 이어가기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="site-footer">STYLE 11 · 네이처 오가닉</footer>
+    </div>
+  </div>
+
+<script>
+  (function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce) return; // HTML/CSS already renders the finished state — no animation needed
+    var html = document.documentElement;
+    html.classList.add('js-anim');
+    // next frame: flip to ready so the grow transitions actually play
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        html.classList.add('is-ready');
+      });
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.classList.add('js-loading');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 · 미니멀 모노크롬</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* ===== 토큰 — 무채색 5단 + 주황 1, 폰트 5단계, 여백 4단계 ===== */
+  :root{
+    --bg:#FFFFFF;
+    --ink:#111111;
+    --mid:#767676;
+    --light:#A8A8A8;
+    --hair:#E5E5E5;
+    --accent:#FF4D00;
+
+    --fs-1:11px;  /* 레이블 */
+    --fs-2:16px;  /* 본문 */
+    --fs-3:24px;  /* 섹션 제목 */
+    --fs-4:36px;  /* 보조 강조 */
+    --fs-5:54px;  /* KPI 수치 */
+
+    --sp-1:8px;
+    --sp-2:16px;
+    --sp-3:32px;
+    --sp-4:64px;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size:var(--fs-2);
+    line-height:1.5;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,p,ul,ol,figure{ margin:0; padding:0; }
+  ul{ list-style:none; }
+  a{ color:inherit; text-decoration:none; }
+  button, input, select{ font-family:inherit; color:inherit; }
+
+  /* 8px 그리드 위에 정렬되되 그리드 선은 렌더링하지 않는다 */
+
+  /* ===== 진입 페이드 — 유일한 히어로 연출 ===== */
+  .reveal{ opacity:1; }
+  html.js-loading .reveal{ opacity:0; }
+  .reveal.is-in{ opacity:1; transition:opacity 400ms ease; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; animation:none !important; }
+    html.js-loading .reveal{ opacity:1; }
+  }
+
+  /* ===== 시각적으로 숨기되 포커스 가능 (드로어 체크박스) ===== */
+  .sr-toggle{
+    position:absolute; width:1px; height:1px; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; padding:0;
+  }
+
+  :focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+
+  /* ===== 레이아웃 뼈대 ===== */
+  .app{ display:flex; min-height:100vh; align-items:stretch; }
+
+  .drawer-scrim{
+    display:none;
+  }
+
+  .sidebar{
+    width:240px; flex-shrink:0;
+    border-right:1px solid var(--hair);
+    padding:var(--sp-3) var(--sp-3);
+    display:flex; flex-direction:column;
+    justify-content:space-between;
+  }
+  .sidebar-top{ display:flex; flex-direction:column; gap:var(--sp-4); }
+  .sidebar-logo{
+    font-size:var(--fs-3); font-weight:700; letter-spacing:-0.02em;
+  }
+  .sidebar-nav ul{ display:flex; flex-direction:column; gap:var(--sp-2); }
+  .nav-item{
+    display:flex; align-items:center; gap:var(--sp-2);
+    font-size:var(--fs-2); font-weight:400; color:var(--mid);
+    padding:var(--sp-1) 0 var(--sp-1) var(--sp-2);
+    border-left:2px solid transparent;
+    transition:color 180ms ease, border-color 180ms ease;
+  }
+  .nav-item .nav-index{
+    font-size:var(--fs-1); letter-spacing:.08em; color:var(--ink); width:1.4em;
+    flex-shrink:0;
+  }
+  .nav-item:hover{ color:var(--ink); }
+  .nav-item.is-active{
+    color:var(--ink); font-weight:700; border-left-color:var(--ink);
+  }
+
+  .sidebar-user{
+    display:flex; align-items:center; gap:var(--sp-2);
+    border-top:1px solid var(--hair); padding-top:var(--sp-3);
+  }
+  .avatar{
+    width:32px; height:32px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--ink); border-radius:0;
+    font-size:var(--fs-2); font-weight:700;
+  }
+  .avatar-sm{ width:28px; height:28px; font-size:var(--fs-2); }
+  .user-role{ font-size:var(--fs-1); letter-spacing:.08em; color:var(--ink); }
+
+  .main{ flex:1; min-width:0; display:flex; flex-direction:column; }
+  .main-inner{
+    max-width:1120px; width:100%; margin:0 auto;
+    padding:var(--sp-3) var(--sp-3) var(--sp-4);
+    display:flex; flex-direction:column; gap:var(--sp-4);
+  }
+
+  /* ===== 상단바 ===== */
+  .topbar{
+    display:flex; align-items:center; gap:var(--sp-3);
+    border-bottom:1px solid var(--hair);
+    padding:var(--sp-2) var(--sp-3);
+  }
+  .drawer-btn{ display:none; }
+  .topbar-brand{ font-size:var(--fs-3); font-weight:700; letter-spacing:-0.02em; flex-shrink:0; }
+
+  .topbar-search{ flex:1; max-width:320px; }
+  .topbar-search input{
+    width:100%; border:none; border-bottom:1px solid var(--hair);
+    background:transparent; padding:var(--sp-1) 0; font-size:var(--fs-2);
+    color:var(--ink); transition:border-color 180ms ease;
+  }
+  .topbar-search input::placeholder{ color:var(--mid); }
+  .topbar-search input:focus{ border-bottom:2px solid var(--ink); outline:none; }
+
+  .topbar-actions{ display:flex; align-items:center; gap:var(--sp-3); margin-left:auto; }
+
+  .icon-alert{
+    position:relative; background:none; border:none; cursor:pointer;
+    font-size:var(--fs-1); letter-spacing:.08em; color:var(--ink);
+    padding:var(--sp-1) 0; display:flex; align-items:center; gap:var(--sp-1);
+  }
+  .badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:16px; height:16px; padding:0 var(--sp-1);
+    border:1px solid var(--ink); font-size:var(--fs-1); font-weight:700;
+    border-radius:0;
+  }
+
+  .btn{
+    height:40px; padding:0 var(--sp-3); border-radius:0;
+    font-size:var(--fs-2); font-weight:500; cursor:pointer;
+    transition:background 180ms ease, color 180ms ease, border-color 180ms ease;
+    display:inline-flex; align-items:center; justify-content:center;
+    white-space:nowrap;
+  }
+  .btn-primary{ background:var(--ink); color:var(--bg); border:1px solid var(--ink); }
+  .btn-primary:hover{ background:var(--bg); color:var(--ink); }
+  .btn-primary:active{ background:var(--mid); border-color:var(--mid); color:var(--bg); }
+  .btn-secondary{ background:transparent; color:var(--ink); border:1px solid var(--ink); }
+  .btn-secondary:hover{ background:var(--ink); color:var(--bg); }
+  .btn-secondary:active{ background:var(--mid); border-color:var(--mid); color:var(--bg); }
+
+  /* ===== 탭 + 필터 ===== */
+  .toolbar{
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:var(--sp-2);
+  }
+  .tabs{ display:flex; gap:var(--sp-3); }
+  .tab{
+    background:none; border:none; cursor:pointer;
+    font-size:var(--fs-2); color:var(--mid); font-weight:400;
+    padding:var(--sp-1) 0; border-bottom:2px solid transparent;
+    transition:color 180ms ease, border-color 180ms ease;
+  }
+  .tab:hover{ color:var(--ink); }
+  .tab.is-active{ color:var(--ink); font-weight:700; border-bottom-color:var(--ink); }
+
+  .filter-select{
+    appearance:none; -webkit-appearance:none; background:transparent;
+    border:none; border-bottom:1px solid var(--hair);
+    font-size:var(--fs-2); color:var(--ink); padding:var(--sp-1) 0;
+    cursor:pointer;
+  }
+  .filter-select:focus{ border-bottom:2px solid var(--ink); outline:none; }
+
+  /* ===== 배너 ===== */
+  .banner{
+    display:flex; align-items:flex-start; gap:var(--sp-2);
+    border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);
+    padding:var(--sp-2) 0; font-size:var(--fs-2); color:var(--ink);
+  }
+  .banner-mark{
+    width:6px; height:6px; margin-top:8px; background:var(--ink); flex-shrink:0;
+  }
+
+  /* ===== KPI ===== */
+  .kpi-row{
+    display:grid; grid-template-columns:repeat(4, 1fr);
+  }
+  .kpi-card{
+    padding:0 var(--sp-3);
+    border-left:1px solid var(--hair);
+    display:flex; flex-direction:column; gap:var(--sp-1);
+  }
+  .kpi-card:first-child{ border-left:none; padding-left:0; }
+  .kpi-card.is-flagged{ border-left:2px solid var(--accent); }
+  .kpi-label{
+    font-size:var(--fs-1); font-weight:500; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink);
+  }
+  .kpi-value-row{ display:flex; align-items:baseline; gap:var(--sp-1); flex-wrap:wrap; }
+  .kpi-value{
+    font-size:var(--fs-5); font-weight:800; letter-spacing:-0.04em; color:var(--ink);
+  }
+  .kpi-unit{ font-size:var(--fs-2); font-weight:400; color:var(--mid); }
+  .kpi-underline{
+    height:1px; background:var(--hair); width:0; transition:width 200ms ease;
+  }
+  .kpi-card:hover .kpi-underline{ width:100%; }
+  .kpi-delta-row{ display:flex; align-items:center; gap:var(--sp-2); }
+  .kpi-delta{ font-size:var(--fs-2); color:var(--ink); }
+  .kpi-delta.is-flag{ color:var(--accent); font-weight:700; }
+  .kpi-spark{ display:block; }
+
+  /* ===== 차트 공통 ===== */
+  .chart-row{
+    display:grid; grid-template-columns:1.4fr 1fr; gap:var(--sp-4);
+  }
+  .chart-card{ display:flex; flex-direction:column; gap:var(--sp-2); }
+  .chart-card-head{
+    display:flex; align-items:center; justify-content:space-between; gap:var(--sp-2);
+    flex-wrap:wrap;
+  }
+  h2.section-title{ font-size:var(--fs-3); font-weight:700; }
+
+  .chart-line-svg{ width:100%; height:auto; display:block; }
+  .chart-line-svg .pt{ fill:var(--ink); transition:fill 180ms ease; }
+  .chart-line-svg:hover .pt{ fill:var(--hair); }
+  .chart-line-svg .pt:hover{ fill:var(--ink); }
+  .chart-line-svg .pt-peak{ fill:var(--accent); }
+  .chart-axis-label{ font-size:var(--fs-1); fill:var(--ink); }
+  .chart-x-labels{
+    display:flex; justify-content:space-between; padding:0;
+    font-size:var(--fs-1); color:var(--ink); letter-spacing:.02em;
+  }
+
+  .segment{ display:inline-flex; align-items:center; gap:var(--sp-2); }
+  .seg-item{
+    background:none; border:none; cursor:pointer;
+    font-size:var(--fs-1); letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink); font-weight:400; padding:var(--sp-1) 0; border-bottom:2px solid transparent;
+    transition:font-weight 180ms ease, border-color 180ms ease;
+  }
+  .seg-item.is-active{ color:var(--ink); font-weight:700; border-bottom-color:var(--ink); }
+  .seg-divider{ width:1px; height:12px; background:var(--hair); }
+
+  .donut-wrap{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; }
+  .donut-svg{ flex-shrink:0; }
+  .legend{ display:flex; flex-direction:column; gap:var(--sp-1); flex:1; min-width:180px; }
+  .legend-item{ display:flex; align-items:center; gap:var(--sp-2); font-size:var(--fs-2); }
+  .legend-swatch{ width:10px; height:10px; flex-shrink:0; border:1px solid var(--ink); }
+  .legend-value{ margin-left:auto; font-weight:700; }
+
+  /* ===== 인사이트 행: 목표진행률 / 상위리스트 ===== */
+  .insight-row{
+    display:grid; grid-template-columns:1fr 1.6fr; gap:var(--sp-4);
+  }
+  .insight-card{ display:flex; flex-direction:column; gap:var(--sp-2); }
+
+  .goal-figure{ display:flex; align-items:baseline; gap:var(--sp-2); }
+  .goal-pct{ font-size:var(--fs-4); font-weight:700; letter-spacing:-0.02em; }
+  .goal-count{ font-size:var(--fs-2); color:var(--mid); }
+  .goal-track{ height:4px; background:var(--hair); width:100%; }
+  .goal-fill{ height:4px; background:var(--ink); width:65%; }
+
+  .toplist{ display:flex; flex-direction:column; gap:var(--sp-2); }
+  .toplist-item{ display:flex; align-items:center; gap:var(--sp-2); }
+  .toplist-initial{
+    width:24px; height:24px; flex-shrink:0; border-radius:0;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--ink); font-size:var(--fs-1); font-weight:700;
+  }
+  .toplist-name{ font-size:var(--fs-2); flex:1; min-width:0; }
+  .toplist-value{ font-size:var(--fs-2); font-weight:700; }
+  .toplist-bar-track{ height:2px; background:var(--hair); width:100%; }
+  .toplist-bar-fill{ height:2px; background:var(--ink); }
+  .toplist-row-inner{ display:flex; flex-direction:column; flex:1; min-width:0; gap:var(--sp-1); }
+  .toplist-top{ display:flex; align-items:center; gap:var(--sp-2); }
+
+  /* ===== 테이블 ===== */
+  .table-scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:640px; }
+  thead th{
+    text-align:left; font-size:var(--fs-1); font-weight:500; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink);
+    padding:var(--sp-2) var(--sp-2) var(--sp-2) 0;
+    border-bottom:1px solid var(--ink);
+  }
+  th.is-sorted{ display:table-cell; }
+  .sort-caret{
+    display:inline-block; margin-left:var(--sp-1);
+    width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent;
+    border-bottom:5px solid var(--ink); vertical-align:middle;
+  }
+  tbody td{
+    font-size:var(--fs-2); color:var(--ink);
+    padding:var(--sp-2) var(--sp-2) var(--sp-2) 0;
+    vertical-align:top;
+  }
+  tbody tr{ position:relative; border-bottom:none; }
+  tbody tr:last-child td{ border-bottom:1px solid var(--ink); }
+  tbody tr::before{
+    content:''; position:absolute; left:-16px; top:0; bottom:0; width:2px;
+    background:var(--ink); opacity:0; transition:opacity 180ms ease;
+  }
+  tbody tr:hover::before{ opacity:1; }
+  td.cell-empty{ color:var(--mid); }
+  .cell-clamp{
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden; max-width:32ch;
+  }
+  .status{ display:inline-flex; align-items:center; gap:var(--sp-1); font-size:var(--fs-2); }
+  .status-dot{ width:6px; height:6px; flex-shrink:0; }
+  .status-heard .status-dot{ border:1px solid var(--ink); background:var(--bg); }
+  .status-heard{ color:var(--mid); }
+  .status-hold .status-dot{ background:var(--mid); }
+  .status-hold{ color:var(--mid); }
+  .status-relisten .status-dot{ background:var(--ink); outline:1px solid var(--ink); outline-offset:2px; }
+  .status-relisten{ color:var(--ink); font-style:italic; }
+  .status-new .status-dot{ background:var(--ink); }
+  .status-new{ color:var(--ink); font-weight:700; }
+
+  /* ===== 모아보기 빈 상태 ===== */
+  .empty-state{
+    display:flex; flex-direction:column; gap:var(--sp-2);
+    border-top:1px solid var(--hair); padding-top:var(--sp-3);
+    max-width:60ch;
+  }
+  .eyebrow{ font-size:var(--fs-1); font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); }
+  .empty-headline{ font-size:var(--fs-4); font-weight:700; letter-spacing:-0.02em; max-width:60ch; }
+  .empty-desc{ font-size:var(--fs-2); color:var(--mid); max-width:60ch; }
+  .empty-cta{ margin-top:var(--sp-1); align-self:flex-start; }
+
+  /* ===== 대화 패널 ===== */
+  .conversation{ display:flex; flex-direction:column; gap:var(--sp-3); }
+  .chat{ display:flex; flex-direction:column; gap:var(--sp-3); max-width:60ch; }
+  .msg{ display:flex; flex-direction:column; gap:var(--sp-1); }
+  .msg-you{ padding-left:var(--sp-3); }
+  .msg-speaker{ font-size:var(--fs-1); font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); }
+  .msg-text{ font-size:var(--fs-2); color:var(--ink); }
+  .msg-options{ display:flex; gap:var(--sp-2); flex-wrap:wrap; margin-top:var(--sp-1); }
+  .opt-btn{
+    background:transparent; border:1px solid var(--ink); color:var(--ink);
+    padding:var(--sp-1) var(--sp-2); font-size:var(--fs-2); cursor:pointer;
+    border-radius:0; transition:background 180ms ease, color 180ms ease;
+  }
+  .opt-btn:hover{ background:var(--ink); color:var(--bg); }
+
+  .diagnosis-block{ border-top:1px solid var(--hair); padding-top:var(--sp-3); max-width:60ch; }
+  .diagnosis-label{ font-size:var(--fs-1); font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); margin-bottom:var(--sp-1); }
+  .diagnosis-text{ font-size:var(--fs-4); font-weight:500; letter-spacing:-0.01em; max-width:60ch; }
+
+  .story-card{
+    display:flex; flex-direction:column; gap:var(--sp-1);
+    border-top:1px solid var(--hair); padding-top:var(--sp-3); max-width:60ch;
+  }
+  .axis-badge{
+    display:inline-flex; width:fit-content; border:1px solid var(--ink);
+    font-size:var(--fs-1); font-weight:500; letter-spacing:.08em; text-transform:uppercase;
+    padding:0 var(--sp-1);
+  }
+  .story-source{ font-size:var(--fs-2); color:var(--mid); }
+  .story-lesson{ font-size:var(--fs-2); color:var(--ink); }
+  .story-cta{ font-size:var(--fs-2); color:var(--ink); border-bottom:1px solid var(--ink); width:fit-content; cursor:pointer; }
+
+  /* ===== 푸터 ===== */
+  .site-footer{
+    font-size:var(--fs-1); letter-spacing:.08em; text-transform:uppercase; color:var(--ink);
+    border-top:1px solid var(--hair); padding-top:var(--sp-3); margin-top:var(--sp-1);
+  }
+
+  /* ===== 반응형 900px ===== */
+  @media (max-width:900px){
+    .sidebar{
+      position:fixed; top:0; left:0; bottom:0; width:240px; z-index:20;
+      background:var(--bg); transform:translateX(-100%);
+      transition:transform 220ms ease;
+    }
+    .sr-toggle:checked ~ .app .sidebar{ transform:translateX(0); }
+    .drawer-scrim{
+      display:block; position:fixed; inset:0; background:var(--bg);
+      opacity:0; pointer-events:none; z-index:10;
+      border-left:1px solid var(--hair);
+    }
+    .sr-toggle:checked ~ .app .drawer-scrim{ opacity:.0001; pointer-events:auto; }
+    .drawer-btn{
+      display:inline-flex; align-items:center; cursor:pointer; flex-shrink:0;
+      font-size:var(--fs-1); font-weight:500; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--ink); border-bottom:1px solid var(--ink); padding:var(--sp-1) 0;
+    }
+    .topbar-brand{ display:none; }
+    .topbar{ flex-wrap:wrap; row-gap:var(--sp-2); }
+    .topbar-search{ max-width:none; flex:1 1 120px; }
+    .topbar-actions{ flex:1 1 100%; margin-left:0; justify-content:flex-end; flex-wrap:wrap; row-gap:var(--sp-2); }
+    .kpi-row{ grid-template-columns:repeat(2, 1fr); row-gap:var(--sp-3); }
+    .kpi-card:nth-child(2n+1){ border-left:none; padding-left:0; }
+    .chart-row{ grid-template-columns:1fr; }
+    .insight-row{ grid-template-columns:1fr; }
+    .msg-you{ padding-left:var(--sp-2); }
+  }
+  @media (max-width:560px){
+    .kpi-row{ grid-template-columns:1fr; }
+    .kpi-card{ border-left:none !important; padding-left:0 !important; border-top:1px solid var(--hair); padding-top:var(--sp-2); }
+    .kpi-card:first-child{ border-top:none; padding-top:0; }
+    .kpi-card.is-flagged{ border-top:2px solid var(--accent); }
+    .topbar-actions{ gap:var(--sp-2); }
+    .btn{ padding:0 var(--sp-2); }
+  }
+</style>
+</head>
+<body>
+
+<input type="checkbox" id="drawer-toggle" class="sr-toggle">
+
+<div class="app reveal">
+  <label for="drawer-toggle" class="drawer-scrim" aria-hidden="true"></label>
+
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">연서</div>
+      <nav class="sidebar-nav" aria-label="주 메뉴">
+        <ul>
+          <li><a href="#" class="nav-item is-active"><span class="nav-index">01</span>대화</a></li>
+          <li><a href="#" class="nav-item"><span class="nav-index">02</span>모아보기</a></li>
+          <li><a href="#" class="nav-item"><span class="nav-index">03</span>결핍 지도</a></li>
+          <li><a href="#" class="nav-item"><span class="nav-index">04</span>작품 서가</a></li>
+          <li><a href="#" class="nav-item"><span class="nav-index">05</span>기록</a></li>
+          <li><a href="#" class="nav-item"><span class="nav-index">06</span>설정</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="sidebar-user">
+      <span class="avatar">ㅇ</span>
+      <span class="user-role">읽는 사람</span>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <label for="drawer-toggle" class="drawer-btn" aria-label="메뉴 열기">메뉴</label>
+      <div class="topbar-brand">연서</div>
+      <div class="topbar-search">
+        <input type="text" placeholder="작품·교훈 검색" aria-label="작품·교훈 검색">
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-alert" type="button" aria-label="알림, 미확인 3건">
+          알림<span class="badge">3</span>
+        </button>
+        <span class="avatar avatar-sm">ㅇ</span>
+        <button class="btn btn-primary" type="button">새 대화</button>
+        <button class="btn btn-secondary" type="button">모아보기</button>
+      </div>
+    </header>
+
+    <div class="main-inner">
+
+      <div class="toolbar">
+        <div class="tabs" role="tablist" aria-label="축 필터">
+          <button class="tab is-active" type="button" role="tab" aria-selected="true">전체</button>
+          <button class="tab" type="button" role="tab" aria-selected="false">외적</button>
+          <button class="tab" type="button" role="tab" aria-selected="false">내적</button>
+          <button class="tab" type="button" role="tab" aria-selected="false">최근</button>
+        </div>
+        <select class="filter-select" aria-label="시대 필터">
+          <option>시대 ▾</option>
+        </select>
+      </div>
+
+      <div class="banner" role="status">
+        <span class="banner-mark" aria-hidden="true"></span>
+        <span>결핍을 짚으려면 두세 마디가 더 필요해요. 편한 만큼만 답해도 됩니다.</span>
+      </div>
+
+      <!-- KPI 4개 -->
+      <section class="kpi-row" aria-label="핵심 지표">
+        <div class="kpi-card">
+          <div class="kpi-label">들은 스토리</div>
+          <div class="kpi-value-row">
+            <span class="kpi-value">1,284,000</span>
+            <span class="kpi-unit">편</span>
+          </div>
+          <div class="kpi-underline" aria-hidden="true"></div>
+          <div class="kpi-delta-row">
+            <span class="kpi-delta">+12.4%</span>
+            <svg class="kpi-spark" width="64" height="20" viewBox="0 0 64 20" aria-hidden="true">
+              <polyline points="0,16 10,14 20,15 30,10 40,8 50,5 64,2" fill="none" stroke="#111111" stroke-width="1.5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-card is-flagged">
+          <div class="kpi-label">짚어낸 결핍</div>
+          <div class="kpi-value-row">
+            <span class="kpi-value">7</span>
+            <span class="kpi-unit">개</span>
+          </div>
+          <div class="kpi-underline" aria-hidden="true"></div>
+          <div class="kpi-delta-row">
+            <span class="kpi-delta is-flag">-2</span>
+            <svg class="kpi-spark" width="64" height="20" viewBox="0 0 64 20" aria-hidden="true">
+              <polyline points="0,4 10,6 20,8 30,9 40,12 50,14 64,16" fill="none" stroke="#111111" stroke-width="1.5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">평균 읽은 시간</div>
+          <div class="kpi-value-row">
+            <span class="kpi-value">58</span>
+            <span class="kpi-unit">초</span>
+          </div>
+          <div class="kpi-underline" aria-hidden="true"></div>
+          <div class="kpi-delta-row">
+            <span class="kpi-delta">+3초</span>
+            <svg class="kpi-spark" width="64" height="20" viewBox="0 0 64 20" aria-hidden="true">
+              <polyline points="0,14 10,15 20,12 30,13 40,9 50,10 64,6" fill="none" stroke="#111111" stroke-width="1.5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">이어온 날</div>
+          <div class="kpi-value-row">
+            <span class="kpi-value">26</span>
+            <span class="kpi-unit">일</span>
+          </div>
+          <div class="kpi-underline" aria-hidden="true"></div>
+          <div class="kpi-delta-row">
+            <span class="kpi-delta">+1일</span>
+            <svg class="kpi-spark" width="64" height="20" viewBox="0 0 64 20" aria-hidden="true">
+              <polyline points="0,17 10,15 20,15 30,12 40,10 50,7 64,4" fill="none" stroke="#111111" stroke-width="1.5"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- 차트 2종 -->
+      <section class="chart-row">
+        <div class="chart-card">
+          <div class="chart-card-head">
+            <h2 class="section-title">최근 10일 청취 추이</h2>
+          </div>
+          <svg class="chart-line-svg" viewBox="0 0 600 260" role="img" aria-label="최근 10일 청취 추이, 1일 12건부터 10일 29건까지, 8일째 41건으로 최고점">
+            <line x1="32" y1="228" x2="584" y2="228" stroke="#E5E5E5" stroke-width="1"/>
+            <text x="8" y="232" class="chart-axis-label">0</text>
+            <text x="4" y="20" class="chart-axis-label">50</text>
+            <polygon points="32,177.1 93.3,151.7 154.7,164.4 216.0,189.8 277.3,126.2 338.7,96.6 400.0,113.5 461.3,54.2 522.7,88.1 584.0,105.0 584.0,228 32,228"
+              fill="#E5E5E5" fill-opacity="0.55" stroke="none"/>
+            <polyline points="32,177.1 93.3,151.7 154.7,164.4 216.0,189.8 277.3,126.2 338.7,96.6 400.0,113.5 461.3,54.2 522.7,88.1 584.0,105.0"
+              fill="none" stroke="#111111" stroke-width="2"/>
+            <circle class="pt" cx="32" cy="177.1" r="3.5"><title>1일 · 12</title></circle>
+            <circle class="pt" cx="93.3" cy="151.7" r="3.5"><title>2일 · 18</title></circle>
+            <circle class="pt" cx="154.7" cy="164.4" r="3.5"><title>3일 · 15</title></circle>
+            <circle class="pt" cx="216.0" cy="189.8" r="3.5"><title>4일 · 9</title></circle>
+            <circle class="pt" cx="277.3" cy="126.2" r="3.5"><title>5일 · 24</title></circle>
+            <circle class="pt" cx="338.7" cy="96.6" r="3.5"><title>6일 · 31</title></circle>
+            <circle class="pt" cx="400.0" cy="113.5" r="3.5"><title>7일 · 27</title></circle>
+            <circle class="pt-peak" cx="461.3" cy="54.2" r="5"><title>8일 · 41 (최고점)</title></circle>
+            <text x="461.3" y="42" text-anchor="middle" class="chart-axis-label" font-weight="700">41</text>
+            <circle class="pt" cx="522.7" cy="88.1" r="3.5"><title>9일 · 33</title></circle>
+            <circle class="pt" cx="584.0" cy="105.0" r="3.5"><title>10일 · 29</title></circle>
+          </svg>
+          <div class="chart-x-labels" aria-hidden="true">
+            <span>1일</span><span>2일</span><span>3일</span><span>4일</span><span>5일</span>
+            <span>6일</span><span>7일</span><span>8일</span><span>9일</span><span>10일</span>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-head">
+            <h2 class="section-title">축 구성비</h2>
+            <div class="segment" role="group" aria-label="차트 뷰 전환">
+              <button class="seg-item is-active" type="button">내적</button>
+              <span class="seg-divider" aria-hidden="true"></span>
+              <button class="seg-item" type="button">외적</button>
+            </div>
+          </div>
+          <div class="donut-wrap">
+            <svg class="donut-svg" width="160" height="160" viewBox="0 0 180 180" role="img" aria-label="축 구성비: 내적-성찰 34%, 내적-마음 22%, 내적-성품 18%, 외적-첫인상 16%, 외적-조건 10%">
+              <defs>
+                <pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+                  <line x1="0" y1="0" x2="0" y2="6" stroke="#111111" stroke-width="1.4"/>
+                </pattern>
+              </defs>
+              <g transform="rotate(-90 90 90)">
+                <circle cx="90" cy="90" r="70" fill="none" stroke="#111111" stroke-width="24"
+                  stroke-dasharray="149.5 290.32" stroke-dashoffset="0"/>
+                <circle cx="90" cy="90" r="70" fill="none" stroke="#767676" stroke-width="24"
+                  stroke-dasharray="96.76 343.06" stroke-dashoffset="-149.5"/>
+                <circle cx="90" cy="90" r="70" fill="none" stroke="#A8A8A8" stroke-width="24"
+                  stroke-dasharray="79.17 360.65" stroke-dashoffset="-246.26"/>
+                <circle cx="90" cy="90" r="70" fill="none" stroke="#E5E5E5" stroke-width="24"
+                  stroke-dasharray="70.37 369.45" stroke-dashoffset="-325.43"/>
+                <circle cx="90" cy="90" r="70" fill="none" stroke="url(#hatch)" stroke-width="24"
+                  stroke-dasharray="43.98 395.84" stroke-dashoffset="-395.80"/>
+              </g>
+              <circle cx="90" cy="90" r="70" fill="none" stroke="#111111" stroke-width="1"/>
+            </svg>
+            <ul class="legend">
+              <li class="legend-item"><span class="legend-swatch" style="background:#111111;border-color:#111111;"></span>내적-성찰<span class="legend-value">34%</span></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:#767676;border-color:#767676;"></span>내적-마음<span class="legend-value">22%</span></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:#A8A8A8;border-color:#A8A8A8;"></span>내적-성품<span class="legend-value">18%</span></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:#E5E5E5;"></span>외적-첫인상<span class="legend-value">16%</span></li>
+              <li class="legend-item"><svg class="legend-swatch" style="border:none;" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><rect x="0.5" y="0.5" width="9" height="9" fill="#FFFFFF" stroke="#111111"/><line x1="0" y1="10" x2="10" y2="0" stroke="#111111" stroke-width="1"/><line x1="0" y1="5" x2="5" y2="0" stroke="#111111" stroke-width="1"/><line x1="5" y1="10" x2="10" y2="5" stroke="#111111" stroke-width="1"/></svg>외적-조건<span class="legend-value">10%</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 목표 진행률 / 상위 리스트 (세그먼트 컨트롤은 위 축 구성비 차트에 위치) -->
+      <section class="insight-row">
+        <div class="insight-card">
+          <h2 class="section-title">이번 달 소양 목표</h2>
+          <div class="goal-figure">
+            <span class="goal-pct">65%</span>
+            <span class="goal-count">26 / 40편</span>
+          </div>
+          <div class="goal-track"><div class="goal-fill"></div></div>
+        </div>
+
+        <div class="insight-card">
+          <h2 class="section-title">자주 나온 결핍</h2>
+          <div class="toplist">
+            <div class="toplist-item">
+              <span class="toplist-initial">ㄱ</span>
+              <div class="toplist-row-inner">
+                <div class="toplist-top"><span class="toplist-name">기대치 어긋남</span><span class="toplist-value">32</span></div>
+                <div class="toplist-bar-track"><div class="toplist-bar-fill" style="width:100%;"></div></div>
+              </div>
+            </div>
+            <div class="toplist-item">
+              <span class="toplist-initial">ㅍ</span>
+              <div class="toplist-row-inner">
+                <div class="toplist-top"><span class="toplist-name">표현 부족</span><span class="toplist-value">27</span></div>
+                <div class="toplist-bar-track"><div class="toplist-bar-fill" style="width:84%;"></div></div>
+              </div>
+            </div>
+            <div class="toplist-item">
+              <span class="toplist-initial">ㅈ</span>
+              <div class="toplist-row-inner">
+                <div class="toplist-top"><span class="toplist-name">자존감</span><span class="toplist-value">21</span></div>
+                <div class="toplist-bar-track"><div class="toplist-bar-fill" style="width:66%;"></div></div>
+              </div>
+            </div>
+            <div class="toplist-item">
+              <span class="toplist-initial">ㄱ</span>
+              <div class="toplist-row-inner">
+                <div class="toplist-top"><span class="toplist-name">거리 조절</span><span class="toplist-value">15</span></div>
+                <div class="toplist-bar-track"><div class="toplist-bar-fill" style="width:47%;"></div></div>
+              </div>
+            </div>
+            <div class="toplist-item">
+              <span class="toplist-initial">ㅅ</span>
+              <div class="toplist-row-inner">
+                <div class="toplist-top"><span class="toplist-name">신뢰 회복</span><span class="toplist-value">9</span></div>
+                <div class="toplist-bar-track"><div class="toplist-bar-fill" style="width:28%;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 테이블 -->
+      <section class="table-section">
+        <h2 class="section-title" style="margin-bottom:var(--sp-2);">받은 스토리</h2>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th class="is-sorted">작품<span class="sort-caret" aria-hidden="true"></span></th>
+                <th>작가</th>
+                <th>축</th>
+                <th>교훈</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>오만과 편견</td>
+                <td>제인 오스틴</td>
+                <td>내적</td>
+                <td>첫인상은 자주 틀린다</td>
+                <td><span class="status status-heard"><span class="status-dot"></span>들음</span></td>
+              </tr>
+              <tr>
+                <td>위대한 개츠비</td>
+                <td>F. 스콧 피츠제럴드</td>
+                <td>외적</td>
+                <td>조건으로 시작한 마음은 조건에서 끝난다</td>
+                <td><span class="status status-hold"><span class="status-dot"></span>보류</span></td>
+              </tr>
+              <tr>
+                <td class="cell-clamp">어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설</td>
+                <td class="cell-empty">—</td>
+                <td>내적</td>
+                <td>기다림은 사람을 바꾼다</td>
+                <td><span class="status status-relisten"><span class="status-dot"></span>다시듣기</span></td>
+              </tr>
+              <tr>
+                <td>폭풍의 언덕</td>
+                <td>에밀리 브론테</td>
+                <td>내적</td>
+                <td>집착은 사랑의 이름을 빌린다</td>
+                <td><span class="status status-heard"><span class="status-dot"></span>들음</span></td>
+              </tr>
+              <tr>
+                <td>시라노 드 베르주라크</td>
+                <td>에드몽 로스탕</td>
+                <td>외적</td>
+                <td>목소리는 얼굴보다 오래 남는다</td>
+                <td><span class="status status-new"><span class="status-dot"></span>새로움</span></td>
+              </tr>
+              <tr>
+                <td>안나 카레니나</td>
+                <td>레프 톨스토이</td>
+                <td>내적</td>
+                <td>불행한 사랑은 저마다의 이유로 불행하다</td>
+                <td><span class="status status-hold"><span class="status-dot"></span>보류</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 대화 패널 -->
+      <section class="conversation">
+        <h2 class="section-title">대화</h2>
+        <div class="chat">
+          <div class="msg">
+            <span class="msg-speaker">연서</span>
+            <span class="msg-text">요즘 사랑에서 어떤 게 제일 어려우세요?</span>
+          </div>
+          <div class="msg msg-you">
+            <span class="msg-speaker">나</span>
+            <span class="msg-text">연락이 오면 반갑고 안 오면 하루가 다 망가져요. 제가 너무 매달리는 것 같기도 하고, 사실은 그냥 확인받고 싶은 건지도 모르겠어요.</span>
+          </div>
+          <div class="msg">
+            <span class="msg-speaker">연서</span>
+            <span class="msg-text">기다림이 힘든 건가요, 기다리는 자신이 싫은 건가요?</span>
+            <div class="msg-options">
+              <button class="opt-btn" type="button">[ 기다림이 힘들다 ]</button>
+              <button class="opt-btn" type="button">[ 그런 내가 싫다 ]</button>
+            </div>
+          </div>
+          <div class="msg msg-you">
+            <span class="msg-speaker">나</span>
+            <span class="msg-text">후자요.</span>
+          </div>
+        </div>
+
+        <div class="diagnosis-block">
+          <div class="diagnosis-label">진단</div>
+          <p class="diagnosis-text">확인받아야 안심되는 마음이 보여요. 없는 건 상대의 애정이 아니라 스스로에 대한 확신 같습니다.</p>
+        </div>
+
+        <div class="story-card">
+          <span class="axis-badge">내적</span>
+          <div class="story-source">오만과 편견 · 제인 오스틴</div>
+          <p class="story-lesson">첫인상은 자주 틀린다 — 나에 대한 첫인상도 마찬가지다.</p>
+        </div>
+
+        <div class="story-cta">다른 이야기도 들어볼래요?</div>
+      </section>
+
+      <!-- 모아보기 빈 상태 -->
+      <section class="empty-state">
+        <span class="eyebrow">모아보기 · 외적</span>
+        <h2 class="empty-headline">아직 이 축의 이야기가 없어요</h2>
+        <p class="empty-desc">대화를 두어 마디 더 나누면 맞는 이야기를 찾아드릴게요.</p>
+        <button class="btn btn-primary empty-cta" type="button">대화 이어가기</button>
+      </section>
+
+      <footer class="site-footer">STYLE 07 · 미니멀 모노크롬</footer>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', function(){
+    document.documentElement.classList.remove('js-loading');
+    var el = document.querySelector('.reveal');
+    if(el){ el.classList.add('is-in'); }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>연서 · 대화 워크스페이스</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   STYLE 09 · 레트로 픽셀 — 연서 대화 워크스페이스
+   무드: 8비트 게임 콘솔. 데이터는 스코어, 화면은 스테이지.
+   ========================================================= */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+:root {
+  /* 팔레트 — 유채색 5색(그린·옐로·레드·블루·오렌지) + 다크 네이비 중립 스케일 */
+  --bg: #1A1C2C;
+  --bg-alt: #20223A;
+  --panel: #29366F;
+  --panel-alt: #232D5C;
+  --edge: #4A5591;
+  --green: #38B764;
+  --yellow: #FFCD75;
+  --red: #B13E53;
+  --blue: #3B5DC9;
+  --orange: #EF7D57;
+  --text: #F4F4F4;
+  --text-dim: #B7C0E0;
+  --ink: #0D0E16;
+
+  /* 4px 단위 그리드 */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px;
+  --s6: 24px; --s8: 32px; --s10: 40px; --s12: 48px; --s16: 64px;
+
+  /* 타이포 스케일 */
+  --t-xs: 12px; --t-sm: 14px; --t-md: 16px; --t-lg: 20px; --t-xl: 24px; --t-2xl: 32px;
+  --tp-xs: 10px; --tp-sm: 11px; --tp-md: 13px; --tp-lg: 16px; /* Press Start 2P: 16px 초과 금지 */
+
+  --font-kr: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-px: 'Press Start 2P', monospace;
+}
+
+body {
+  background-color: var(--bg);
+  background-image:
+    repeating-linear-gradient(45deg, rgba(244,244,244,0.028) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(-45deg, rgba(244,244,244,0.02) 0 2px, transparent 2px 4px);
+  color: var(--text);
+  font-family: var(--font-kr);
+  font-size: var(--t-sm);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.num { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+
+.pixel-font {
+  font-family: var(--font-px);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  text-rendering: optimizeSpeed;
+  letter-spacing: 0.5px;
+}
+
+a { color: inherit; text-decoration: none; }
+button, select, input { font-family: var(--font-kr); color: var(--text); }
+ul { list-style: none; margin: 0; padding: 0; }
+h1, h2, h3, p { margin: 0; }
+img, svg { display: block; }
+
+/* ── 픽셀 프레임 (계단식 잘린 모서리 보더) ───────────────── */
+.pixel-clip {
+  clip-path: polygon(
+    0 8px, 8px 8px, 8px 0,
+    calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
+    100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+    8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px)
+  );
+}
+.pixel-clip-sm {
+  clip-path: polygon(
+    0 4px, 4px 4px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+}
+.pixel-frame {
+  background: var(--frame-edge, var(--edge));
+  padding: 4px;
+  border-radius: 0;
+}
+.pixel-frame__body {
+  background: var(--panel);
+  height: 100%;
+  border-radius: 0;
+}
+/* 카드 hover 보더 색 반전은 KPI 카드에 한정(대형 패널 전체 반전은 오독 유발 + 저대비 위험) */
+.kpi-card.pixel-frame:hover { background: var(--panel); }
+.kpi-card.pixel-frame:hover > .pixel-frame__body { background: var(--frame-edge, var(--edge)); }
+
+/* pixel icon set (SVG rect 그리드, 곡선 없음) */
+.pxicon rect { fill: currentColor; }
+.pxicon { flex-shrink: 0; }
+
+/* ready overlay ── "READY?" 오프닝(0~0.6s), 스냅 종료 ───── */
+.ready-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  animation: overlay-out 0.01s steps(1, end) 1;
+  animation-delay: 0.6s;
+  animation-fill-mode: forwards;
+}
+@keyframes overlay-out { from { opacity: 1; visibility: visible; } to { opacity: 0; visibility: hidden; pointer-events: none; } }
+.ready-overlay__text {
+  font-size: var(--tp-lg);
+  color: var(--yellow);
+  transform: scale(3);
+  animation: ready-blink 0.3s steps(1, end) 2;
+}
+@keyframes ready-blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+
+/* ── 앱 셸 레이아웃 ─────────────────────────────────────── */
+.drawer-toggle { position: absolute; opacity: 0; pointer-events: none; }
+.app-shell { display: flex; min-height: 100vh; }
+
+.hamburger-btn {
+  display: none;
+  position: fixed; top: var(--s3); left: var(--s3); z-index: 60;
+  width: 40px; height: 40px;
+  background: var(--panel);
+  border: 2px solid var(--edge);
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 4px;
+  cursor: pointer;
+}
+.hamburger-btn span { width: 18px; height: 2px; background: var(--text); display: block; }
+.drawer-backdrop {
+  display: none;
+  position: fixed; inset: 0; z-index: 45;
+  background: rgba(13,14,22,0.6);
+}
+
+.sidebar {
+  width: 232px; flex-shrink: 0;
+  background: var(--panel);
+  border-right: 2px solid var(--edge);
+  padding: var(--s6) var(--s4);
+  display: flex; flex-direction: column; gap: var(--s8);
+  position: sticky; top: 0; height: 100vh;
+}
+.sidebar__logo {
+  font-size: var(--t-xl); font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: var(--s2) var(--s3);
+  background: var(--bg-alt);
+  border: 2px solid var(--yellow);
+  width: fit-content;
+}
+.sidebar__nav { display: flex; flex-direction: column; gap: var(--s1); flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s3);
+  color: var(--text-dim);
+  border: 2px solid transparent;
+  font-size: var(--t-sm); font-weight: 600;
+}
+.nav-item:hover { border-color: var(--edge); color: var(--text); }
+.nav-item.is-active {
+  background: var(--bg-alt);
+  color: var(--yellow);
+  border-color: var(--yellow);
+}
+.sidebar__user {
+  display: flex; align-items: center; gap: var(--s3);
+  padding-top: var(--s4);
+  border-top: 2px solid var(--edge);
+}
+.avatar-box {
+  width: 36px; height: 36px;
+  background: var(--bg-alt);
+  border: 2px solid var(--yellow);
+  color: var(--yellow);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: var(--t-md);
+  border-radius: 0;
+  flex-shrink: 0;
+}
+.avatar-box--sm { width: 28px; height: 28px; font-size: var(--t-sm); }
+.user-role { font-size: var(--t-xs); color: var(--text-dim); }
+
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ── 상단바 ─────────────────────────────────────────────── */
+.topbar {
+  display: flex; align-items: center; gap: var(--s4);
+  padding: var(--s4) var(--s6);
+  background: var(--panel-alt);
+  border-bottom: 2px solid var(--edge);
+  flex-wrap: wrap;
+}
+.topbar__brand { font-size: var(--t-lg); font-weight: 800; letter-spacing: 0.06em; color: var(--yellow); }
+.topbar__search {
+  flex: 1; min-width: 180px; max-width: 360px;
+  display: flex; align-items: center; gap: var(--s2);
+  background: var(--bg-alt);
+  border: 2px solid var(--edge);
+  padding: 0 var(--s3);
+  height: 38px;
+  color: var(--text-dim);
+}
+.topbar__search:focus-within { border-color: var(--yellow); }
+.topbar__search input {
+  background: transparent; border: none; outline: none;
+  color: var(--text); font-size: var(--t-sm); width: 100%; height: 100%;
+}
+.topbar__search input::placeholder { color: var(--text-dim); }
+.topbar__actions { display: flex; align-items: center; gap: var(--s3); margin-left: auto; }
+.icon-btn {
+  position: relative;
+  width: 38px; height: 38px;
+  background: var(--bg-alt);
+  border: 2px solid var(--edge);
+  color: var(--text-dim);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.icon-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+.icon-btn:focus-visible { outline: 2px dashed var(--yellow); outline-offset: 2px; }
+.notif-badge {
+  position: absolute; top: -6px; right: -6px;
+  min-width: 16px; height: 16px; padding: 0 3px;
+  background: var(--red); color: var(--text);
+  font-size: 9px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--panel-alt);
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+  height: 38px; padding: 0 var(--s4);
+  font-size: var(--t-sm); font-weight: 700;
+  border: 2px solid transparent;
+  cursor: pointer; white-space: nowrap;
+  border-radius: 0;
+}
+.btn:focus-visible { outline: 2px dashed var(--text); outline-offset: 2px; }
+.btn-primary { background: var(--green); color: var(--ink); border-color: var(--green); box-shadow: 4px 4px 0 0 var(--ink); }
+.btn-primary:hover { background: var(--yellow); border-color: var(--yellow); }
+.btn-primary:active { transform: translate(3px, 3px); box-shadow: none; }
+.btn-secondary { background: var(--bg-alt); color: var(--text); border-color: var(--edge); box-shadow: 4px 4px 0 0 var(--panel-alt); }
+.btn-secondary:hover { background: var(--text); color: var(--ink); border-color: var(--text); }
+.btn-secondary:active { transform: translate(3px, 3px); box-shadow: none; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+/* ── 콘텐츠 영역 공통 ───────────────────────────────────── */
+.content {
+  max-width: 1280px; width: 100%; margin: 0 auto;
+  padding: var(--s6);
+  display: flex; flex-direction: column; gap: var(--s8);
+}
+.section-label {
+  display: flex; align-items: center; gap: var(--s2);
+  font-size: var(--t-md); font-weight: 800; color: var(--text);
+  margin-bottom: var(--s4);
+}
+.section-label::before {
+  content: ""; width: 10px; height: 10px; background: var(--yellow); flex-shrink: 0;
+}
+.card {
+  --frame-edge: var(--edge);
+}
+.card > .pixel-frame__body { padding: var(--s5); }
+
+/* ── 탭 + 필터 ──────────────────────────────────────────── */
+.tabs-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); flex-wrap: wrap; }
+.tabs { display: flex; gap: var(--s2); flex-wrap: wrap; }
+.tab {
+  background: var(--panel);
+  border: 2px solid var(--edge);
+  color: var(--text-dim);
+  padding: var(--s2) var(--s4);
+  font-size: var(--t-sm); font-weight: 700;
+  cursor: pointer;
+}
+.tab:hover { border-color: var(--yellow); color: var(--text); }
+.tab.is-active { background: var(--yellow); color: var(--ink); border-color: var(--yellow); }
+.filter-select {
+  background: var(--panel) url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0h2v2h2v2h2v-2h2v-2h2v2h-2v2h-2v2h-2v-2h-2z' fill='%23FFCD75'/%3E%3C/svg%3E") no-repeat right 12px center;
+  border: 2px solid var(--edge);
+  color: var(--text);
+  padding: var(--s2) var(--s8) var(--s2) var(--s4);
+  height: 38px;
+  font-size: var(--t-sm); font-weight: 600;
+  appearance: none; -webkit-appearance: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+.filter-select:hover, .filter-select:focus-visible { border-color: var(--yellow); outline: none; }
+
+/* ── 배너 ───────────────────────────────────────────────── */
+.banner {
+  display: flex; align-items: flex-start; gap: var(--s3);
+  padding: var(--s4);
+  background: var(--panel-alt);
+  border: 2px solid var(--blue);
+  color: var(--text);
+  font-size: var(--t-sm);
+  line-height: 1.6;
+}
+.banner__icon {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  background: var(--blue); color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-px); font-size: var(--tp-sm);
+}
+
+/* ── KPI 그리드 ─────────────────────────────────────────── */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s4); }
+.kpi-card__label { font-size: var(--t-xs); color: var(--text-dim); font-weight: 600; margin-bottom: var(--s3); }
+.kpi-card__value-row { display: flex; align-items: baseline; gap: var(--s2); flex-wrap: wrap; margin-bottom: var(--s2); }
+.kpi-card__value { font-size: var(--tp-md); color: var(--text); }
+.kpi-card__value--long { font-size: var(--tp-sm); }
+.kpi-card__unit { font-size: var(--t-sm); color: var(--text-dim); font-weight: 600; }
+.delta-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 6px;
+  font-size: var(--tp-xs);
+  font-weight: 700;
+}
+.delta-chip--up { background: var(--green); color: var(--ink); }
+.delta-chip--down { background: var(--red); color: var(--text); }
+.sparkline { display: flex; align-items: flex-end; gap: 3px; height: 28px; margin-top: var(--s3); }
+.sparkline i { flex: 1; background: var(--edge); display: block; }
+.kpi-card:hover .sparkline i { background: var(--yellow); }
+.kpi-card:hover .kpi-card__label, .kpi-card:hover .kpi-card__unit { color: var(--text); }
+
+/* ── 차트 행 ────────────────────────────────────────────── */
+.chart-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: var(--s4); align-items: stretch; }
+.card-header { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-bottom: var(--s5); flex-wrap: wrap; }
+.card-title { font-size: var(--t-md); font-weight: 800; }
+
+.segmented { display: inline-flex; align-items: center; gap: var(--s1); font-family: var(--font-px); font-size: var(--tp-xs); color: var(--text-dim); }
+.segmented .seg-bracket { color: var(--text-dim); }
+.seg-btn {
+  background: var(--panel-alt);
+  border: 2px solid var(--edge);
+  color: var(--text-dim);
+  font-family: var(--font-kr); font-size: var(--t-xs); font-weight: 700;
+  padding: var(--s1) var(--s3);
+  cursor: pointer;
+}
+.seg-btn.is-active { background: var(--green); color: var(--ink); border-color: var(--green); }
+.seg-btn:hover:not(.is-active) { border-color: var(--yellow); color: var(--text); }
+
+.trend-chart {
+  position: relative;
+  display: flex; align-items: flex-end; gap: var(--s2);
+  height: 176px;
+  padding-top: var(--s8);
+  border-bottom: 2px solid var(--edge);
+}
+.trend-bar-wrap { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; }
+.trend-bar-value { font-family: var(--font-px); font-size: 9px; color: var(--text-dim); margin-bottom: var(--s1); }
+.trend-bar {
+  width: 100%;
+  max-width: 28px;
+  background: var(--green);
+  background-image: repeating-linear-gradient(to top, rgba(13,14,22,0.55) 0 2px, transparent 2px 8px);
+  height: var(--h);
+  animation: block-grow 0.8s steps(8, end) both;
+  animation-delay: 0.8s;
+}
+.trend-bar--peak { background-color: var(--yellow); }
+.trend-bar-wrap:has(.trend-bar--peak) .trend-bar-value { color: var(--yellow); }
+@keyframes block-grow { from { height: 0; } to { height: var(--h); } }
+.peak-cursor {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-px); font-size: 12px; color: var(--yellow);
+  opacity: 0;
+  animation: cursor-blink 0.5s steps(1, end) infinite;
+  animation-delay: 1.4s;
+}
+@keyframes cursor-blink { 0%, 49.9% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.trend-axis { display: flex; gap: var(--s2); margin-top: var(--s2); }
+.trend-axis span { flex: 1; max-width: 28px; text-align: center; font-size: 10px; color: var(--text-dim); }
+.trend-zero { position: absolute; left: 0; bottom: -18px; font-family: var(--font-px); font-size: 9px; color: var(--text-dim); }
+
+.donut-wrap { display: flex; align-items: center; gap: var(--s5); flex-wrap: wrap; justify-content: center; }
+.donut-svg { image-rendering: pixelated; flex-shrink: 0; }
+.donut-legend { display: flex; flex-direction: column; gap: var(--s2); flex: 1; min-width: 160px; }
+.donut-legend li { display: flex; align-items: center; gap: var(--s2); font-size: var(--t-xs); }
+.donut-swatch { width: 12px; height: 12px; flex-shrink: 0; }
+.donut-legend .pct { margin-left: auto; font-family: var(--font-px); font-size: var(--tp-sm); }
+
+/* ── 중간 3열 ───────────────────────────────────────────── */
+.mid-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s4); }
+.goal-title { font-size: var(--t-sm); color: var(--text-dim); font-weight: 600; margin-bottom: var(--s3); }
+.goal-value-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--s3); }
+.goal-count { font-size: var(--tp-md); }
+.goal-count__unit { font-family: var(--font-kr); font-size: var(--t-xs); color: var(--text-dim); margin-left: 4px; }
+.goal-pct { font-family: var(--font-px); font-size: var(--tp-lg); color: var(--yellow); }
+.gauge-track { display: flex; gap: 2px; height: 20px; background: var(--bg-alt); border: 2px solid var(--edge); padding: 2px; }
+.gauge-track i { flex: 1; background: var(--panel-alt); }
+.gauge-track i.is-filled { background: var(--green); }
+
+.list-row { display: flex; align-items: center; gap: var(--s3); padding: var(--s2) 0; border-bottom: 2px solid var(--panel-alt); }
+.list-row:last-child { border-bottom: none; }
+.list-initial {
+  width: 26px; height: 26px; flex-shrink: 0;
+  background: var(--bg-alt); border: 2px solid var(--edge);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: var(--t-xs); color: var(--text);
+}
+.list-name { flex: 1; font-size: var(--t-xs); color: var(--text); }
+.list-value { font-family: var(--font-px); font-size: var(--tp-sm); color: var(--yellow); }
+
+.empty-state { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--s3); padding: var(--s3) 0; }
+.empty-state .pxicon--empty { color: var(--edge); width: 40px; height: 40px; }
+.empty-state__headline { font-size: var(--t-sm); font-weight: 800; }
+.empty-state__desc { font-size: var(--t-xs); color: var(--text-dim); }
+
+/* ── 테이블 ─────────────────────────────────────────────── */
+.table-scroll { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.table th {
+  text-align: left; font-size: var(--t-xs); color: var(--text-dim);
+  padding: var(--s2) var(--s3); border-bottom: 2px solid var(--edge);
+  white-space: nowrap;
+}
+.table th.is-sorted { color: var(--yellow); }
+.table th .sort-arrow { color: var(--yellow); margin-left: 4px; }
+.table td {
+  padding: var(--s3); border-bottom: 2px solid var(--panel-alt);
+  font-size: var(--t-xs); vertical-align: top;
+}
+.table tbody tr { position: relative; }
+.table tbody tr::before {
+  content: "▶"; position: absolute; left: -14px; top: 50%; transform: translateY(-50%);
+  color: var(--yellow); font-size: 10px; opacity: 0;
+}
+.table tbody tr:hover::before { opacity: 1; }
+.table tbody tr:hover { background: var(--panel-alt); }
+.table td.missing { color: var(--text-dim); }
+.cell-title {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; max-width: 260px; overflow-wrap: break-word; font-weight: 600;
+}
+.axis-tag {
+  display: inline-block; padding: 2px 6px; font-size: 10px; font-weight: 700;
+  background: var(--bg-alt); border: 2px solid var(--edge); color: var(--text-dim);
+}
+.status-chip { display: inline-flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
+.status-label { padding: 2px 6px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+.status-label--green { background: var(--green); color: var(--ink); }
+.status-label--yellow { background: var(--yellow); color: var(--ink); }
+.status-label--red { background: var(--red); color: var(--text); }
+.status-label--blue { background: var(--blue); color: var(--text); }
+.hp-gauge { display: inline-flex; gap: 2px; }
+.hp-gauge i { width: 5px; height: 10px; background: var(--panel-alt); border: 1px solid var(--edge); }
+.hp-gauge i.on-green { background: var(--green); border-color: var(--green); }
+.hp-gauge i.on-yellow { background: var(--yellow); border-color: var(--yellow); }
+.hp-gauge i.on-blue { background: var(--blue); border-color: var(--blue); }
+.hp-gauge i.on-red { background: var(--red); border-color: var(--red); animation: hp-blink 0.6s steps(1, end) infinite; }
+@keyframes hp-blink { 0%, 49.9% { opacity: 1; } 50%, 100% { opacity: 0.25; } }
+
+/* ── 대화 패널 ──────────────────────────────────────────── */
+.chat-list { display: flex; flex-direction: column; gap: var(--s4); margin-bottom: var(--s5); }
+.chat-msg { display: flex; gap: var(--s3); max-width: 640px; }
+.chat-msg--me { align-self: flex-end; flex-direction: row-reverse; }
+.chat-msg__avatar {
+  width: 30px; height: 30px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: var(--t-xs);
+  border: 2px solid var(--edge);
+  background: var(--bg-alt); color: var(--text);
+}
+.chat-msg--me .chat-msg__avatar { border-color: var(--green); color: var(--green); }
+.chat-msg--yeonseo .chat-msg__avatar { border-color: var(--yellow); color: var(--yellow); }
+.chat-msg__body { display: flex; flex-direction: column; gap: var(--s2); }
+.chat-msg__bubble {
+  padding: var(--s3);
+  background: var(--panel-alt);
+  border: 2px solid var(--edge);
+  font-size: var(--t-sm); line-height: 1.6;
+  overflow-wrap: break-word;
+}
+.chat-msg--me .chat-msg__bubble { background: var(--bg-alt); border-color: var(--green); }
+.chat-choices { display: flex; gap: var(--s2); flex-wrap: wrap; }
+.choice-btn {
+  background: var(--panel-alt); border: 2px solid var(--edge); color: var(--text-dim);
+  padding: var(--s2) var(--s3); font-size: var(--t-xs); font-weight: 700; cursor: pointer;
+}
+.choice-btn.is-chosen { background: var(--green); color: var(--ink); border-color: var(--green); }
+.choice-btn:hover:not(.is-chosen) { border-color: var(--yellow); color: var(--text); }
+
+.diagnosis-block { display: flex; flex-direction: column; gap: var(--s4); padding-top: var(--s4); border-top: 2px solid var(--edge); }
+.diagnosis-label { display: flex; align-items: center; gap: var(--s2); font-size: var(--t-xs); font-weight: 800; color: var(--yellow); }
+.diagnosis-text { font-size: var(--t-sm); line-height: 1.7; }
+.story-card { display: flex; flex-direction: column; gap: var(--s2); padding: var(--s4); background: var(--bg-alt); border: 2px solid var(--yellow); }
+.story-card__meta { display: flex; align-items: center; gap: var(--s2); font-size: var(--t-xs); color: var(--text-dim); }
+.story-card__lesson { font-size: var(--t-sm); font-weight: 700; line-height: 1.6; }
+.story-card__cta { font-size: var(--t-xs); color: var(--text-dim); margin-top: var(--s2); }
+
+/* ── 푸터 ───────────────────────────────────────────────── */
+.app-footer {
+  padding: var(--s5) var(--s6);
+  border-top: 2px solid var(--edge);
+  color: var(--text-dim);
+  font-size: var(--t-xs);
+  max-width: 1280px; width: 100%; margin: 0 auto;
+}
+.app-footer .footer-style { font-family: var(--font-px); font-size: var(--tp-sm); color: var(--text); }
+
+/* ── 반응형 ─────────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .chart-row { grid-template-columns: 1fr; }
+  .mid-row { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed; top: 0; left: 0; z-index: 50;
+    transform: translateX(-100%);
+  }
+  .drawer-toggle:checked ~ .app-shell .sidebar { transform: translateX(0); }
+  .drawer-toggle:checked ~ .app-shell .drawer-backdrop { display: block; }
+  .hamburger-btn { display: flex; }
+  .topbar { padding-left: var(--s16); }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .mid-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .content { padding: var(--s4); gap: var(--s6); }
+  .topbar { padding: var(--s3) var(--s3) var(--s3) var(--s16); }
+  .topbar__search { order: 3; max-width: none; flex-basis: 100%; }
+}
+
+/* ── 접근성: 모션 축소 ──────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .ready-overlay { display: none !important; }
+  .ready-overlay__text { animation: none !important; }
+  .trend-bar { animation: none !important; }
+  .peak-cursor { animation: none !important; opacity: 1 !important; }
+  .hp-gauge i.on-red { animation: none !important; opacity: 1 !important; }
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="ready-overlay" aria-hidden="true">
+  <div class="ready-overlay__text pixel-font">READY?</div>
+</div>
+
+<input type="checkbox" id="drawer-toggle" class="drawer-toggle" aria-hidden="true">
+
+<div class="app-shell">
+  <label for="drawer-toggle" class="hamburger-btn" aria-label="메뉴 열기">
+    <span></span><span></span><span></span>
+  </label>
+  <label for="drawer-toggle" class="drawer-backdrop" aria-hidden="true"></label>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__logo">연서</div>
+    <nav class="sidebar__nav" aria-label="주 메뉴">
+      <a href="#" class="nav-item is-active">
+        <svg class="pxicon pxicon--chat" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><rect x="4" y="0" width="2" height="2"/><rect x="6" y="0" width="2" height="2"/><rect x="8" y="0" width="2" height="2"/><rect x="10" y="0" width="2" height="2"/><rect x="2" y="2" width="2" height="2"/><rect x="4" y="2" width="2" height="2"/><rect x="6" y="2" width="2" height="2"/><rect x="8" y="2" width="2" height="2"/><rect x="10" y="2" width="2" height="2"/><rect x="12" y="2" width="2" height="2"/><rect x="0" y="4" width="2" height="2"/><rect x="2" y="4" width="2" height="2"/><rect x="4" y="4" width="2" height="2"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="12" y="4" width="2" height="2"/><rect x="14" y="4" width="2" height="2"/><rect x="0" y="6" width="2" height="2"/><rect x="2" y="6" width="2" height="2"/><rect x="4" y="6" width="2" height="2"/><rect x="6" y="6" width="2" height="2"/><rect x="8" y="6" width="2" height="2"/><rect x="10" y="6" width="2" height="2"/><rect x="12" y="6" width="2" height="2"/><rect x="14" y="6" width="2" height="2"/><rect x="0" y="8" width="2" height="2"/><rect x="2" y="8" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="6" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="2"/><rect x="10" y="8" width="2" height="2"/><rect x="12" y="8" width="2" height="2"/><rect x="14" y="8" width="2" height="2"/><rect x="2" y="10" width="2" height="2"/><rect x="4" y="10" width="2" height="2"/><rect x="6" y="10" width="2" height="2"/><rect x="8" y="10" width="2" height="2"/><rect x="10" y="10" width="2" height="2"/><rect x="12" y="10" width="2" height="2"/><rect x="4" y="12" width="2" height="2"/><rect x="6" y="12" width="2" height="2"/><rect x="6" y="14" width="2" height="2"/><rect x="8" y="14" width="2" height="2"/></svg>
+        대화
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="pxicon pxicon--grid" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><rect x="0" y="0" width="2" height="2"/><rect x="2" y="0" width="2" height="2"/><rect x="4" y="0" width="2" height="2"/><rect x="8" y="0" width="2" height="2"/><rect x="10" y="0" width="2" height="2"/><rect x="12" y="0" width="2" height="2"/><rect x="0" y="2" width="2" height="2"/><rect x="2" y="2" width="2" height="2"/><rect x="4" y="2" width="2" height="2"/><rect x="8" y="2" width="2" height="2"/><rect x="10" y="2" width="2" height="2"/><rect x="12" y="2" width="2" height="2"/><rect x="0" y="4" width="2" height="2"/><rect x="2" y="4" width="2" height="2"/><rect x="4" y="4" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="12" y="4" width="2" height="2"/><rect x="0" y="8" width="2" height="2"/><rect x="2" y="8" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="2"/><rect x="10" y="8" width="2" height="2"/><rect x="12" y="8" width="2" height="2"/><rect x="0" y="10" width="2" height="2"/><rect x="2" y="10" width="2" height="2"/><rect x="4" y="10" width="2" height="2"/><rect x="8" y="10" width="2" height="2"/><rect x="10" y="10" width="2" height="2"/><rect x="12" y="10" width="2" height="2"/><rect x="0" y="12" width="2" height="2"/><rect x="2" y="12" width="2" height="2"/><rect x="4" y="12" width="2" height="2"/><rect x="8" y="12" width="2" height="2"/><rect x="10" y="12" width="2" height="2"/><rect x="12" y="12" width="2" height="2"/></svg>
+        모아보기
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="pxicon pxicon--target" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><rect x="6" y="0" width="2" height="2"/><rect x="8" y="0" width="2" height="2"/><rect x="4" y="2" width="2" height="2"/><rect x="6" y="2" width="2" height="2"/><rect x="8" y="2" width="2" height="2"/><rect x="10" y="2" width="2" height="2"/><rect x="2" y="4" width="2" height="2"/><rect x="4" y="4" width="2" height="2"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="12" y="4" width="2" height="2"/><rect x="2" y="6" width="2" height="2"/><rect x="4" y="6" width="2" height="2"/><rect x="10" y="6" width="2" height="2"/><rect x="12" y="6" width="2" height="2"/><rect x="2" y="8" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="10" y="8" width="2" height="2"/><rect x="12" y="8" width="2" height="2"/><rect x="2" y="10" width="2" height="2"/><rect x="4" y="10" width="2" height="2"/><rect x="6" y="10" width="2" height="2"/><rect x="8" y="10" width="2" height="2"/><rect x="10" y="10" width="2" height="2"/><rect x="12" y="10" width="2" height="2"/><rect x="4" y="12" width="2" height="2"/><rect x="6" y="12" width="2" height="2"/><rect x="8" y="12" width="2" height="2"/><rect x="10" y="12" width="2" height="2"/><rect x="6" y="14" width="2" height="2"/><rect x="8" y="14" width="2" height="2"/></svg>
+        결핍 지도
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="pxicon pxicon--book" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><rect x="0" y="0" width="2" height="2"/><rect x="2" y="0" width="2" height="2"/><rect x="4" y="0" width="2" height="2"/><rect x="6" y="0" width="2" height="2"/><rect x="8" y="0" width="2" height="2"/><rect x="10" y="0" width="2" height="2"/><rect x="12" y="0" width="2" height="2"/><rect x="0" y="2" width="2" height="2"/><rect x="12" y="2" width="2" height="2"/><rect x="0" y="4" width="2" height="2"/><rect x="4" y="4" width="2" height="2"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="12" y="4" width="2" height="2"/><rect x="0" y="6" width="2" height="2"/><rect x="4" y="6" width="2" height="2"/><rect x="6" y="6" width="2" height="2"/><rect x="8" y="6" width="2" height="2"/><rect x="12" y="6" width="2" height="2"/><rect x="0" y="8" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="6" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="2"/><rect x="12" y="8" width="2" height="2"/><rect x="0" y="10" width="2" height="2"/><rect x="4" y="10" width="2" height="2"/><rect x="6" y="10" width="2" height="2"/><rect x="8" y="10" width="2" height="2"/><rect x="12" y="10" width="2" height="2"/><rect x="0" y="12" width="2" height="2"/><rect x="12" y="12" width="2" height="2"/><rect x="0" y="14" width="2" height="2"/><rect x="2" y="14" width="2" height="2"/><rect x="4" y="14" width="2" height="2"/><rect x="6" y="14" width="2" height="2"/><rect x="8" y="14" width="2" height="2"/><rect x="10" y="14" width="2" height="2"/><rect x="12" y="14" width="2" height="2"/></svg>
+        작품 서가
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="pxicon pxicon--clock" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><rect x="4" y="0" width="2" height="2"/><rect x="6" y="0" width="2" height="2"/><rect x="8" y="0" width="2" height="2"/><rect x="10" y="0" width="2" height="2"/><rect x="2" y="2" width="2" height="2"/><rect x="12" y="2" width="2" height="2"/><rect x="0" y="4" width="2" height="2"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="14" y="4" width="2" height="2"/><rect x="0" y="6" width="2" height="2"/><rect x="6" y="6" width="2" height="2"/><rect x="8" y="6" width="2" height="2"/><rect x="14" y="6" width="2" height="2"/><rect x="0" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="2"/><rect x="14" y="8" width="2" height="2"/><rect x="0" y="10" width="2" height="2"/><rect x="14" y="10" width="2" height="2"/><rect x="2" y="12" width="2" height="2"/><rect x="12" y="12" width="2" height="2"/><rect x="4" y="14" width="2" height="2"/><rect x="6" y="14" width="2" height="2"/><rect x="8" y="14" width="2" height="2"/><rect x="10" y="14" width="2" height="2"/></svg>
+        기록
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="pxicon pxicon--gear" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><rect x="4" y="0" width="2" height="2"/><rect x="10" y="0" width="2" height="2"/><rect x="0" y="2" width="2" height="2"/><rect x="4" y="2" width="2" height="2"/><rect x="6" y="2" width="2" height="2"/><rect x="8" y="2" width="2" height="2"/><rect x="10" y="2" width="2" height="2"/><rect x="14" y="2" width="2" height="2"/><rect x="2" y="4" width="2" height="2"/><rect x="4" y="4" width="2" height="2"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="12" y="4" width="2" height="2"/><rect x="0" y="6" width="2" height="2"/><rect x="2" y="6" width="2" height="2"/><rect x="4" y="6" width="2" height="2"/><rect x="6" y="6" width="2" height="2"/><rect x="8" y="6" width="2" height="2"/><rect x="10" y="6" width="2" height="2"/><rect x="12" y="6" width="2" height="2"/><rect x="14" y="6" width="2" height="2"/><rect x="0" y="8" width="2" height="2"/><rect x="2" y="8" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="6" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="2"/><rect x="10" y="8" width="2" height="2"/><rect x="12" y="8" width="2" height="2"/><rect x="14" y="8" width="2" height="2"/><rect x="2" y="10" width="2" height="2"/><rect x="4" y="10" width="2" height="2"/><rect x="6" y="10" width="2" height="2"/><rect x="8" y="10" width="2" height="2"/><rect x="10" y="10" width="2" height="2"/><rect x="12" y="10" width="2" height="2"/><rect x="0" y="12" width="2" height="2"/><rect x="4" y="12" width="2" height="2"/><rect x="6" y="12" width="2" height="2"/><rect x="8" y="12" width="2" height="2"/><rect x="10" y="12" width="2" height="2"/><rect x="14" y="12" width="2" height="2"/><rect x="4" y="14" width="2" height="2"/><rect x="10" y="14" width="2" height="2"/></svg>
+        설정
+      </a>
+    </nav>
+    <div class="sidebar__user">
+      <div class="avatar-box">ㅇ</div>
+      <div class="user-role">읽는 사람</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar__brand">연서</div>
+      <div class="topbar__search">
+        <svg class="pxicon pxicon--search" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><rect x="4" y="0" width="2" height="2"/><rect x="6" y="0" width="2" height="2"/><rect x="8" y="0" width="2" height="2"/><rect x="2" y="2" width="2" height="2"/><rect x="10" y="2" width="2" height="2"/><rect x="0" y="4" width="2" height="2"/><rect x="12" y="4" width="2" height="2"/><rect x="0" y="6" width="2" height="2"/><rect x="12" y="6" width="2" height="2"/><rect x="0" y="8" width="2" height="2"/><rect x="12" y="8" width="2" height="2"/><rect x="2" y="10" width="2" height="2"/><rect x="10" y="10" width="2" height="2"/><rect x="14" y="10" width="2" height="2"/><rect x="4" y="12" width="2" height="2"/><rect x="6" y="12" width="2" height="2"/><rect x="8" y="12" width="2" height="2"/><rect x="12" y="12" width="2" height="2"/><rect x="10" y="14" width="2" height="2"/><rect x="14" y="14" width="2" height="2"/></svg>
+        <input type="search" placeholder="작품·교훈 검색" aria-label="작품·교훈 검색">
+      </div>
+      <div class="topbar__actions">
+        <button class="icon-btn" aria-label="알림, 미확인 3건">
+          <svg class="pxicon pxicon--bell" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><rect x="6" y="0" width="2" height="2"/><rect x="8" y="0" width="2" height="2"/><rect x="4" y="2" width="2" height="2"/><rect x="6" y="2" width="2" height="2"/><rect x="8" y="2" width="2" height="2"/><rect x="10" y="2" width="2" height="2"/><rect x="4" y="4" width="2" height="2"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="2" y="6" width="2" height="2"/><rect x="4" y="6" width="2" height="2"/><rect x="6" y="6" width="2" height="2"/><rect x="8" y="6" width="2" height="2"/><rect x="10" y="6" width="2" height="2"/><rect x="12" y="6" width="2" height="2"/><rect x="2" y="8" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="6" y="8" width="2" height="2"/><rect x="8" y="8" width="2" height="2"/><rect x="10" y="8" width="2" height="2"/><rect x="12" y="8" width="2" height="2"/><rect x="0" y="10" width="2" height="2"/><rect x="2" y="10" width="2" height="2"/><rect x="4" y="10" width="2" height="2"/><rect x="6" y="10" width="2" height="2"/><rect x="8" y="10" width="2" height="2"/><rect x="10" y="10" width="2" height="2"/><rect x="12" y="10" width="2" height="2"/><rect x="14" y="10" width="2" height="2"/><rect x="6" y="12" width="2" height="2"/><rect x="8" y="12" width="2" height="2"/><rect x="6" y="14" width="2" height="2"/><rect x="8" y="14" width="2" height="2"/></svg>
+          <span class="notif-badge pixel-font num" aria-hidden="true">3</span>
+        </button>
+        <div class="avatar-box avatar-box--sm" aria-hidden="true">ㅇ</div>
+        <button class="btn btn-primary">새 대화</button>
+        <button class="btn btn-secondary">모아보기</button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <div class="tabs-row">
+        <div class="tabs" role="tablist" aria-label="축 필터">
+          <button class="tab is-active" role="tab" aria-selected="true">전체</button>
+          <button class="tab" role="tab" aria-selected="false">외적</button>
+          <button class="tab" role="tab" aria-selected="false">내적</button>
+          <button class="tab" role="tab" aria-selected="false">최근</button>
+        </div>
+        <select class="filter-select" aria-label="시대 필터">
+          <option>시대 ▾</option>
+          <option>고전(19세기)</option>
+          <option>근현대</option>
+        </select>
+      </div>
+
+      <div class="banner banner--info" role="status">
+        <span class="banner__icon" aria-hidden="true">!</span>
+        결핍을 짚으려면 두세 마디가 더 필요해요. 편한 만큼만 답해도 됩니다.
+      </div>
+
+      <div class="kpi-grid">
+        <article class="card kpi-card pixel-frame">
+          <div class="pixel-frame__body">
+            <div class="kpi-card__label">들은 스토리</div>
+            <div class="kpi-card__value-row">
+              <span class="kpi-card__value kpi-card__value--long pixel-font num">1,284,000</span>
+              <span class="kpi-card__unit">편</span>
+            </div>
+            <span class="delta-chip delta-chip--up pixel-font num">▲ +12.4%</span>
+            <div class="sparkline" aria-hidden="true">
+              <i style="height:40%"></i><i style="height:52%"></i><i style="height:48%"></i>
+              <i style="height:66%"></i><i style="height:60%"></i><i style="height:82%"></i><i style="height:100%"></i>
+            </div>
+          </div>
+        </article>
+
+        <article class="card kpi-card pixel-frame">
+          <div class="pixel-frame__body">
+            <div class="kpi-card__label">짚어낸 결핍</div>
+            <div class="kpi-card__value-row">
+              <span class="kpi-card__value pixel-font num">7</span>
+              <span class="kpi-card__unit">개</span>
+            </div>
+            <span class="delta-chip delta-chip--down pixel-font num">▼ -2</span>
+            <div class="sparkline" aria-hidden="true">
+              <i style="height:100%"></i><i style="height:88%"></i><i style="height:74%"></i>
+              <i style="height:60%"></i><i style="height:48%"></i><i style="height:38%"></i><i style="height:30%"></i>
+            </div>
+          </div>
+        </article>
+
+        <article class="card kpi-card pixel-frame">
+          <div class="pixel-frame__body">
+            <div class="kpi-card__label">평균 읽은 시간</div>
+            <div class="kpi-card__value-row">
+              <span class="kpi-card__value pixel-font num">58</span>
+              <span class="kpi-card__unit">초</span>
+            </div>
+            <span class="delta-chip delta-chip--up"><span class="pixel-font num">▲ +3</span><span>초</span></span>
+            <div class="sparkline" aria-hidden="true">
+              <i style="height:56%"></i><i style="height:60%"></i><i style="height:54%"></i>
+              <i style="height:66%"></i><i style="height:70%"></i><i style="height:64%"></i><i style="height:78%"></i>
+            </div>
+          </div>
+        </article>
+
+        <article class="card kpi-card pixel-frame">
+          <div class="pixel-frame__body">
+            <div class="kpi-card__label">이어온 날</div>
+            <div class="kpi-card__value-row">
+              <span class="kpi-card__value pixel-font num">26</span>
+              <span class="kpi-card__unit">일</span>
+            </div>
+            <span class="delta-chip delta-chip--up"><span class="pixel-font num">▲ +1</span><span>일</span></span>
+            <div class="sparkline" aria-hidden="true">
+              <i style="height:64%"></i><i style="height:68%"></i><i style="height:70%"></i>
+              <i style="height:74%"></i><i style="height:78%"></i><i style="height:80%"></i><i style="height:88%"></i>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="chart-row">
+        <section class="card trend-card pixel-frame">
+          <div class="pixel-frame__body">
+            <div class="card-header">
+              <h2 class="card-title">최근 10일 청취 추이</h2>
+              <div class="segmented">
+                <span class="seg-bracket">[</span>
+                <button class="seg-btn is-active">내적</button>
+                <span class="seg-bracket">|</span>
+                <button class="seg-btn">외적</button>
+                <span class="seg-bracket">]</span>
+              </div>
+            </div>
+            <div class="trend-chart">
+              <span class="trend-zero pixel-font num">0</span>
+              <div class="trend-bar-wrap">
+                <span class="trend-bar-value pixel-font num">12</span>
+                <div class="trend-bar" style="--h:29.3%"></div>
+              </div>
+              <div class="trend-bar-wrap">
+                <span class="trend-bar-value pixel-font num">18</span>
+                <div class="trend-bar" style="--h:43.9%"></div>
+              </div>
+              <div class="trend-bar-wrap">
+                <span class="trend-bar-value pixel-font num">15</span>
+                <div class="trend-bar" style="--h:36.6%"></div>
+              </div>
+              <div class="trend-bar-wrap">
+                <span class="trend-bar-value pixel-font num">9</span>
+                <div class="trend-bar" style="--h:22%"></div>
+              </div>
+              <div class="trend-bar-wrap">
+                <span class="trend-bar-value pixel-font num">24</span>
+                <div class="trend-bar" style="--h:58.5%"></div>
+              </div>
+              <div class="trend-bar-wrap">
+                <span class="trend-bar-value pixel-font num">31</span>
+                <div class="trend-bar" style="--h:75.6%"></div>
+              </div>
+              <div class="trend-bar-wrap">
+                <span class="trend-bar-value pixel-font num">27</span>
+                <div class="trend-bar" style="--h:65.9%"></div>
+              </div>
+              <div class="trend-bar-wrap">
+                <span class="trend-bar-value pixel-font num" style="color:var(--yellow)">41</span>
+                <span class="peak-cursor pixel-font" aria-hidden="true">▶</span>
+                <div class="trend-bar trend-bar--peak" style="--h:100%"></div>
+              </div>
+              <div class="trend-bar-wrap">
+                <span class="trend-bar-value pixel-font num">33</span>
+                <div class="trend-bar" style="--h:80.5%"></div>
+              </div>
+              <div class="trend-bar-wrap">
+                <span class="trend-bar-value pixel-font num">29</span>
+                <div class="trend-bar" style="--h:70.7%"></div>
+              </div>
+            </div>
+            <div class="trend-axis" aria-hidden="true">
+              <span>1일</span><span>2일</span><span>3일</span><span>4일</span><span>5일</span>
+              <span>6일</span><span>7일</span><span>8일</span><span>9일</span><span>10일</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card donut-card pixel-frame">
+          <div class="pixel-frame__body">
+            <div class="card-header">
+              <h2 class="card-title">축 구성비</h2>
+            </div>
+            <div class="donut-wrap">
+              <svg class="donut-svg" viewBox="0 0 154 154" width="154" height="154" role="img" aria-label="축 구성비: 내적-성찰 34%, 내적-마음 22%, 내적-성품 18%, 외적-첫인상 16%, 외적-조건 10%">
+                <rect x="56" y="7" width="7" height="7" fill="#B13E53"/><rect x="63" y="7" width="7" height="7" fill="#B13E53"/><rect x="70" y="7" width="7" height="7" fill="#B13E53"/><rect x="77" y="7" width="7" height="7" fill="#38B764"/><rect x="84" y="7" width="7" height="7" fill="#38B764"/><rect x="91" y="7" width="7" height="7" fill="#38B764"/><rect x="42" y="14" width="7" height="7" fill="#B13E53"/><rect x="49" y="14" width="7" height="7" fill="#B13E53"/><rect x="56" y="14" width="7" height="7" fill="#B13E53"/><rect x="63" y="14" width="7" height="7" fill="#B13E53"/><rect x="70" y="14" width="7" height="7" fill="#B13E53"/><rect x="77" y="14" width="7" height="7" fill="#38B764"/><rect x="84" y="14" width="7" height="7" fill="#38B764"/><rect x="91" y="14" width="7" height="7" fill="#38B764"/><rect x="98" y="14" width="7" height="7" fill="#38B764"/><rect x="105" y="14" width="7" height="7" fill="#38B764"/><rect x="28" y="21" width="7" height="7" fill="#FFCD75"/><rect x="35" y="21" width="7" height="7" fill="#FFCD75"/><rect x="42" y="21" width="7" height="7" fill="#B13E53"/><rect x="49" y="21" width="7" height="7" fill="#B13E53"/><rect x="56" y="21" width="7" height="7" fill="#B13E53"/><rect x="63" y="21" width="7" height="7" fill="#B13E53"/><rect x="70" y="21" width="7" height="7" fill="#B13E53"/><rect x="77" y="21" width="7" height="7" fill="#38B764"/><rect x="84" y="21" width="7" height="7" fill="#38B764"/><rect x="91" y="21" width="7" height="7" fill="#38B764"/><rect x="98" y="21" width="7" height="7" fill="#38B764"/><rect x="105" y="21" width="7" height="7" fill="#38B764"/><rect x="112" y="21" width="7" height="7" fill="#38B764"/><rect x="119" y="21" width="7" height="7" fill="#38B764"/><rect x="21" y="28" width="7" height="7" fill="#FFCD75"/><rect x="28" y="28" width="7" height="7" fill="#FFCD75"/><rect x="35" y="28" width="7" height="7" fill="#FFCD75"/><rect x="42" y="28" width="7" height="7" fill="#B13E53"/><rect x="49" y="28" width="7" height="7" fill="#B13E53"/><rect x="56" y="28" width="7" height="7" fill="#B13E53"/><rect x="63" y="28" width="7" height="7" fill="#B13E53"/><rect x="70" y="28" width="7" height="7" fill="#B13E53"/><rect x="77" y="28" width="7" height="7" fill="#38B764"/><rect x="84" y="28" width="7" height="7" fill="#38B764"/><rect x="91" y="28" width="7" height="7" fill="#38B764"/><rect x="98" y="28" width="7" height="7" fill="#38B764"/><rect x="105" y="28" width="7" height="7" fill="#38B764"/><rect x="112" y="28" width="7" height="7" fill="#38B764"/><rect x="119" y="28" width="7" height="7" fill="#38B764"/><rect x="126" y="28" width="7" height="7" fill="#38B764"/><rect x="21" y="35" width="7" height="7" fill="#FFCD75"/><rect x="28" y="35" width="7" height="7" fill="#FFCD75"/><rect x="35" y="35" width="7" height="7" fill="#FFCD75"/><rect x="42" y="35" width="7" height="7" fill="#FFCD75"/><rect x="49" y="35" width="7" height="7" fill="#B13E53"/><rect x="56" y="35" width="7" height="7" fill="#B13E53"/><rect x="91" y="35" width="7" height="7" fill="#38B764"/><rect x="98" y="35" width="7" height="7" fill="#38B764"/><rect x="105" y="35" width="7" height="7" fill="#38B764"/><rect x="112" y="35" width="7" height="7" fill="#38B764"/><rect x="119" y="35" width="7" height="7" fill="#38B764"/><rect x="126" y="35" width="7" height="7" fill="#38B764"/><rect x="14" y="42" width="7" height="7" fill="#FFCD75"/><rect x="21" y="42" width="7" height="7" fill="#FFCD75"/><rect x="28" y="42" width="7" height="7" fill="#FFCD75"/><rect x="35" y="42" width="7" height="7" fill="#FFCD75"/><rect x="42" y="42" width="7" height="7" fill="#FFCD75"/><rect x="105" y="42" width="7" height="7" fill="#38B764"/><rect x="112" y="42" width="7" height="7" fill="#38B764"/><rect x="119" y="42" width="7" height="7" fill="#38B764"/><rect x="126" y="42" width="7" height="7" fill="#38B764"/><rect x="133" y="42" width="7" height="7" fill="#38B764"/><rect x="14" y="49" width="7" height="7" fill="#FFCD75"/><rect x="21" y="49" width="7" height="7" fill="#FFCD75"/><rect x="28" y="49" width="7" height="7" fill="#FFCD75"/><rect x="35" y="49" width="7" height="7" fill="#FFCD75"/><rect x="112" y="49" width="7" height="7" fill="#38B764"/><rect x="119" y="49" width="7" height="7" fill="#38B764"/><rect x="126" y="49" width="7" height="7" fill="#38B764"/><rect x="133" y="49" width="7" height="7" fill="#38B764"/><rect x="7" y="56" width="7" height="7" fill="#FFCD75"/><rect x="14" y="56" width="7" height="7" fill="#FFCD75"/><rect x="21" y="56" width="7" height="7" fill="#FFCD75"/><rect x="28" y="56" width="7" height="7" fill="#FFCD75"/><rect x="35" y="56" width="7" height="7" fill="#FFCD75"/><rect x="112" y="56" width="7" height="7" fill="#38B764"/><rect x="119" y="56" width="7" height="7" fill="#38B764"/><rect x="126" y="56" width="7" height="7" fill="#38B764"/><rect x="133" y="56" width="7" height="7" fill="#38B764"/><rect x="140" y="56" width="7" height="7" fill="#38B764"/><rect x="7" y="63" width="7" height="7" fill="#FFCD75"/><rect x="14" y="63" width="7" height="7" fill="#FFCD75"/><rect x="21" y="63" width="7" height="7" fill="#FFCD75"/><rect x="28" y="63" width="7" height="7" fill="#FFCD75"/><rect x="119" y="63" width="7" height="7" fill="#38B764"/><rect x="126" y="63" width="7" height="7" fill="#38B764"/><rect x="133" y="63" width="7" height="7" fill="#38B764"/><rect x="140" y="63" width="7" height="7" fill="#38B764"/><rect x="7" y="70" width="7" height="7" fill="#FFCD75"/><rect x="14" y="70" width="7" height="7" fill="#FFCD75"/><rect x="21" y="70" width="7" height="7" fill="#FFCD75"/><rect x="28" y="70" width="7" height="7" fill="#FFCD75"/><rect x="119" y="70" width="7" height="7" fill="#38B764"/><rect x="126" y="70" width="7" height="7" fill="#38B764"/><rect x="133" y="70" width="7" height="7" fill="#38B764"/><rect x="140" y="70" width="7" height="7" fill="#38B764"/><rect x="7" y="77" width="7" height="7" fill="#FFCD75"/><rect x="14" y="77" width="7" height="7" fill="#FFCD75"/><rect x="21" y="77" width="7" height="7" fill="#EF7D57"/><rect x="28" y="77" width="7" height="7" fill="#EF7D57"/><rect x="119" y="77" width="7" height="7" fill="#38B764"/><rect x="126" y="77" width="7" height="7" fill="#38B764"/><rect x="133" y="77" width="7" height="7" fill="#38B764"/><rect x="140" y="77" width="7" height="7" fill="#38B764"/><rect x="7" y="84" width="7" height="7" fill="#EF7D57"/><rect x="14" y="84" width="7" height="7" fill="#EF7D57"/><rect x="21" y="84" width="7" height="7" fill="#EF7D57"/><rect x="28" y="84" width="7" height="7" fill="#EF7D57"/><rect x="119" y="84" width="7" height="7" fill="#38B764"/><rect x="126" y="84" width="7" height="7" fill="#38B764"/><rect x="133" y="84" width="7" height="7" fill="#38B764"/><rect x="140" y="84" width="7" height="7" fill="#38B764"/><rect x="7" y="91" width="7" height="7" fill="#EF7D57"/><rect x="14" y="91" width="7" height="7" fill="#EF7D57"/><rect x="21" y="91" width="7" height="7" fill="#EF7D57"/><rect x="28" y="91" width="7" height="7" fill="#EF7D57"/><rect x="35" y="91" width="7" height="7" fill="#EF7D57"/><rect x="112" y="91" width="7" height="7" fill="#38B764"/><rect x="119" y="91" width="7" height="7" fill="#38B764"/><rect x="126" y="91" width="7" height="7" fill="#38B764"/><rect x="133" y="91" width="7" height="7" fill="#38B764"/><rect x="140" y="91" width="7" height="7" fill="#38B764"/><rect x="14" y="98" width="7" height="7" fill="#EF7D57"/><rect x="21" y="98" width="7" height="7" fill="#EF7D57"/><rect x="28" y="98" width="7" height="7" fill="#EF7D57"/><rect x="35" y="98" width="7" height="7" fill="#EF7D57"/><rect x="112" y="98" width="7" height="7" fill="#3B5DC9"/><rect x="119" y="98" width="7" height="7" fill="#38B764"/><rect x="126" y="98" width="7" height="7" fill="#38B764"/><rect x="133" y="98" width="7" height="7" fill="#38B764"/><rect x="14" y="105" width="7" height="7" fill="#EF7D57"/><rect x="21" y="105" width="7" height="7" fill="#EF7D57"/><rect x="28" y="105" width="7" height="7" fill="#EF7D57"/><rect x="35" y="105" width="7" height="7" fill="#EF7D57"/><rect x="42" y="105" width="7" height="7" fill="#EF7D57"/><rect x="105" y="105" width="7" height="7" fill="#3B5DC9"/><rect x="112" y="105" width="7" height="7" fill="#3B5DC9"/><rect x="119" y="105" width="7" height="7" fill="#3B5DC9"/><rect x="126" y="105" width="7" height="7" fill="#38B764"/><rect x="133" y="105" width="7" height="7" fill="#38B764"/><rect x="21" y="112" width="7" height="7" fill="#EF7D57"/><rect x="28" y="112" width="7" height="7" fill="#EF7D57"/><rect x="35" y="112" width="7" height="7" fill="#EF7D57"/><rect x="42" y="112" width="7" height="7" fill="#EF7D57"/><rect x="49" y="112" width="7" height="7" fill="#EF7D57"/><rect x="56" y="112" width="7" height="7" fill="#EF7D57"/><rect x="91" y="112" width="7" height="7" fill="#3B5DC9"/><rect x="98" y="112" width="7" height="7" fill="#3B5DC9"/><rect x="105" y="112" width="7" height="7" fill="#3B5DC9"/><rect x="112" y="112" width="7" height="7" fill="#3B5DC9"/><rect x="119" y="112" width="7" height="7" fill="#3B5DC9"/><rect x="126" y="112" width="7" height="7" fill="#3B5DC9"/><rect x="21" y="119" width="7" height="7" fill="#EF7D57"/><rect x="28" y="119" width="7" height="7" fill="#EF7D57"/><rect x="35" y="119" width="7" height="7" fill="#EF7D57"/><rect x="42" y="119" width="7" height="7" fill="#EF7D57"/><rect x="49" y="119" width="7" height="7" fill="#EF7D57"/><rect x="56" y="119" width="7" height="7" fill="#3B5DC9"/><rect x="63" y="119" width="7" height="7" fill="#3B5DC9"/><rect x="70" y="119" width="7" height="7" fill="#3B5DC9"/><rect x="77" y="119" width="7" height="7" fill="#3B5DC9"/><rect x="84" y="119" width="7" height="7" fill="#3B5DC9"/><rect x="91" y="119" width="7" height="7" fill="#3B5DC9"/><rect x="98" y="119" width="7" height="7" fill="#3B5DC9"/><rect x="105" y="119" width="7" height="7" fill="#3B5DC9"/><rect x="112" y="119" width="7" height="7" fill="#3B5DC9"/><rect x="119" y="119" width="7" height="7" fill="#3B5DC9"/><rect x="126" y="119" width="7" height="7" fill="#3B5DC9"/><rect x="28" y="126" width="7" height="7" fill="#EF7D57"/><rect x="35" y="126" width="7" height="7" fill="#EF7D57"/><rect x="42" y="126" width="7" height="7" fill="#EF7D57"/><rect x="49" y="126" width="7" height="7" fill="#EF7D57"/><rect x="56" y="126" width="7" height="7" fill="#3B5DC9"/><rect x="63" y="126" width="7" height="7" fill="#3B5DC9"/><rect x="70" y="126" width="7" height="7" fill="#3B5DC9"/><rect x="77" y="126" width="7" height="7" fill="#3B5DC9"/><rect x="84" y="126" width="7" height="7" fill="#3B5DC9"/><rect x="91" y="126" width="7" height="7" fill="#3B5DC9"/><rect x="98" y="126" width="7" height="7" fill="#3B5DC9"/><rect x="105" y="126" width="7" height="7" fill="#3B5DC9"/><rect x="112" y="126" width="7" height="7" fill="#3B5DC9"/><rect x="119" y="126" width="7" height="7" fill="#3B5DC9"/><rect x="42" y="133" width="7" height="7" fill="#EF7D57"/><rect x="49" y="133" width="7" height="7" fill="#EF7D57"/><rect x="56" y="133" width="7" height="7" fill="#3B5DC9"/><rect x="63" y="133" width="7" height="7" fill="#3B5DC9"/><rect x="70" y="133" width="7" height="7" fill="#3B5DC9"/><rect x="77" y="133" width="7" height="7" fill="#3B5DC9"/><rect x="84" y="133" width="7" height="7" fill="#3B5DC9"/><rect x="91" y="133" width="7" height="7" fill="#3B5DC9"/><rect x="98" y="133" width="7" height="7" fill="#3B5DC9"/><rect x="105" y="133" width="7" height="7" fill="#3B5DC9"/><rect x="56" y="140" width="7" height="7" fill="#3B5DC9"/><rect x="63" y="140" width="7" height="7" fill="#3B5DC9"/><rect x="70" y="140" width="7" height="7" fill="#3B5DC9"/><rect x="77" y="140" width="7" height="7" fill="#3B5DC9"/><rect x="84" y="140" width="7" height="7" fill="#3B5DC9"/><rect x="91" y="140" width="7" height="7" fill="#3B5DC9"/>
+              </svg>
+              <ul class="donut-legend">
+                <li><span class="donut-swatch" style="background:#38B764"></span>내적-성찰<span class="pct pixel-font num">34%</span></li>
+                <li><span class="donut-swatch" style="background:#3B5DC9"></span>내적-마음<span class="pct pixel-font num">22%</span></li>
+                <li><span class="donut-swatch" style="background:#EF7D57"></span>내적-성품<span class="pct pixel-font num">18%</span></li>
+                <li><span class="donut-swatch" style="background:#FFCD75"></span>외적-첫인상<span class="pct pixel-font num">16%</span></li>
+                <li><span class="donut-swatch" style="background:#B13E53"></span>외적-조건<span class="pct pixel-font num">10%</span></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="mid-row">
+        <section class="card goal-card pixel-frame">
+          <div class="pixel-frame__body">
+            <div class="goal-title">이번 달 소양 목표</div>
+            <div class="goal-value-row">
+              <span class="goal-count"><span class="pixel-font num">26 / 40</span><span class="goal-count__unit">편</span></span>
+              <span class="goal-pct pixel-font num">65%</span>
+            </div>
+            <div class="gauge-track" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="이번 달 소양 목표 달성률 65%">
+              <i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i>
+              <i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i>
+              <i class="is-filled"></i><i class="is-filled"></i><i class="is-filled"></i>
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+          </div>
+        </section>
+
+        <section class="card list-card pixel-frame">
+          <div class="pixel-frame__body">
+            <h2 class="card-title" style="margin-bottom:var(--s3)">자주 나온 결핍</h2>
+            <div class="list-row">
+              <div class="list-initial">ㄱ</div>
+              <div class="list-name">기대치 어긋남</div>
+              <div class="list-value num">32</div>
+            </div>
+            <div class="list-row">
+              <div class="list-initial">ㅍ</div>
+              <div class="list-name">표현 부족</div>
+              <div class="list-value num">27</div>
+            </div>
+            <div class="list-row">
+              <div class="list-initial">ㅈ</div>
+              <div class="list-name">자존감</div>
+              <div class="list-value num">21</div>
+            </div>
+            <div class="list-row">
+              <div class="list-initial">ㄱ</div>
+              <div class="list-name">거리 조절</div>
+              <div class="list-value num">15</div>
+            </div>
+            <div class="list-row">
+              <div class="list-initial">ㅅ</div>
+              <div class="list-name">신뢰 회복</div>
+              <div class="list-value num">9</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card empty-card pixel-frame">
+          <div class="pixel-frame__body">
+            <div class="empty-state">
+              <svg class="pxicon pxicon--empty" viewBox="0 0 16 16" width="40" height="40" aria-hidden="true" focusable="false"><rect x="2" y="2" width="2" height="2"/><rect x="12" y="2" width="2" height="2"/><rect x="0" y="4" width="2" height="2"/><rect x="4" y="4" width="2" height="2"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="14" y="4" width="2" height="2"/><rect x="0" y="6" width="2" height="2"/><rect x="4" y="6" width="2" height="2"/><rect x="10" y="6" width="2" height="2"/><rect x="14" y="6" width="2" height="2"/><rect x="0" y="8" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="10" y="8" width="2" height="2"/><rect x="14" y="8" width="2" height="2"/><rect x="0" y="10" width="2" height="2"/><rect x="4" y="10" width="2" height="2"/><rect x="6" y="10" width="2" height="2"/><rect x="8" y="10" width="2" height="2"/><rect x="10" y="10" width="2" height="2"/><rect x="14" y="10" width="2" height="2"/><rect x="2" y="12" width="2" height="2"/><rect x="12" y="12" width="2" height="2"/></svg>
+              <div class="empty-state__headline">아직 이 축의 이야기가 없어요</div>
+              <div class="empty-state__desc">대화를 두어 마디 더 나누면 맞는 이야기를 찾아드릴게요.</div>
+              <button class="btn btn-primary" style="margin-top:var(--s2)">대화 이어가기</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="card table-card pixel-frame">
+        <div class="pixel-frame__body">
+          <h2 class="card-title" style="margin-bottom:var(--s4)">받은 스토리</h2>
+          <div class="table-scroll">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="is-sorted">작품 <span class="sort-arrow">▲</span></th>
+                  <th>작가</th>
+                  <th>축</th>
+                  <th>교훈</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="cell-title">오만과 편견</td>
+                  <td>제인 오스틴</td>
+                  <td><span class="axis-tag">내적</span></td>
+                  <td>첫인상은 자주 틀린다</td>
+                  <td>
+                    <span class="status-chip">
+                      <span class="status-label status-label--green">들음</span>
+                      <span class="hp-gauge" aria-hidden="true"><i class="on-green"></i><i class="on-green"></i><i class="on-green"></i><i class="on-green"></i><i class="on-green"></i></span>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="cell-title">위대한 개츠비</td>
+                  <td>F. 스콧 피츠제럴드</td>
+                  <td><span class="axis-tag">외적</span></td>
+                  <td>조건으로 시작한 마음은 조건에서 끝난다</td>
+                  <td>
+                    <span class="status-chip">
+                      <span class="status-label status-label--yellow">보류</span>
+                      <span class="hp-gauge" aria-hidden="true"><i class="on-yellow"></i><i class="on-yellow"></i><i class="on-yellow"></i><i></i><i></i></span>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="cell-title">어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설</td>
+                  <td class="missing">—</td>
+                  <td><span class="axis-tag">내적</span></td>
+                  <td>기다림은 사람을 바꾼다</td>
+                  <td>
+                    <span class="status-chip">
+                      <span class="status-label status-label--red">다시듣기</span>
+                      <span class="hp-gauge" aria-hidden="true"><i class="on-red"></i><i></i><i></i><i></i><i></i></span>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="cell-title">폭풍의 언덕</td>
+                  <td>에밀리 브론테</td>
+                  <td><span class="axis-tag">내적</span></td>
+                  <td>집착은 사랑의 이름을 빌린다</td>
+                  <td>
+                    <span class="status-chip">
+                      <span class="status-label status-label--green">들음</span>
+                      <span class="hp-gauge" aria-hidden="true"><i class="on-green"></i><i class="on-green"></i><i class="on-green"></i><i class="on-green"></i><i class="on-green"></i></span>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="cell-title">시라노 드 베르주라크</td>
+                  <td>에드몽 로스탕</td>
+                  <td><span class="axis-tag">외적</span></td>
+                  <td>목소리는 얼굴보다 오래 남는다</td>
+                  <td>
+                    <span class="status-chip">
+                      <span class="status-label status-label--blue">새로움</span>
+                      <span class="hp-gauge" aria-hidden="true"><i class="on-blue"></i><i></i><i></i><i></i><i></i></span>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="cell-title">안나 카레니나</td>
+                  <td>레프 톨스토이</td>
+                  <td><span class="axis-tag">내적</span></td>
+                  <td>불행한 사랑은 저마다의 이유로 불행하다</td>
+                  <td>
+                    <span class="status-chip">
+                      <span class="status-label status-label--yellow">보류</span>
+                      <span class="hp-gauge" aria-hidden="true"><i class="on-yellow"></i><i class="on-yellow"></i><i class="on-yellow"></i><i></i><i></i></span>
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="card conversation-card pixel-frame">
+        <div class="pixel-frame__body">
+          <h2 class="card-title" style="margin-bottom:var(--s5)">대화</h2>
+          <div class="chat-list">
+            <div class="chat-msg chat-msg--yeonseo">
+              <div class="chat-msg__avatar">연</div>
+              <div class="chat-msg__body">
+                <div class="chat-msg__bubble">요즘 사랑에서 어떤 게 제일 어려우세요?</div>
+              </div>
+            </div>
+            <div class="chat-msg chat-msg--me">
+              <div class="chat-msg__avatar">나</div>
+              <div class="chat-msg__body">
+                <div class="chat-msg__bubble">연락이 오면 반갑고 안 오면 하루가 다 망가져요. 제가 너무 매달리는 것 같기도 하고, 사실은 그냥 확인받고 싶은 건지도 모르겠어요.</div>
+              </div>
+            </div>
+            <div class="chat-msg chat-msg--yeonseo">
+              <div class="chat-msg__avatar">연</div>
+              <div class="chat-msg__body">
+                <div class="chat-msg__bubble">기다림이 힘든 건가요, 기다리는 자신이 싫은 건가요?</div>
+                <div class="chat-choices">
+                  <button class="choice-btn">[ 기다림이 힘들다 ]</button>
+                  <button class="choice-btn is-chosen">[ 그런 내가 싫다 ]</button>
+                </div>
+              </div>
+            </div>
+            <div class="chat-msg chat-msg--me">
+              <div class="chat-msg__avatar">나</div>
+              <div class="chat-msg__body">
+                <div class="chat-msg__bubble">후자요.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="diagnosis-block">
+            <div class="diagnosis-label">진단</div>
+            <p class="diagnosis-text">확인받아야 안심되는 마음이 보여요. 없는 건 상대의 애정이 아니라 스스로에 대한 확신 같습니다.</p>
+            <div class="story-card">
+              <div class="story-card__meta">
+                <span class="axis-tag">내적</span>
+                <span>오만과 편견 · 제인 오스틴</span>
+              </div>
+              <p class="story-card__lesson">첫인상은 자주 틀린다 — 나에 대한 첫인상도 마찬가지다.</p>
+              <p class="story-card__cta">다른 이야기도 들어볼래요?</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="app-footer">
+      <span class="footer-style num">STYLE 09</span><span>&nbsp;· 레트로 픽셀</span>
+    </footer>
+  </div>
+</div>
+
+<script>
+(function () {
+  document.querySelectorAll('.tabs .tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var group = btn.closest('.tabs').querySelectorAll('.tab');
+      group.forEach(function (b) { b.classList.remove('is-active'); b.setAttribute('aria-selected', 'false'); });
+      btn.classList.add('is-active');
+      btn.setAttribute('aria-selected', 'true');
+    });
+  });
+  document.querySelectorAll('.segmented .seg-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var group = btn.closest('.segmented').querySelectorAll('.seg-btn');
+      group.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연서 · 관제 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d1117;
+    --card:#161b22;
+    --card-hover:#1a2029;
+    --track:#21262d;
+    --border:#30363d;
+    --text:#c9d1d9;
+    --muted:#8b949e;
+    --teal:#2dd4bf;
+    --teal-mid:#5eead4;
+    --teal-deep:#0d9488;
+    --blue:#58a6ff;
+    --purple:#bc8cff;
+    --magenta:#f778ba;
+    --green:#3fb950;
+    --yellow:#d29922;
+    --orange:#db6d28;
+    --red:#f85149;
+    --radius:6px;
+    --sidebar-w:216px;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:13px;
+    line-height:1.35;
+    -webkit-font-smoothing:antialiased;
+  }
+  .tnum{
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:'tnum' 1;
+  }
+  .mono{
+    font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  a{color:inherit;}
+  button{font-family:inherit;color:inherit;}
+  ::selection{background:var(--blue);color:#0d1117;}
+
+  /* ---------- 접근성: focus-visible ---------- */
+  a:focus-visible,button:focus-visible,input:focus-visible,
+  .widget:focus-visible,.tbl tbody tr:focus-visible,.nav-item:focus-visible,
+  .seg-btn:focus-visible,.chart-frame:focus-visible,.gauge-wrap:focus-visible,
+  .donut-wrap:focus-visible,.opt-btn:focus-visible,.th-sort:focus-visible{
+    outline:2px solid var(--blue);
+    outline-offset:2px;
+    border-radius:3px;
+  }
+
+  /* =================== 드로어 토글 (900px↓, CSS-only) =================== */
+  #drawer-toggle{display:none;}
+  .drawer-overlay{
+    display:none;
+    position:fixed;inset:0;
+    background:rgba(1,4,9,.6);
+    z-index:40;
+  }
+  .hamburger-btn{
+    display:none;
+    width:36px;height:36px;
+    align-items:center;justify-content:center;
+    border:1px solid var(--border);
+    background:var(--card);
+    border-radius:var(--radius);
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .hamburger-btn:hover{border-color:var(--blue);}
+
+  /* =================== 레이아웃 셸 =================== */
+  .shell{display:flex;min-height:100vh;}
+
+  /* ---------- 사이드바 ---------- */
+  .sidebar{
+    width:var(--sidebar-w);
+    flex-shrink:0;
+    background:var(--card);
+    border-right:1px solid var(--border);
+    display:flex;flex-direction:column;
+    padding:16px 12px;
+    gap:20px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:8px;
+    padding:4px 8px;
+  }
+  .brand-mark{
+    width:26px;height:26px;border-radius:6px;
+    background:var(--track);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--teal);font-weight:700;font-size:13px;flex-shrink:0;
+  }
+  .brand-name{font-weight:700;font-size:14px;letter-spacing:-0.01em;color:var(--text);}
+  .nav{display:flex;flex-direction:column;gap:2px;flex:1;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 10px;border-radius:5px;
+    color:var(--muted);text-decoration:none;
+    font-size:13px;font-weight:500;
+    border:1px solid transparent;
+    cursor:pointer;background:none;width:100%;text-align:left;
+  }
+  .nav-item svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;}
+  .nav-item:hover{background:var(--track);color:var(--text);}
+  .nav-item.active{
+    background:rgba(45,212,191,.12);
+    color:var(--teal);
+    border-color:rgba(45,212,191,.25);
+    font-weight:600;
+  }
+  .sidebar-user{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 8px;border-top:1px solid var(--border);
+  }
+  .avatar-chip{
+    width:26px;height:26px;border-radius:5px;
+    background:var(--track);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0;
+  }
+  .user-meta{display:flex;flex-direction:column;line-height:1.25;min-width:0;}
+  .user-role{font-size:11px;color:var(--muted);}
+
+  /* ---------- 메인 컬럼 ---------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  /* ---------- 상단바 ---------- */
+  .topbar{
+    display:flex;align-items:center;gap:14px;
+    padding:0 20px;height:56px;flex-shrink:0;
+    background:var(--bg);
+    border-bottom:1px solid var(--border);
+    position:sticky;top:0;z-index:20;
+  }
+  .search-wrap{position:relative;flex:1;max-width:340px;}
+  .search-wrap svg{
+    position:absolute;left:10px;top:50%;transform:translateY(-50%);
+    width:14px;height:14px;stroke:var(--muted);fill:none;pointer-events:none;
+  }
+  .search-input{
+    width:100%;
+    background:var(--track);
+    border:1px solid var(--border);
+    border-radius:5px;
+    padding:7px 10px 7px 30px;
+    color:var(--text);
+    font-size:12.5px;
+    font-family:inherit;
+  }
+  .search-input::placeholder{color:var(--muted);}
+  .search-input:focus{outline:none;border-color:var(--blue);background:var(--card);}
+  .topbar-spacer{flex:1;}
+  .live-tag{
+    display:flex;align-items:center;gap:6px;
+    font-size:11px;color:var(--muted);
+    padding:5px 9px;border:1px solid var(--border);border-radius:20px;
+    background:var(--track);
+  }
+  .live-dot{
+    width:6px;height:6px;border-radius:50%;background:var(--green);
+    animation:liveBlink 1.2s ease-in-out infinite;
+  }
+  .icon-btn{
+    position:relative;
+    width:32px;height:32px;border-radius:5px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--track);border:1px solid var(--border);
+    cursor:pointer;flex-shrink:0;
+  }
+  .icon-btn svg{width:15px;height:15px;stroke:var(--muted);fill:none;}
+  .icon-btn:hover{border-color:var(--blue);}
+  .icon-btn:hover svg{stroke:var(--text);}
+  .badge-dot{
+    position:absolute;top:-4px;right:-4px;
+    min-width:15px;height:15px;padding:0 3px;
+    border-radius:8px;background:var(--red);
+    color:#fff;font-size:9.5px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    border:1.5px solid var(--bg);
+  }
+  .topbar-avatar{
+    width:32px;height:32px;border-radius:5px;
+    background:var(--track);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:var(--blue);flex-shrink:0;
+  }
+  .btn{
+    font-size:12.5px;font-weight:600;
+    border-radius:5px;padding:7px 13px;
+    border:1px solid transparent;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;
+    white-space:nowrap;
+  }
+  .btn-primary{background:var(--teal);color:#04211d;border-color:var(--teal);}
+  .btn-primary:hover{background:#26c4b0;}
+  .btn-primary:active{background:#1fae9d;}
+  .btn-secondary{background:var(--track);color:var(--text);border-color:var(--border);}
+  .btn-secondary:hover{border-color:var(--blue);color:var(--text);}
+  .btn-secondary:active{background:#262c36;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  /* ---------- 컨트롤바: 탭 + 필터 ---------- */
+  .control-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;flex-wrap:wrap;
+    padding:10px 20px;border-bottom:1px solid var(--border);
+  }
+  .tabs{display:flex;gap:2px;background:var(--track);padding:3px;border-radius:6px;}
+  .tab-btn{
+    font-size:12px;font-weight:600;color:var(--muted);
+    background:none;border:none;border-radius:4px;
+    padding:6px 12px;cursor:pointer;
+  }
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 0 0 1px var(--border) inset;}
+  .filter-btn{
+    display:flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:500;color:var(--text);
+    background:var(--track);border:1px solid var(--border);border-radius:5px;
+    padding:6px 10px;cursor:pointer;
+  }
+  .filter-btn svg{width:12px;height:12px;stroke:var(--muted);fill:none;}
+  .filter-btn:hover{border-color:var(--blue);}
+
+  /* ---------- 콘텐츠 ---------- */
+  .content{padding:16px 20px 48px;max-width:1760px;margin:0 auto;width:100%;}
+
+  /* ---------- 배너 ---------- */
+  .banner{
+    display:flex;align-items:flex-start;gap:10px;
+    background:rgba(88,166,255,.08);
+    border:1px solid rgba(88,166,255,.28);
+    border-radius:6px;padding:10px 14px;margin-bottom:12px;
+    font-size:12.5px;color:var(--text);
+  }
+  .banner svg{width:15px;height:15px;stroke:var(--blue);fill:none;flex-shrink:0;margin-top:1px;}
+
+  /* ---------- 그리드 ---------- */
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;}
+  .span-3{grid-column:span 3;}
+  .span-4{grid-column:span 4;}
+  .span-5{grid-column:span 5;}
+  .span-7{grid-column:span 7;}
+  .span-8{grid-column:span 8;}
+  .span-12{grid-column:span 12;}
+
+  /* ---------- 위젯 공통 ---------- */
+  .widget{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    display:flex;flex-direction:column;gap:10px;
+    min-width:0;
+    opacity:0;transform:translateY(4px);
+    animation:enter .26s ease-out forwards;
+    transition:border-color .1s linear,background-color .1s linear;
+  }
+  .widget:hover{border-color:var(--blue);background:var(--card-hover);}
+  .widget-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .w-label{
+    font-size:11px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+  .w-meta{font-size:10.5px;color:var(--muted);}
+
+  /* ---------- KPI ---------- */
+  .kpi-body{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;}
+  .kpi-num-wrap{min-width:0;}
+  .kpi-value{font-size:22px;font-weight:700;color:var(--text);white-space:nowrap;}
+  .kpi-unit{font-size:11.5px;color:var(--muted);font-weight:500;margin-left:3px;}
+  .kpi-delta{
+    display:flex;align-items:center;gap:3px;
+    font-size:11.5px;font-weight:600;margin-top:3px;
+  }
+  .kpi-delta svg{width:10px;height:10px;}
+  .kpi-delta.up{color:var(--green);}
+  .kpi-delta.down{color:var(--red);}
+  .kpi-spark{flex-shrink:0;width:80px;height:32px;}
+  .kpi-flash{animation:kpiFlash 1.4s ease-out .9s 1 both;}
+
+  /* ---------- 차트 위젯 공통 ---------- */
+  .chart-frame{width:100%;overflow:visible;}
+  .grid-line{stroke:var(--border);stroke-width:1;opacity:.6;}
+  .axis-label{fill:var(--muted);font-size:8.5px;}
+  .peak-tag{fill:var(--teal);font-size:9.5px;font-weight:700;}
+  .line-series{
+    fill:none;stroke:var(--teal);stroke-width:1.5;
+    stroke-dasharray:1000;stroke-dashoffset:0;
+    animation:drawLine .7s .15s cubic-bezier(.16,.8,.3,1) both;
+  }
+  .area-series{
+    fill:url(#areaFillTeal);opacity:1;
+    transform:scaleY(1);transform-origin:bottom;
+    animation:growArea .7s .2s ease-out both;
+  }
+  .crosshair-line{stroke:var(--blue);stroke-width:1;opacity:0;pointer-events:none;}
+  .crosshair-dot{fill:var(--teal);stroke:var(--bg);stroke-width:2;r:3;opacity:0;pointer-events:none;}
+  .chart-tooltip{
+    position:absolute;pointer-events:none;
+    background:#0d1117;border:1px solid var(--border);border-radius:4px;
+    padding:4px 7px;font-size:11px;color:var(--text);
+    opacity:0;white-space:nowrap;z-index:5;
+    box-shadow:0 0 0 1px var(--border);
+  }
+  .chart-hit{fill:transparent;cursor:crosshair;}
+
+  /* ---------- 도넛 ---------- */
+  .donut-row{display:flex;align-items:center;gap:16px;}
+  .donut-wrap{position:relative;flex-shrink:0;width:112px;height:112px;}
+  .donut-center{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    flex-direction:column;
+  }
+  .donut-center b{font-size:16px;color:var(--text);}
+  .donut-center span{font-size:9.5px;color:var(--muted);}
+  .donut-seg{
+    fill:none;stroke-width:16;
+    transform:rotate(-90deg);transform-origin:center;
+    transition:opacity .15s linear;
+  }
+  .legend{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;}
+  .legend-row{display:flex;align-items:center;gap:7px;font-size:11.5px;transition:opacity .15s linear;}
+  .legend-swatch{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+  .legend-name{flex:1;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .legend-pct{font-weight:700;color:var(--text);flex-shrink:0;}
+  .legend-row.dim{opacity:.32;}
+
+  .seg-control{display:flex;gap:2px;background:var(--track);padding:2px;border-radius:5px;}
+  .seg-btn{
+    font-size:10.5px;font-weight:700;color:var(--muted);
+    background:none;border:none;border-radius:3px;padding:4px 9px;cursor:pointer;
+  }
+  .seg-btn.active{background:var(--card);color:var(--teal);box-shadow:0 0 0 1px var(--border) inset;}
+  .seg-btn:hover{color:var(--text);}
+
+  /* ---------- 게이지 ---------- */
+  .gauge-row{display:flex;align-items:center;gap:14px;}
+  .gauge-wrap{position:relative;width:150px;height:82px;flex-shrink:0;}
+  .gauge-value-arc{
+    stroke:var(--yellow);stroke-width:10;stroke-linecap:round;fill:none;
+    stroke-dasharray:188.5 400;
+    stroke-dashoffset:188.5;
+    animation:sweepGauge .7s .2s cubic-bezier(.16,.8,.3,1) forwards;
+  }
+  .gauge-track{stroke:var(--track);stroke-width:10;stroke-linecap:round;fill:none;}
+  .gauge-center{
+    position:absolute;left:0;right:0;bottom:2px;text-align:center;
+  }
+  .gauge-center b{font-size:20px;color:var(--text);display:block;}
+  .gauge-center span{font-size:10px;color:var(--muted);}
+  .gauge-tooltip{
+    position:absolute;top:2px;left:50%;transform:translateX(-50%);
+    background:#0d1117;border:1px solid var(--border);border-radius:4px;
+    padding:3px 8px;font-size:10.5px;white-space:nowrap;
+    opacity:0;transition:opacity .12s linear;color:var(--text);
+  }
+  .gauge-wrap:hover .gauge-tooltip,.gauge-wrap:focus-visible .gauge-tooltip{opacity:1;}
+  .gauge-side{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0;}
+  .gauge-goal-label{font-size:11.5px;color:var(--muted);}
+  .status-pill{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:10.5px;font-weight:700;border-radius:20px;padding:2px 8px;width:fit-content;
+  }
+  .status-pill.warn{background:rgba(210,153,34,.14);color:var(--yellow);}
+  .status-pill.ok{background:rgba(63,185,80,.14);color:var(--green);}
+  .status-pill.caution{background:rgba(219,109,40,.14);color:var(--orange);}
+  .status-pill.crit{background:rgba(248,81,73,.14);color:var(--red);}
+
+  /* ---------- 바 리스트 ---------- */
+  .bar-list{display:flex;flex-direction:column;gap:9px;}
+  .bar-row{display:flex;align-items:center;gap:9px;}
+  .bar-chip{
+    width:22px;height:22px;border-radius:4px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;
+    background:rgba(45,212,191,.14);color:var(--teal);
+  }
+  .bar-name{width:96px;flex-shrink:0;font-size:11.5px;color:var(--text);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bar-track{flex:1;height:8px;background:var(--track);border-radius:2px;overflow:hidden;min-width:24px;}
+  .bar-fill{height:100%;background:var(--teal);border-radius:2px;
+    width:0;animation:growBar .6s cubic-bezier(.16,.8,.3,1) forwards;}
+  .bar-value{width:28px;flex-shrink:0;text-align:right;font-size:12px;font-weight:700;color:var(--text);}
+
+  /* ---------- 테이블 ---------- */
+  .table-scroll{width:100%;overflow-x:auto;}
+  .tbl{width:100%;border-collapse:collapse;min-width:640px;}
+  .tbl thead th{
+    text-align:left;font-size:10.5px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.03em;
+    padding:0 10px 8px;border-bottom:1px solid var(--border);white-space:nowrap;
+  }
+  .th-sort{display:flex;align-items:center;gap:4px;cursor:pointer;background:none;border:none;
+    color:var(--muted);font:inherit;text-transform:uppercase;letter-spacing:.03em;font-weight:700;font-size:10.5px;padding:0;}
+  .th-sort svg{width:9px;height:9px;stroke:var(--blue);fill:none;}
+  .th-sort:hover{color:var(--text);}
+  .tbl tbody td{
+    padding:10px;font-size:12.5px;color:var(--text);
+    border-bottom:1px solid var(--border);vertical-align:top;
+  }
+  .tbl tbody tr{transition:background-color .1s linear;box-shadow:inset 0 0 0 0 transparent;}
+  .tbl tbody tr:hover,.tbl tbody tr:focus-visible{
+    background:#1c2230;
+    box-shadow:inset 2px 0 0 0 var(--row-accent,var(--border));
+  }
+  .tbl tbody tr:last-child td{border-bottom:none;}
+  .cell-title{
+    max-width:220px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    overflow:hidden;text-overflow:ellipsis;line-height:1.35;
+  }
+  .cell-muted{color:var(--muted);}
+  .cell-axis{font-size:11.5px;color:var(--muted);white-space:nowrap;}
+  .status-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11px;font-weight:700;border-radius:20px;padding:3px 9px;white-space:nowrap;
+  }
+  .status-badge .dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+  .badge-heard{background:rgba(63,185,80,.14);color:var(--green);}
+  .badge-heard .dot{background:var(--green);}
+  .badge-hold{background:rgba(219,109,40,.14);color:var(--orange);}
+  .badge-hold .dot{background:var(--orange);}
+  .badge-replay{background:rgba(248,81,73,.14);color:var(--red);}
+  .badge-replay .dot{background:var(--red);animation:badgePulse 1.5s ease-in-out infinite;}
+  .badge-new{background:rgba(210,153,34,.14);color:var(--yellow);}
+  .badge-new .dot{background:var(--yellow);}
+
+  /* ---------- 대화 패널 ---------- */
+  .chat-thread{display:flex;flex-direction:column;gap:10px;}
+  .msg{max-width:88%;}
+  .msg-bot{align-self:flex-start;}
+  .msg-user{align-self:flex-end;margin-left:auto;text-align:right;}
+  .speaker{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}
+  .msg-bot .speaker{color:var(--teal);}
+  .msg-user .speaker{color:var(--blue);}
+  .msg p{
+    margin:4px 0 0;font-size:13px;line-height:1.5;color:var(--text);
+    background:var(--track);border:1px solid var(--border);
+    border-radius:8px;padding:9px 12px;display:inline-block;text-align:left;
+  }
+  .msg-user p{background:rgba(88,166,255,.1);border-color:rgba(88,166,255,.28);}
+  .msg-options{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+  .opt-btn{
+    font-size:11.5px;font-weight:600;color:var(--teal);
+    background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.3);
+    border-radius:20px;padding:6px 12px;cursor:pointer;
+  }
+  .opt-btn:hover{background:rgba(45,212,191,.18);}
+  .diagnosis-card{
+    margin-top:2px;border:1px solid var(--border);border-radius:6px;
+    padding:12px 14px;background:var(--track);display:flex;flex-direction:column;gap:10px;
+  }
+  .diag-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}
+  .diag-text{margin:0;font-size:12.5px;line-height:1.5;color:var(--text);}
+  .story-suggest{display:flex;gap:10px;align-items:flex-start;padding-top:10px;border-top:1px solid var(--border);}
+  .axis-badge{
+    font-size:10.5px;font-weight:700;border-radius:4px;padding:3px 7px;flex-shrink:0;white-space:nowrap;
+  }
+  .axis-badge.axis-inner{background:rgba(45,212,191,.14);color:var(--teal);}
+  .axis-badge.axis-outer{background:rgba(88,166,255,.14);color:var(--blue);}
+  .story-meta{min-width:0;}
+  .story-meta strong{display:block;font-size:12.5px;color:var(--text);}
+  .story-meta p{margin:3px 0 0;font-size:12px;color:var(--muted);line-height:1.4;}
+  .story-cta{
+    background:none;border:none;color:var(--blue);font-size:12px;font-weight:600;
+    cursor:pointer;text-align:left;padding:0;font-family:inherit;width:fit-content;
+  }
+  .story-cta:hover{text-decoration:underline;}
+
+  /* ---------- 빈 상태 ---------- */
+  .empty-state{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;gap:8px;padding:20px 10px;
+  }
+  .empty-state svg{width:36px;height:36px;stroke:var(--border);fill:none;margin-bottom:2px;}
+  .empty-head{font-size:13.5px;font-weight:700;color:var(--text);}
+  .empty-desc{font-size:12px;color:var(--muted);max-width:220px;line-height:1.5;}
+
+  /* ---------- 푸터 ---------- */
+  .footer{
+    text-align:center;padding:18px 20px 26px;
+    font-size:11px;color:var(--muted);border-top:1px solid var(--border);
+  }
+
+  /* =================== 애니메이션 =================== */
+  @keyframes enter{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes drawLine{from{stroke-dashoffset:1000;}to{stroke-dashoffset:0;}}
+  @keyframes growArea{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+  @keyframes sweepGauge{from{stroke-dashoffset:188.5;}to{stroke-dashoffset:66;}}
+  @keyframes growBar{from{width:0;}}
+  @keyframes liveBlink{0%,100%{opacity:1;}50%{opacity:.35;}}
+  @keyframes badgePulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+  @keyframes kpiFlash{0%{background-color:transparent;}8%{background-color:rgba(63,185,80,.22);}100%{background-color:transparent;}}
+  @keyframes peakFlash{0%{fill:var(--teal);}10%{fill:var(--green);}100%{fill:var(--teal);}}
+  .peak-dot{animation:peakFlash 1.4s ease-out .9s 1 both;}
+
+  /* 위젯 stagger delay (좌상단→우하단, 40ms 간격) */
+  .grid > *:nth-child(1){animation-delay:0ms;}
+  .grid > *:nth-child(2){animation-delay:40ms;}
+  .grid > *:nth-child(3){animation-delay:80ms;}
+  .grid > *:nth-child(4){animation-delay:120ms;}
+  .grid > *:nth-child(5){animation-delay:160ms;}
+  .grid > *:nth-child(6){animation-delay:200ms;}
+  .grid > *:nth-child(7){animation-delay:240ms;}
+  .grid > *:nth-child(8){animation-delay:280ms;}
+  .grid > *:nth-child(9){animation-delay:320ms;}
+  .grid > *:nth-child(10){animation-delay:360ms;}
+  .grid > *:nth-child(11){animation-delay:400ms;}
+  .grid > *:nth-child(12){animation-delay:440ms;}
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation:none !important;
+      transition:none !important;
+    }
+    .widget{opacity:1;transform:none;}
+    .line-series{stroke-dashoffset:0;}
+    .area-series{transform:scaleY(1);}
+    .gauge-value-arc{stroke-dashoffset:66;}
+    .bar-fill{width:var(--w,100%);}
+    .live-dot{opacity:1;}
+  }
+
+  /* =================== 반응형 =================== */
+  @media (max-width:900px){
+    .hamburger-btn{display:flex;}
+    .sidebar{
+      position:fixed;top:0;left:0;bottom:0;z-index:50;
+      transform:translateX(-100%);
+      transition:transform .18s ease-out;
+      box-shadow:1px 0 0 0 var(--border);
+    }
+    #drawer-toggle:checked ~ .shell .sidebar{transform:translateX(0);}
+    #drawer-toggle:checked ~ .shell .drawer-overlay{display:block;}
+    .grid{grid-template-columns:repeat(6,1fr);}
+    .span-3{grid-column:span 3;}
+    .span-4,.span-5,.span-7,.span-8,.span-12{grid-column:span 6;}
+    .search-wrap{max-width:180px;}
+    .kpi-spark{width:60px;}
+  }
+  @media (max-width:600px){
+    .grid{grid-template-columns:1fr;}
+    .grid>*{grid-column:1/-1;}
+    .content{padding:12px 12px 40px;}
+    .topbar{padding:0 12px;gap:8px;}
+    .control-bar{padding:8px 12px;}
+    .live-tag span.mono{display:none;}
+    .btn span.btn-txt-long{display:none;}
+    .donut-row{flex-direction:column;align-items:flex-start;}
+    .gauge-row{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<input type="checkbox" id="drawer-toggle">
+<label for="drawer-toggle" class="drawer-overlay" aria-hidden="true"></label>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="brand-mark">연</span>
+      <span class="brand-name">연서</span>
+    </div>
+    <nav class="nav" aria-label="주 네비게이션">
+      <button class="nav-item active" type="button">
+        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        대화
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="1.6"/></svg>
+        모아보기
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.6"/><circle cx="12" cy="12" r="3.2" stroke-width="1.6"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke-width="1.6" stroke-linecap="round"/></svg>
+        결핍 지도
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4M9 12h6M9 15.5h6" stroke-width="1.6" stroke-linecap="round"/></svg>
+        작품 서가
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.6"/><path d="M12 7v5l3.5 2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        기록
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="1.6"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l2-1.5-2-3.4-2.4 1a8 8 0 0 0-1.7-1L14.8 3H9.2l-.5 2.6a8 8 0 0 0-1.7 1l-2.4-1-2 3.4L4.6 11a7.97 7.97 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 1.7 1l.5 2.6h5.6l.5-2.6a8 8 0 0 0 1.7-1l2.4 1 2-3.4-2-1.5z" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        설정
+      </button>
+    </nav>
+    <div class="sidebar-user">
+      <span class="avatar-chip">ㅇ</span>
+      <div class="user-meta">
+        <span class="user-role">읽는 사람</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <label for="drawer-toggle" class="hamburger-btn" aria-label="메뉴 열기">
+        <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </label>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input class="search-input" type="search" placeholder="작품·교훈 검색">
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="live-tag"><span class="live-dot" id="liveDot"></span><span class="mono">LIVE</span></div>
+      <button class="icon-btn" type="button" aria-label="알림">
+        <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 0 1-3.4 0" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span class="badge-dot">3</span>
+      </button>
+      <span class="topbar-avatar">ㅇ</span>
+      <button class="btn btn-secondary" type="button">모아보기</button>
+      <button class="btn btn-primary" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/></svg>
+        새 대화
+      </button>
+    </header>
+
+    <div class="control-bar">
+      <div class="tabs" role="tablist" aria-label="축 탭">
+        <button class="tab-btn active" type="button" role="tab" aria-selected="true">전체</button>
+        <button class="tab-btn" type="button" role="tab" aria-selected="false">외적</button>
+        <button class="tab-btn" type="button" role="tab" aria-selected="false">내적</button>
+        <button class="tab-btn" type="button" role="tab" aria-selected="false">최근</button>
+      </div>
+      <button class="filter-btn" type="button">
+        시대
+        <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="content">
+      <div class="banner">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.6"/><path d="M12 8v5M12 16.2v.1" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>결핍을 짚으려면 두세 마디가 더 필요해요. 편한 만큼만 답해도 됩니다.</span>
+      </div>
+
+      <div class="grid">
+
+        <!-- KPI 1 -->
+        <div class="widget span-3" tabindex="0">
+          <div class="widget-head">
+            <span class="w-label">들은 스토리</span>
+            <span class="w-meta mono">· 2초 전</span>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-num-wrap">
+              <span class="kpi-value tnum" data-target="1284000" data-format="int">1,284,000</span><span class="kpi-unit">편</span>
+              <div class="kpi-delta up tnum">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                +12.4%
+              </div>
+            </div>
+            <svg class="kpi-spark" viewBox="0 0 100 32" preserveAspectRatio="none">
+              <polyline points="0,26.75 14.29,23.5 28.57,30 42.86,20.25 57.14,13.75 71.43,17 85.71,10.5 100,4" fill="none" stroke="var(--teal)" stroke-width="1.5"/>
+              <circle cx="100" cy="4" r="2.4" fill="var(--green)" stroke="var(--card)" stroke-width="1"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="widget span-3" tabindex="0">
+          <div class="widget-head">
+            <span class="w-label">짚어낸 결핍</span>
+            <span class="w-meta mono">· 5초 전</span>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-num-wrap">
+              <span class="kpi-value tnum kpi-flash" data-target="7" data-format="int">7</span><span class="kpi-unit">개</span>
+              <div class="kpi-delta down tnum">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 5v14M5 12l7 7 7-7" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                -2
+              </div>
+            </div>
+            <svg class="kpi-spark" viewBox="0 0 100 32" preserveAspectRatio="none">
+              <polyline points="0,4 14.29,12.67 28.57,12.67 42.86,21.33 57.14,21.33 71.43,30 85.71,30 100,30" fill="none" stroke="var(--blue)" stroke-width="1.5"/>
+              <circle cx="100" cy="30" r="2.4" fill="var(--red)" stroke="var(--card)" stroke-width="1"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="widget span-3" tabindex="0">
+          <div class="widget-head">
+            <span class="w-label">평균 읽은 시간</span>
+            <span class="w-meta mono">· 8초 전</span>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-num-wrap">
+              <span class="kpi-value tnum" data-target="58" data-format="int">58</span><span class="kpi-unit">초</span>
+              <div class="kpi-delta up tnum">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                +3초
+              </div>
+            </div>
+            <svg class="kpi-spark" viewBox="0 0 100 32" preserveAspectRatio="none">
+              <polyline points="0,30 14.29,21.33 28.57,25.67 42.86,17 57.14,12.67 71.43,17 85.71,8.33 100,4" fill="none" stroke="var(--purple)" stroke-width="1.5"/>
+              <circle cx="100" cy="4" r="2.4" fill="var(--green)" stroke="var(--card)" stroke-width="1"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="widget span-3" tabindex="0">
+          <div class="widget-head">
+            <span class="w-label">이어온 날</span>
+            <span class="w-meta mono">· 12초 전</span>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-num-wrap">
+              <span class="kpi-value tnum" data-target="26" data-format="int">26</span><span class="kpi-unit">일</span>
+              <div class="kpi-delta up tnum">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                +1일
+              </div>
+            </div>
+            <svg class="kpi-spark" viewBox="0 0 100 32" preserveAspectRatio="none">
+              <polyline points="0,30 14.29,25.67 28.57,21.33 42.86,17 57.14,12.67 71.43,12.67 85.71,8.33 100,4" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+              <circle cx="100" cy="4" r="2.4" fill="var(--green)" stroke="var(--card)" stroke-width="1"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 최근 10일 청취 추이 (라인/영역) -->
+        <div class="widget span-7">
+          <div class="widget-head">
+            <span class="w-label">최근 10일 청취 추이</span>
+            <span class="w-meta">피크 8일째 <b class="tnum" style="color:var(--teal)">41</b></span>
+          </div>
+          <div style="position:relative;" id="lineChartHost">
+            <svg class="chart-frame" viewBox="0 0 340 122" tabindex="0" aria-label="최근 10일 청취 추이 라인 차트, 8일째 41편으로 최고치">
+              <defs>
+                <linearGradient id="areaFillTeal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--teal)" stop-opacity="0.18"/>
+                  <stop offset="100%" stop-color="var(--teal)" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line class="grid-line" x1="30" y1="20" x2="310" y2="20"/>
+              <line class="grid-line" x1="30" y1="40" x2="310" y2="40"/>
+              <line class="grid-line" x1="30" y1="60" x2="310" y2="60"/>
+              <line class="grid-line" x1="30" y1="80" x2="310" y2="80"/>
+              <line class="grid-line" x1="30" y1="100" x2="310" y2="100"/>
+              <text class="axis-label tnum" x="24" y="23" text-anchor="end">40</text>
+              <text class="axis-label tnum" x="24" y="43" text-anchor="end">30</text>
+              <text class="axis-label tnum" x="24" y="63" text-anchor="end">20</text>
+              <text class="axis-label tnum" x="24" y="83" text-anchor="end">10</text>
+              <text class="axis-label tnum" x="24" y="103" text-anchor="end">0</text>
+
+              <polygon class="area-series" points="30,100 30,76 61.11,64 92.22,70 123.33,82 154.44,52 185.56,38 216.67,46 247.78,18 278.89,34 310,42 310,100"/>
+              <polyline class="line-series" points="30,76 61.11,64 92.22,70 123.33,82 154.44,52 185.56,38 216.67,46 247.78,18 278.89,34 310,42"/>
+
+              <circle class="peak-dot" cx="247.78" cy="18" r="3.2" fill="var(--teal)" stroke="var(--bg)" stroke-width="1.5"/>
+              <text class="peak-tag tnum" x="247.78" y="12" text-anchor="middle">41</text>
+
+              <line class="crosshair-line" id="crossLine" x1="0" y1="10" x2="0" y2="100"/>
+              <circle class="crosshair-dot" id="crossDot"/>
+              <rect class="chart-hit" x="30" y="0" width="280" height="122" id="chartHit"/>
+            </svg>
+            <div class="chart-tooltip" id="chartTip"></div>
+          </div>
+        </div>
+
+        <!-- 축 구성비 도넛 -->
+        <div class="widget span-5">
+          <div class="widget-head">
+            <span class="w-label">축 구성비</span>
+            <div class="seg-control" role="group" aria-label="축 강조 전환">
+              <button class="seg-btn active" type="button" data-axis="inner">내적</button>
+              <button class="seg-btn" type="button" data-axis="outer">외적</button>
+            </div>
+          </div>
+          <div class="donut-row" id="donutRow">
+            <div class="donut-wrap" tabindex="0" aria-label="축 구성비 도넛 차트">
+              <svg viewBox="0 0 120 120" width="112" height="112">
+                <circle class="gauge-track" cx="60" cy="60" r="50" stroke="var(--track)" stroke-width="16" fill="none"/>
+                <circle class="donut-seg" data-axis="inner" cx="60" cy="60" r="50" stroke="var(--teal)" stroke-dasharray="106.81 314.16" stroke-dashoffset="0"><title>내적-성찰 34%</title></circle>
+                <circle class="donut-seg" data-axis="inner" cx="60" cy="60" r="50" stroke="var(--teal-mid)" stroke-dasharray="69.12 314.16" stroke-dashoffset="-106.81"><title>내적-마음 22%</title></circle>
+                <circle class="donut-seg" data-axis="inner" cx="60" cy="60" r="50" stroke="var(--teal-deep)" stroke-dasharray="56.55 314.16" stroke-dashoffset="-175.93"><title>내적-성품 18%</title></circle>
+                <circle class="donut-seg" data-axis="outer" cx="60" cy="60" r="50" stroke="var(--blue)" stroke-dasharray="50.27 314.16" stroke-dashoffset="-232.48"><title>외적-첫인상 16%</title></circle>
+                <circle class="donut-seg" data-axis="outer" cx="60" cy="60" r="50" stroke="var(--purple)" stroke-dasharray="31.42 314.16" stroke-dashoffset="-282.75"><title>외적-조건 10%</title></circle>
+              </svg>
+              <div class="donut-center">
+                <b class="tnum">5</b>
+                <span>항목</span>
+              </div>
+            </div>
+            <div class="legend" id="legendList">
+              <div class="legend-row" data-axis="inner"><span class="legend-swatch" style="background:var(--teal)"></span><span class="legend-name">내적 · 성찰</span><span class="legend-pct tnum">34%</span></div>
+              <div class="legend-row" data-axis="inner"><span class="legend-swatch" style="background:var(--teal-mid)"></span><span class="legend-name">내적 · 마음</span><span class="legend-pct tnum">22%</span></div>
+              <div class="legend-row" data-axis="inner"><span class="legend-swatch" style="background:var(--teal-deep)"></span><span class="legend-name">내적 · 성품</span><span class="legend-pct tnum">18%</span></div>
+              <div class="legend-row" data-axis="outer"><span class="legend-swatch" style="background:var(--blue)"></span><span class="legend-name">외적 · 첫인상</span><span class="legend-pct tnum">16%</span></div>
+              <div class="legend-row" data-axis="outer"><span class="legend-swatch" style="background:var(--purple)"></span><span class="legend-name">외적 · 조건</span><span class="legend-pct tnum">10%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 목표 진행률 (게이지) -->
+        <div class="widget span-4">
+          <div class="widget-head">
+            <span class="w-label">이번 달 소양 목표</span>
+            <span class="w-meta tnum">26 / 40편</span>
+          </div>
+          <div class="gauge-row">
+            <div class="gauge-wrap" tabindex="0" aria-label="이번 달 소양 목표 달성률 65%, 주의 구간">
+              <svg viewBox="0 0 160 90" width="150" height="82">
+                <path class="gauge-track" d="M 20 80 A 60 60 0 1 0 140 80"/>
+                <path class="gauge-value-arc" d="M 20 80 A 60 60 0 1 0 140 80"/>
+              </svg>
+              <div class="gauge-center">
+                <b class="tnum" id="gaugeValue">65%</b>
+                <span>달성률</span>
+              </div>
+              <div class="gauge-tooltip">주의 구간 · 65.0% 정확값</div>
+            </div>
+            <div class="gauge-side">
+              <span class="gauge-goal-label">목표 40편 중 <b class="tnum">26</b>편 완료</span>
+              <span class="status-pill warn">▲ 주의</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 자주 나온 결핍 (바 리스트) -->
+        <div class="widget span-8">
+          <div class="widget-head">
+            <span class="w-label">자주 나온 결핍</span>
+            <span class="w-meta">최근 30일</span>
+          </div>
+          <div class="bar-list">
+            <div class="bar-row">
+              <span class="bar-chip">ㄱ</span>
+              <span class="bar-name">기대치 어긋남</span>
+              <span class="bar-track"><span class="bar-fill" style="--w:100%;width:100%;"></span></span>
+              <span class="bar-value tnum">32</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-chip">ㅍ</span>
+              <span class="bar-name">표현 부족</span>
+              <span class="bar-track"><span class="bar-fill" style="--w:84.4%;width:84.4%;"></span></span>
+              <span class="bar-value tnum">27</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-chip">ㅈ</span>
+              <span class="bar-name">자존감</span>
+              <span class="bar-track"><span class="bar-fill" style="--w:65.6%;width:65.6%;"></span></span>
+              <span class="bar-value tnum">21</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-chip">ㄱ</span>
+              <span class="bar-name">거리 조절</span>
+              <span class="bar-track"><span class="bar-fill" style="--w:46.9%;width:46.9%;"></span></span>
+              <span class="bar-value tnum">15</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-chip">ㅅ</span>
+              <span class="bar-name">신뢰 회복</span>
+              <span class="bar-track"><span class="bar-fill" style="--w:28.1%;width:28.1%;"></span></span>
+              <span class="bar-value tnum">9</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 테이블: 받은 스토리 -->
+        <div class="widget span-12">
+          <div class="widget-head">
+            <span class="w-label">받은 스토리</span>
+            <span class="w-meta">전체 6건</span>
+          </div>
+          <div class="table-scroll">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>
+                    <button class="th-sort" type="button" aria-label="작품 열 기준 오름차순 정렬 중">
+                      작품
+                      <svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </th>
+                  <th>작가</th>
+                  <th>축</th>
+                  <th>교훈</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="--row-accent:var(--green)">
+                  <td>오만과 편견</td>
+                  <td>제인 오스틴</td>
+                  <td class="cell-axis">내적</td>
+                  <td>첫인상은 자주 틀린다</td>
+                  <td><span class="status-badge badge-heard"><span class="dot"></span>들음</span></td>
+                </tr>
+                <tr style="--row-accent:var(--orange)">
+                  <td>위대한 개츠비</td>
+                  <td>F. 스콧 피츠제럴드</td>
+                  <td class="cell-axis">외적</td>
+                  <td>조건으로 시작한 마음은 조건에서 끝난다</td>
+                  <td><span class="status-badge badge-hold"><span class="dot"></span>보류</span></td>
+                </tr>
+                <tr style="--row-accent:var(--red)">
+                  <td><span class="cell-title">어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설</span></td>
+                  <td class="cell-muted">—</td>
+                  <td class="cell-axis">내적</td>
+                  <td>기다림은 사람을 바꾼다</td>
+                  <td><span class="status-badge badge-replay"><span class="dot"></span>다시듣기</span></td>
+                </tr>
+                <tr style="--row-accent:var(--green)">
+                  <td>폭풍의 언덕</td>
+                  <td>에밀리 브론테</td>
+                  <td class="cell-axis">내적</td>
+                  <td>집착은 사랑의 이름을 빌린다</td>
+                  <td><span class="status-badge badge-heard"><span class="dot"></span>들음</span></td>
+                </tr>
+                <tr style="--row-accent:var(--yellow)">
+                  <td>시라노 드 베르주라크</td>
+                  <td>에드몽 로스탕</td>
+                  <td class="cell-axis">외적</td>
+                  <td>목소리는 얼굴보다 오래 남는다</td>
+                  <td><span class="status-badge badge-new"><span class="dot"></span>새로움</span></td>
+                </tr>
+                <tr style="--row-accent:var(--orange)">
+                  <td>안나 카레니나</td>
+                  <td>레프 톨스토이</td>
+                  <td class="cell-axis">내적</td>
+                  <td>불행한 사랑은 저마다의 이유로 불행하다</td>
+                  <td><span class="status-badge badge-hold"><span class="dot"></span>보류</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 대화 패널 -->
+        <div class="widget span-7">
+          <div class="widget-head">
+            <span class="w-label">대화</span>
+            <span class="w-meta">진행 중</span>
+          </div>
+          <div class="chat-thread">
+            <div class="msg msg-bot">
+              <span class="speaker">연서</span>
+              <p>요즘 사랑에서 어떤 게 제일 어려우세요?</p>
+            </div>
+            <div class="msg msg-user">
+              <span class="speaker">나</span>
+              <p>연락이 오면 반갑고 안 오면 하루가 다 망가져요. 제가 너무 매달리는 것 같기도 하고, 사실은 그냥 확인받고 싶은 건지도 모르겠어요.</p>
+            </div>
+            <div class="msg msg-bot">
+              <span class="speaker">연서</span>
+              <p>기다림이 힘든 건가요, 기다리는 자신이 싫은 건가요?</p>
+              <div class="msg-options">
+                <button class="opt-btn" type="button">기다림이 힘들다</button>
+                <button class="opt-btn" type="button">그런 내가 싫다</button>
+              </div>
+            </div>
+            <div class="msg msg-user">
+              <span class="speaker">나</span>
+              <p>후자요.</p>
+            </div>
+          </div>
+          <div class="diagnosis-card">
+            <span class="diag-label">진단</span>
+            <p class="diag-text">확인받아야 안심되는 마음이 보여요. 없는 건 상대의 애정이 아니라 스스로에 대한 확신 같습니다.</p>
+            <div class="story-suggest">
+              <span class="axis-badge axis-inner">내적</span>
+              <div class="story-meta">
+                <strong>오만과 편견 · 제인 오스틴</strong>
+                <p>첫인상은 자주 틀린다 — 나에 대한 첫인상도 마찬가지다.</p>
+              </div>
+            </div>
+            <button class="story-cta" type="button">다른 이야기도 들어볼래요?</button>
+          </div>
+        </div>
+
+        <!-- 빈 상태 (모아보기 축 필터 결과 0건) -->
+        <div class="widget span-5">
+          <div class="widget-head">
+            <span class="w-label">모아보기 · 외적 축</span>
+            <span class="w-meta">0건</span>
+          </div>
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="3 3"/><path d="M14 3v4h4" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            <span class="empty-head">아직 이 축의 이야기가 없어요</span>
+            <p class="empty-desc">대화를 두어 마디 더 나누면 맞는 이야기를 찾아드릴게요.</p>
+            <button class="btn btn-secondary" type="button">대화 이어가기</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="footer">STYLE 20 · 다크 대시보드</footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- KPI count-up ---------- */
+  function easeOutExpo(t){ return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
+  function formatInt(n){ return Math.round(n).toLocaleString('ko-KR'); }
+
+  document.querySelectorAll('.kpi-value[data-target]').forEach(function(el){
+    var target = parseFloat(el.getAttribute('data-target'));
+    if (reduceMotion) { el.textContent = formatInt(target); return; }
+    var start = null, dur = 700;
+    function frame(ts){
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var eased = easeOutExpo(p);
+      el.textContent = formatInt(target * eased);
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = formatInt(target);
+    }
+    requestAnimationFrame(frame);
+  });
+
+  /* ---------- 게이지 중앙 값 %도 함께 카운트업 ---------- */
+  var gaugeEl = document.getElementById('gaugeValue');
+  if (gaugeEl) {
+    if (reduceMotion) {
+      gaugeEl.textContent = '65%';
+    } else {
+      var gStart = null, gDur = 700, gTarget = 65;
+      function gFrame(ts){
+        if (gStart === null) gStart = ts;
+        var p = Math.min((ts - gStart) / gDur, 1);
+        var eased = easeOutExpo(p);
+        gaugeEl.textContent = Math.round(gTarget * eased) + '%';
+        if (p < 1) requestAnimationFrame(gFrame);
+        else gaugeEl.textContent = '65%';
+      }
+      requestAnimationFrame(gFrame);
+    }
+  }
+
+  /* ---------- 라인 차트 크로스헤어 ---------- */
+  var svg = document.querySelector('#lineChartHost svg');
+  var hit = document.getElementById('chartHit');
+  var crossLine = document.getElementById('crossLine');
+  var crossDot = document.getElementById('crossDot');
+  var tip = document.getElementById('chartTip');
+  var host = document.getElementById('lineChartHost');
+
+  var xs = [30,61.11,92.22,123.33,154.44,185.56,216.67,247.78,278.89,310];
+  var ys = [76,64,70,82,52,38,46,18,34,42];
+  var vals = [12,18,15,9,24,31,27,41,33,29];
+
+  if (svg && hit) {
+    hit.addEventListener('mousemove', function(e){
+      var rect = svg.getBoundingClientRect();
+      var vb = svg.viewBox.baseVal;
+      var relX = ((e.clientX - rect.left) / rect.width) * vb.width;
+      var idx = 0, best = Infinity;
+      for (var i=0;i<xs.length;i++){
+        var d = Math.abs(xs[i]-relX);
+        if (d < best){ best = d; idx = i; }
+      }
+      crossLine.setAttribute('x1', xs[idx]);
+      crossLine.setAttribute('x2', xs[idx]);
+      crossLine.style.opacity = 1;
+      crossDot.setAttribute('cx', xs[idx]);
+      crossDot.setAttribute('cy', ys[idx]);
+      crossDot.style.opacity = 1;
+
+      var px = (xs[idx] / vb.width) * rect.width;
+      var py = (ys[idx] / vb.height) * rect.height;
+      tip.textContent = (idx+1) + '일째 · ' + vals[idx] + '편';
+      tip.style.left = Math.max(0, px - 30) + 'px';
+      tip.style.top = Math.max(0, py - 34) + 'px';
+      tip.style.opacity = 1;
+    });
+    hit.addEventListener('mouseleave', function(){
+      crossLine.style.opacity = 0;
+      crossDot.style.opacity = 0;
+      tip.style.opacity = 0;
+    });
+  }
+
+  /* ---------- 도넛 세그먼트 컨트롤 (내적/외적 강조) ---------- */
+  var segBtns = document.querySelectorAll('.seg-btn');
+  var donutSegs = document.querySelectorAll('.donut-seg');
+  var legendRows = document.querySelectorAll('.legend-row');
+  segBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      segBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var axis = btn.getAttribute('data-axis');
+      donutSegs.forEach(function(seg){
+        seg.style.opacity = (seg.getAttribute('data-axis') === axis) ? '1' : '.32';
+      });
+      legendRows.forEach(function(row){
+        row.classList.toggle('dim', row.getAttribute('data-axis') !== axis);
+      });
+    });
+  });
+
+  /* ---------- 테이블 정렬 캐럿 토글 (연출) ---------- */
+  var sortBtn = document.querySelector('.th-sort');
+  if (sortBtn) {
+    var asc = true;
+    sortBtn.addEventListener('click', function(){
+      asc = !asc;
+      var svgIcon = sortBtn.querySelector('svg path');
+      svgIcon.setAttribute('d', asc ? 'M6 15l6-6 6 6' : 'M6 9l6 6 6-6');
+      sortBtn.setAttribute('aria-label', '작품 열 기준 ' + (asc ? '오름차순' : '내림차순') + ' 정렬 중');
+    });
+  }
+})();
+</script>
+</body>
+</html>

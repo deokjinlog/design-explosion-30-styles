@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 — 워크스페이스</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============ RESET ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+img,svg{display:block;max-width:100%;}
+button,input{font:inherit;color:inherit;}
+a{color:inherit;}
+ul{list-style:none;}
+
+/* ============ TOKENS ============ */
+:root{
+  --paper:#FAF7F2;
+  --ink:#1C1B18;
+  --crimson:#A32638;
+  --crimson-press:#7C1D2B;
+  --hairline:#D8D2C6;
+  --muted:#57534A;
+  --highlighter: rgba(240,196,44,.28);
+
+  --state-done:#5C5850;
+  --state-hold:#7A5C12;
+  --state-replay:#244C68;
+  --state-new:#A32638;
+
+  --font-serif:'Noto Serif KR', serif;
+  --font-sans:'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --sidebar-w:248px;
+  --content-max:1240px;
+  --gutter:24px;
+}
+
+/* ============ BASE ============ */
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-sans);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.num{font-variant-numeric:tabular-nums;}
+
+/* ============ APP SHELL ============ */
+.app{
+  display:grid;
+  grid-template-columns:var(--sidebar-w) 1fr;
+  min-height:100vh;
+  opacity:0;
+  animation:fadeIn .4s ease forwards;
+}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@media (prefers-reduced-motion: reduce){
+  .app{animation:none;opacity:1;}
+  .sidebar{transition:none;}
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar{
+  border-right:1px solid var(--ink);
+  padding:28px 20px;
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  position:sticky;
+  top:0;
+}
+.sidebar-brand{
+  font-family:var(--font-serif);
+  font-weight:900;
+  font-size:28px;
+  letter-spacing:-0.01em;
+  margin-bottom:4px;
+}
+.sidebar-tagline{
+  font-family:var(--font-serif);
+  font-style:italic;
+  font-size:12px;
+  color:var(--muted);
+  border-bottom:1px solid var(--hairline);
+  padding-bottom:20px;
+  margin-bottom:24px;
+}
+.nav-menu{display:flex;flex-direction:column;gap:2px;flex:1;}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:11px 10px;
+  font-size:14.5px;
+  font-weight:500;
+  color:var(--ink);
+  text-decoration:none;
+  border-left:3px solid transparent;
+}
+.nav-item svg{width:19px;height:19px;flex:none;stroke:currentColor;}
+.nav-item:hover{background:rgba(28,27,24,.045);}
+.nav-item:focus-visible{outline:2px solid var(--crimson);outline-offset:-2px;}
+.nav-item[aria-current="page"]{
+  font-weight:700;
+  border-left-color:var(--crimson);
+  color:var(--crimson);
+  background:rgba(163,38,56,.05);
+}
+.sidebar-user{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding-top:18px;
+  margin-top:14px;
+  border-top:1px solid var(--hairline);
+}
+.avatar-sq{
+  width:34px;height:34px;
+  border:1px solid var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-serif);
+  font-weight:700;
+  font-size:15px;
+  flex:none;
+}
+.sidebar-user-role{font-size:13px;font-weight:600;line-height:1.3;}
+
+/* ============ MAIN SCROLL AREA ============ */
+.main{min-width:0;}
+.container{max-width:var(--content-max);margin:0 auto;padding:0 40px 80px;}
+
+/* ---- utility topbar ---- */
+.utility-bar{
+  display:flex;
+  align-items:center;
+  gap:20px;
+  padding:18px 40px;
+  border-bottom:1px solid var(--hairline);
+}
+.utility-brand{
+  font-family:var(--font-serif);
+  font-weight:700;
+  font-size:17px;
+  flex:none;
+}
+.search-wrap{
+  position:relative;
+  flex:1;
+  max-width:360px;
+}
+.search-wrap svg{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;stroke:var(--muted);pointer-events:none;
+}
+.search-input{
+  width:100%;
+  height:38px;
+  border:1px solid var(--ink);
+  background:transparent;
+  padding:0 14px 0 36px;
+  font-size:13.5px;
+}
+.search-input::placeholder{color:var(--muted);}
+.search-input:focus-visible{outline:2px solid var(--crimson);outline-offset:2px;}
+.utility-right{display:flex;align-items:center;gap:14px;margin-left:auto;}
+.icon-btn{
+  position:relative;
+  width:38px;height:38px;
+  border:1px solid var(--ink);
+  background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.icon-btn svg{width:18px;height:18px;stroke:var(--ink);}
+.icon-btn:hover{background:rgba(28,27,24,.06);}
+.icon-btn:focus-visible{outline:2px solid var(--crimson);outline-offset:2px;}
+.badge-dot{
+  position:absolute;top:-7px;right:-7px;
+  min-width:16px;height:16px;padding:0 3px;
+  background:var(--crimson);color:var(--paper);
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--paper);
+}
+.btn{
+  height:38px;padding:0 18px;
+  border:1px solid var(--ink);
+  background:transparent;color:var(--ink);
+  font-size:13.5px;font-weight:700;
+  cursor:pointer;white-space:nowrap;
+  letter-spacing:.01em;
+}
+.btn:focus-visible{outline:2px solid var(--crimson);outline-offset:2px;}
+.btn-primary{background:var(--ink);border-color:var(--ink);color:var(--paper);}
+.btn-primary:hover{background:var(--crimson);border-color:var(--crimson);}
+.btn-primary:active{background:var(--crimson-press);border-color:var(--crimson-press);}
+.btn-secondary:hover{background:var(--ink);color:var(--paper);}
+.btn-secondary:active{background:var(--muted);border-color:var(--muted);color:var(--paper);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn:disabled:hover{background:transparent;color:var(--ink);}
+
+/* hamburger (mobile only) */
+.menu-toggle-label{display:none;}
+#nav-toggle{display:none;}
+.hamburger-bar{display:block;width:20px;height:2px;background:var(--ink);margin:4px auto;}
+
+/* ---- masthead (editorial hero) ---- */
+.masthead{padding:40px 0 28px;}
+.masthead-meta{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:12px;color:var(--muted);
+  border-bottom:1px solid var(--ink);
+  padding-bottom:10px;margin-bottom:14px;
+}
+.masthead-meta .num{font-weight:600;}
+.masthead-logo{
+  font-family:var(--font-serif);
+  font-weight:900;
+  font-size:clamp(40px,6vw,64px);
+  letter-spacing:-0.02em;
+  text-align:center;
+  line-height:1;
+  margin-bottom:16px;
+}
+.rule-double{
+  position:relative;
+  border-top:2px solid var(--ink);
+  padding-top:5px;
+}
+.rule-double::after{
+  content:"";position:absolute;top:3px;left:0;right:0;height:1px;background:var(--ink);
+}
+.lead{
+  font-family:var(--font-serif);
+  font-size:clamp(19px,2.4vw,25px);
+  line-height:1.55;
+  font-weight:500;
+  max-width:880px;
+  margin:0 auto;
+  text-align:left;
+}
+.lead::first-letter{
+  font-size:2.6em;
+  font-weight:900;
+  float:left;
+  line-height:.85;
+  padding:4px 8px 0 0;
+  color:var(--crimson);
+}
+
+/* ---- section scaffolding ---- */
+.section{
+  margin-top:56px;
+  position:relative;
+  border-top:2px solid var(--ink);
+  padding-top:24px;
+}
+.section::after{
+  content:"";position:absolute;top:3px;left:0;right:0;height:1px;background:var(--ink);
+}
+.section-head{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  margin-bottom:20px;
+}
+.eyebrow{
+  font-family:var(--font-serif);
+  font-style:italic;
+  font-size:12.5px;
+  color:var(--crimson);
+  letter-spacing:.02em;
+}
+.section-title{
+  font-family:var(--font-serif);
+  font-weight:700;
+  font-size:22px;
+  margin-top:2px;
+}
+.section-note{font-size:12.5px;color:var(--muted);max-width:320px;text-align:right;}
+
+/* ---- tabs + filter ---- */
+.tabs-filter{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;
+  padding:18px 0;
+  border-bottom:1px solid var(--hairline);
+}
+.tabs{display:flex;gap:28px;}
+.tab{
+  background:none;border:none;cursor:pointer;
+  font-size:14.5px;color:var(--muted);font-weight:600;
+  padding-bottom:12px;border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+}
+.tab:hover{color:var(--ink);}
+.tab:focus-visible{outline:2px solid var(--crimson);outline-offset:2px;}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--crimson);font-weight:700;}
+.filter-dd{
+  height:36px;padding:0 14px;
+  border:1px solid var(--ink);background:transparent;
+  font-size:13px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+}
+.filter-dd:focus-visible{outline:2px solid var(--crimson);outline-offset:2px;}
+
+/* ---- banner ---- */
+.banner{
+  display:flex;gap:12px;align-items:flex-start;
+  border:1px solid var(--ink);
+  border-left:4px solid var(--crimson);
+  padding:16px 20px;
+  margin-top:24px;
+  font-size:14px;
+}
+.banner-label{
+  font-family:var(--font-serif);font-weight:700;font-size:12px;
+  color:var(--crimson);flex:none;text-transform:uppercase;letter-spacing:.04em;
+  padding-top:2px;
+}
+
+/* ---- kpi grid ---- */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;}
+.kpi-card{
+  border-top:2px solid var(--ink);
+  padding-top:16px;
+}
+.kpi-label{font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:10px;}
+.kpi-value-row{display:flex;align-items:baseline;gap:6px;margin-bottom:8px;}
+.kpi-value{
+  font-family:var(--font-serif);font-weight:700;
+  font-size:clamp(28px,3vw,44px);
+  line-height:1;
+  letter-spacing:-0.01em;
+  white-space:nowrap;
+}
+.kpi-unit{font-size:14px;color:var(--muted);font-weight:500;}
+.kpi-delta{font-size:13px;font-weight:700;margin-bottom:10px;}
+.kpi-delta.up::before{content:"▲ ";}
+.kpi-delta.down::before{content:"▼ ";}
+.kpi-headline{
+  font-family:var(--font-serif);font-style:italic;font-size:13.5px;
+  color:var(--ink);line-height:1.5;
+  border-top:1px solid var(--hairline);padding-top:10px;margin-top:2px;
+}
+.kpi-spark{margin-top:10px;}
+.kpi-spark svg{width:100%;height:28px;overflow:visible;}
+
+/* ---- charts row ---- */
+.charts-row{display:grid;grid-template-columns:7fr 5fr;gap:var(--gutter);align-items:stretch;}
+.chart-box{border:1px solid var(--hairline);padding:22px 24px;display:flex;flex-direction:column;}
+.chart-title{font-family:var(--font-serif);font-weight:700;font-size:16px;margin-bottom:2px;}
+.chart-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.chart-figure{flex:1;display:flex;align-items:center;justify-content:center;}
+.chart-figure svg{width:100%;height:auto;}
+.chart-caption{
+  font-family:var(--font-serif);font-style:italic;font-size:13px;
+  color:var(--muted);margin-top:12px;padding-top:12px;border-top:1px solid var(--hairline);
+}
+.chart-caption b{color:var(--crimson);font-weight:700;font-style:normal;}
+.axis-label{font-size:9.5px;fill:var(--muted);font-family:var(--font-sans);}
+.grid-line{stroke:var(--hairline);stroke-width:1;}
+.donut-legend{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:7px;}
+.donut-legend li{display:flex;align-items:center;gap:8px;font-size:12.5px;}
+.legend-swatch{width:10px;height:10px;flex:none;border:1px solid var(--ink);}
+.legend-val{margin-left:auto;font-weight:700;}
+
+/* ---- goal + segment row ---- */
+.goal-segment-row{display:grid;grid-template-columns:5fr 7fr;gap:var(--gutter);}
+.card{border:1px solid var(--hairline);padding:22px 24px;}
+.goal-title{font-family:var(--font-serif);font-weight:700;font-size:16px;margin-bottom:14px;}
+.goal-count{font-family:var(--font-serif);font-weight:700;font-size:30px;margin-bottom:2px;}
+.goal-count span{font-size:15px;color:var(--muted);font-weight:500;}
+.goal-pct{font-size:13px;color:var(--muted);margin-bottom:14px;}
+.goal-track{height:12px;border:1px solid var(--ink);position:relative;background:var(--paper);}
+.goal-fill{height:100%;background:var(--crimson);}
+.goal-ticks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:6px;}
+.goal-caption{
+  font-family:var(--font-serif);font-style:italic;font-size:13px;color:var(--muted);
+  margin-top:14px;padding-top:12px;border-top:1px solid var(--hairline);
+}
+
+.segment-list-card{display:flex;flex-direction:column;gap:16px;}
+.segment-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.segment-title{font-family:var(--font-serif);font-weight:700;font-size:16px;}
+.segment-control{display:flex;border:1px solid var(--ink);}
+.segment-btn{
+  background:transparent;border:none;cursor:pointer;
+  padding:7px 18px;font-size:13px;font-weight:700;color:var(--ink);
+}
+.segment-btn + .segment-btn{border-left:1px solid var(--ink);}
+.segment-btn[aria-pressed="true"]{background:var(--ink);color:var(--paper);}
+.segment-btn:focus-visible{outline:2px solid var(--crimson);outline-offset:-2px;}
+.top-list{display:flex;flex-direction:column;}
+.top-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 0;border-bottom:1px solid var(--hairline);
+}
+.top-row:last-child{border-bottom:none;}
+.top-avatar{width:28px;height:28px;border:1px solid var(--ink);flex:none;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-weight:700;font-size:13px;}
+.top-name{font-size:13.5px;font-weight:600;flex:none;width:112px;}
+.top-bar-track{flex:1;height:6px;background:var(--hairline);position:relative;}
+.top-bar-fill{height:100%;background:var(--crimson);}
+.top-value{font-weight:700;font-size:13.5px;width:34px;text-align:right;flex:none;}
+
+/* ---- table ---- */
+.table-scroll{overflow-x:auto;border:1px solid var(--hairline);}
+table{width:100%;border-collapse:collapse;min-width:640px;}
+thead th{
+  text-align:left;font-family:var(--font-serif);font-weight:700;font-size:13px;
+  padding:12px 16px;border-bottom:2px solid var(--ink);white-space:nowrap;
+}
+th.sortable{cursor:pointer;}
+th.sortable .caret{color:var(--crimson);margin-left:3px;}
+tbody td{
+  padding:14px 16px;font-size:13.5px;border-bottom:1px solid var(--hairline);
+  vertical-align:top;
+}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--highlighter);}
+td.title-cell{max-width:230px;font-weight:600;}
+td.title-cell .clamp{
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+td.dim{color:var(--muted);}
+.status{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12.5px;white-space:nowrap;}
+.status i{width:7px;height:7px;flex:none;display:inline-block;}
+.status--done{color:var(--state-done);}
+.status--done i{background:var(--state-done);}
+.status--hold{color:var(--state-hold);}
+.status--hold i{background:var(--state-hold);}
+.status--replay{color:var(--state-replay);}
+.status--replay i{background:var(--state-replay);}
+.status--new{color:var(--state-new);}
+.status--new i{background:var(--state-new);}
+
+/* ---- conversation feature ---- */
+.feature-row{display:grid;grid-template-columns:7fr 5fr;gap:var(--gutter);align-items:start;}
+.transcript{border:1px solid var(--hairline);padding:24px;}
+.turn{padding:14px 0;border-bottom:1px solid var(--hairline);}
+.turn:last-of-type{border-bottom:none;}
+.turn-speaker{
+  font-family:var(--font-serif);font-weight:700;font-size:12.5px;
+  text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;
+}
+.turn-speaker.yeonseo{color:var(--crimson);}
+.turn-speaker.me{color:var(--muted);}
+.turn-text{font-size:14.5px;line-height:1.65;}
+.choice-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+.choice-btn{
+  border:1px solid var(--ink);background:transparent;cursor:pointer;
+  padding:8px 14px;font-size:13px;font-weight:600;
+}
+.choice-btn::before{content:"[ ";}
+.choice-btn::after{content:" ]";}
+.choice-btn:hover{background:var(--ink);color:var(--paper);}
+.choice-btn:focus-visible{outline:2px solid var(--crimson);outline-offset:2px;}
+
+.diagnosis-card{border:1px solid var(--ink);padding:24px;}
+.diagnosis-eyebrow{font-family:var(--font-serif);font-style:italic;font-size:12px;color:var(--crimson);margin-bottom:10px;}
+.diagnosis-text{font-family:var(--font-serif);font-size:16px;line-height:1.6;font-weight:500;margin-bottom:20px;}
+.story-card{border-top:1px solid var(--ink);padding-top:18px;}
+.axis-badge{
+  display:inline-block;border:1px solid var(--ink);font-size:11px;font-weight:700;
+  padding:2px 8px;margin-bottom:10px;
+}
+.story-title{font-family:var(--font-serif);font-weight:700;font-size:15px;margin-bottom:8px;}
+.story-lesson{font-size:13.5px;color:var(--muted);font-style:italic;margin-bottom:16px;line-height:1.55;}
+.story-link{color:var(--crimson);text-decoration:underline;font-weight:700;font-size:13.5px;background:none;border:none;cursor:pointer;padding:0;}
+.story-link:hover{color:var(--crimson-press);}
+.story-link:focus-visible{outline:2px solid var(--crimson);outline-offset:2px;}
+
+/* ---- empty state ---- */
+.empty-card{
+  border:1px dashed var(--ink);
+  padding:56px 24px;
+  text-align:center;
+}
+.empty-headline{font-family:var(--font-serif);font-weight:700;font-size:19px;margin-bottom:10px;}
+.empty-desc{font-size:14px;color:var(--muted);max-width:360px;margin:0 auto 22px;}
+
+/* ---- footer ---- */
+.site-footer{
+  margin-top:64px;padding-top:20px;border-top:2px solid var(--ink);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  font-size:11.5px;color:var(--muted);letter-spacing:.02em;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:900px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{
+    position:fixed;top:0;left:0;height:100vh;width:260px;
+    background:var(--paper);z-index:30;
+    transform:translateX(-100%);
+    transition:transform .2s ease;
+  }
+  #nav-toggle:checked ~ .app .sidebar{transform:translateX(0);}
+  .menu-toggle-label{
+    display:flex;flex-direction:column;justify-content:center;
+    width:38px;height:38px;border:1px solid var(--ink);cursor:pointer;flex:none;
+  }
+  .scrim{
+    display:none;position:fixed;inset:0;background:rgba(28,27,24,.35);z-index:20;
+  }
+  #nav-toggle:checked ~ .app .scrim{display:block;}
+  .utility-bar{padding:16px 20px;flex-wrap:wrap;}
+  .container{padding:0 20px 60px;}
+  .search-wrap{order:3;max-width:none;flex:1 1 100%;}
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:24px;}
+  .charts-row,.goal-segment-row,.feature-row{grid-template-columns:1fr;}
+  .lead::first-letter{font-size:2.1em;}
+  .masthead-meta{flex-direction:column;align-items:flex-start;gap:4px;}
+}
+@media (max-width:560px){
+  .kpi-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<input type="checkbox" id="nav-toggle">
+<div class="app">
+
+  <label class="scrim" for="nav-toggle" aria-hidden="true"></label>
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-brand">연서</div>
+      <div class="sidebar-tagline">이야기로 짚어보는 마음</div>
+    </div>
+    <nav class="nav-menu" aria-label="주 메뉴">
+      <a class="nav-item" href="#" aria-current="page">
+        <svg viewBox="0 0 20 20" fill="none" stroke-width="1.5"><path d="M3.5 4.5h13a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H9l-3.5 3v-3h-2a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1z"/></svg>
+        대화
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 20 20" fill="none" stroke-width="1.5"><rect x="3" y="3" width="6" height="6"/><rect x="11" y="3" width="6" height="6"/><rect x="3" y="11" width="6" height="6"/><rect x="11" y="11" width="6" height="6"/></svg>
+        모아보기
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 20 20" fill="none" stroke-width="1.5"><path d="M10 2.5c-3 0-5.2 2.2-5.2 5 0 3.9 5.2 9.3 5.2 9.3s5.2-5.4 5.2-9.3c0-2.8-2.2-5-5.2-5z"/><circle cx="10" cy="7.3" r="1.8"/></svg>
+        결핍 지도
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 20 20" fill="none" stroke-width="1.5"><path d="M4 3.5h4v13H4a1 1 0 0 1-1-1v-11a1 1 0 0 1 1-1z"/><path d="M9 3.5h4v13H9z"/><path d="M14 4l3 .8v11.2l-3-.8z"/></svg>
+        작품 서가
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 20 20" fill="none" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6.3v4l2.8 1.8"/></svg>
+        기록
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 20 20" fill="none" stroke-width="1.5"><line x1="4" y1="6" x2="16" y2="6"/><circle cx="12" cy="6" r="1.6"/><line x1="4" y1="10" x2="16" y2="10"/><circle cx="7" cy="10" r="1.6"/><line x1="4" y1="14" x2="16" y2="14"/><circle cx="13" cy="14" r="1.6"/></svg>
+        설정
+      </a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar-sq">ㅇ</div>
+      <div class="sidebar-user-role">읽는 사람</div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <!-- utility topbar -->
+    <header class="utility-bar">
+      <label class="menu-toggle-label" for="nav-toggle" aria-label="메뉴 열기">
+        <span class="hamburger-bar"></span><span class="hamburger-bar"></span><span class="hamburger-bar"></span>
+      </label>
+      <div class="utility-brand">연서</div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 20 20" fill="none" stroke-width="1.6"><circle cx="8.5" cy="8.5" r="5"/><line x1="12.4" y1="12.4" x2="17" y2="17"/></svg>
+        <input class="search-input" type="search" placeholder="작품·교훈 검색">
+      </div>
+      <div class="utility-right">
+        <button class="icon-btn" aria-label="알림, 읽지 않은 알림 3개">
+          <svg viewBox="0 0 20 20" fill="none" stroke-width="1.5"><path d="M10 3a5 5 0 0 0-5 5v2.6L3.5 13h13L15 10.6V8a5 5 0 0 0-5-5z"/><path d="M8 15.5a2 2 0 0 0 4 0"/></svg>
+          <span class="badge-dot num">3</span>
+        </button>
+        <div class="avatar-sq">ㅇ</div>
+        <button class="btn btn-primary">새 대화</button>
+        <button class="btn btn-secondary">모아보기</button>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <!-- masthead -->
+      <section class="masthead">
+        <div class="masthead-meta">
+          <span>연서 워크스페이스 · 데이터 지면</span>
+          <span><span class="num">2026년 7월 20일 월요일</span> · 제<span class="num">128</span>호</span>
+        </div>
+        <h1 class="masthead-logo">연서</h1>
+        <div class="rule-double"></div>
+        <p class="lead" style="margin-top:20px;">
+          이번 주 들은 스토리 <span class="num">128만 4천</span> 편, 짚어낸 결핍은 <span class="num">7</span>개로 줄었다 —
+          내적 축이 대화의 <span class="num">74%</span>를 차지했다.
+        </p>
+      </section>
+
+      <!-- tabs + filter -->
+      <nav class="tabs-filter" aria-label="축 필터">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" aria-selected="true">전체</button>
+          <button class="tab" role="tab" aria-selected="false">외적</button>
+          <button class="tab" role="tab" aria-selected="false">내적</button>
+          <button class="tab" role="tab" aria-selected="false">최근</button>
+        </div>
+        <button class="filter-dd">시대 <span aria-hidden="true">▾</span></button>
+      </nav>
+
+      <!-- banner -->
+      <div class="banner" role="status">
+        <span class="banner-label">안내</span>
+        <span>결핍을 짚으려면 두세 마디가 더 필요해요. 편한 만큼만 답해도 됩니다.</span>
+      </div>
+
+      <!-- KPI -->
+      <section class="section">
+        <div class="section-head">
+          <div><div class="eyebrow">Numbers</div><h2 class="section-title">이번 주 지표</h2></div>
+          <div class="section-note">전주 대비 증감을 함께 읽는다</div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">들은 스토리</div>
+            <div class="kpi-value-row"><span class="kpi-value num">1,284,000</span><span class="kpi-unit">편</span></div>
+            <div class="kpi-delta up num">12.4%</div>
+            <div class="kpi-headline">"들은 스토리, 전주 대비 12.4% 늘었다"</div>
+            <div class="kpi-spark" aria-hidden="true">
+              <svg viewBox="0 0 80 28" preserveAspectRatio="none"><polyline points="0,25 11.43,22.8 22.86,21.15 34.29,17.85 45.71,15.65 57.14,11.8 68.57,8.5 80,3" fill="none" stroke="var(--ink)" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">짚어낸 결핍</div>
+            <div class="kpi-value-row"><span class="kpi-value num">7</span><span class="kpi-unit">개</span></div>
+            <div class="kpi-delta down num">2개</div>
+            <div class="kpi-headline">"짚어낸 결핍, 지난주보다 2개 줄었다"</div>
+            <div class="kpi-spark" aria-hidden="true">
+              <svg viewBox="0 0 80 28" preserveAspectRatio="none"><polyline points="0,3 11.43,8.5 22.86,8.5 34.29,14 45.71,14 57.14,19.5 68.57,25 80,25" fill="none" stroke="var(--ink)" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">평균 읽은 시간</div>
+            <div class="kpi-value-row"><span class="kpi-value num">58</span><span class="kpi-unit">초</span></div>
+            <div class="kpi-delta up num">3초</div>
+            <div class="kpi-headline">"읽은 시간, 3초 더 길어졌다"</div>
+            <div class="kpi-spark" aria-hidden="true">
+              <svg viewBox="0 0 80 28" preserveAspectRatio="none"><polyline points="0,25 11.43,19.5 22.86,19.5 34.29,14 45.71,14 57.14,8.5 68.57,8.5 80,3" fill="none" stroke="var(--ink)" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">이어온 날</div>
+            <div class="kpi-value-row"><span class="kpi-value num">26</span><span class="kpi-unit">일</span></div>
+            <div class="kpi-delta up num">1일</div>
+            <div class="kpi-headline">"이어온 기록, 하루를 더 보탰다"</div>
+            <div class="kpi-spark" aria-hidden="true">
+              <svg viewBox="0 0 80 28" preserveAspectRatio="none"><polyline points="0,25 11.43,21.86 22.86,18.71 34.29,15.57 45.71,12.43 57.14,9.29 68.57,6.14 80,3" fill="none" stroke="var(--ink)" stroke-width="1.6"/></svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- charts -->
+      <section class="section">
+        <div class="section-head">
+          <div><div class="eyebrow">Charts</div><h2 class="section-title">그래프로 보는 흐름</h2></div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-box">
+            <div class="chart-title">최근 10일 청취 추이</div>
+            <div class="chart-sub">일별 들은 스토리 수 · 편</div>
+            <div class="chart-figure">
+              <svg viewBox="0 0 400 150" role="img" aria-label="최근 10일 청취 추이 라인 차트, 8일째 41회로 최고치">
+                <line class="grid-line" x1="20" y1="130" x2="390" y2="130"/>
+                <line class="grid-line" x1="20" y1="90" x2="390" y2="90"/>
+                <line class="grid-line" x1="20" y1="50" x2="390" y2="50"/>
+                <line class="grid-line" x1="20" y1="10" x2="390" y2="10"/>
+                <text x="12" y="133" class="axis-label" text-anchor="end">0</text>
+                <text x="12" y="93" class="axis-label" text-anchor="end">15</text>
+                <text x="12" y="53" class="axis-label" text-anchor="end">30</text>
+                <text x="12" y="13" class="axis-label" text-anchor="end">45</text>
+                <polygon points="20,130 20,98 60,82 100,90 140,106 180,66 220,47.3 260,58 300,20.7 340,42 380,52.7 380,130" fill="var(--crimson)" opacity=".08"/>
+                <polyline points="20,98 60,82 100,90 140,106 180,66 220,47.3 260,58 300,20.7 340,42 380,52.7" fill="none" stroke="var(--ink)" stroke-width="2"/>
+                <circle cx="300" cy="20.7" r="4.5" fill="var(--crimson)"/>
+                <text x="300" y="13" text-anchor="middle" class="axis-label num" font-weight="700" fill="var(--crimson)" font-size="11">41</text>
+                <text x="20" y="144" class="axis-label">1일</text>
+                <text x="300" y="144" class="axis-label" text-anchor="middle">8일</text>
+                <text x="380" y="144" class="axis-label" text-anchor="end">10일</text>
+              </svg>
+            </div>
+            <div class="chart-caption"><b>8일째 41회</b>, 열흘 중 최고치를 기록했다.</div>
+          </div>
+          <div class="chart-box">
+            <div class="chart-title">축 구성비</div>
+            <div class="chart-sub">최근 대화의 결핍 축 비중</div>
+            <div class="chart-figure">
+              <svg viewBox="0 0 180 180" role="img" aria-label="축 구성비 도넛 차트, 내적 74%, 외적 26%">
+                <g transform="rotate(-90 90 90)">
+                  <circle cx="90" cy="90" r="64" fill="none" stroke="var(--crimson)" stroke-width="26" stroke-dasharray="136.72 265.4" stroke-dashoffset="0"/>
+                  <circle cx="90" cy="90" r="64" fill="none" stroke="var(--crimson)" stroke-width="26" opacity=".72" stroke-dasharray="88.47 313.65" stroke-dashoffset="-136.72"/>
+                  <circle cx="90" cy="90" r="64" fill="none" stroke="var(--crimson)" stroke-width="26" opacity=".42" stroke-dasharray="72.38 329.74" stroke-dashoffset="-225.19"/>
+                  <circle cx="90" cy="90" r="64" fill="none" stroke="var(--ink)" stroke-width="26" stroke-dasharray="64.34 337.78" stroke-dashoffset="-297.57"/>
+                  <circle cx="90" cy="90" r="64" fill="none" stroke="var(--muted)" stroke-width="26" stroke-dasharray="40.21 361.91" stroke-dashoffset="-361.91"/>
+                </g>
+                <text x="90" y="85" text-anchor="middle" font-family="var(--font-serif)" font-weight="700" font-size="26" fill="var(--ink)" class="num">74%</text>
+                <text x="90" y="104" text-anchor="middle" class="axis-label" font-size="11">내적 축</text>
+              </svg>
+            </div>
+            <ul class="donut-legend">
+              <li><span class="legend-swatch" style="background:var(--crimson);"></span>내적-성찰<span class="legend-val num">34%</span></li>
+              <li><span class="legend-swatch" style="background:var(--crimson);opacity:.72;"></span>내적-마음<span class="legend-val num">22%</span></li>
+              <li><span class="legend-swatch" style="background:var(--crimson);opacity:.42;"></span>내적-성품<span class="legend-val num">18%</span></li>
+              <li><span class="legend-swatch" style="background:var(--ink);"></span>외적-첫인상<span class="legend-val num">16%</span></li>
+              <li><span class="legend-swatch" style="background:var(--muted);"></span>외적-조건<span class="legend-val num">10%</span></li>
+            </ul>
+            <div class="chart-caption">내적 축 <b>74%</b>, 외적 축 <b>26%</b> — 마음의 결이 대화를 채운다.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- goal + segment/top list -->
+      <section class="section">
+        <div class="goal-segment-row">
+          <div class="card">
+            <div class="goal-title">이번 달 소양 목표</div>
+            <div class="goal-count"><span class="num">26</span><span> / 40편</span></div>
+            <div class="goal-pct"><span class="num">65%</span> 달성</div>
+            <div class="goal-track"><div class="goal-fill" style="width:65%;"></div></div>
+            <div class="goal-ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+            <div class="goal-caption">이번 달 목표의 65%, 14편이 남았다.</div>
+          </div>
+          <div class="card segment-list-card">
+            <div class="segment-head">
+              <div class="segment-title">자주 나온 결핍</div>
+              <div class="segment-control">
+                <button class="segment-btn" aria-pressed="true">내적</button>
+                <button class="segment-btn" aria-pressed="false">외적</button>
+              </div>
+            </div>
+            <div class="top-list">
+              <div class="top-row">
+                <div class="top-avatar">ㄱ</div>
+                <div class="top-name">기대치 어긋남</div>
+                <div class="top-bar-track"><div class="top-bar-fill" style="width:100%;"></div></div>
+                <div class="top-value num">32</div>
+              </div>
+              <div class="top-row">
+                <div class="top-avatar">ㅍ</div>
+                <div class="top-name">표현 부족</div>
+                <div class="top-bar-track"><div class="top-bar-fill" style="width:84.4%;"></div></div>
+                <div class="top-value num">27</div>
+              </div>
+              <div class="top-row">
+                <div class="top-avatar">ㅈ</div>
+                <div class="top-name">자존감</div>
+                <div class="top-bar-track"><div class="top-bar-fill" style="width:65.6%;"></div></div>
+                <div class="top-value num">21</div>
+              </div>
+              <div class="top-row">
+                <div class="top-avatar">ㄱ</div>
+                <div class="top-name">거리 조절</div>
+                <div class="top-bar-track"><div class="top-bar-fill" style="width:46.9%;"></div></div>
+                <div class="top-value num">15</div>
+              </div>
+              <div class="top-row">
+                <div class="top-avatar">ㅅ</div>
+                <div class="top-name">신뢰 회복</div>
+                <div class="top-bar-track"><div class="top-bar-fill" style="width:28.1%;"></div></div>
+                <div class="top-value num">9</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- table -->
+      <section class="section">
+        <div class="section-head">
+          <div><div class="eyebrow">Ledger</div><h2 class="section-title">받은 스토리</h2></div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th class="sortable">작품 <span class="caret" aria-hidden="true">▾</span></th>
+                <th>작가</th>
+                <th>축</th>
+                <th>교훈</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="title-cell">오만과 편견</td>
+                <td>제인 오스틴</td>
+                <td>내적</td>
+                <td>첫인상은 자주 틀린다</td>
+                <td><span class="status status--done"><i></i>들음</span></td>
+              </tr>
+              <tr>
+                <td class="title-cell">위대한 개츠비</td>
+                <td>F. 스콧 피츠제럴드</td>
+                <td>외적</td>
+                <td>조건으로 시작한 마음은 조건에서 끝난다</td>
+                <td><span class="status status--hold"><i></i>보류</span></td>
+              </tr>
+              <tr>
+                <td class="title-cell"><span class="clamp">어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설</span></td>
+                <td class="dim">—</td>
+                <td>내적</td>
+                <td>기다림은 사람을 바꾼다</td>
+                <td><span class="status status--replay"><i></i>다시듣기</span></td>
+              </tr>
+              <tr>
+                <td class="title-cell">폭풍의 언덕</td>
+                <td>에밀리 브론테</td>
+                <td>내적</td>
+                <td>집착은 사랑의 이름을 빌린다</td>
+                <td><span class="status status--done"><i></i>들음</span></td>
+              </tr>
+              <tr>
+                <td class="title-cell">시라노 드 베르주라크</td>
+                <td>에드몽 로스탕</td>
+                <td>외적</td>
+                <td>목소리는 얼굴보다 오래 남는다</td>
+                <td><span class="status status--new"><i></i>새로움</span></td>
+              </tr>
+              <tr>
+                <td class="title-cell">안나 카레니나</td>
+                <td>레프 톨스토이</td>
+                <td>내적</td>
+                <td>불행한 사랑은 저마다의 이유로 불행하다</td>
+                <td><span class="status status--hold"><i></i>보류</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- conversation feature -->
+      <section class="section">
+        <div class="section-head">
+          <div><div class="eyebrow">Interview</div><h2 class="section-title">오늘의 대화</h2></div>
+        </div>
+        <div class="feature-row">
+          <div class="transcript">
+            <div class="turn">
+              <div class="turn-speaker yeonseo">연서</div>
+              <div class="turn-text">요즘 사랑에서 어떤 게 제일 어려우세요?</div>
+            </div>
+            <div class="turn">
+              <div class="turn-speaker me">나</div>
+              <div class="turn-text">연락이 오면 반갑고 안 오면 하루가 다 망가져요. 제가 너무 매달리는 것 같기도 하고, 사실은 그냥 확인받고 싶은 건지도 모르겠어요.</div>
+            </div>
+            <div class="turn">
+              <div class="turn-speaker yeonseo">연서</div>
+              <div class="turn-text">기다림이 힘든 건가요, 기다리는 자신이 싫은 건가요?</div>
+              <div class="choice-row">
+                <button class="choice-btn">기다림이 힘들다</button>
+                <button class="choice-btn">그런 내가 싫다</button>
+              </div>
+            </div>
+            <div class="turn">
+              <div class="turn-speaker me">나</div>
+              <div class="turn-text">후자요.</div>
+            </div>
+          </div>
+          <div class="diagnosis-card">
+            <div class="diagnosis-eyebrow">진단</div>
+            <p class="diagnosis-text">확인받아야 안심되는 마음이 보여요. 없는 건 상대의 애정이 아니라 스스로에 대한 확신 같습니다.</p>
+            <div class="story-card">
+              <span class="axis-badge">내적</span>
+              <div class="story-title">오만과 편견 · 제인 오스틴</div>
+              <p class="story-lesson">"첫인상은 자주 틀린다 — 나에 대한 첫인상도 마찬가지다."</p>
+              <button class="story-link">다른 이야기도 들어볼래요?</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- empty state -->
+      <section class="section">
+        <div class="section-head">
+          <div><div class="eyebrow">모아보기</div><h2 class="section-title">축 필터 결과</h2></div>
+        </div>
+        <div class="empty-card">
+          <div class="empty-headline">아직 이 축의 이야기가 없어요</div>
+          <p class="empty-desc">대화를 두어 마디 더 나누면 맞는 이야기를 찾아드릴게요.</p>
+          <button class="btn btn-primary">대화 이어가기</button>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <span>연서 · 이야기로 짚어보는 마음</span>
+        <span>STYLE 10 · 에디토리얼</span>
+      </footer>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// 연출 전용: 모바일 드로어는 순수 CSS(checkbox)로 동작 — JS 실패 시에도 완전한 화면.
+// 내비 링크를 누르면 드로어를 자동으로 닫아주는 편의 기능만 JS로 보강한다.
+(function(){
+  var toggle = document.getElementById('nav-toggle');
+  if(!toggle) return;
+  document.querySelectorAll('.sidebar .nav-item').forEach(function(link){
+    link.addEventListener('click', function(){ toggle.checked = false; });
+  });
+})();
+</script>
+</body>
+</html>

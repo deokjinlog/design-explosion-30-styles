@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>연서 워크스페이스 · 다크 프로 미니멀</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+<style>
+  /* ============ 리셋 ============ */
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+  ul{list-style:none;}
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;}
+  input{font:inherit;color:inherit;}
+  a{color:inherit;text-decoration:none;}
+  svg{display:block;}
+
+  /* ============ 토큰 ============ */
+  :root{
+    --bg:#0E0E11;
+    --surface:#131317;
+    --surface-raised:#17171C;
+    --surface-hover:#1C1C22;
+    --border:#232326;
+    --border-strong:#2E2E33;
+    --text-primary:#EDEDEF;
+    --text-secondary:#A0A0A8;
+    --text-tertiary:#6E6E76;
+    --accent:#8B8BF5;
+    --accent-strong:#9E9EF8;
+    --accent-dim:rgba(139,139,245,.14);
+    --accent-dim-strong:rgba(139,139,245,.24);
+    --success:#4E9A76;
+    --success-dim:rgba(78,154,118,.14);
+    --warning:#C7A15A;
+    --warning-dim:rgba(199,161,90,.14);
+    --danger:#C96A6A;
+    --danger-dim:rgba(201,106,106,.14);
+    --r-card:10px;
+    --r-control:8px;
+    --r-avatar:6px;
+    --shadow-pop:0 8px 24px rgba(0,0,0,.4);
+    --font-kr:'Pretendard',-apple-system,sans-serif;
+    --font-en:'Inter',sans-serif;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+
+  body{
+    background:var(--bg);
+    color:var(--text-primary);
+    font-family:var(--font-kr);
+    font-size:14px;
+    line-height:1.6;
+    font-variant-numeric:tabular-nums;
+    min-height:100vh;
+  }
+  .num{font-family:var(--font-en);font-variant-numeric:tabular-nums;font-feature-settings:'tnum';}
+
+  /* ============ 타이포 유틸 ============ */
+  .t-display{font-family:var(--font-en);font-size:30px;line-height:38px;font-weight:620;letter-spacing:-0.02em;}
+  .t-title{font-size:20px;line-height:28px;font-weight:600;letter-spacing:-0.01em;}
+  .t-section{font-size:15px;line-height:22px;font-weight:600;}
+  .t-body{font-size:14px;line-height:22px;font-weight:400;}
+  .t-small{font-size:13px;line-height:18px;}
+  .t-label{font-family:var(--font-en);font-size:12px;line-height:16px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:var(--text-tertiary);}
+
+  /* ============ 포커스 ============ */
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+
+  /* ============ 레이아웃 ============ */
+  .app{display:flex;min-height:100vh;}
+
+  /* --- 사이드바 --- */
+  .sidebar{
+    width:240px;flex:0 0 auto;
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    display:flex;flex-direction:column;
+    padding:20px 12px;
+    transition:width .22s var(--ease);
+    position:sticky;top:0;height:100vh;overflow:hidden;
+  }
+  .sidebar.collapsed{width:64px;}
+  .sidebar-brand{display:flex;align-items:center;gap:10px;padding:8px 8px 24px;}
+  .logo-mark{
+    flex:0 0 auto;width:28px;height:28px;border-radius:var(--r-avatar);
+    border:1px solid var(--border-strong);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:14px;color:var(--accent);
+  }
+  .logo-text{font-weight:700;font-size:16px;letter-spacing:-0.01em;white-space:nowrap;}
+  .sidebar.collapsed .logo-text,
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed .user-label,
+  .sidebar.collapsed .sidebar-toggle span{display:none;}
+
+  .nav-list{display:flex;flex-direction:column;gap:2px;flex:1;}
+  .nav-item{
+    position:relative;
+    display:flex;align-items:center;gap:12px;
+    padding:10px 12px;border-radius:var(--r-control);
+    color:var(--text-tertiary);
+    transition:background-color .12s var(--ease),color .12s var(--ease);
+    white-space:nowrap;overflow:hidden;
+  }
+  .nav-item::before{
+    content:'';position:absolute;left:0;top:8px;bottom:8px;width:0;
+    background:var(--accent);border-radius:0 2px 2px 0;
+    transition:width .15s var(--ease);
+  }
+  .nav-item:hover{background:var(--surface-hover);color:var(--text-primary);}
+  .nav-item:hover::before{width:2px;}
+  .nav-item .icon{flex:0 0 auto;width:18px;height:18px;color:currentColor;}
+  .nav-item.is-active{background:var(--surface-hover);color:var(--text-primary);}
+  .nav-item.is-active::before{width:2px;}
+  .nav-label{font-size:14px;font-weight:500;}
+
+  .sidebar-toggle{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:var(--r-control);color:var(--text-tertiary);
+    margin-bottom:8px;
+  }
+  .sidebar-toggle:hover{background:var(--surface-hover);color:var(--text-primary);}
+  .sidebar-toggle .icon{width:16px;height:16px;transition:transform .22s var(--ease);}
+  .sidebar.collapsed .sidebar-toggle .icon{transform:rotate(180deg);}
+
+  .sidebar-user{
+    display:flex;align-items:center;gap:10px;
+    padding:12px 8px 4px;border-top:1px solid var(--border);margin-top:8px;
+  }
+  .avatar{
+    flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    width:28px;height:28px;border-radius:var(--r-avatar);
+    background:var(--surface-hover);border:1px solid var(--border-strong);
+    font-size:12px;font-weight:600;color:var(--text-secondary);
+  }
+  .user-meta{display:flex;flex-direction:column;line-height:1.3;white-space:nowrap;overflow:hidden;}
+  .user-name{font-size:13px;font-weight:600;color:var(--text-primary);}
+  .user-label{font-size:12px;color:var(--text-tertiary);}
+
+  /* --- 메인 --- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    display:flex;align-items:center;gap:16px;
+    padding:14px 32px;background:rgba(14,14,17,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  .topbar-title{font-weight:700;font-size:15px;flex:0 0 auto;margin-right:4px;}
+  .search-box{
+    flex:1;max-width:360px;position:relative;display:flex;align-items:center;
+  }
+  .search-box .icon{position:absolute;left:12px;width:16px;height:16px;color:var(--text-tertiary);pointer-events:none;}
+  .search-box input{
+    width:100%;height:36px;padding:0 12px 0 36px;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-control);
+    color:var(--text-primary);font-size:13px;
+    transition:border-color .15s var(--ease),background-color .15s var(--ease);
+  }
+  .search-box input::placeholder{color:var(--text-tertiary);}
+  .search-box input:hover{background:var(--surface-hover);}
+  .search-box input:focus{outline:none;border-color:var(--accent);background:var(--surface-hover);}
+
+  .topbar-right{display:flex;align-items:center;gap:12px;margin-left:auto;}
+  .icon-btn{
+    position:relative;width:36px;height:36px;border-radius:var(--r-control);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-secondary);border:1px solid transparent;
+    transition:background-color .12s var(--ease),color .12s var(--ease);
+  }
+  .icon-btn:hover{background:var(--surface-hover);color:var(--text-primary);}
+  .icon-btn .icon{width:18px;height:18px;}
+  .badge-dot{
+    position:absolute;top:4px;right:4px;min-width:15px;height:15px;padding:0 3px;
+    border-radius:8px;background:var(--accent);color:#0E0E11;
+    font-family:var(--font-en);font-size:10px;font-weight:700;line-height:15px;text-align:center;
+  }
+
+  .btn{
+    height:38px;padding:0 16px;border-radius:var(--r-control);
+    font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:8px;
+    border:1px solid transparent;white-space:nowrap;
+    transition:background-color .12s var(--ease),border-color .15s var(--ease),transform .08s var(--ease),filter .12s var(--ease);
+  }
+  .btn .icon{width:16px;height:16px;}
+  .btn-primary{background:var(--accent);color:#0E0E11;border-color:var(--accent);}
+  .btn-primary:hover{background:var(--accent-strong);border-color:var(--accent-strong);}
+  .btn-primary:active{transform:scale(.96);filter:brightness(.96);}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+  .btn-secondary{background:transparent;color:var(--text-primary);border-color:var(--border-strong);}
+  .btn-secondary:hover{background:var(--surface-hover);}
+  .btn-secondary:active{transform:scale(.96);}
+  .btn-ghost{background:transparent;color:var(--text-secondary);border-color:transparent;}
+  .btn-ghost:hover{background:var(--surface-hover);color:var(--text-primary);}
+
+  .content-wrap{max-width:1280px;width:100%;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:32px;}
+
+  /* --- 탭 + 필터 --- */
+  .tabs-filter-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);}
+  .tab{
+    padding:10px 4px;margin-right:20px;color:var(--text-tertiary);font-size:14px;font-weight:500;
+    border-bottom:2px solid transparent;transition:color .12s var(--ease),border-color .12s var(--ease);
+  }
+  .tab:hover{color:var(--text-primary);}
+  .tab.is-active{color:var(--text-primary);border-color:var(--accent);}
+
+  .filter-dd{position:relative;}
+  .filter-trigger{
+    height:36px;padding:0 12px;border:1px solid var(--border);border-radius:var(--r-control);
+    display:inline-flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:13px;
+    transition:border-color .15s var(--ease),background-color .12s var(--ease);
+  }
+  .filter-trigger:hover{background:var(--surface-hover);}
+  .filter-trigger .icon{width:14px;height:14px;transition:transform .15s var(--ease);}
+  .filter-dd.is-open .filter-trigger{border-color:var(--accent);}
+  .filter-dd.is-open .filter-trigger .icon{transform:rotate(180deg);}
+  .filter-menu{
+    position:absolute;top:calc(100% + 6px);right:0;min-width:160px;z-index:30;
+    background:var(--surface-raised);border:1px solid var(--border-strong);border-radius:var(--r-card);
+    box-shadow:var(--shadow-pop);padding:6px;
+    opacity:0;visibility:hidden;transform:translateY(-4px);
+    transition:opacity .12s var(--ease),transform .12s var(--ease),visibility .12s;
+  }
+  .filter-dd.is-open .filter-menu{opacity:1;visibility:visible;transform:translateY(0);}
+  .filter-menu button{
+    display:block;width:100%;text-align:left;padding:8px 10px;border-radius:6px;font-size:13px;color:var(--text-secondary);
+  }
+  .filter-menu button:hover{background:var(--surface-hover);color:var(--text-primary);}
+  .filter-menu button.is-selected{color:var(--accent);}
+
+  /* --- 배너 --- */
+  .banner{
+    display:flex;align-items:flex-start;gap:12px;
+    padding:14px 16px;border-radius:var(--r-card);
+    background:var(--accent-dim);border:1px solid var(--accent-dim-strong);
+  }
+  .banner .icon{width:18px;height:18px;flex:0 0 auto;color:var(--accent);margin-top:1px;}
+  .banner p{font-size:13px;color:var(--text-primary);line-height:1.6;}
+
+  /* --- 공통 카드 --- */
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);
+    padding:24px;display:flex;flex-direction:column;gap:16px;min-width:0;
+  }
+  .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .card-head h3{font-size:15px;font-weight:600;}
+  .card-sub{color:var(--text-tertiary);font-size:12px;}
+
+  /* --- KPI --- */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+  .kpi-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);
+    padding:20px;display:flex;flex-direction:column;gap:12px;min-width:0;
+  }
+  .kpi-label{font-size:13px;color:var(--text-secondary);}
+  .kpi-value-row{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+  .kpi-value{font-family:var(--font-en);font-size:28px;line-height:34px;font-weight:620;letter-spacing:-0.02em;}
+  .kpi-unit{font-size:13px;color:var(--text-secondary);}
+  .kpi-delta{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-en);font-size:12px;font-weight:600;width:fit-content;}
+  .kpi-delta .icon{width:12px;height:12px;}
+  .kpi-delta.is-up{color:var(--success);}
+  .kpi-delta.is-down{color:var(--danger);}
+  .kpi-spark{width:100%;height:30px;color:var(--text-tertiary);}
+  .kpi-spark polyline{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+
+  /* --- 차트 --- */
+  .charts-row{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;}
+  .line-chart-wrap{position:relative;width:100%;}
+  .line-chart-wrap svg{width:100%;height:auto;display:block;}
+  .line-path{fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .area-path{fill:url(#areaGrad);stroke:none;}
+  .baseline{stroke:var(--border);stroke-width:1;}
+  .peak-marker{
+    position:absolute;width:8px;height:8px;margin:-4px 0 0 -4px;
+    background:var(--accent);border-radius:2px;border:2px solid var(--surface);
+    cursor:default;
+  }
+  .peak-marker .tip{
+    position:absolute;bottom:calc(100% + 10px);left:50%;transform:translate(-50%,4px);
+    background:var(--surface-raised);border:1px solid var(--border-strong);border-radius:6px;
+    padding:6px 10px;font-size:12px;white-space:nowrap;box-shadow:var(--shadow-pop);
+    opacity:0;pointer-events:none;transition:opacity .12s var(--ease),transform .12s var(--ease);
+  }
+  .peak-marker:hover .tip,.peak-marker:focus-visible .tip{opacity:1;transform:translate(-50%,0);}
+  .chart-x-labels{display:flex;justify-content:space-between;margin-top:4px;padding:0 2px;}
+  .chart-x-labels span{font-family:var(--font-en);font-size:11px;color:var(--text-tertiary);}
+
+  .donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center;}
+  .donut-wrap svg{flex:0 0 auto;width:150px;height:150px;}
+  .donut-center{font-family:var(--font-en);font-weight:620;font-size:16px;}
+  .legend{display:flex;flex-direction:column;gap:8px;flex:1;min-width:140px;}
+  .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);}
+  .legend-dot{width:8px;height:8px;border-radius:2px;flex:0 0 auto;}
+  .legend-name{flex:1;}
+  .legend-pct{font-family:var(--font-en);color:var(--text-primary);font-weight:600;}
+
+  /* --- 목표 진행률 --- */
+  .goal-card .goal-num-row{display:flex;align-items:baseline;justify-content:space-between;}
+  .goal-num{font-family:var(--font-en);font-size:20px;font-weight:620;}
+  .goal-pct{font-family:var(--font-en);font-size:13px;color:var(--accent);font-weight:600;}
+  .progress-track{width:100%;height:8px;border-radius:8px;background:var(--surface-hover);border:1px solid var(--border);overflow:hidden;}
+  .progress-fill{height:100%;border-radius:8px;background:var(--accent);}
+
+  /* --- 세그먼트 --- */
+  .segment-control{display:inline-flex;padding:3px;border:1px solid var(--border);border-radius:var(--r-control);background:var(--surface-raised);width:fit-content;}
+  .segment-btn{padding:7px 18px;border-radius:6px;font-size:13px;font-weight:500;color:var(--text-tertiary);transition:background-color .12s var(--ease),color .12s var(--ease);}
+  .segment-btn:hover{color:var(--text-secondary);}
+  .segment-btn.is-active{background:var(--surface-hover);color:var(--text-primary);}
+  .segment-hint{color:var(--text-tertiary);font-size:12px;}
+
+  /* --- 상위 리스트 --- */
+  .top-list{display:flex;flex-direction:column;gap:2px;}
+  .top-list li{
+    display:flex;align-items:center;gap:12px;padding:8px;border-radius:var(--r-control);
+    transition:background-color .12s var(--ease);
+  }
+  .top-list li:hover{background:var(--surface-hover);}
+  .top-list .avatar{color:var(--text-secondary);}
+  .top-list .name{flex:1;font-size:13px;color:var(--text-primary);}
+  .top-list .val{font-family:var(--font-en);font-size:13px;font-weight:600;color:var(--text-secondary);}
+  .top-list .bar-track{width:56px;height:4px;border-radius:4px;background:var(--surface-hover);overflow:hidden;flex:0 0 auto;}
+  .top-list .bar-fill{height:100%;background:var(--border-strong);border-radius:4px;}
+  .top-list li:first-child .bar-fill{background:var(--accent);}
+
+  /* --- 빈 상태 --- */
+  .empty-card{align-items:center;text-align:center;justify-content:center;gap:12px;padding:32px 24px;}
+  .empty-card .icon{width:28px;height:28px;color:var(--text-tertiary);}
+  .empty-card h4{font-size:15px;font-weight:600;}
+  .empty-card p{font-size:13px;color:var(--text-secondary);max-width:280px;}
+
+  /* --- 테이블 --- */
+  .table-scroll{width:100%;overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:640px;}
+  thead th{
+    text-align:left;padding:0 12px 10px;border-bottom:1px solid var(--border);
+    font-family:var(--font-en);font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:var(--text-tertiary);
+    white-space:nowrap;
+  }
+  th.sortable{cursor:pointer;user-select:none;}
+  th.sortable button{display:inline-flex;align-items:center;gap:4px;color:inherit;font:inherit;text-transform:inherit;letter-spacing:inherit;}
+  th.sortable .icon{width:12px;height:12px;transition:transform .15s var(--ease);opacity:.6;}
+  th.sortable[aria-sort="descending"] .icon{transform:rotate(180deg);}
+  th.sortable:hover{color:var(--text-secondary);}
+  tbody td{padding:14px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-secondary);vertical-align:middle;}
+  tbody tr{transition:background-color .12s var(--ease);}
+  tbody tr:hover{background:var(--surface-hover);}
+  tbody tr:last-child td{border-bottom:none;}
+  .cell-title{display:flex;align-items:center;gap:10px;max-width:280px;}
+  .cover{
+    position:relative;flex:0 0 auto;width:26px;height:26px;border-radius:var(--r-avatar);
+    background:var(--surface-raised);border:1px solid var(--border-strong);
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text-secondary);
+    overflow:hidden;
+  }
+  .cover .cover-play{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:var(--surface-hover);opacity:0;transition:opacity .12s var(--ease);
+  }
+  .cover .cover-play .icon{width:11px;height:11px;color:var(--accent);}
+  tbody tr:hover .cover .cover-play{opacity:1;}
+  .cover.is-disabled .cover-play{opacity:0 !important;}
+  tbody tr .title-text{color:var(--text-primary);font-weight:500;line-height:1.4;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .missing{color:var(--text-tertiary);}
+  .lesson-text{max-width:260px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .axis-badge{display:inline-flex;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:500;white-space:nowrap;}
+  .axis-badge.is-inner{background:var(--accent-dim);color:var(--accent);}
+  .axis-badge.is-outer{background:transparent;color:var(--text-secondary);border:1px solid var(--border-strong);}
+  .status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;white-space:nowrap;}
+  .status .icon{width:13px;height:13px;}
+  .status.is-heard{color:var(--success);}
+  .status.is-hold{color:var(--warning);}
+  .status.is-replay{color:var(--danger);}
+  .status.is-new{color:var(--accent);}
+
+  /* --- 대화 패널 --- */
+  .chat-card{padding:24px;gap:20px;}
+  .chat-thread{display:flex;flex-direction:column;gap:14px;}
+  .msg{display:flex;flex-direction:column;gap:4px;max-width:100%;}
+  .msg-meta{display:flex;align-items:center;gap:8px;}
+  .msg-meta .avatar{width:20px;height:20px;font-size:9px;}
+  .msg-speaker{font-size:12px;font-weight:600;color:var(--text-tertiary);}
+  .msg-bubble{
+    padding:10px 14px;border-radius:var(--r-card);font-size:13px;line-height:1.6;
+    background:var(--surface-raised);border:1px solid var(--border);color:var(--text-primary);
+    max-width:92%;
+  }
+  .msg.is-me{align-items:flex-end;}
+  .msg.is-me .msg-bubble{background:var(--surface-hover);}
+  .msg-choices{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;}
+  .choice-chip{
+    padding:6px 12px;border:1px solid var(--border-strong);border-radius:var(--r-control);
+    font-size:12px;color:var(--text-secondary);transition:border-color .15s var(--ease),color .12s var(--ease),background-color .12s var(--ease);
+  }
+  .choice-chip:hover{border-color:var(--accent);color:var(--text-primary);background:var(--surface-hover);}
+
+  .diagnosis-block{
+    border-left:2px solid var(--accent);padding:2px 0 2px 14px;
+    font-size:13px;color:var(--text-primary);line-height:1.6;
+  }
+  .story-card{
+    border:1px solid var(--border);border-radius:var(--r-card);padding:16px;
+    display:flex;flex-direction:column;gap:8px;background:var(--surface-raised);
+  }
+  .story-top{display:flex;align-items:center;gap:8px;}
+  .story-work{font-size:13px;color:var(--text-secondary);}
+  .story-lesson{font-size:13px;color:var(--text-primary);line-height:1.6;}
+  .chat-footer{font-size:12px;color:var(--text-tertiary);text-align:center;padding-top:4px;}
+
+  /* --- 반응형 --- */
+  .layout-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:32px;}
+  .col-main{display:flex;flex-direction:column;gap:32px;min-width:0;}
+  .col-aside{min-width:0;}
+  .goal-segment-row,.lists-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+
+  @media (max-width:900px){
+    .sidebar{position:fixed;z-index:40;width:64px;}
+    .sidebar .nav-label,.sidebar .logo-text,.sidebar .user-label,.sidebar-toggle{display:none;}
+    .main{margin-left:64px;}
+    .content-wrap{padding:20px;gap:24px;}
+    .topbar{padding:12px 20px;}
+    .kpi-grid{grid-template-columns:repeat(2,1fr);gap:16px;}
+    .layout-grid{grid-template-columns:1fr;gap:24px;}
+    .charts-row,.goal-segment-row,.lists-row{grid-template-columns:1fr;gap:16px;}
+    .search-box{max-width:160px;}
+    .topbar-title{display:none;}
+  }
+  @media (max-width:520px){
+    .kpi-grid{grid-template-columns:1fr;}
+    .btn span.btn-text-full{display:none;}
+    .search-box{display:none;}
+  }
+
+  /* ============ 히어로 로드 연출 (CSS-only, JS 불필요) ============ */
+  .app{animation:app-fade .22s var(--ease) both;}
+  @keyframes app-fade{from{opacity:0;}to{opacity:1;}}
+
+  .nav-item{animation:nav-reveal .18s var(--ease) both;}
+  .nav-item:nth-child(1){animation-delay:.10s;}
+  .nav-item:nth-child(2){animation-delay:.12s;}
+  .nav-item:nth-child(3){animation-delay:.14s;}
+  .nav-item:nth-child(4){animation-delay:.16s;}
+  .nav-item:nth-child(5){animation-delay:.18s;}
+  .nav-item:nth-child(6){animation-delay:.20s;}
+  @keyframes nav-reveal{from{color:transparent;}to{color:var(--text-tertiary);}}
+
+  .kpi-card{animation:kpi-in .18s var(--ease) both;}
+  .kpi-card:nth-child(1){animation-delay:.25s;}
+  .kpi-card:nth-child(2){animation-delay:.31s;}
+  .kpi-card:nth-child(3){animation-delay:.37s;}
+  .kpi-card:nth-child(4){animation-delay:.43s;}
+  @keyframes kpi-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .line-path{
+    stroke-dasharray:1000;stroke-dashoffset:1000;
+    animation:draw-line .6s ease-out .45s both;
+  }
+  @keyframes draw-line{to{stroke-dashoffset:0;}}
+  .area-path{animation:area-fade .5s var(--ease) .7s both;}
+  @keyframes area-fade{from{opacity:0;}to{opacity:1;}}
+
+  tbody tr{animation:row-in .22s var(--ease) both;}
+  tbody tr:nth-child(1){animation-delay:.60s;}
+  tbody tr:nth-child(2){animation-delay:.624s;}
+  tbody tr:nth-child(3){animation-delay:.648s;}
+  tbody tr:nth-child(4){animation-delay:.672s;}
+  tbody tr:nth-child(5){animation-delay:.696s;}
+  tbody tr:nth-child(6){animation-delay:.720s;}
+  @keyframes row-in{from{opacity:0;}to{opacity:1;}}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important;animation-delay:0s !important;transition-duration:0.001ms !important;}
+    .app,.nav-item,.kpi-card,tbody tr{opacity:1;transform:none;color:var(--text-tertiary);}
+    .nav-item{color:var(--text-tertiary);}
+    .nav-item.is-active,.nav-item:hover{color:var(--text-primary);}
+    .line-path{stroke-dashoffset:0;}
+  }
+
+  /* ============ 푸터 ============ */
+  .site-footer{
+    padding:24px 32px 40px;text-align:center;color:var(--text-tertiary);font-size:12px;
+    border-top:1px solid var(--border);margin-top:8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 아이콘 스프라이트 -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+  </symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+  </symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+  </symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+  </symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+  </symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
+  </symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+  </symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="6 9 12 15 18 9"/>
+  </symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="15 18 9 12 15 6"/>
+  </symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+  </symbol>
+  <symbol id="i-arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+  </symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <polygon points="5 3 19 12 5 21 5 3"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+  </symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+  </symbol>
+  <symbol id="i-star" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+  </symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  </symbol>
+</svg>
+
+<div class="app">
+  <!-- ============ 사이드바 ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="logo-mark">연</span>
+      <span class="logo-text">연서</span>
+    </div>
+    <nav class="nav-list" aria-label="주 네비게이션">
+      <a href="#" class="nav-item is-active" aria-current="page"><svg class="icon"><use href="#i-chat"/></svg><span class="nav-label">대화</span></a>
+      <a href="#" class="nav-item"><svg class="icon"><use href="#i-grid"/></svg><span class="nav-label">모아보기</span></a>
+      <a href="#" class="nav-item"><svg class="icon"><use href="#i-compass"/></svg><span class="nav-label">결핍 지도</span></a>
+      <a href="#" class="nav-item"><svg class="icon"><use href="#i-book"/></svg><span class="nav-label">작품 서가</span></a>
+      <a href="#" class="nav-item"><svg class="icon"><use href="#i-clock"/></svg><span class="nav-label">기록</span></a>
+      <a href="#" class="nav-item"><svg class="icon"><use href="#i-sliders"/></svg><span class="nav-label">설정</span></a>
+    </nav>
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="사이드바 접기/펴기" aria-expanded="true">
+      <svg class="icon"><use href="#i-chevron-left"/></svg><span>접기</span>
+    </button>
+    <div class="sidebar-user">
+      <span class="avatar">ㅇ</span>
+      <div class="user-meta">
+        <span class="user-label">읽는 사람</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ 메인 ============ -->
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title">연서</span>
+      <div class="search-box">
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input type="text" placeholder="작품·교훈 검색" aria-label="작품·교훈 검색">
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" aria-label="알림, 읽지 않음 3개">
+          <svg class="icon"><use href="#i-bell"/></svg>
+          <span class="badge-dot num">3</span>
+        </button>
+        <span class="avatar">ㅇ</span>
+        <button class="btn btn-secondary"><span class="btn-text-full">모아보기</span></button>
+        <button class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg><span class="btn-text-full">새 대화</span></button>
+      </div>
+    </header>
+
+    <div class="content-wrap">
+
+      <!-- 탭 + 필터 -->
+      <div class="tabs-filter-row">
+        <div class="tabs" role="tablist" aria-label="축 필터">
+          <button class="tab is-active" role="tab" aria-selected="true">전체</button>
+          <button class="tab" role="tab" aria-selected="false">외적</button>
+          <button class="tab" role="tab" aria-selected="false">내적</button>
+          <button class="tab" role="tab" aria-selected="false">최근</button>
+        </div>
+        <div class="filter-dd" id="filterDD">
+          <button class="filter-trigger" id="filterTrigger" aria-haspopup="true" aria-expanded="false">
+            <span>시대</span><svg class="icon"><use href="#i-chevron-down"/></svg>
+          </button>
+          <div class="filter-menu" role="menu">
+            <button class="is-selected" role="menuitem">전체 시대</button>
+            <button role="menuitem">근대</button>
+            <button role="menuitem">현대</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 알림 배너 -->
+      <div class="banner">
+        <svg class="icon"><use href="#i-info"/></svg>
+        <p>결핍을 짚으려면 두세 마디가 더 필요해요. 편한 만큼만 답해도 됩니다.</p>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">들은 스토리</span>
+          <div class="kpi-value-row"><span class="kpi-value num">1,284,000</span><span class="kpi-unit">편</span></div>
+          <span class="kpi-delta is-up"><svg class="icon"><use href="#i-arrow-up"/></svg><span class="num">+12.4%</span></span>
+          <svg class="kpi-spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,25 14.3,23 28.6,22 42.9,20 57.1,17 71.4,14 85.7,11 100,6"/></svg>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">짚어낸 결핍</span>
+          <div class="kpi-value-row"><span class="kpi-value num">7</span><span class="kpi-unit">개</span></div>
+          <span class="kpi-delta is-down"><svg class="icon"><use href="#i-arrow-down"/></svg><span class="num">-2</span></span>
+          <svg class="kpi-spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,6 14.3,9 28.6,11 42.9,13 57.1,16 71.4,19 85.7,21 100,23"/></svg>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">평균 읽은 시간</span>
+          <div class="kpi-value-row"><span class="kpi-value num">58</span><span class="kpi-unit">초</span></div>
+          <span class="kpi-delta is-up"><svg class="icon"><use href="#i-arrow-up"/></svg><span class="num">+3초</span></span>
+          <svg class="kpi-spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,20 14.3,19 28.6,19 42.9,17 57.1,16 71.4,15 85.7,13 100,10"/></svg>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">이어온 날</span>
+          <div class="kpi-value-row"><span class="kpi-value num">26</span><span class="kpi-unit">일</span></div>
+          <span class="kpi-delta is-up"><svg class="icon"><use href="#i-arrow-up"/></svg><span class="num">+1일</span></span>
+          <svg class="kpi-spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,24 14.3,22 28.6,21 42.9,19 57.1,17 71.4,15 85.7,13 100,10"/></svg>
+        </div>
+      </div>
+
+      <div class="layout-grid">
+        <div class="col-main">
+
+          <!-- 차트 2종 -->
+          <div class="charts-row">
+            <div class="card">
+              <div class="card-head"><h3>최근 10일 청취 추이</h3><span class="card-sub">단위: 회</span></div>
+              <div class="line-chart-wrap">
+                <svg viewBox="0 0 600 220" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#8B8BF5" stop-opacity="0.16"/>
+                      <stop offset="100%" stop-color="#8B8BF5" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <line class="baseline" x1="20" y1="200" x2="580" y2="200"/>
+                  <path class="area-path" d="M20,152 L82.22,128 L144.44,140 L206.67,164 L268.89,104 L331.11,76 L393.33,92 L455.56,36 L517.78,68 L580,84 L580,200 L20,200 Z"/>
+                  <path class="line-path" d="M20,152 L82.22,128 L144.44,140 L206.67,164 L268.89,104 L331.11,76 L393.33,92 L455.56,36 L517.78,68 L580,84"/>
+                </svg>
+                <div class="peak-marker" style="left:75.93%;top:16.36%" tabindex="0">
+                  <span class="tip">8일째 · <span class="num">41</span>회</span>
+                </div>
+              </div>
+              <div class="chart-x-labels">
+                <span>1일</span><span>3일</span><span>5일</span><span>7일</span><span>10일</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>축 구성비</h3></div>
+              <div class="donut-wrap">
+                <svg viewBox="0 0 200 200">
+                  <g stroke-width="26" fill="none">
+                    <circle cx="100" cy="100" r="70" stroke="var(--surface-hover)" stroke-width="26"/>
+                    <circle cx="100" cy="100" r="70" stroke="#8B8BF5" stroke-dasharray="149.54 439.82" transform="rotate(-90 100 100)"/>
+                    <circle cx="100" cy="100" r="70" stroke="#6E6E76" stroke-dasharray="96.76 439.82" stroke-dashoffset="-149.54" transform="rotate(-90 100 100)"/>
+                    <circle cx="100" cy="100" r="70" stroke="#52525A" stroke-dasharray="79.17 439.82" stroke-dashoffset="-246.30" transform="rotate(-90 100 100)"/>
+                    <circle cx="100" cy="100" r="70" stroke="#3A3A40" stroke-dasharray="70.37 439.82" stroke-dashoffset="-325.47" transform="rotate(-90 100 100)"/>
+                    <circle cx="100" cy="100" r="70" stroke="#2A2A2F" stroke-dasharray="43.98 439.82" stroke-dashoffset="-395.84" transform="rotate(-90 100 100)"/>
+                  </g>
+                </svg>
+                <ul class="legend">
+                  <li class="legend-item"><span class="legend-dot" style="background:#8B8BF5"></span><span class="legend-name">내적-성찰</span><span class="legend-pct num">34%</span></li>
+                  <li class="legend-item"><span class="legend-dot" style="background:#6E6E76"></span><span class="legend-name">내적-마음</span><span class="legend-pct num">22%</span></li>
+                  <li class="legend-item"><span class="legend-dot" style="background:#52525A"></span><span class="legend-name">내적-성품</span><span class="legend-pct num">18%</span></li>
+                  <li class="legend-item"><span class="legend-dot" style="background:#3A3A40"></span><span class="legend-name">외적-첫인상</span><span class="legend-pct num">16%</span></li>
+                  <li class="legend-item"><span class="legend-dot" style="background:#2A2A2F"></span><span class="legend-name">외적-조건</span><span class="legend-pct num">10%</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 목표 진행률 + 세그먼트 -->
+          <div class="goal-segment-row">
+            <div class="card goal-card">
+              <div class="card-head"><h3>이번 달 소양 목표</h3></div>
+              <div class="goal-num-row">
+                <span class="goal-num"><span class="num">26</span> / <span class="num">40</span>편</span>
+                <span class="goal-pct num">65%</span>
+              </div>
+              <div class="progress-track" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="이번 달 소양 목표 달성률">
+                <div class="progress-fill" style="width:65%"></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>차트 뷰</h3></div>
+              <div class="segment-control" role="tablist" aria-label="차트 뷰 전환">
+                <button class="segment-btn is-active" role="tab" aria-selected="true">내적</button>
+                <button class="segment-btn" role="tab" aria-selected="false">외적</button>
+              </div>
+              <span class="segment-hint">선택한 축 기준으로 위 차트가 갱신됩니다</span>
+            </div>
+          </div>
+
+          <!-- 상위 리스트 + 빈 상태 -->
+          <div class="lists-row">
+            <div class="card">
+              <div class="card-head"><h3>자주 나온 결핍</h3></div>
+              <ul class="top-list">
+                <li><span class="avatar">ㄱ</span><span class="name">기대치 어긋남</span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="val num">32</span></li>
+                <li><span class="avatar">ㅍ</span><span class="name">표현 부족</span><span class="bar-track"><span class="bar-fill" style="width:84%"></span></span><span class="val num">27</span></li>
+                <li><span class="avatar">ㅈ</span><span class="name">자존감</span><span class="bar-track"><span class="bar-fill" style="width:66%"></span></span><span class="val num">21</span></li>
+                <li><span class="avatar">ㄱ</span><span class="name">거리 조절</span><span class="bar-track"><span class="bar-fill" style="width:47%"></span></span><span class="val num">15</span></li>
+                <li><span class="avatar">ㅅ</span><span class="name">신뢰 회복</span><span class="bar-track"><span class="bar-fill" style="width:28%"></span></span><span class="val num">9</span></li>
+              </ul>
+            </div>
+
+            <div class="card empty-card">
+              <svg class="icon"><use href="#i-compass"/></svg>
+              <span class="card-sub">모아보기 · 축 필터</span>
+              <h4>아직 이 축의 이야기가 없어요</h4>
+              <p>대화를 두어 마디 더 나누면 맞는 이야기를 찾아드릴게요.</p>
+              <button class="btn btn-secondary">대화 이어가기</button>
+            </div>
+          </div>
+
+          <!-- 테이블 -->
+          <div class="card">
+            <div class="card-head"><h3>받은 스토리</h3></div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="sortable" aria-sort="none" id="thTitle"><button type="button">작품 <svg class="icon"><use href="#i-chevron-down"/></svg></button></th>
+                    <th>작가</th>
+                    <th>축</th>
+                    <th>교훈</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+                <tbody id="storyBody">
+                  <tr data-title="오만과 편견">
+                    <td><div class="cell-title"><span class="cover">오<span class="cover-play"><svg class="icon"><use href="#i-play"/></svg></span></span><span class="title-text">오만과 편견</span></div></td>
+                    <td>제인 오스틴</td>
+                    <td><span class="axis-badge is-inner">내적</span></td>
+                    <td><span class="lesson-text">첫인상은 자주 틀린다</span></td>
+                    <td><span class="status is-heard"><svg class="icon"><use href="#i-check"/></svg>들음</span></td>
+                  </tr>
+                  <tr data-title="위대한 개츠비">
+                    <td><div class="cell-title"><span class="cover">위<span class="cover-play"><svg class="icon"><use href="#i-play"/></svg></span></span><span class="title-text">위대한 개츠비</span></div></td>
+                    <td>F. 스콧 피츠제럴드</td>
+                    <td><span class="axis-badge is-outer">외적</span></td>
+                    <td><span class="lesson-text">조건으로 시작한 마음은 조건에서 끝난다</span></td>
+                    <td><span class="status is-hold"><svg class="icon"><use href="#i-pause"/></svg>보류</span></td>
+                  </tr>
+                  <tr data-title="어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설">
+                    <td><div class="cell-title"><span class="cover is-disabled">어<span class="cover-play"><svg class="icon"><use href="#i-play"/></svg></span></span><span class="title-text">어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설</span></div></td>
+                    <td><span class="missing">—</span></td>
+                    <td><span class="axis-badge is-inner">내적</span></td>
+                    <td><span class="lesson-text">기다림은 사람을 바꾼다</span></td>
+                    <td><span class="status is-replay"><svg class="icon"><use href="#i-refresh"/></svg>다시듣기</span></td>
+                  </tr>
+                  <tr data-title="폭풍의 언덕">
+                    <td><div class="cell-title"><span class="cover">폭<span class="cover-play"><svg class="icon"><use href="#i-play"/></svg></span></span><span class="title-text">폭풍의 언덕</span></div></td>
+                    <td>에밀리 브론테</td>
+                    <td><span class="axis-badge is-inner">내적</span></td>
+                    <td><span class="lesson-text">집착은 사랑의 이름을 빌린다</span></td>
+                    <td><span class="status is-heard"><svg class="icon"><use href="#i-check"/></svg>들음</span></td>
+                  </tr>
+                  <tr data-title="시라노 드 베르주라크">
+                    <td><div class="cell-title"><span class="cover">시<span class="cover-play"><svg class="icon"><use href="#i-play"/></svg></span></span><span class="title-text">시라노 드 베르주라크</span></div></td>
+                    <td>에드몽 로스탕</td>
+                    <td><span class="axis-badge is-outer">외적</span></td>
+                    <td><span class="lesson-text">목소리는 얼굴보다 오래 남는다</span></td>
+                    <td><span class="status is-new"><svg class="icon"><use href="#i-star"/></svg>새로움</span></td>
+                  </tr>
+                  <tr data-title="안나 카레니나">
+                    <td><div class="cell-title"><span class="cover">안<span class="cover-play"><svg class="icon"><use href="#i-play"/></svg></span></span><span class="title-text">안나 카레니나</span></div></td>
+                    <td>레프 톨스토이</td>
+                    <td><span class="axis-badge is-inner">내적</span></td>
+                    <td><span class="lesson-text">불행한 사랑은 저마다의 이유로 불행하다</span></td>
+                    <td><span class="status is-hold"><svg class="icon"><use href="#i-pause"/></svg>보류</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 대화 패널 -->
+        <aside class="col-aside">
+          <div class="card chat-card">
+            <div class="card-head"><h3>대화</h3><span class="card-sub">오늘</span></div>
+            <div class="chat-thread">
+              <div class="msg">
+                <div class="msg-meta"><span class="avatar">연</span><span class="msg-speaker">연서</span></div>
+                <p class="msg-bubble">요즘 사랑에서 어떤 게 제일 어려우세요?</p>
+              </div>
+              <div class="msg is-me">
+                <div class="msg-meta"><span class="msg-speaker">나</span><span class="avatar">ㅇ</span></div>
+                <p class="msg-bubble">연락이 오면 반갑고 안 오면 하루가 다 망가져요. 제가 너무 매달리는 것 같기도 하고, 사실은 그냥 확인받고 싶은 건지도 모르겠어요.</p>
+              </div>
+              <div class="msg">
+                <div class="msg-meta"><span class="avatar">연</span><span class="msg-speaker">연서</span></div>
+                <p class="msg-bubble">기다림이 힘든 건가요, 기다리는 자신이 싫은 건가요?</p>
+                <div class="msg-choices">
+                  <button class="choice-chip">기다림이 힘들다</button>
+                  <button class="choice-chip">그런 내가 싫다</button>
+                </div>
+              </div>
+              <div class="msg is-me">
+                <div class="msg-meta"><span class="msg-speaker">나</span><span class="avatar">ㅇ</span></div>
+                <p class="msg-bubble">후자요.</p>
+              </div>
+            </div>
+
+            <div class="diagnosis-block">
+              확인받아야 안심되는 마음이 보여요. 없는 건 상대의 애정이 아니라 스스로에 대한 확신 같습니다.
+            </div>
+
+            <div class="story-card">
+              <div class="story-top"><span class="axis-badge is-inner">내적</span></div>
+              <span class="story-work">오만과 편견 · 제인 오스틴</span>
+              <p class="story-lesson">첫인상은 자주 틀린다 — 나에 대한 첫인상도 마찬가지다.</p>
+            </div>
+
+            <p class="chat-footer">다른 이야기도 들어볼래요?</p>
+          </div>
+        </aside>
+      </div>
+
+    </div>
+
+    <footer class="site-footer">STYLE 26 · 다크 프로 미니멀</footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  // 사이드바 접기 (데스크톱 전용 향상 기능 — 실패해도 기본 레이아웃은 완전함)
+  var sidebar = document.getElementById('sidebar');
+  var toggle = document.getElementById('sidebarToggle');
+  if(toggle && sidebar){
+    toggle.addEventListener('click', function(){
+      var collapsed = sidebar.classList.toggle('collapsed');
+      toggle.setAttribute('aria-expanded', String(!collapsed));
+    });
+  }
+
+  // 축 탭 전환
+  document.querySelectorAll('.tabs .tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('.tabs .tab').forEach(function(t){
+        t.classList.remove('is-active'); t.setAttribute('aria-selected','false');
+      });
+      tab.classList.add('is-active'); tab.setAttribute('aria-selected','true');
+    });
+  });
+
+  // 시대 필터 드롭다운
+  var dd = document.getElementById('filterDD');
+  var ddTrigger = document.getElementById('filterTrigger');
+  if(dd && ddTrigger){
+    ddTrigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var open = dd.classList.toggle('is-open');
+      ddTrigger.setAttribute('aria-expanded', String(open));
+    });
+    dd.querySelectorAll('.filter-menu button').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        dd.querySelectorAll('.filter-menu button').forEach(function(b){b.classList.remove('is-selected');});
+        btn.classList.add('is-selected');
+        ddTrigger.querySelector('span').textContent = btn.textContent;
+        dd.classList.remove('is-open');
+        ddTrigger.setAttribute('aria-expanded','false');
+      });
+    });
+    document.addEventListener('click', function(e){
+      if(!dd.contains(e.target)){ dd.classList.remove('is-open'); ddTrigger.setAttribute('aria-expanded','false'); }
+    });
+  }
+
+  // 세그먼트 컨트롤
+  document.querySelectorAll('.segment-control .segment-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var group = btn.closest('.segment-control');
+      group.querySelectorAll('.segment-btn').forEach(function(b){
+        b.classList.remove('is-active'); b.setAttribute('aria-selected','false');
+      });
+      btn.classList.add('is-active'); btn.setAttribute('aria-selected','true');
+    });
+  });
+
+  // 테이블 정렬 (작품 열, 기존 DOM 행 재정렬 — 데이터 중복 없음)
+  var thTitle = document.getElementById('thTitle');
+  var tbody = document.getElementById('storyBody');
+  if(thTitle && tbody){
+    var asc = true;
+    thTitle.addEventListener('click', function(){
+      var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+      rows.sort(function(a,b){
+        var ka = a.getAttribute('data-title'), kb = b.getAttribute('data-title');
+        return asc ? ka.localeCompare(kb, 'ko') : kb.localeCompare(ka, 'ko');
+      });
+      rows.forEach(function(r){ tbody.appendChild(r); });
+      thTitle.setAttribute('aria-sort', asc ? 'ascending' : 'descending');
+      asc = !asc;
+    });
+  }
+})();
+</script>
+</body>
+</html>

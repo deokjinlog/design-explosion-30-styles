@@ -1,7 +1,7 @@
 {
   "name": "design-explosion-30-styles",
-  "description": "하나의 화면을 30가지 디자인 스타일로 폭발시켜 나란히 비교 — 도메인 하나로 방향을 정하는 디자인 탐색",
-  "version": "1.1.0",
+  "description": "화면 하나를 30가지 디자인 스타일로, 카피 하나를 30가지 메시지 각도로 폭발시켜 나란히 비교 — 스타일 × 메시지로 방향을 정하는 탐색 키트",
+  "version": "1.2.0",
   "author": {
     "name": "djchoi",
     "email": "deokjinlog@users.noreply.github.com"
@@ -10,13 +10,8 @@
   "repository": "https://github.com/deokjinlog/design-explosion-30-styles",
   "license": "MIT",
   "keywords": [
-    "design",
-    "ui",
-    "design-exploration",
-    "html",
-    "mockup",
-    "gallery",
-    "claude-code",
-    "claude-code-plugin"
+    "design", "ui", "design-exploration", "html", "mockup", "gallery",
+    "copywriting", "landing-page", "messaging", "archetype",
+    "claude-code", "claude-code-plugin"
   ]
 }

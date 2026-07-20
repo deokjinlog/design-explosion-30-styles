@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 · 데이터 어드민</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ 0. 토큰 — 데이터 리치 라이트 팔레트 ============ */
+:root{
+  --bg:#FFFFFF;
+  --canvas:#F9FAFB;
+  --zebra:#F3F4F6;
+  --row-hover:#EFF6FF;
+  --grid:#E5E7EB;
+  --grid-strong:#D1D5DB;
+  --text:#111827;
+  --muted:#6B7280;        /* 흰/캔버스 배경 전용 (4.5:1 확보) */
+  --muted-strong:#4B5563; /* zebra·상태칩 등 어디서나 안전 (6.8:1+) */
+
+  --primary:#2563EB;
+  --on-primary:#FFFFFF;
+  --primary-soft:#DBEAFE;
+  --primary-chip-text:#1D4ED8; /* primary-soft 위 텍스트 전용(대비 보강) */
+
+  --success:#059669; --success-bg:#D1FAE5; --success-text:#047857;
+  --warning:#D97706; --warning-bg:#FEF3C7; --warning-text:#92400E;
+  --danger:#DC2626;  --danger-bg:#FEE2E2;  --danger-text:#991B1B;
+  --progress:#7C3AED; --progress-bg:#EDE9FE; /* 자체로 4.8:1 확보, 조정 불필요 */
+
+  --filter-active-border:#2563EB;
+  --filter-active-bg:#EFF6FF;
+  --filter-inactive-border:#E5E7EB;
+  --filter-inactive-text:#6B7280;
+
+  --font-kr:'Pretendard', sans-serif;
+  --font-en:'Inter', sans-serif;
+
+  --sidebar-w:220px;
+  --sidebar-w-rail:56px;
+  --topbar-h:52px;
+
+  --menu-shadow:0 4px 12px rgba(17,24,39,.08); /* 뜬 요소(드롭다운/메뉴)만 허용된 그림자 */
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-kr);
+  font-size:13px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+}
+.num, th, td, .stat-value, .stat-delta, .kpi-unit, .th-inner, .chip .count, .progress-pct, .progress-frac,
+.tval, .btn, .tab, .chip, .seg-btn, input, .badge, .stat-label{
+  font-family:var(--font-en), var(--font-kr);
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+}
+img,svg{display:block;}
+button{font:inherit; color:inherit; background:none; border:none; cursor:pointer;}
+a{color:inherit; text-decoration:none;}
+ul{list-style:none;}
+input{font:inherit; color:inherit;}
+
+:focus-visible{
+  outline:2px solid var(--primary);
+  outline-offset:1px;
+  border-radius:3px;
+}
+
+/* ============ 타이포 스케일 (조밀) ============ */
+.page-title{ font-size:20px; line-height:28px; font-weight:600; letter-spacing:-.01em; color:var(--text); }
+.section-title{ font-size:15px; line-height:20px; font-weight:600; color:var(--text); }
+.section-sub{ font-size:11px; line-height:14px; font-weight:500; color:var(--muted); margin-top:2px; }
+
+/* ============ 1. 레이아웃 셸 ============ */
+.app-shell{ display:grid; grid-template-columns:var(--sidebar-w) 1fr; min-height:100vh; }
+.app-shell.rail{ grid-template-columns:var(--sidebar-w-rail) 1fr; }
+
+/* ---- 사이드바 ---- */
+.sidebar{
+  background:var(--canvas);
+  border-right:1px solid var(--grid);
+  padding:14px 12px;
+  display:flex; flex-direction:column; gap:4px;
+  position:sticky; top:0; height:100vh; z-index:40;
+}
+.sidebar-head{ display:flex; align-items:center; justify-content:space-between; padding:4px 6px 14px; }
+.brand{ display:flex; align-items:center; gap:8px; min-width:0; }
+.brand-mark{
+  width:26px; height:26px; border-radius:6px; flex-shrink:0;
+  background:var(--primary); color:var(--on-primary);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:13px; font-family:var(--font-en);
+}
+.brand-word{ font-size:15px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.collapse-btn{ width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; color:var(--muted); flex-shrink:0; }
+.collapse-btn:hover{ background:var(--zebra); color:var(--text); }
+.collapse-btn svg{ width:16px; height:16px; transition:transform .15s ease; }
+.app-shell.rail .collapse-btn svg{ transform:rotate(180deg); }
+
+.nav{ display:flex; flex-direction:column; gap:1px; flex:1; }
+.nav-item{
+  display:flex; align-items:center; gap:10px;
+  height:34px; padding:0 10px; padding-left:9px;
+  border-left:3px solid transparent; border-radius:0 6px 6px 0;
+  color:var(--muted-strong); font-size:13px; font-weight:500; width:100%; text-align:left;
+}
+.nav-item svg{ width:17px; height:17px; flex-shrink:0; }
+.nav-item span.label{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.nav-item:hover{ background:var(--zebra); color:var(--text); }
+.nav-item.active{ background:var(--primary-soft); color:var(--primary-chip-text); border-left-color:var(--primary); font-weight:600; }
+
+.sidebar-foot{
+  margin-top:auto; display:flex; align-items:center; gap:8px;
+  padding:10px 8px 4px; border-top:1px solid var(--grid);
+}
+.avatar{
+  width:26px; height:26px; border-radius:50%; flex-shrink:0;
+  background:var(--primary-soft); color:var(--primary-chip-text);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:11px; font-family:var(--font-en);
+}
+.avatar.sm{ width:22px; height:22px; font-size:10px; }
+.user-role{ font-size:12px; color:var(--muted-strong); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.app-shell.rail .brand-word,
+.app-shell.rail .nav-item span.label,
+.app-shell.rail .user-role{ display:none; }
+.app-shell.rail .nav-item{ justify-content:center; padding-left:0; border-left:none; }
+.app-shell.rail .nav-item.active{ border-left:none; box-shadow:inset 3px 0 0 var(--primary); }
+.app-shell.rail .brand{ justify-content:center; }
+.app-shell.rail .sidebar-head{ justify-content:center; }
+.app-shell.rail .collapse-btn{ display:none; }
+.app-shell.rail .sidebar-foot{ justify-content:center; }
+
+.scrim{ position:fixed; inset:0; background:rgba(17,24,39,.35); z-index:39; opacity:0; pointer-events:none; transition:opacity .18s ease; }
+.scrim.show{ opacity:1; pointer-events:auto; }
+
+/* ---- 메인 컬럼 ---- */
+.main{ display:flex; flex-direction:column; min-width:0; }
+
+/* ---- 상단바 ---- */
+.topbar{
+  position:sticky; top:0; z-index:30;
+  background:var(--bg); border-bottom:1px solid var(--grid);
+  display:flex; align-items:center; gap:12px;
+  padding:0 16px; height:var(--topbar-h);
+}
+.hamburger{ display:none; width:32px; height:32px; border-radius:6px; align-items:center; justify-content:center; color:var(--muted-strong); flex-shrink:0; }
+.hamburger:hover{ background:var(--zebra); }
+.hamburger svg{ width:20px; height:20px; }
+.topbar-word{ font-family:var(--font-en); font-size:14px; font-weight:700; color:var(--text); flex-shrink:0; }
+
+.search{
+  position:relative; flex:1; max-width:300px;
+  display:flex; align-items:center; gap:6px;
+  background:var(--canvas); border:1px solid var(--grid); border-radius:6px;
+  height:32px; padding:0 10px; color:var(--muted-strong);
+}
+.search svg{ width:16px; height:16px; flex-shrink:0; }
+.search input{ border:none; outline:none; background:none; width:100%; color:var(--text); font-size:13px; }
+.search input::placeholder{ color:var(--muted); }
+.search:focus-within{ border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft); }
+
+.topbar-spacer{ flex:1; }
+
+.icon-btn{
+  position:relative; width:32px; height:32px; border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--muted-strong); border:1px solid transparent; flex-shrink:0;
+}
+.icon-btn:hover{ background:var(--zebra); border-color:var(--grid); color:var(--text); }
+.icon-btn.sm{ width:28px; height:28px; }
+.icon-btn svg{ width:17px; height:17px; }
+.icon-btn[disabled]{ color:#D1D5DB; pointer-events:none; }
+.badge{
+  position:absolute; top:-3px; right:-3px; min-width:15px; height:15px; padding:0 3px; border-radius:8px;
+  background:var(--danger); color:#fff; font-size:10px; font-weight:700; line-height:15px; text-align:center;
+}
+
+/* ---- 버튼: primary / secondary / ghost 상태 전부 ---- */
+.btn{
+  height:32px; padding:0 14px; border-radius:6px;
+  font-size:13px; font-weight:600; white-space:nowrap;
+  display:inline-flex; align-items:center; gap:6px; border:1px solid transparent;
+  transition:background .12s ease, border-color .12s ease, color .12s ease;
+}
+.btn svg{ width:15px; height:15px; }
+.btn-primary{ background:var(--primary); color:var(--on-primary); }
+.btn-primary:hover{ background:#1D4ED8; }
+.btn-primary:active{ background:#1E40AF; }
+.btn-primary[disabled]{ background:#93C5FD; color:#fff; cursor:not-allowed; }
+.btn-secondary{ background:var(--bg); color:var(--text); border-color:var(--grid); }
+.btn-secondary:hover{ background:var(--zebra); }
+.btn-secondary:active{ background:#E5E7EB; }
+.btn-secondary[disabled]{ color:#9CA3AF; cursor:not-allowed; }
+.btn-ghost{ background:transparent; color:var(--muted-strong); }
+.btn-ghost:hover{ background:var(--zebra); color:var(--text); }
+.btn-ghost:active{ background:#E5E7EB; }
+
+/* ---- 컨텐츠 영역 ---- */
+.content{ padding:16px 20px 64px; max-width:1280px; width:100%; margin:0 auto; }
+.content-grid{ display:grid; grid-template-columns:1fr 336px; gap:16px; align-items:start; }
+.page-head{ margin-bottom:12px; }
+
+/* ---- 탭 + 필터 드롭다운 ---- */
+.tabs-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+.tabs{ display:flex; gap:2px; border-bottom:1px solid var(--grid); }
+.tab{ height:32px; padding:0 12px; font-size:13px; font-weight:500; color:var(--muted-strong); border-bottom:2px solid transparent; margin-bottom:-1px; }
+.tab:hover{ background:var(--zebra); color:var(--text); }
+.tab.active{ color:var(--primary); font-weight:700; border-bottom-color:var(--primary); }
+
+.filter-wrap{ position:relative; }
+.filter-btn{
+  display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px;
+  border:1px solid var(--grid); border-radius:6px; color:var(--muted-strong); font-size:13px; font-weight:500; background:var(--bg);
+}
+.filter-btn:hover{ background:var(--zebra); }
+.filter-btn svg{ width:14px; height:14px; transition:transform .15s ease; }
+.filter-btn[aria-expanded="true"] svg{ transform:rotate(180deg); }
+.menu{
+  position:absolute; top:calc(100% + 6px); right:0; min-width:176px;
+  background:var(--bg); border:1px solid var(--grid); border-radius:8px; box-shadow:var(--menu-shadow);
+  padding:6px; z-index:50;
+  opacity:0; visibility:hidden; transform:translateY(-4px);
+  transition:opacity .14s ease, transform .14s ease, visibility .14s;
+}
+.menu.open{ opacity:1; visibility:visible; transform:translateY(0); }
+.menu-item{
+  display:flex; align-items:center; justify-content:space-between;
+  width:100%; text-align:left; padding:8px 10px; border-radius:6px; font-size:13px; color:var(--text);
+}
+.menu-item:hover{ background:var(--zebra); }
+.menu-item svg{ width:15px; height:15px; color:var(--primary); }
+
+/* ---- 배너 (info) ---- */
+.banner{
+  display:flex; align-items:flex-start; gap:8px;
+  background:var(--primary-soft); border:1px solid #BFDBFE; border-radius:8px;
+  padding:10px 12px; margin-bottom:16px; color:#1E3A8A;
+}
+.banner svg{ width:18px; height:18px; flex-shrink:0; margin-top:1px; color:var(--primary-chip-text); }
+.banner p{ font-size:13px; line-height:18px; }
+
+/* ---- 스탯 바 (KPI 4, 72px 압축 행) ---- */
+.statbar{ display:flex; align-items:stretch; background:var(--bg); border:1px solid var(--grid); border-radius:8px; margin-bottom:16px; overflow:hidden; }
+.stat-item{ position:relative; flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; gap:3px; padding:9px 16px 15px; height:72px; border-right:1px solid var(--grid); overflow:hidden; }
+.stat-item:last-child{ border-right:none; }
+.stat-label{ font-size:11px; line-height:14px; font-weight:500; color:var(--muted); }
+.stat-value-row{ display:flex; align-items:baseline; gap:3px; }
+.stat-value{ font-size:24px; line-height:28px; font-weight:700; color:var(--text); white-space:nowrap; }
+.stat-unit{ font-size:12px; color:var(--muted); font-weight:500; }
+.stat-delta{ font-size:11px; font-weight:700; display:flex; align-items:center; gap:3px; }
+.stat-delta.up{ color:var(--success-text); }
+.stat-delta.down{ color:var(--danger-text); }
+.stat-delta .ctx{ color:var(--muted); font-weight:400; margin-left:1px; }
+.stat-spark{ position:absolute; left:16px; right:16px; bottom:5px; height:9px; opacity:.65; }
+
+/* ---- 차트 헤더 + 세그먼트 컨트롤 ---- */
+.charts-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; flex-wrap:wrap; }
+.segmented{ display:inline-flex; border:1px solid var(--grid); border-radius:6px; overflow:hidden; }
+.seg-btn{ height:28px; padding:0 13px; font-size:12px; font-weight:600; color:var(--muted-strong); border-right:1px solid var(--grid); }
+.seg-btn:last-child{ border-right:none; }
+.seg-btn:hover{ background:var(--zebra); }
+.seg-btn.selected{ background:var(--primary-soft); color:var(--primary-chip-text); }
+
+/* ---- 패널 공통 (보더만, 그림자 없음) ---- */
+.panel{ background:var(--bg); border:1px solid var(--grid); border-radius:8px; padding:14px 16px; }
+.panel-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:12px; }
+
+/* ---- 차트 로우 ---- */
+.charts-row{ display:grid; grid-template-columns:1.6fr 1fr; gap:16px; margin-bottom:16px; }
+.chart-svg{ width:100%; height:auto; overflow:visible; }
+.chart-grid line{ stroke:var(--grid); }
+.chart-axis text{ fill:var(--muted); font-size:10.5px; font-family:var(--font-en); }
+.chart-area{ fill:rgba(37,99,235,.10); }
+.chart-line{ fill:none; stroke:var(--primary); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.chart-dot{ fill:var(--bg); stroke:var(--primary); stroke-width:1.6; }
+.peak-dot{ fill:var(--primary); stroke:var(--bg); stroke-width:2; }
+.peak-tag-bg{ fill:var(--primary-soft); }
+.peak-tag-text{ font-size:10px; font-weight:700; fill:var(--primary-chip-text); font-family:var(--font-en); }
+
+.donut-wrap{ display:flex; flex-direction:column; align-items:center; gap:12px; }
+.donut-svg{ width:150px; height:150px; }
+.donut-seg{ transition:opacity .2s ease; transform-origin:center; }
+.donut-seg.dim{ opacity:.22; }
+.legend{ width:100%; display:flex; flex-direction:column; gap:6px; }
+.legend-item{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted-strong); transition:opacity .2s ease; }
+.legend-item.dim{ opacity:.35; }
+.legend-dot{ width:9px; height:9px; border-radius:2px; flex-shrink:0; }
+.legend-name{ flex:1; color:var(--text); }
+.legend-pct{ font-weight:700; color:var(--text); }
+
+/* ---- 중단 2단: 목표 진행률 + 자주 나온 결핍 ---- */
+.mid-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.progress-track{ position:relative; width:100%; height:8px; border-radius:4px; background:var(--zebra); overflow:hidden; margin:14px 0 8px; }
+.progress-fill{ position:absolute; inset:0 auto 0 0; height:100%; border-radius:4px; background:var(--progress); transform-origin:left; transform:scaleX(0); }
+.progress-meta{ display:flex; align-items:baseline; justify-content:space-between; }
+.progress-frac{ font-size:12px; color:var(--muted-strong); }
+.progress-pct{ font-size:20px; font-weight:700; color:var(--progress); }
+
+.top-list{ display:flex; flex-direction:column; gap:2px; }
+.top-item{ display:flex; align-items:center; gap:10px; padding:6px 2px; }
+.top-item .bar-track{ flex:1; height:5px; border-radius:3px; background:var(--zebra); overflow:hidden; }
+.top-item .bar-fill{ height:100%; border-radius:3px; background:var(--primary); }
+.top-item .tname{ min-width:96px; font-size:12.5px; color:var(--text); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.top-item .tval{ min-width:24px; text-align:right; font-size:12.5px; font-weight:700; color:var(--text); }
+
+/* ---- 필터 칩 줄 (시그니처) ---- */
+.chip-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.chip-field-label{ font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-right:2px; }
+.chip-row{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.chip{
+  height:24px; padding:0 10px; border-radius:6px; border:1px solid var(--filter-inactive-border);
+  color:var(--filter-inactive-text); font-size:12px; font-weight:600; background:var(--bg);
+  display:inline-flex; align-items:center; gap:5px; transition:background .1s ease, border-color .1s ease, color .1s ease;
+}
+.chip:hover{ background:var(--zebra); }
+.chip .count{ font-size:11px; font-weight:700; opacity:.85; }
+.chip.active{ border-color:var(--filter-active-border); background:var(--filter-active-bg); color:var(--primary); }
+.chip.summary{ border-style:dashed; color:var(--muted-strong); display:none; align-items:center; gap:6px; }
+.chip.summary.show{ display:inline-flex; }
+.chip.summary svg{ width:12px; height:12px; }
+
+/* ---- 대량 작업 바 (슬라이드 다운) ---- */
+.bulk-bar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:var(--primary-soft); border-bottom:1px solid var(--grid);
+  padding:0 16px; max-height:0; opacity:0; overflow:hidden;
+  transition:max-height .16s ease, opacity .12s ease, padding .16s ease;
+}
+.bulk-bar.show{ max-height:48px; opacity:1; padding:9px 16px; }
+.bulk-bar span{ font-size:12.5px; font-weight:600; color:var(--primary-chip-text); }
+.bulk-actions{ display:flex; gap:6px; }
+
+/* ---- 테이블 (시그니처: 촘촘한 라이트 그리드) ---- */
+.table-card{ border:1px solid var(--grid); border-radius:8px; background:var(--bg); overflow:hidden; margin-bottom:16px; }
+.table-card-head{ padding:12px 16px; border-bottom:1px solid var(--grid); }
+.table-scroll{ overflow:auto; max-height:392px; }
+table{ width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed; min-width:660px; }
+col.c-cb{ width:34px; }
+col.c-work{ width:25%; }
+col.c-author{ width:16%; }
+col.c-axis{ width:9%; }
+col.c-lesson{ width:32%; }
+col.c-status{ width:18%; }
+
+thead th{
+  position:sticky; top:0; z-index:2; background:var(--zebra);
+  text-align:left; font-size:12px; line-height:16px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--muted-strong); padding:0 12px; height:34px;
+  border-bottom:1px solid var(--grid-strong); border-right:1px solid var(--grid); white-space:nowrap;
+}
+thead th:last-child{ border-right:none; }
+th.sortable{ cursor:pointer; user-select:none; }
+th.sortable:hover{ color:var(--text); }
+th.sorted{ color:var(--primary); }
+.th-inner{ display:inline-flex; align-items:center; gap:4px; }
+.sort-arrow{ font-size:9px; }
+th.cb-th{ text-align:center; }
+
+tbody tr{ position:relative; }
+tbody tr::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:0; background:var(--primary); transition:width .08s ease; }
+tbody tr:hover::before{ width:3px; }
+tbody tr:nth-child(even) td{ background:var(--zebra); }
+tbody tr:hover td{ background:var(--row-hover); }
+tbody tr[style*="display: none"]{ display:none; }
+tbody td{
+  padding:0 12px; height:34px; font-size:13px; line-height:18px; color:var(--text);
+  border-bottom:1px solid var(--grid); border-right:1px solid var(--grid); vertical-align:middle;
+  transition:background .08s ease;
+}
+tbody td:last-child{ border-right:none; }
+td.cb-td{ text-align:center; }
+.row-cb, #selectAllCb{ width:15px; height:15px; accent-color:var(--primary); cursor:pointer; }
+
+.cell-ellipsis{ display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cell-title{ font-weight:500; }
+.cell-muted{ color:var(--muted-strong); }
+
+.axis-tag{
+  display:inline-flex; align-items:center; padding:2px 8px; border-radius:6px;
+  border:1px solid var(--grid); color:var(--muted-strong); font-size:11px; font-weight:600; background:var(--bg);
+}
+
+.status{ display:inline-flex; align-items:center; gap:4px; padding:3px 8px 3px 7px; border-radius:6px; font-size:11.5px; font-weight:700; white-space:nowrap; }
+.status svg{ width:12px; height:12px; }
+.status.done{ background:var(--success-bg); color:var(--success-text); }
+.status.hold{ background:var(--warning-bg); color:var(--warning-text); }
+.status.replay{ background:var(--progress-bg); color:var(--progress); }
+.status.new{ background:var(--primary-soft); color:var(--primary-chip-text); }
+
+.row-actions{ display:inline-flex; gap:2px; opacity:0; transition:opacity .12s ease; margin-left:6px; vertical-align:middle; }
+tbody tr:hover .row-actions, tbody tr:focus-within .row-actions{ opacity:1; }
+.status-cell{ display:flex; align-items:center; }
+
+.cell-text.editable{ cursor:text; border-radius:4px; padding:2px 4px; margin:0 -4px; }
+.cell-text.editable:hover{ background:var(--zebra); }
+.cell-edit-input{
+  width:100%; height:24px; border:2px solid var(--primary); border-radius:4px; padding:0 5px;
+  font:inherit; font-family:var(--font-kr); font-size:13px; background:var(--bg);
+}
+.cell-flash{ animation:cellFlash .5s ease; }
+@keyframes cellFlash{ 0%{ background:var(--success-bg); } 100%{ background:transparent; } }
+
+/* ---- 아래 로우: 대화 패널 + 빈 상태 ---- */
+.aside{ display:flex; flex-direction:column; gap:16px; position:sticky; top:calc(var(--topbar-h) + 16px); }
+.chat-scroll{ display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+.msg-row{ display:flex; gap:8px; max-width:92%; }
+.msg-row.mine{ align-self:flex-end; flex-direction:row-reverse; max-width:88%; }
+.msg-avatar{ width:24px; height:24px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:var(--font-en); }
+.msg-avatar.bot{ background:var(--primary); color:#fff; }
+.msg-avatar.mine{ background:var(--primary-soft); color:var(--primary-chip-text); }
+.bubble{ padding:9px 12px; border-radius:8px; font-size:12.5px; line-height:18px; }
+.msg-row:not(.mine) .bubble{ background:var(--zebra); color:var(--text); }
+.msg-row.mine .bubble{ background:var(--primary-soft); color:#1E3A8A; }
+
+.choice-row{ display:flex; gap:6px; flex-wrap:wrap; margin:0 0 4px 32px; }
+.choice-chip{ padding:6px 12px; border-radius:6px; border:1px solid var(--grid); font-size:12px; font-weight:600; color:var(--primary-chip-text); background:var(--bg); }
+.choice-chip:hover{ background:var(--filter-active-bg); border-color:var(--filter-active-border); }
+
+.diagnosis{ background:var(--zebra); border-left:3px solid var(--progress); border-radius:0 6px 6px 0; padding:10px 12px; font-size:12.5px; line-height:18px; color:var(--text); margin-bottom:10px; }
+.diagnosis .dx-label{ display:block; font-size:10.5px; font-weight:700; letter-spacing:.04em; color:var(--progress); margin-bottom:5px; text-transform:uppercase; }
+
+.story-card{ border:1px solid var(--grid); border-radius:8px; padding:12px; }
+.story-head{ display:flex; align-items:center; gap:8px; margin-bottom:7px; flex-wrap:wrap; }
+.story-source{ font-size:11.5px; color:var(--muted-strong); }
+.story-lesson{ font-size:13px; font-weight:500; color:var(--text); line-height:19px; margin-bottom:9px; }
+.story-cta{ display:flex; justify-content:flex-end; }
+
+/* ---- 빈 상태 ---- */
+.empty-panel{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; padding:26px 18px; border:1.5px dashed var(--grid-strong); border-radius:8px; }
+.empty-eyebrow{ display:inline-flex; padding:2px 9px; border-radius:6px; border:1px solid var(--grid); color:var(--muted-strong); font-size:11px; font-weight:600; margin-bottom:2px; }
+.empty-icon{ width:44px; height:44px; border-radius:50%; background:var(--zebra); display:flex; align-items:center; justify-content:center; color:var(--muted-strong); }
+.empty-icon svg{ width:22px; height:22px; }
+.empty-headline{ font-size:14px; font-weight:700; color:var(--text); }
+.empty-desc{ font-size:12.5px; color:var(--muted-strong); line-height:18px; max-width:24em; }
+
+/* ---- 푸터 ---- */
+.footer{ max-width:1280px; margin:0 auto; padding:0 20px 32px; color:var(--muted); font-size:11.5px; text-align:center; }
+
+/* ============ 로드 시퀀스 (히어로 연출) — 크롬은 대상 아님, 담백하게 ============ */
+@media (prefers-reduced-motion: no-preference){
+  .chip-row .chip{ opacity:0; animation:chip-in .12s ease forwards; }
+  .chip-row .chip:nth-child(1){ animation-delay:.30s; }
+  .chip-row .chip:nth-child(2){ animation-delay:.32s; }
+  .chip-row .chip:nth-child(3){ animation-delay:.34s; }
+  .chip-row .chip:nth-child(4){ animation-delay:.36s; }
+  .chip-row .chip:nth-child(5){ animation-delay:.38s; }
+  @keyframes chip-in{ from{ opacity:0; transform:translateY(-3px); } to{ opacity:1; transform:translateY(0); } }
+
+  tbody tr td{ animation:row-fade .01s linear forwards; }
+  tbody tr{ opacity:0; animation:row-show .01s linear forwards; }
+  tbody tr:nth-child(1){ animation-delay:.40s; }
+  tbody tr:nth-child(2){ animation-delay:.415s; }
+  tbody tr:nth-child(3){ animation-delay:.43s; }
+  tbody tr:nth-child(4){ animation-delay:.445s; }
+  tbody tr:nth-child(5){ animation-delay:.46s; }
+  tbody tr:nth-child(6){ animation-delay:.475s; }
+  @keyframes row-show{ to{ opacity:1; } }
+
+  .chart-anim-y{ transform:scaleY(0); opacity:0; transform-origin:bottom; animation:grow-y .36s ease-out .7s forwards; }
+  @keyframes grow-y{ to{ transform:scaleY(1); opacity:1; } }
+  .donut-seg{ stroke-dasharray:0 439.8 !important; animation:donut-in .36s ease-out .7s forwards; }
+  @keyframes donut-in{ to{ stroke-dasharray:var(--seg-len) calc(439.8 - var(--seg-len)); } }
+
+  .progress-fill{ animation:prog-in .5s ease-out .5s forwards; }
+  @keyframes prog-in{ to{ transform:scaleX(var(--pfill)); } }
+}
+@media (prefers-reduced-motion: reduce){
+  .progress-fill{ transform:scaleX(var(--pfill)); }
+  .donut-seg{ stroke-dasharray:var(--seg-len) calc(439.8 - var(--seg-len)); }
+  tbody tr{ opacity:1; }
+  .chip-row .chip{ opacity:1; }
+}
+
+/* ============ 반응형 ============ */
+@media (max-width:1080px){
+  .content-grid{ grid-template-columns:1fr; }
+  .aside{ position:static; }
+  .charts-row{ grid-template-columns:1fr; }
+}
+@media (max-width:900px){
+  .app-shell{ grid-template-columns:1fr; }
+  .app-shell.rail{ grid-template-columns:1fr; }
+  .sidebar{
+    position:fixed; left:0; top:0; height:100vh; width:240px; z-index:41;
+    transform:translateX(-100%); transition:transform .18s ease;
+  }
+  .sidebar.open{ transform:translateX(0); }
+  .app-shell.rail .sidebar .label,
+  .app-shell.rail .sidebar .brand-word,
+  .app-shell.rail .sidebar .user-role{ display:block; }
+  .app-shell.rail .sidebar .nav-item{ justify-content:flex-start; padding-left:9px; }
+  .hamburger{ display:flex; }
+  .collapse-btn{ display:none; }
+  .statbar{ flex-wrap:wrap; height:auto; }
+  .stat-item{ flex:1 1 50%; height:auto; padding:10px 14px 14px; border-bottom:1px solid var(--grid); }
+  .stat-item:nth-child(2n){ border-right:none; }
+  .mid-row{ grid-template-columns:1fr; }
+  .topbar-word{ display:none; }
+  .search{ max-width:none; }
+}
+@media (max-width:640px){
+  .stat-item{ flex:1 1 100%; border-right:none !important; }
+  .content{ padding:12px 14px 56px; }
+  .btn.hide-sm{ display:none; }
+  .tabs-row{ align-items:flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 아이콘 심볼 라이브러리 ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="ic-chat" viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="ic-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13" y="4" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="4" y="13" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13" y="13" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="ic-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="9.5" r="2.3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="ic-book" viewBox="0 0 24 24"><path d="M5 4.5A2 2 0 0 1 7 3h11v16H7a2 2 0 0 0-2 2V4.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M5 19a2 2 0 0 0 2 2h11" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="ic-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 4v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8v4l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V20a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H4a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.55-1.1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H10a1.7 1.7 0 0 0 1-1.55V4a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V10a1.7 1.7 0 0 0 1.55 1H20a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4.3-4.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 19a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12.5l2.5 2.5L16 9.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-pause-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 9v6M14 9v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.66-5.66L20 8M20 4v4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 12a8 8 0 0 1-13.66 5.66L4 16M4 20v-4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="8" r="1.1" fill="currentColor"/></symbol>
+<symbol id="ic-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7V5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="ic-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></symbol>
+<symbol id="ic-empty" viewBox="0 0 24 24"><path d="M4 7h9l3 3h4v9H4V7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 15h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="ic-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-reset" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 4v4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-collapse" viewBox="0 0 24 24"><path d="M14 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</defs>
+</svg>
+
+<div class="scrim" id="scrim"></div>
+
+<div class="app-shell" id="appShell">
+
+  <!-- ============ 사이드바 ============ -->
+  <aside class="sidebar" id="sidebar" aria-label="주 네비게이션">
+    <div class="sidebar-head">
+      <div class="brand">
+        <div class="brand-mark">연</div>
+        <span class="brand-word">연서</span>
+      </div>
+      <button class="collapse-btn" id="collapseBtn" aria-label="사이드바 접기/펴기" aria-expanded="true">
+        <svg><use href="#ic-collapse"/></svg>
+      </button>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item active" aria-current="page"><svg><use href="#ic-chat"/></svg><span class="label">대화</span></button>
+      <button class="nav-item"><svg><use href="#ic-grid"/></svg><span class="label">모아보기</span></button>
+      <button class="nav-item"><svg><use href="#ic-pin"/></svg><span class="label">결핍 지도</span></button>
+      <button class="nav-item"><svg><use href="#ic-book"/></svg><span class="label">작품 서가</span></button>
+      <button class="nav-item"><svg><use href="#ic-history"/></svg><span class="label">기록</span></button>
+      <button class="nav-item"><svg><use href="#ic-settings"/></svg><span class="label">설정</span></button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="avatar">ㅇ</div>
+      <div class="user-role">읽는 사람</div>
+    </div>
+  </aside>
+
+  <!-- ============ 메인 ============ -->
+  <div class="main">
+
+    <!-- 상단바 -->
+    <header class="topbar">
+      <button class="hamburger" id="drawerBtn" aria-label="메뉴 열기"><svg><use href="#ic-menu"/></svg></button>
+      <span class="topbar-word">연서</span>
+
+      <label class="search">
+        <svg><use href="#ic-search"/></svg>
+        <input type="text" placeholder="작품·교훈 검색" aria-label="작품·교훈 검색">
+      </label>
+
+      <div class="topbar-spacer"></div>
+
+      <button class="icon-btn" aria-label="알림, 미확인 3건"><svg><use href="#ic-bell"/></svg><span class="badge">3</span></button>
+      <div class="avatar sm">ㅇ</div>
+      <button class="btn btn-primary" id="newChatBtn"><svg><use href="#ic-plus"/></svg><span>새 대화</span></button>
+      <button class="btn btn-secondary hide-sm"><span>모아보기</span></button>
+    </header>
+
+    <div class="content">
+      <div class="content-grid">
+
+        <!-- ============ 좌측: 대시보드 ============ -->
+        <div class="main-col">
+
+          <div class="page-head"><h1 class="page-title">대화</h1></div>
+
+          <!-- 탭 + 필터 -->
+          <div class="tabs-row">
+            <div class="tabs" id="tabs" role="tablist">
+              <button class="tab active" role="tab" aria-selected="true">전체</button>
+              <button class="tab" role="tab" aria-selected="false">외적</button>
+              <button class="tab" role="tab" aria-selected="false">내적</button>
+              <button class="tab" role="tab" aria-selected="false">최근</button>
+            </div>
+
+            <div class="filter-wrap">
+              <button class="filter-btn" id="filterBtn" aria-haspopup="true" aria-expanded="false">
+                <span id="filterLabel">시대</span>
+                <svg><use href="#ic-chevron"/></svg>
+              </button>
+              <div class="menu" id="filterMenu" role="menu">
+                <button class="menu-item" role="menuitem"><span>전체 시대</span><svg><use href="#ic-check-circle"/></svg></button>
+                <button class="menu-item" role="menuitem"><span>근대 이전</span></button>
+                <button class="menu-item" role="menuitem"><span>근현대</span></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 알림 배너 -->
+          <div class="banner">
+            <svg><use href="#ic-info"/></svg>
+            <p>결핍을 짚으려면 두세 마디가 더 필요해요. 편한 만큼만 답해도 됩니다.</p>
+          </div>
+
+          <!-- KPI 4 (스탯 바) -->
+          <div class="statbar">
+            <div class="stat-item">
+              <span class="stat-label">들은 스토리</span>
+              <span class="stat-value-row"><span class="stat-value" data-target="1284000">1,284,000</span><span class="stat-unit">편</span></span>
+              <span class="stat-delta up">▲ +12.4%<span class="ctx">전주 대비</span></span>
+              <svg class="stat-spark" viewBox="0 0 100 20" preserveAspectRatio="none"><polyline points="0,17 14,15 28,15.5 42,11 56,8 70,5.5 84,3.5 100,2" fill="none" stroke="var(--success)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">짚어낸 결핍</span>
+              <span class="stat-value-row"><span class="stat-value" data-target="7">7</span><span class="stat-unit">개</span></span>
+              <span class="stat-delta down">▼ -2<span class="ctx">전주 대비</span></span>
+              <svg class="stat-spark" viewBox="0 0 100 20" preserveAspectRatio="none"><polyline points="0,4 14,6 28,7 42,9.5 56,12 70,14 84,16.5 100,18" fill="none" stroke="var(--danger)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">평균 읽은 시간</span>
+              <span class="stat-value-row"><span class="stat-value" data-target="58">58</span><span class="stat-unit">초</span></span>
+              <span class="stat-delta up">▲ +3초<span class="ctx">전주 대비</span></span>
+              <svg class="stat-spark" viewBox="0 0 100 20" preserveAspectRatio="none"><polyline points="0,16 14,15 28,13.5 42,12 56,12.5 70,9 84,6.5 100,4" fill="none" stroke="var(--success)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">이어온 날</span>
+              <span class="stat-value-row"><span class="stat-value" data-target="26">26</span><span class="stat-unit">일</span></span>
+              <span class="stat-delta up">▲ +1일<span class="ctx">전주 대비</span></span>
+              <svg class="stat-spark" viewBox="0 0 100 20" preserveAspectRatio="none"><polyline points="0,18 14,17 28,15.5 42,14 56,12.5 70,11.5 84,11.5 100,3" fill="none" stroke="var(--success)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+
+          <!-- 차트 헤더 + 세그먼트 -->
+          <div class="charts-head">
+            <span class="section-title">축 데이터</span>
+            <div class="segmented" id="segControl" role="group" aria-label="차트 뷰 전환">
+              <button class="seg-btn selected" data-axis="내적"><span>내적</span></button>
+              <button class="seg-btn" data-axis="외적"><span>외적</span></button>
+            </div>
+          </div>
+
+          <!-- 차트 2종 -->
+          <div class="charts-row">
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="section-title">최근 10일 청취 추이</div>
+                  <div class="section-sub">단위: 편 · 8일째 피크</div>
+                </div>
+              </div>
+              <div class="chart-anim-y">
+              <svg class="chart-svg" viewBox="0 0 600 210" role="img" aria-label="최근 10일 청취 추이, 8일째 41편으로 최고치">
+                <g class="chart-grid">
+                  <line x1="40" y1="190" x2="580" y2="190"/>
+                  <line x1="40" y1="133.3" x2="580" y2="133.3"/>
+                  <line x1="40" y1="76.7" x2="580" y2="76.7"/>
+                  <line x1="40" y1="20" x2="580" y2="20"/>
+                </g>
+                <g class="chart-axis">
+                  <text x="32" y="194" text-anchor="end">0</text>
+                  <text x="32" y="137" text-anchor="end">15</text>
+                  <text x="32" y="80" text-anchor="end">30</text>
+                  <text x="32" y="24" text-anchor="end">45</text>
+                  <text x="40" y="205" text-anchor="middle">1</text>
+                  <text x="100" y="205" text-anchor="middle">2</text>
+                  <text x="160" y="205" text-anchor="middle">3</text>
+                  <text x="220" y="205" text-anchor="middle">4</text>
+                  <text x="280" y="205" text-anchor="middle">5</text>
+                  <text x="340" y="205" text-anchor="middle">6</text>
+                  <text x="400" y="205" text-anchor="middle">7</text>
+                  <text x="460" y="205" text-anchor="middle" font-weight="700">8</text>
+                  <text x="520" y="205" text-anchor="middle">9</text>
+                  <text x="580" y="205" text-anchor="middle">10</text>
+                </g>
+                <path class="chart-area" d="M40,144.7 100,122.0 160,133.3 220,156.0 280,99.3 340,72.9 400,88.0 460,35.1 520,65.3 580,80.4 580,190 40,190 Z"/>
+                <path class="chart-line" d="M40,144.7 100,122.0 160,133.3 220,156.0 280,99.3 340,72.9 400,88.0 460,35.1 520,65.3 580,80.4"/>
+                <line x1="460" y1="35.1" x2="460" y2="190" stroke="var(--primary)" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/>
+                <g>
+                  <circle class="chart-dot" cx="40" cy="144.7" r="3"/>
+                  <circle class="chart-dot" cx="100" cy="122.0" r="3"/>
+                  <circle class="chart-dot" cx="160" cy="133.3" r="3"/>
+                  <circle class="chart-dot" cx="220" cy="156.0" r="3"/>
+                  <circle class="chart-dot" cx="280" cy="99.3" r="3"/>
+                  <circle class="chart-dot" cx="340" cy="72.9" r="3"/>
+                  <circle class="chart-dot" cx="400" cy="88.0" r="3"/>
+                  <circle class="chart-dot" cx="520" cy="65.3" r="3"/>
+                  <circle class="chart-dot" cx="580" cy="80.4" r="3"/>
+                  <circle class="peak-dot" cx="460" cy="35.1" r="5"/>
+                </g>
+                <g transform="translate(460,18)">
+                  <rect class="peak-tag-bg" x="-20" y="-15" width="40" height="19" rx="5"/>
+                  <text x="0" y="-2" text-anchor="middle" class="peak-tag-text">41 · 피크</text>
+                </g>
+              </svg>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="section-title">축 구성비</div>
+                  <div class="section-sub">5개 항목 · %</div>
+                </div>
+              </div>
+              <div class="donut-wrap chart-anim-y">
+                <svg class="donut-svg" viewBox="0 0 180 180" role="img" aria-label="축 구성비: 내적-성찰 34%, 내적-마음 22%, 내적-성품 18%, 외적-첫인상 16%, 외적-조건 10%">
+                  <g transform="rotate(-90 90 90)">
+                    <circle class="donut-seg" data-axis="내적" style="--seg-len:149.5" cx="90" cy="90" r="70" fill="none" stroke="#2563EB" stroke-width="24" stroke-dasharray="149.5 290.3" stroke-dashoffset="0"/>
+                    <circle class="donut-seg" data-axis="내적" style="--seg-len:96.8" cx="90" cy="90" r="70" fill="none" stroke="#7C3AED" stroke-width="24" stroke-dasharray="96.8 343.0" stroke-dashoffset="-149.5"/>
+                    <circle class="donut-seg" data-axis="내적" style="--seg-len:79.2" cx="90" cy="90" r="70" fill="none" stroke="#0891B2" stroke-width="24" stroke-dasharray="79.2 360.6" stroke-dashoffset="-246.3"/>
+                    <circle class="donut-seg" data-axis="외적" style="--seg-len:70.4" cx="90" cy="90" r="70" fill="none" stroke="#64748B" stroke-width="24" stroke-dasharray="70.4 369.4" stroke-dashoffset="-325.5"/>
+                    <circle class="donut-seg" data-axis="외적" style="--seg-len:44.0" cx="90" cy="90" r="70" fill="none" stroke="#94A3B8" stroke-width="24" stroke-dasharray="44.0 395.8" stroke-dashoffset="-395.9"/>
+                  </g>
+                </svg>
+                <div class="legend">
+                  <div class="legend-item" data-axis="내적"><span class="legend-dot" style="background:#2563EB"></span><span class="legend-name">내적-성찰</span><span class="legend-pct">34%</span></div>
+                  <div class="legend-item" data-axis="내적"><span class="legend-dot" style="background:#7C3AED"></span><span class="legend-name">내적-마음</span><span class="legend-pct">22%</span></div>
+                  <div class="legend-item" data-axis="내적"><span class="legend-dot" style="background:#0891B2"></span><span class="legend-name">내적-성품</span><span class="legend-pct">18%</span></div>
+                  <div class="legend-item" data-axis="외적"><span class="legend-dot" style="background:#64748B"></span><span class="legend-name">외적-첫인상</span><span class="legend-pct">16%</span></div>
+                  <div class="legend-item" data-axis="외적"><span class="legend-dot" style="background:#94A3B8"></span><span class="legend-name">외적-조건</span><span class="legend-pct">10%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 목표 진행률 + 자주 나온 결핍 -->
+          <div class="mid-row">
+            <div class="panel">
+              <div class="panel-head"><div class="section-title">이번 달 소양 목표</div></div>
+              <div class="progress-track"><div class="progress-fill" style="--pfill:.65"></div></div>
+              <div class="progress-meta">
+                <span class="progress-frac">26 / 40편</span>
+                <span class="progress-pct">65%</span>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><div class="section-title">자주 나온 결핍</div></div>
+              <div class="top-list">
+                <div class="top-item"><div class="avatar sm">ㄱ</div><span class="tname">기대치 어긋남</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="tval">32</span></div>
+                <div class="top-item"><div class="avatar sm">ㅍ</div><span class="tname">표현 부족</span><div class="bar-track"><div class="bar-fill" style="width:84%"></div></div><span class="tval">27</span></div>
+                <div class="top-item"><div class="avatar sm">ㅈ</div><span class="tname">자존감</span><div class="bar-track"><div class="bar-fill" style="width:66%"></div></div><span class="tval">21</span></div>
+                <div class="top-item"><div class="avatar sm">ㄱ</div><span class="tname">거리 조절</span><div class="bar-track"><div class="bar-fill" style="width:47%"></div></div><span class="tval">15</span></div>
+                <div class="top-item"><div class="avatar sm">ㅅ</div><span class="tname">신뢰 회복</span><div class="bar-track"><div class="bar-fill" style="width:28%"></div></div><span class="tval">9</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 필터 칩 줄 (시그니처) -->
+          <div class="chip-toolbar">
+            <div class="chip-row" id="chipRow">
+              <span class="chip-field-label">상태</span>
+              <button class="chip" data-status="들음">들음 <span class="count">2</span></button>
+              <button class="chip" data-status="보류">보류 <span class="count">2</span></button>
+              <button class="chip" data-status="다시듣기">다시듣기 <span class="count">1</span></button>
+              <button class="chip" data-status="새로움">새로움 <span class="count">1</span></button>
+              <button class="chip summary" id="filterSummary"><svg><use href="#ic-reset"/></svg>필터 <span class="count">0</span>개 · 초기화</button>
+            </div>
+          </div>
+
+          <!-- 테이블 -->
+          <div class="table-card" id="tableCard">
+            <div class="table-card-head">
+              <div class="section-title">받은 스토리</div>
+              <div class="section-sub">최근 전달된 이야기와 진행 상태</div>
+            </div>
+            <div class="bulk-bar" id="bulkBar">
+              <span><span id="bulkCount">0</span>개 선택 · 일괄 작업</span>
+              <div class="bulk-actions">
+                <button class="btn btn-ghost" style="height:26px;padding:0 10px;font-size:12px;">보류 처리</button>
+                <button class="btn btn-ghost" style="height:26px;padding:0 10px;font-size:12px;">선택 해제</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table id="storyTable">
+                <colgroup>
+                  <col class="c-cb"><col class="c-work"><col class="c-author"><col class="c-axis"><col class="c-lesson"><col class="c-status">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th class="cb-th"><input type="checkbox" id="selectAllCb" aria-label="전체 선택"></th>
+                    <th class="sortable sorted" id="sortWork" aria-sort="ascending"><span class="th-inner">작품 <span class="sort-arrow">▲</span></span></th>
+                    <th>작가</th>
+                    <th>축</th>
+                    <th>교훈</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-work="오만과 편견" data-status="들음">
+                    <td class="cb-td"><input type="checkbox" class="row-cb" aria-label="오만과 편견 선택"></td>
+                    <td><span class="cell-title cell-ellipsis" title="오만과 편견">오만과 편견</span></td>
+                    <td><span class="cell-ellipsis" title="제인 오스틴">제인 오스틴</span></td>
+                    <td><span class="axis-tag">내적</span></td>
+                    <td><span class="cell-text cell-ellipsis editable" tabindex="0" title="더블클릭하여 편집">첫인상은 자주 틀린다</span></td>
+                    <td>
+                      <div class="status-cell">
+                        <span class="status done"><svg><use href="#ic-check-circle"/></svg>들음</span>
+                        <span class="row-actions"><button class="icon-btn sm" aria-label="다시 재생"><svg><use href="#ic-play"/></svg></button><button class="icon-btn sm" aria-label="더보기"><svg><use href="#ic-more"/></svg></button></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr data-work="위대한 개츠비" data-status="보류">
+                    <td class="cb-td"><input type="checkbox" class="row-cb" aria-label="위대한 개츠비 선택"></td>
+                    <td><span class="cell-title cell-ellipsis" title="위대한 개츠비">위대한 개츠비</span></td>
+                    <td><span class="cell-ellipsis" title="F. 스콧 피츠제럴드">F. 스콧 피츠제럴드</span></td>
+                    <td><span class="axis-tag">외적</span></td>
+                    <td><span class="cell-text cell-ellipsis editable" tabindex="0" title="더블클릭하여 편집">조건으로 시작한 마음은 조건에서 끝난다</span></td>
+                    <td>
+                      <div class="status-cell">
+                        <span class="status hold"><svg><use href="#ic-pause-circle"/></svg>보류</span>
+                        <span class="row-actions"><button class="icon-btn sm" disabled aria-label="다시 재생 (보류 중)"><svg><use href="#ic-play"/></svg></button><button class="icon-btn sm" aria-label="더보기"><svg><use href="#ic-more"/></svg></button></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr data-work="어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설" data-status="다시듣기">
+                    <td class="cb-td"><input type="checkbox" class="row-cb" aria-label="어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설 선택"></td>
+                    <td><span class="cell-title cell-ellipsis" title="어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설">어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설</span></td>
+                    <td><span class="cell-muted" aria-label="정보 없음">—</span></td>
+                    <td><span class="axis-tag">내적</span></td>
+                    <td><span class="cell-text cell-ellipsis editable" tabindex="0" title="더블클릭하여 편집">기다림은 사람을 바꾼다</span></td>
+                    <td>
+                      <div class="status-cell">
+                        <span class="status replay"><svg><use href="#ic-refresh"/></svg>다시듣기</span>
+                        <span class="row-actions"><button class="icon-btn sm" aria-label="다시 재생"><svg><use href="#ic-play"/></svg></button><button class="icon-btn sm" aria-label="더보기"><svg><use href="#ic-more"/></svg></button></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr data-work="폭풍의 언덕" data-status="들음">
+                    <td class="cb-td"><input type="checkbox" class="row-cb" aria-label="폭풍의 언덕 선택"></td>
+                    <td><span class="cell-title cell-ellipsis" title="폭풍의 언덕">폭풍의 언덕</span></td>
+                    <td><span class="cell-ellipsis" title="에밀리 브론테">에밀리 브론테</span></td>
+                    <td><span class="axis-tag">내적</span></td>
+                    <td><span class="cell-text cell-ellipsis editable" tabindex="0" title="더블클릭하여 편집">집착은 사랑의 이름을 빌린다</span></td>
+                    <td>
+                      <div class="status-cell">
+                        <span class="status done"><svg><use href="#ic-check-circle"/></svg>들음</span>
+                        <span class="row-actions"><button class="icon-btn sm" aria-label="다시 재생"><svg><use href="#ic-play"/></svg></button><button class="icon-btn sm" aria-label="더보기"><svg><use href="#ic-more"/></svg></button></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr data-work="시라노 드 베르주라크" data-status="새로움">
+                    <td class="cb-td"><input type="checkbox" class="row-cb" aria-label="시라노 드 베르주라크 선택"></td>
+                    <td><span class="cell-title cell-ellipsis" title="시라노 드 베르주라크">시라노 드 베르주라크</span></td>
+                    <td><span class="cell-ellipsis" title="에드몽 로스탕">에드몽 로스탕</span></td>
+                    <td><span class="axis-tag">외적</span></td>
+                    <td><span class="cell-text cell-ellipsis editable" tabindex="0" title="더블클릭하여 편집">목소리는 얼굴보다 오래 남는다</span></td>
+                    <td>
+                      <div class="status-cell">
+                        <span class="status new"><svg><use href="#ic-sparkle"/></svg>새로움</span>
+                        <span class="row-actions"><button class="icon-btn sm" aria-label="다시 재생"><svg><use href="#ic-play"/></svg></button><button class="icon-btn sm" aria-label="더보기"><svg><use href="#ic-more"/></svg></button></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr data-work="안나 카레니나" data-status="보류">
+                    <td class="cb-td"><input type="checkbox" class="row-cb" aria-label="안나 카레니나 선택"></td>
+                    <td><span class="cell-title cell-ellipsis" title="안나 카레니나">안나 카레니나</span></td>
+                    <td><span class="cell-ellipsis" title="레프 톨스토이">레프 톨스토이</span></td>
+                    <td><span class="axis-tag">내적</span></td>
+                    <td><span class="cell-text cell-ellipsis editable" tabindex="0" title="더블클릭하여 편집">불행한 사랑은 저마다의 이유로 불행하다</span></td>
+                    <td>
+                      <div class="status-cell">
+                        <span class="status hold"><svg><use href="#ic-pause-circle"/></svg>보류</span>
+                        <span class="row-actions"><button class="icon-btn sm" disabled aria-label="다시 재생 (보류 중)"><svg><use href="#ic-play"/></svg></button><button class="icon-btn sm" aria-label="더보기"><svg><use href="#ic-more"/></svg></button></span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+        <!-- /main-col -->
+
+        <!-- ============ 우측: 대화 패널 + 빈 상태 ============ -->
+        <aside class="aside">
+          <div class="panel" id="chatPanel">
+            <div class="panel-head"><div class="section-title">연서와의 대화</div></div>
+
+            <div class="chat-scroll">
+              <div class="msg-row">
+                <div class="msg-avatar bot">연</div>
+                <div class="bubble">요즘 사랑에서 어떤 게 제일 어려우세요?</div>
+              </div>
+              <div class="msg-row mine">
+                <div class="msg-avatar mine">ㅇ</div>
+                <div class="bubble">연락이 오면 반갑고 안 오면 하루가 다 망가져요. 제가 너무 매달리는 것 같기도 하고, 사실은 그냥 확인받고 싶은 건지도 모르겠어요.</div>
+              </div>
+              <div class="msg-row">
+                <div class="msg-avatar bot">연</div>
+                <div class="bubble">기다림이 힘든 건가요, 기다리는 자신이 싫은 건가요?</div>
+              </div>
+            </div>
+            <div class="choice-row">
+              <button class="choice-chip">기다림이 힘들다</button>
+              <button class="choice-chip">그런 내가 싫다</button>
+            </div>
+            <div class="chat-scroll" style="margin-top:8px;">
+              <div class="msg-row mine">
+                <div class="msg-avatar mine">ㅇ</div>
+                <div class="bubble">후자요.</div>
+              </div>
+            </div>
+
+            <div class="diagnosis" style="margin-top:12px;">
+              <span class="dx-label">진단</span>
+              확인받아야 안심되는 마음이 보여요. 없는 건 상대의 애정이 아니라 스스로에 대한 확신 같습니다.
+            </div>
+
+            <div class="story-card">
+              <div class="story-head">
+                <span class="axis-tag">내적</span>
+                <span class="story-source">오만과 편견 · 제인 오스틴</span>
+              </div>
+              <div class="story-lesson">첫인상은 자주 틀린다 — 나에 대한 첫인상도 마찬가지다.</div>
+              <div class="story-cta">
+                <button class="btn btn-ghost"><span>다른 이야기도 들어볼래요?</span></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 빈 상태 시연 (모아보기 · 외적 축 필터 0건) -->
+          <div class="panel empty-panel">
+            <span class="empty-eyebrow">외적</span>
+            <div class="empty-icon"><svg><use href="#ic-empty"/></svg></div>
+            <div class="empty-headline">아직 이 축의 이야기가 없어요</div>
+            <p class="empty-desc">대화를 두어 마디 더 나누면 맞는 이야기를 찾아드릴게요.</p>
+            <button class="btn btn-secondary"><span>대화 이어가기</span></button>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+
+    <footer class="footer">STYLE 30 · 데이터 리치 라이트</footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- 사이드바 접기(220px ↔ 56px 아이콘 레일) ---- */
+  var shell = document.getElementById('appShell');
+  var collapseBtn = document.getElementById('collapseBtn');
+  collapseBtn.addEventListener('click', function(){
+    var rail = shell.classList.toggle('rail');
+    collapseBtn.setAttribute('aria-expanded', rail ? 'false' : 'true');
+  });
+
+  /* ---- 모바일 드로어 ---- */
+  var sidebar = document.getElementById('sidebar');
+  var drawerBtn = document.getElementById('drawerBtn');
+  var scrim = document.getElementById('scrim');
+  function closeDrawer(){ sidebar.classList.remove('open'); scrim.classList.remove('show'); }
+  drawerBtn.addEventListener('click', function(){ sidebar.classList.add('open'); scrim.classList.add('show'); });
+  scrim.addEventListener('click', closeDrawer);
+
+  /* ---- 탭 ---- */
+  document.querySelectorAll('#tabs .tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('#tabs .tab').forEach(function(o){ o.classList.remove('active'); o.setAttribute('aria-selected','false'); });
+      t.classList.add('active'); t.setAttribute('aria-selected','true');
+    });
+  });
+
+  /* ---- 필터 드롭다운 (시대) ---- */
+  var filterBtn = document.getElementById('filterBtn');
+  var filterMenu = document.getElementById('filterMenu');
+  var filterLabel = document.getElementById('filterLabel');
+  filterBtn.addEventListener('click', function(){
+    var open = filterMenu.classList.toggle('open');
+    filterBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  filterMenu.querySelectorAll('.menu-item').forEach(function(mi){
+    mi.addEventListener('click', function(){
+      filterLabel.textContent = mi.querySelector('span').textContent;
+      filterMenu.classList.remove('open');
+      filterBtn.setAttribute('aria-expanded','false');
+    });
+  });
+  document.addEventListener('click', function(e){
+    if(!filterBtn.contains(e.target) && !filterMenu.contains(e.target)){
+      filterMenu.classList.remove('open');
+      filterBtn.setAttribute('aria-expanded','false');
+    }
+  });
+
+  /* ---- 세그먼트 컨트롤: 도넛 축 강조 ---- */
+  var segBtns = document.querySelectorAll('#segControl .seg-btn');
+  var donutSegs = document.querySelectorAll('.donut-seg');
+  var legendItems = document.querySelectorAll('.legend-item');
+  segBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      segBtns.forEach(function(o){ o.classList.remove('selected'); });
+      b.classList.add('selected');
+      var axis = b.getAttribute('data-axis');
+      donutSegs.forEach(function(s){ s.classList.toggle('dim', s.getAttribute('data-axis') !== axis); });
+      legendItems.forEach(function(l){ l.classList.toggle('dim', l.getAttribute('data-axis') !== axis); });
+    });
+  });
+
+  /* ---- 필터 칩: 상태별 다중 토글 + 요약 칩 ---- */
+  var chips = document.querySelectorAll('#chipRow .chip[data-status]');
+  var summaryChip = document.getElementById('filterSummary');
+  var tableRows = document.querySelectorAll('#storyTable tbody tr');
+  function applyChipFilter(){
+    var active = Array.from(chips).filter(function(c){ return c.classList.contains('active'); }).map(function(c){ return c.getAttribute('data-status'); });
+    tableRows.forEach(function(r){
+      var show = active.length === 0 || active.indexOf(r.getAttribute('data-status')) !== -1;
+      r.style.display = show ? '' : 'none';
+    });
+    if(active.length > 0){
+      summaryChip.classList.add('show');
+      summaryChip.querySelector('.count').textContent = active.length;
+    } else {
+      summaryChip.classList.remove('show');
+    }
+  }
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){ c.classList.toggle('active'); applyChipFilter(); });
+  });
+  summaryChip.addEventListener('click', function(){
+    chips.forEach(function(c){ c.classList.remove('active'); });
+    applyChipFilter();
+  });
+
+  /* ---- 열 정렬: 작품 열 (FLIP 트랜지션) ---- */
+  var sortTh = document.getElementById('sortWork');
+  var sortArrow = sortTh.querySelector('.sort-arrow');
+  var sortDir = 'asc';
+  var tbody = document.querySelector('#storyTable tbody');
+  sortTh.addEventListener('click', function(){
+    var rows = Array.from(tbody.querySelectorAll('tr'));
+    var firstRects = new Map(rows.map(function(r){ return [r, r.getBoundingClientRect()]; }));
+
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    rows.sort(function(a, b){
+      var cmp = a.getAttribute('data-work').localeCompare(b.getAttribute('data-work'), 'ko');
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    rows.forEach(function(r){ tbody.appendChild(r); });
+
+    sortTh.setAttribute('aria-sort', sortDir === 'asc' ? 'ascending' : 'descending');
+    sortArrow.textContent = sortDir === 'asc' ? '▲' : '▼';
+
+    if(!reduceMotion){
+      rows.forEach(function(r){
+        var first = firstRects.get(r);
+        var last = r.getBoundingClientRect();
+        var dy = first.top - last.top;
+        if(dy){
+          r.style.transition = 'none';
+          r.style.transform = 'translateY(' + dy + 'px)';
+          requestAnimationFrame(function(){
+            r.style.transition = 'transform .12s ease';
+            r.style.transform = '';
+          });
+        }
+      });
+    }
+  });
+
+  /* ---- 셀 인라인 편집: 교훈 셀 더블클릭 ---- */
+  function startEdit(span){
+    if(span.querySelector('input')) return;
+    var original = span.textContent;
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'cell-edit-input';
+    input.value = original;
+    var parentTd = span.closest('td');
+    span.style.display = 'none';
+    parentTd.insertBefore(input, span);
+    input.focus();
+    input.select();
+
+    function finish(save){
+      if(save && input.value.trim() !== ''){
+        span.textContent = input.value.trim();
+      }
+      input.remove();
+      span.style.display = '';
+      if(save && !reduceMotion){
+        parentTd.classList.remove('cell-flash'); void parentTd.offsetWidth; parentTd.classList.add('cell-flash');
+        setTimeout(function(){ parentTd.classList.remove('cell-flash'); }, 520);
+      }
+    }
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ finish(true); }
+      else if(e.key === 'Escape'){ finish(false); }
+    });
+    input.addEventListener('blur', function(){ finish(false); });
+  }
+  document.querySelectorAll('.cell-text.editable').forEach(function(span){
+    span.addEventListener('dblclick', function(){ startEdit(span); });
+    span.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ startEdit(span); }
+    });
+  });
+
+  /* ---- 체크박스 다중 선택 → 일괄 작업 바 ---- */
+  var selectAllCb = document.getElementById('selectAllCb');
+  var rowCbs = document.querySelectorAll('.row-cb');
+  var bulkBar = document.getElementById('bulkBar');
+  var bulkCount = document.getElementById('bulkCount');
+  function updateBulk(){
+    var checked = Array.from(rowCbs).filter(function(c){ return c.checked; }).length;
+    bulkCount.textContent = checked;
+    bulkBar.classList.toggle('show', checked > 0);
+    selectAllCb.checked = checked === rowCbs.length && rowCbs.length > 0;
+    selectAllCb.indeterminate = checked > 0 && checked < rowCbs.length;
+  }
+  rowCbs.forEach(function(cb){ cb.addEventListener('change', updateBulk); });
+  selectAllCb.addEventListener('change', function(){
+    rowCbs.forEach(function(cb){ cb.checked = selectAllCb.checked; });
+    updateBulk();
+  });
+  bulkBar.querySelectorAll('.bulk-actions .btn').forEach(function(b, i){
+    if(i === 1){ // 선택 해제
+      b.addEventListener('click', function(){
+        rowCbs.forEach(function(cb){ cb.checked = false; });
+        updateBulk();
+      });
+    }
+  });
+
+  /* ---- KPI 카운트업 (tnum 이라 자릿수 안 흔들림) ---- */
+  function formatNum(n){ return Math.round(n).toLocaleString('en-US'); }
+  document.querySelectorAll('.stat-value[data-target]').forEach(function(el){
+    var target = parseFloat(el.getAttribute('data-target'));
+    if(reduceMotion){ el.textContent = formatNum(target); return; }
+    var start = null; var duration = 600;
+    function step(ts){
+      if(start === null) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+      el.textContent = formatNum(target * eased);
+      if(p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+
+  /* ---- 새 대화 버튼 → 대화 패널로 스크롤 ---- */
+  document.getElementById('newChatBtn').addEventListener('click', function(){
+    var panel = document.getElementById('chatPanel');
+    panel.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+  });
+})();
+</script>
+</body>
+</html>

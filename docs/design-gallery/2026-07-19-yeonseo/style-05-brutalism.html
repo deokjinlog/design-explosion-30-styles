@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 — 대화 · STYLE 05 브루탈리즘</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+/* ============================================================
+   연서 · STYLE 05 브루탈리즘
+   무채색 규율 + 원색 딱 1개(#FF3B00) + 초대형 숫자 + 하드 섀도
+   ============================================================ */
+
+/* ---------- 리셋 ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+img, svg { display: block; max-width: 100%; }
+button, input { font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+
+/* ---------- 토큰 ---------- */
+:root {
+  --bg: #FFFFFF;
+  --ink: #000000;
+  --gray-2: #E7E7E7;
+  --gray-9: #1A1A1A;
+  --accent: #FF3B00;
+
+  --bw-thin: 4px;
+  --bw-thick: 6px;
+
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-6: 24px; --sp-8: 32px; --sp-12: 48px; --sp-16: 64px;
+
+  --fs-xs: 12px; --fs-sm: 14px; --fs-base: 16px; --fs-md: 20px;
+  --fs-lg: 24px; --fs-xl: 32px; --fs-2xl: 48px;
+
+  --f-display: 'Archivo Black', 'Pretendard', sans-serif;
+  --f-body: 'Pretendard', -apple-system, sans-serif;
+
+  --shadow-full: 10px 10px 0 var(--ink);
+  --shadow-mid:  4px 4px 0 var(--ink);
+  --shadow-none: 0 0 0 var(--ink);
+}
+
+/* 배경은 body 에 — 래퍼에만 두면 흰 여백/로드 플래시 */
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* ---------- 물리성: 카드/버튼 공통 hover·active ---------- */
+.brutal-card {
+  --rot: 0deg;
+  background: var(--bg);
+  border: var(--bw-thin) solid var(--ink);
+  box-shadow: var(--shadow-full);
+  transform: rotate(var(--rot));
+  transition: transform .1s linear, box-shadow .1s linear;
+}
+.brutal-card:hover  { transform: rotate(var(--rot)) translate(4px, 4px);   box-shadow: var(--shadow-mid); }
+.brutal-card:active { transform: rotate(var(--rot)) translate(10px, 10px); box-shadow: var(--shadow-none); }
+.card-inner { transform: rotate(calc(-1 * var(--rot))); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: .001ms !important; animation-duration: .001ms !important; }
+  .brutal-card, .btn { transition: none !important; }
+  .brutal-card:hover  { transform: rotate(var(--rot)) !important; box-shadow: var(--shadow-mid) !important; }
+  .brutal-card:active { transform: rotate(var(--rot)) !important; box-shadow: var(--shadow-mid) !important; }
+  .btn:hover  { transform: none !important; box-shadow: var(--shadow-mid) !important; }
+  .btn:active { transform: none !important; box-shadow: var(--shadow-mid) !important; }
+  .sidebar { transition: none !important; }
+}
+
+/* ---------- 레이아웃 골격 ---------- */
+.app { position: relative; display: flex; min-height: 100vh; }
+.drawer-toggle { position: absolute; opacity: 0; pointer-events: none; }
+.drawer-scrim { display: none; }
+
+.sidebar {
+  flex: 0 0 260px;
+  border-right: var(--bw-thick) solid var(--ink);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-6) var(--sp-4);
+  gap: var(--sp-8);
+}
+.sidebar-logo {
+  font-family: var(--f-display);
+  font-size: var(--fs-xl);
+  letter-spacing: -0.02em;
+  border-bottom: var(--bw-thin) solid var(--ink);
+  padding-bottom: var(--sp-3);
+}
+.sidebar-nav { display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-3);
+  border: var(--bw-thin) solid transparent;
+  font-weight: 800;
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+.nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+.nav-item:hover:not(.active) { border-color: var(--ink); }
+.nav-item.active {
+  background: var(--ink);
+  color: #FFF;
+  border-color: var(--ink);
+}
+.sidebar-user {
+  display: flex; align-items: center; gap: var(--sp-3);
+  border-top: var(--bw-thin) solid var(--ink);
+  padding-top: var(--sp-4);
+}
+.avatar-sq {
+  width: 40px; height: 40px;
+  border: var(--bw-thin) solid var(--ink);
+  background: var(--gray-2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--f-display);
+  font-size: var(--fs-md);
+  flex-shrink: 0;
+}
+.avatar-sq.sm { width: 32px; height: 32px; font-size: var(--fs-base); }
+.avatar-sq.missing { background: var(--bg); color: var(--gray-9); }
+.user-role { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+
+.hamburger-btn { display: none; }
+
+/* ---------- 메인 ---------- */
+.main { flex: 1; min-width: 0; padding: var(--sp-6) var(--sp-8) var(--sp-16); }
+
+/* ---------- 상단바 ---------- */
+.topbar {
+  display: flex; align-items: center; gap: var(--sp-4);
+  border-bottom: var(--bw-thick) solid var(--ink);
+  padding-bottom: var(--sp-4);
+  margin-bottom: var(--sp-6);
+  flex-wrap: wrap;
+}
+.brand {
+  font-family: var(--f-display);
+  font-size: var(--fs-lg);
+  letter-spacing: -0.02em;
+}
+.search-wrap { flex: 1; min-width: 160px; position: relative; }
+.search-wrap input {
+  width: 100%;
+  border: var(--bw-thin) solid var(--ink);
+  background: var(--bg);
+  padding: var(--sp-3) var(--sp-3) var(--sp-3) 40px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.search-wrap input::placeholder { color: var(--gray-9); opacity: 0.6; font-weight: 600; }
+.search-wrap input:focus { outline: var(--bw-thin) solid var(--ink); outline-offset: 2px; }
+.search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; }
+
+.icon-btn {
+  position: relative;
+  width: 44px; height: 44px;
+  border: var(--bw-thin) solid var(--ink);
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform .1s linear, box-shadow .1s linear;
+}
+.icon-btn svg { width: 20px; height: 20px; }
+.icon-btn:hover { transform: translate(2px, 2px); }
+.icon-btn:focus-visible { outline: var(--bw-thin) solid var(--ink); outline-offset: 2px; }
+.badge {
+  position: absolute; top: -8px; right: -8px;
+  min-width: 20px; height: 20px; padding: 0 4px;
+  background: var(--ink); color: #FFF;
+  border: 2px solid var(--bg);
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--sp-2);
+  height: 44px;
+  padding: 0 var(--sp-6);
+  border: var(--bw-thin) solid var(--ink);
+  font-weight: 800;
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: var(--shadow-mid);
+  transition: transform .1s linear, box-shadow .1s linear;
+  white-space: nowrap;
+}
+.btn:hover  { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+.btn:active { transform: translate(4px, 4px); box-shadow: var(--shadow-none); }
+.btn:focus-visible { outline: var(--bw-thin) solid var(--ink); outline-offset: 3px; }
+.btn-primary   { background: var(--accent); color: var(--ink); } /* 원색 면 #1 */
+.btn-secondary { background: var(--bg); color: var(--ink); }
+.btn-ghost     { background: var(--bg); color: var(--ink); border-style: dashed; box-shadow: none; }
+.btn-ghost:hover { transform: none; background: var(--gray-2); }
+.btn[disabled] {
+  cursor: not-allowed; opacity: 0.4; box-shadow: none;
+  border-style: dashed;
+}
+.btn[disabled]:hover, .btn[disabled]:active { transform: none; box-shadow: none; }
+
+/* ---------- 탭 + 필터 ---------- */
+.tabs-filter-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--sp-4); flex-wrap: wrap;
+  margin-bottom: var(--sp-6);
+}
+.tabs { display: flex; gap: 0; border: var(--bw-thin) solid var(--ink); }
+.tab {
+  background: var(--bg); border: none;
+  border-right: var(--bw-thin) solid var(--ink);
+  padding: var(--sp-3) var(--sp-6);
+  font-weight: 800; font-size: var(--fs-sm);
+  text-transform: uppercase; letter-spacing: 0.02em;
+  cursor: pointer;
+}
+.tab:last-child { border-right: none; }
+.tab.active { background: var(--ink); color: #FFF; }
+.tab:not(.active):hover { background: var(--gray-2); }
+.filter-dd {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  border: var(--bw-thin) solid var(--ink);
+  padding: var(--sp-3) var(--sp-4);
+  font-weight: 800; font-size: var(--fs-sm);
+  cursor: pointer; background: var(--bg);
+}
+.filter-dd:hover { background: var(--gray-2); }
+
+/* ---------- 배너 ---------- */
+.banner {
+  border: var(--bw-thick) solid var(--ink);
+  padding: var(--sp-4) var(--sp-6);
+  margin-bottom: var(--sp-8);
+  font-weight: 700;
+  font-size: var(--fs-base);
+  display: flex; align-items: center; gap: var(--sp-3);
+}
+.banner::before {
+  content: 'i';
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border: var(--bw-thin) solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--f-display);
+  font-style: normal;
+}
+
+/* ---------- 히어로 KPI 그리드 ---------- */
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr 1.3fr;
+  grid-template-areas:
+    "giant b c"
+    "giant d goal";
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-8);
+}
+.kpi-giant  { grid-area: giant; }
+.kpi-b      { grid-area: b; }
+.kpi-c      { grid-area: c; }
+.kpi-d      { grid-area: d; }
+.goal-card  { grid-area: goal; }
+
+.kpi { padding: var(--sp-6); display: flex; flex-direction: column; gap: var(--sp-2); min-height: 0; }
+.kpi-label {
+  font-size: var(--fs-xs); font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.kpi-value-row { display: flex; align-items: baseline; gap: var(--sp-2); flex-wrap: wrap; }
+.kpi-value {
+  font-family: var(--f-display);
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+}
+.kpi-unit { font-size: var(--fs-md); font-weight: 800; }
+.kpi-delta { font-size: var(--fs-sm); font-weight: 800; }
+.kpi-delta.up::before { content: '▲ '; }
+.kpi-delta.down::before { content: '▼ '; }
+.kpi-caption { font-size: 11px; font-weight: 600; opacity: 0.7; text-transform: uppercase; }
+.spark { width: 100%; height: 34px; margin-top: var(--sp-2); }
+
+.kpi-giant {
+  background: var(--accent); /* 원색 면 #1 — 유일한 대형 사용처 */
+  justify-content: center;
+  padding: var(--sp-8);
+}
+.kpi-giant .kpi-label { font-size: var(--fs-sm); }
+.kpi-giant .kpi-value { font-size: clamp(56px, 8.5vw, 132px); }
+.kpi-giant .kpi-unit, .kpi-giant .kpi-delta, .kpi-giant .kpi-label, .kpi-giant .kpi-caption { color: var(--ink); }
+
+.kpi-b, .kpi-c, .kpi-d { background: var(--bg); }
+.kpi-b .kpi-value, .kpi-c .kpi-value, .kpi-d .kpi-value { font-size: clamp(40px, 5vw, 64px); }
+
+.goal-card { padding: var(--sp-6); display: flex; flex-direction: column; gap: var(--sp-3); }
+.goal-title { font-size: var(--fs-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+.goal-fraction { font-family: var(--f-display); font-size: var(--fs-lg); letter-spacing: -0.02em; }
+.goal-bar-track { width: 100%; height: 24px; border: var(--bw-thin) solid var(--ink); background: var(--gray-2); }
+.goal-bar-fill { height: 100%; background: var(--ink); }
+.goal-pct { font-family: var(--f-display); font-size: var(--fs-md); align-self: flex-end; }
+
+/* ---------- 대화 + 사이드 컬럼 ---------- */
+.convo-row {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-8);
+  align-items: start;
+}
+.convo-panel { padding: var(--sp-6); display: flex; flex-direction: column; gap: var(--sp-4); }
+.convo-header {
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: var(--bw-thin) solid var(--ink);
+  padding-bottom: var(--sp-3);
+}
+.convo-title { font-family: var(--f-display); font-size: var(--fs-md); letter-spacing: -0.02em; }
+.convo-flag {
+  background: var(--ink); color: #FFF;
+  padding: 2px var(--sp-2);
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+  transform: rotate(-2deg);
+  display: inline-block;
+}
+
+.msg-list { display: flex; flex-direction: column; gap: var(--sp-4); }
+.msg { display: flex; flex-direction: column; gap: var(--sp-1); max-width: 82%; }
+.msg-speaker {
+  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.msg-bubble {
+  border: var(--bw-thin) solid var(--ink);
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.55;
+}
+.msg.from-yeonseo { align-self: flex-start; }
+.msg.from-yeonseo .msg-bubble { background: var(--bg); }
+.msg.from-me { align-self: flex-end; text-align: right; }
+.msg.from-me .msg-bubble { background: var(--gray-2); }
+.msg.from-me .msg-speaker { align-self: flex-end; }
+
+.choice-row { display: flex; gap: var(--sp-2); margin-top: var(--sp-2); flex-wrap: wrap; }
+.choice-chip {
+  border: var(--bw-thin) solid var(--ink);
+  padding: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-xs); font-weight: 800;
+  background: var(--bg); cursor: default;
+}
+.choice-chip.selected { background: var(--ink); color: #FFF; }
+
+.diagnosis-block {
+  border-top: var(--bw-thick) solid var(--ink);
+  padding-top: var(--sp-4);
+  display: flex; flex-direction: column; gap: var(--sp-3);
+}
+.diagnosis-label { font-size: var(--fs-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+.diagnosis-text { font-size: var(--fs-base); font-weight: 700; line-height: 1.6; }
+
+.story-card {
+  --rot: -1deg;
+  border: var(--bw-thin) solid var(--ink);
+  padding: var(--sp-4);
+  display: flex; flex-direction: column; gap: var(--sp-2);
+  background: var(--gray-2);
+}
+.story-badge {
+  align-self: flex-start;
+  background: var(--ink); color: #FFF;
+  padding: 2px var(--sp-2);
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+}
+.story-source { font-size: var(--fs-sm); font-weight: 800; }
+.story-lesson { font-size: var(--fs-sm); font-weight: 600; }
+.convo-footer-cta {
+  font-size: var(--fs-sm); font-weight: 800;
+  border-top: var(--bw-thin) solid var(--ink);
+  padding-top: var(--sp-3);
+}
+
+/* ---------- 사이드 컬럼: 세그먼트 / 리스트 / 빈 상태 ---------- */
+.side-col { display: flex; flex-direction: column; gap: var(--sp-6); }
+
+.segment-control { display: flex; border: var(--bw-thin) solid var(--ink); }
+.segment-btn {
+  flex: 1; text-align: center;
+  padding: var(--sp-3);
+  font-weight: 800; font-size: var(--fs-sm);
+  text-transform: uppercase; letter-spacing: 0.02em;
+  background: var(--bg); border: none;
+  cursor: default;
+}
+.segment-btn + .segment-btn { border-left: var(--bw-thin) solid var(--ink); }
+.segment-btn.selected { background: var(--ink); color: #FFF; }
+
+.list-card { padding: var(--sp-6); display: flex; flex-direction: column; gap: var(--sp-4); }
+.list-title { font-family: var(--f-display); font-size: var(--fs-base); letter-spacing: -0.02em; }
+.top-list { display: flex; flex-direction: column; gap: var(--sp-3); }
+.top-list-row { display: flex; align-items: center; gap: var(--sp-3); }
+.top-list-name { flex: 1; font-size: var(--fs-sm); font-weight: 700; min-width: 0; }
+.top-list-bar-track { flex: 1; height: 10px; background: var(--gray-2); border: 2px solid var(--ink); min-width: 40px; }
+.top-list-bar-fill { height: 100%; background: var(--ink); }
+.top-list-val { font-family: var(--f-display); font-size: var(--fs-sm); width: 32px; text-align: right; flex-shrink: 0; }
+
+.empty-card {
+  --rot: 0.8deg;
+  padding: var(--sp-6);
+  display: flex; flex-direction: column; gap: var(--sp-3);
+}
+.empty-eyebrow { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
+.empty-headline { font-family: var(--f-display); font-size: var(--fs-md); letter-spacing: -0.02em; }
+.empty-desc { font-size: var(--fs-sm); font-weight: 600; }
+
+/* ---------- 차트 행 ---------- */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-8);
+  align-items: start;
+}
+.chart-card { padding: var(--sp-6); display: flex; flex-direction: column; gap: var(--sp-4); }
+.chart-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; }
+.chart-title { font-family: var(--f-display); font-size: var(--fs-base); letter-spacing: -0.02em; }
+.chart-svg-wrap { width: 100%; overflow-x: auto; }
+.peak-tag {
+  fill: var(--ink);
+}
+.peak-label {
+  font-family: var(--f-display);
+  font-size: 13px;
+  fill: var(--ink);
+}
+.axis-label { font-size: 11px; font-weight: 700; fill: var(--gray-9); font-family: var(--f-body); }
+
+.donut-wrap { display: flex; gap: var(--sp-6); align-items: center; flex-wrap: wrap; }
+.donut-legend { display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; min-width: 160px; }
+.legend-row { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-xs); font-weight: 700; }
+.legend-swatch { width: 14px; height: 14px; border: 2px solid var(--ink); flex-shrink: 0; }
+.legend-pct { font-family: var(--f-display); margin-left: auto; }
+
+/* ---------- 테이블 ---------- */
+.table-section { padding: var(--sp-6); margin-bottom: var(--sp-8); overflow-x: auto; }
+.table-title { font-family: var(--f-display); font-size: var(--fs-md); letter-spacing: -0.02em; margin-bottom: var(--sp-4); }
+table { width: 100%; border-collapse: collapse; min-width: 720px; }
+thead th {
+  text-align: left;
+  font-size: var(--fs-xs); font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.03em;
+  border-bottom: var(--bw-thick) solid var(--ink);
+  padding: var(--sp-3) var(--sp-3);
+  cursor: pointer;
+  white-space: nowrap;
+}
+th.sortable::after { content: ' ▾'; font-size: 10px; }
+tbody td {
+  border-bottom: var(--bw-thin) solid var(--ink);
+  padding: var(--sp-3) var(--sp-3);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  vertical-align: middle;
+}
+.col-title { max-width: 260px; }
+.title-cell {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 700;
+}
+.missing { color: var(--gray-9); opacity: 0.55; font-weight: 800; }
+.author-row { display: flex; align-items: center; gap: var(--sp-2); min-width: 0; }
+.author-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.status-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: var(--sp-1) var(--sp-3);
+  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em;
+  border: var(--bw-thin) solid var(--ink);
+  white-space: nowrap;
+}
+.status-chip::before { content: ''; width: 8px; height: 8px; flex-shrink: 0; }
+.status-heard      { background: var(--ink); color: #FFF; }
+.status-heard::before { background: #FFF; }
+.status-hold        { background: var(--bg); border-style: dashed; }
+.status-hold::before { background: var(--ink); }
+.status-relisten    { background: var(--gray-2); }
+.status-relisten::before { background: var(--ink); border: 1px solid var(--ink); }
+.status-new         { background: var(--bg); border-width: var(--bw-thick); }
+.status-new::before { background: var(--ink); }
+
+tbody tr { transition: background .08s linear, color .08s linear; }
+tbody tr:hover { background: var(--ink); color: #FFF; }
+tbody tr:hover td { border-color: var(--ink); }
+tbody tr:hover .status-chip,
+tbody tr:hover .missing { color: var(--ink); }
+tbody tr:hover .row-action { visibility: visible; opacity: 1; }
+.row-action {
+  visibility: hidden; opacity: 0;
+  border: 2px solid #FFF; background: transparent; color: #FFF;
+  font-size: 11px; font-weight: 800; padding: 4px var(--sp-2);
+  cursor: pointer;
+}
+
+/* ---------- 푸터 ---------- */
+.page-footer {
+  border-top: var(--bw-thick) solid var(--ink);
+  padding-top: var(--sp-6);
+  font-family: var(--f-display);
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- 반응형 900px↓ ---------- */
+@media (max-width: 900px) {
+  .app { display: block; }
+  .sidebar {
+    position: fixed; top: 0; left: 0; z-index: 50;
+    width: 260px; height: 100vh;
+    transform: translateX(-100%);
+    transition: transform .2s ease-out;
+  }
+  #drawer-toggle:checked ~ .sidebar { transform: translateX(0); }
+  .drawer-scrim {
+    display: none;
+    position: fixed; inset: 0; z-index: 40;
+    background: rgba(0,0,0,0.45);
+  }
+  #drawer-toggle:checked ~ .drawer-scrim { display: block; }
+  .hamburger-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px;
+    border: var(--bw-thin) solid var(--ink);
+    background: var(--bg); cursor: pointer; flex-shrink: 0;
+  }
+  .hamburger-btn svg { width: 22px; height: 22px; }
+
+  .main { padding: var(--sp-4) var(--sp-4) var(--sp-12); }
+  .hero-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: "giant" "b" "c" "d" "goal";
+  }
+  .convo-row { grid-template-columns: 1fr; }
+  .charts-row { grid-template-columns: 1fr; }
+  .kpi-giant .kpi-value { font-size: clamp(48px, 16vw, 96px); }
+  .search-wrap { order: 10; flex-basis: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- SVG 아이콘 스프라이트 (각진 획, radius 0 정신 유지) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+  <symbol id="ic-chat" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="7,16 7,21 12,16" fill="currentColor"/></symbol>
+  <symbol id="ic-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="ic-map" viewBox="0 0 24 24"><polygon points="12,2 21,8 21,21 3,21 3,8" fill="none" stroke="currentColor" stroke-width="2"/><rect x="9" y="13" width="6" height="8" fill="currentColor"/></symbol>
+  <symbol id="ic-book" viewBox="0 0 24 24"><rect x="3" y="3" width="4" height="18" fill="currentColor"/><rect x="10" y="3" width="4" height="18" fill="none" stroke="currentColor" stroke-width="2"/><rect x="17" y="3" width="4" height="18" fill="currentColor"/></symbol>
+  <symbol id="ic-log" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6" stroke="currentColor" stroke-width="2"/><line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="2"/><line x1="4" y1="18" x2="14" y2="18" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="ic-gear" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"/><rect x="10" y="10" width="4" height="4" fill="currentColor"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="15" y1="15" x2="21" y2="21" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0v4l2 3H4l2-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><rect x="10" y="19" width="4" height="2" fill="currentColor"/></symbol>
+  <symbol id="ic-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2"/><line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2"/></symbol>
+</defs>
+</svg>
+
+<div class="app">
+  <input type="checkbox" id="drawer-toggle" class="drawer-toggle" aria-hidden="true">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">연서</div>
+    <nav class="sidebar-nav" aria-label="주 네비게이션">
+      <a class="nav-item active" href="#" aria-current="page"><svg><use href="#ic-chat"/></svg>대화</a>
+      <a class="nav-item" href="#"><svg><use href="#ic-grid"/></svg>모아보기</a>
+      <a class="nav-item" href="#"><svg><use href="#ic-map"/></svg>결핍 지도</a>
+      <a class="nav-item" href="#"><svg><use href="#ic-book"/></svg>작품 서가</a>
+      <a class="nav-item" href="#"><svg><use href="#ic-log"/></svg>기록</a>
+      <a class="nav-item" href="#"><svg><use href="#ic-gear"/></svg>설정</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar-sq">ㅇ</div>
+      <span class="user-role">읽는 사람</span>
+    </div>
+  </aside>
+
+  <label for="drawer-toggle" class="drawer-scrim" aria-hidden="true"></label>
+
+  <main class="main">
+
+    <!-- 상단바 -->
+    <header class="topbar">
+      <label for="drawer-toggle" class="hamburger-btn" aria-label="메뉴 열기"><svg><use href="#ic-menu"/></svg></label>
+      <div class="brand">연서</div>
+      <div class="search-wrap">
+        <svg><use href="#ic-search"/></svg>
+        <input type="text" placeholder="작품·교훈 검색" aria-label="작품·교훈 검색">
+      </div>
+      <button class="icon-btn" aria-label="알림, 미확인 3건">
+        <svg><use href="#ic-bell"/></svg>
+        <span class="badge">3</span>
+      </button>
+      <div class="avatar-sq sm">ㅇ</div>
+      <button class="btn btn-primary">새 대화</button>
+      <button class="btn btn-secondary">모아보기</button>
+    </header>
+
+    <!-- 탭 + 필터 -->
+    <div class="tabs-filter-row">
+      <div class="tabs" role="tablist">
+        <button class="tab active" role="tab" aria-selected="true">전체</button>
+        <button class="tab" role="tab" aria-selected="false">외적</button>
+        <button class="tab" role="tab" aria-selected="false">내적</button>
+        <button class="tab" role="tab" aria-selected="false">최근</button>
+      </div>
+      <div class="filter-dd">시대 ▾</div>
+    </div>
+
+    <!-- 알림 배너 -->
+    <div class="banner">결핍을 짚으려면 두세 마디가 더 필요해요. 편한 만큼만 답해도 됩니다.</div>
+
+    <!-- 히어로 KPI -->
+    <section class="hero-grid">
+      <div class="brutal-card kpi kpi-giant">
+        <div class="card-inner" style="display:flex; flex-direction:column; gap:8px;">
+          <div class="kpi-label">들은 스토리</div>
+          <div class="kpi-value-row">
+            <span class="kpi-value">1,284,000</span>
+            <span class="kpi-unit">편</span>
+          </div>
+          <div class="kpi-delta up">+12.4%</div>
+          <div class="kpi-caption">전주 대비</div>
+          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,22 11,20 22,21 33,17 44,15 55,16 66,10 77,8 88,4 100,2" fill="none" stroke="var(--ink)" stroke-width="3"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="brutal-card kpi kpi-b">
+        <div class="kpi-label">짚어낸 결핍</div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">7</span>
+          <span class="kpi-unit">개</span>
+        </div>
+        <div class="kpi-delta down">-2</div>
+        <div class="kpi-caption">전주 대비</div>
+        <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="0,6 11,6 22,10 33,10 44,16 55,12 66,18 77,18 88,24 100,18" fill="none" stroke="var(--ink)" stroke-width="3"/>
+        </svg>
+      </div>
+
+      <div class="brutal-card kpi kpi-c">
+        <div class="kpi-label">평균 읽은 시간</div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">58</span>
+          <span class="kpi-unit">초</span>
+        </div>
+        <div class="kpi-delta up">+3초</div>
+        <div class="kpi-caption">전주 대비</div>
+        <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="0,18 11,14 22,16 33,12 44,14 55,10 66,12 77,8 88,10 100,6" fill="none" stroke="var(--ink)" stroke-width="3"/>
+        </svg>
+      </div>
+
+      <div class="brutal-card kpi kpi-d" style="--rot:-1.2deg;">
+        <div class="card-inner" style="display:flex; flex-direction:column; gap:8px;">
+          <div class="kpi-label">이어온 날</div>
+          <div class="kpi-value-row">
+            <span class="kpi-value">26</span>
+            <span class="kpi-unit">일</span>
+          </div>
+          <div class="kpi-delta up">+1일</div>
+          <div class="kpi-caption">전주 대비</div>
+          <svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,20 11,18 22,17 33,15 44,14 55,12 66,11 77,9 88,8 100,5" fill="none" stroke="var(--ink)" stroke-width="3"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="brutal-card goal-card">
+        <div class="goal-title">이번 달 소양 목표</div>
+        <div class="goal-fraction">26 / 40편</div>
+        <div class="goal-bar-track" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="이번 달 소양 목표 달성률 65%">
+          <div class="goal-bar-fill" style="width:65%;"></div>
+        </div>
+        <div class="goal-pct">65%</div>
+      </div>
+    </section>
+
+    <!-- 대화 패널 + 사이드 컬럼 -->
+    <section class="convo-row">
+      <div class="brutal-card convo-panel">
+        <div class="convo-header">
+          <div class="convo-title">대화</div>
+          <span class="convo-flag">이 제품의 정체성</span>
+        </div>
+        <div class="msg-list">
+          <div class="msg from-yeonseo">
+            <span class="msg-speaker">연서</span>
+            <div class="msg-bubble">요즘 사랑에서 어떤 게 제일 어려우세요?</div>
+          </div>
+          <div class="msg from-me">
+            <span class="msg-speaker">나</span>
+            <div class="msg-bubble">연락이 오면 반갑고 안 오면 하루가 다 망가져요. 제가 너무 매달리는 것 같기도 하고, 사실은 그냥 확인받고 싶은 건지도 모르겠어요.</div>
+          </div>
+          <div class="msg from-yeonseo">
+            <span class="msg-speaker">연서</span>
+            <div class="msg-bubble">
+              기다림이 힘든 건가요, 기다리는 자신이 싫은 건가요?
+              <div class="choice-row">
+                <span class="choice-chip">기다림이 힘들다</span>
+                <span class="choice-chip selected">그런 내가 싫다</span>
+              </div>
+            </div>
+          </div>
+          <div class="msg from-me">
+            <span class="msg-speaker">나</span>
+            <div class="msg-bubble">후자요.</div>
+          </div>
+        </div>
+
+        <div class="diagnosis-block">
+          <div class="diagnosis-label">진단</div>
+          <div class="diagnosis-text">확인받아야 안심되는 마음이 보여요. 없는 건 상대의 애정이 아니라 스스로에 대한 확신 같습니다.</div>
+
+          <div class="story-card">
+            <div class="card-inner" style="display:flex; flex-direction:column; gap:8px;">
+              <span class="story-badge">내적</span>
+              <div class="story-source">오만과 편견 · 제인 오스틴</div>
+              <div class="story-lesson">첫인상은 자주 틀린다 — 나에 대한 첫인상도 마찬가지다.</div>
+            </div>
+          </div>
+
+          <div class="convo-footer-cta">다른 이야기도 들어볼래요?</div>
+        </div>
+      </div>
+
+      <div class="side-col">
+        <div class="brutal-card" style="padding:16px;">
+          <div class="segment-control" role="group" aria-label="차트 뷰 전환">
+            <button class="segment-btn selected">내적</button>
+            <button class="segment-btn">외적</button>
+          </div>
+        </div>
+
+        <div class="brutal-card list-card">
+          <div class="list-title">자주 나온 결핍</div>
+          <div class="top-list">
+            <div class="top-list-row">
+              <div class="avatar-sq sm">ㄱ</div>
+              <div class="top-list-name">기대치 어긋남</div>
+              <div class="top-list-bar-track"><div class="top-list-bar-fill" style="width:100%;"></div></div>
+              <div class="top-list-val">32</div>
+            </div>
+            <div class="top-list-row">
+              <div class="avatar-sq sm">ㅍ</div>
+              <div class="top-list-name">표현 부족</div>
+              <div class="top-list-bar-track"><div class="top-list-bar-fill" style="width:84%;"></div></div>
+              <div class="top-list-val">27</div>
+            </div>
+            <div class="top-list-row">
+              <div class="avatar-sq sm">ㅈ</div>
+              <div class="top-list-name">자존감</div>
+              <div class="top-list-bar-track"><div class="top-list-bar-fill" style="width:66%;"></div></div>
+              <div class="top-list-val">21</div>
+            </div>
+            <div class="top-list-row">
+              <div class="avatar-sq sm">ㄱ</div>
+              <div class="top-list-name">거리 조절</div>
+              <div class="top-list-bar-track"><div class="top-list-bar-fill" style="width:47%;"></div></div>
+              <div class="top-list-val">15</div>
+            </div>
+            <div class="top-list-row">
+              <div class="avatar-sq sm">ㅅ</div>
+              <div class="top-list-name">신뢰 회복</div>
+              <div class="top-list-bar-track"><div class="top-list-bar-fill" style="width:28%;"></div></div>
+              <div class="top-list-val">9</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="brutal-card empty-card">
+          <div class="card-inner" style="display:flex; flex-direction:column; gap:8px;">
+            <div class="empty-eyebrow">모아보기 · 축 필터 결과 0건</div>
+            <div class="empty-headline">아직 이 축의 이야기가 없어요</div>
+            <div class="empty-desc">대화를 두어 마디 더 나누면 맞는 이야기를 찾아드릴게요.</div>
+            <button class="btn btn-secondary" style="align-self:flex-start; margin-top:8px;">대화 이어가기</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 차트 -->
+    <section class="charts-row">
+      <div class="brutal-card chart-card">
+        <div class="chart-head">
+          <div class="chart-title">최근 10일 청취 추이</div>
+        </div>
+        <div class="chart-svg-wrap">
+          <svg viewBox="0 0 460 220" role="img" aria-label="최근 10일 청취 추이, 8일째 41편으로 최고치">
+            <!-- 축 그리드 (0 기준) -->
+            <line x1="40" y1="170" x2="440" y2="170" stroke="var(--ink)" stroke-width="2"/>
+            <line x1="40" y1="116.67" x2="440" y2="116.67" stroke="var(--gray-2)" stroke-width="2"/>
+            <line x1="40" y1="63.33" x2="440" y2="63.33" stroke="var(--gray-2)" stroke-width="2"/>
+            <line x1="40" y1="10" x2="440" y2="10" stroke="var(--gray-2)" stroke-width="2"/>
+            <text x="34" y="174" text-anchor="end" class="axis-label">0</text>
+            <text x="34" y="120.67" text-anchor="end" class="axis-label">15</text>
+            <text x="34" y="67.33" text-anchor="end" class="axis-label">30</text>
+            <text x="34" y="14" text-anchor="end" class="axis-label">45</text>
+
+            <!-- 영역(단색, 그라디언트 금지) -->
+            <polygon points="40,170 40,127.33 84.44,106 128.89,116.67 173.33,138 217.78,84.67 262.22,59.78 306.67,74 351.11,24.22 395.56,52.67 440,66.89 440,170" fill="var(--gray-2)"/>
+            <!-- 라인 -->
+            <polyline points="40,127.33 84.44,106 128.89,116.67 173.33,138 217.78,84.67 262.22,59.78 306.67,74 351.11,24.22 395.56,52.67 440,66.89" fill="none" stroke="var(--ink)" stroke-width="4"/>
+
+            <!-- 데이터 포인트 (각진 마커) -->
+            <rect x="36.5" y="123.83" width="7" height="7" fill="var(--ink)"/>
+            <rect x="80.94" y="102.5" width="7" height="7" fill="var(--ink)"/>
+            <rect x="125.39" y="113.17" width="7" height="7" fill="var(--ink)"/>
+            <rect x="169.83" y="134.5" width="7" height="7" fill="var(--ink)"/>
+            <rect x="214.28" y="81.17" width="7" height="7" fill="var(--ink)"/>
+            <rect x="258.72" y="56.28" width="7" height="7" fill="var(--ink)"/>
+            <rect x="303.17" y="70.5" width="7" height="7" fill="var(--ink)"/>
+            <!-- 피크 (8일째, 41) -->
+            <rect x="345.61" y="18.72" width="11" height="11" class="peak-tag"/>
+            <text x="351.11" y="14" text-anchor="middle" class="peak-label">PEAK 41</text>
+            <rect x="392.06" y="49.17" width="7" height="7" fill="var(--ink)"/>
+            <rect x="436.5" y="63.39" width="7" height="7" fill="var(--ink)"/>
+
+            <!-- x축 라벨 -->
+            <text x="40" y="196" text-anchor="middle" class="axis-label">1</text>
+            <text x="84.44" y="196" text-anchor="middle" class="axis-label">2</text>
+            <text x="128.89" y="196" text-anchor="middle" class="axis-label">3</text>
+            <text x="173.33" y="196" text-anchor="middle" class="axis-label">4</text>
+            <text x="217.78" y="196" text-anchor="middle" class="axis-label">5</text>
+            <text x="262.22" y="196" text-anchor="middle" class="axis-label">6</text>
+            <text x="306.67" y="196" text-anchor="middle" class="axis-label">7</text>
+            <text x="351.11" y="196" text-anchor="middle" class="axis-label">8</text>
+            <text x="395.56" y="196" text-anchor="middle" class="axis-label">9</text>
+            <text x="440" y="196" text-anchor="middle" class="axis-label">10</text>
+            <text x="240" y="212" text-anchor="middle" class="axis-label">일차 · 단위: 편</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="brutal-card chart-card">
+        <div class="chart-head">
+          <div class="chart-title">축 구성비</div>
+        </div>
+        <div class="donut-wrap">
+          <svg viewBox="0 0 200 200" width="160" height="160" role="img" aria-label="축 구성비: 내적-성찰 34%, 내적-마음 22%, 내적-성품 18%, 외적-첫인상 16%, 외적-조건 10%">
+            <g transform="rotate(-90 100 100)">
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#000000" stroke-width="40" pathLength="100" stroke-dasharray="33.4 66.6" stroke-dashoffset="0"/>
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#333333" stroke-width="40" pathLength="100" stroke-dasharray="21.4 78.6" stroke-dashoffset="-34"/>
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#666666" stroke-width="40" pathLength="100" stroke-dasharray="17.4 82.6" stroke-dashoffset="-56"/>
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#999999" stroke-width="40" pathLength="100" stroke-dasharray="15.4 84.6" stroke-dashoffset="-74"/>
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#CCCCCC" stroke-width="40" pathLength="100" stroke-dasharray="9.4 90.6" stroke-dashoffset="-90"/>
+            </g>
+            <text x="100" y="96" text-anchor="middle" font-family="Archivo Black" font-size="26" fill="var(--ink)">74%</text>
+            <text x="100" y="116" text-anchor="middle" font-family="Pretendard" font-weight="700" font-size="11" fill="var(--ink)">내적 비중</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-row"><span class="legend-swatch" style="background:#000000;"></span>내적-성찰<span class="legend-pct">34%</span></div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#333333;"></span>내적-마음<span class="legend-pct">22%</span></div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#666666;"></span>내적-성품<span class="legend-pct">18%</span></div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#999999;"></span>외적-첫인상<span class="legend-pct">16%</span></div>
+            <div class="legend-row"><span class="legend-swatch" style="background:#CCCCCC;"></span>외적-조건<span class="legend-pct">10%</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 테이블 -->
+    <section class="brutal-card table-section">
+      <div class="table-title">받은 스토리</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" scope="col" aria-sort="ascending">작품</th>
+            <th scope="col">작가</th>
+            <th scope="col">축</th>
+            <th scope="col">교훈</th>
+            <th scope="col">상태</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-title"><div class="title-cell">오만과 편견</div></td>
+            <td><div class="author-row"><div class="avatar-sq sm">제</div><span class="author-name">제인 오스틴</span></div></td>
+            <td>내적</td>
+            <td>첫인상은 자주 틀린다</td>
+            <td><span class="status-chip status-heard">들음</span></td>
+          </tr>
+          <tr>
+            <td class="col-title"><div class="title-cell">위대한 개츠비</div></td>
+            <td><div class="author-row"><div class="avatar-sq sm">F</div><span class="author-name">F. 스콧 피츠제럴드</span></div></td>
+            <td>외적</td>
+            <td>조건으로 시작한 마음은 조건에서 끝난다</td>
+            <td><span class="status-chip status-hold">보류</span></td>
+          </tr>
+          <tr>
+            <td class="col-title"><div class="title-cell">어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설</div></td>
+            <td><div class="author-row"><div class="avatar-sq sm missing">—</div><span class="author-name missing">—</span></div></td>
+            <td>내적</td>
+            <td>기다림은 사람을 바꾼다</td>
+            <td>
+              <span class="status-chip status-relisten">다시듣기</span>
+              <button class="row-action">보기</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="col-title"><div class="title-cell">폭풍의 언덕</div></td>
+            <td><div class="author-row"><div class="avatar-sq sm">에</div><span class="author-name">에밀리 브론테</span></div></td>
+            <td>내적</td>
+            <td>집착은 사랑의 이름을 빌린다</td>
+            <td><span class="status-chip status-heard">들음</span></td>
+          </tr>
+          <tr>
+            <td class="col-title"><div class="title-cell">시라노 드 베르주라크</div></td>
+            <td><div class="author-row"><div class="avatar-sq sm">에</div><span class="author-name">에드몽 로스탕</span></div></td>
+            <td>외적</td>
+            <td>목소리는 얼굴보다 오래 남는다</td>
+            <td><span class="status-chip status-new">새로움</span></td>
+          </tr>
+          <tr>
+            <td class="col-title"><div class="title-cell">안나 카레니나</div></td>
+            <td><div class="author-row"><div class="avatar-sq sm">레</div><span class="author-name">레프 톨스토이</span></div></td>
+            <td>내적</td>
+            <td>불행한 사랑은 저마다의 이유로 불행하다</td>
+            <td><span class="status-chip status-hold">보류</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="page-footer">STYLE 05 · 브루탈리즘</footer>
+  </main>
+</div>
+
+<script>
+// JS는 연출 전용 — 실패해도 위 HTML/CSS만으로 화면은 완전하다.
+try {
+  // 모바일 드로어: 네비 클릭 시 자동 닫힘 (편의 기능, 체크박스가 핵심 로직을 이미 담당)
+  var toggle = document.getElementById('drawer-toggle');
+  document.querySelectorAll('.sidebar .nav-item').forEach(function (el) {
+    el.addEventListener('click', function () { if (toggle) toggle.checked = false; });
+  });
+} catch (e) { /* 무시 — 정적 화면은 이미 완전하다 */ }
+</script>
+</body>
+</html>

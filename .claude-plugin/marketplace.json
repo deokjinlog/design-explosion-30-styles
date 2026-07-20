@@ -1,6 +1,6 @@
 {
   "name": "design-explosion-30-styles",
-  "description": "하나의 화면을 30가지 디자인 스타일로 폭발시켜 나란히 비교",
+  "description": "화면 하나를 30가지 디자인 스타일로, 카피 하나를 30가지 메시지 각도로 폭발시켜 나란히 비교 — 스타일 × 메시지로 방향을 정하는 탐색 키트",
   "owner": {
     "name": "djchoi",
     "email": "deokjinlog@users.noreply.github.com"
@@ -9,8 +9,8 @@
   "plugins": [
     {
       "name": "design-explosion-30-styles",
-      "description": "하나의 화면을 30가지 디자인 스타일로 폭발시켜 나란히 비교 — 도메인 하나로 방향을 정하는 디자인 탐색",
-      "version": "1.1.0",
+      "description": "화면 하나를 30가지 디자인 스타일로, 카피 하나를 30가지 메시지 각도로 폭발시켜 나란히 비교 — 스타일 × 메시지로 방향을 정하는 탐색 키트",
+      "version": "1.2.0",
       "source": "./",
       "homepage": "https://github.com/deokjinlog/design-explosion-30-styles",
       "repository": "https://github.com/deokjinlog/design-explosion-30-styles",

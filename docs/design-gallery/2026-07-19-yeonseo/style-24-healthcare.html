@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>연서 — 대화 (STYLE 24 · 헬스케어 웰니스)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#FBFCFD;
+  --surface:#FFFFFF;
+  --border:#E8EDF1;
+  --warm-tint:#FAF8F5;
+  --primary:#4A90D9;
+  --primary-hover:#3A7BC0;
+  --primary-soft:#E3F0FB;
+  --on-primary:#FFFFFF;
+  --secondary:#7FB069;
+  --secondary-soft:#ECF4E7;
+  --text-strong:#2E3A46;
+  --text-mid:#5A6B7A;
+  --text-weak:#8A9AA8;
+  --success:#7FB069;
+  --success-soft:#ECF4E7;
+  --warning:#E8B04B;
+  --warning-soft:#FBF1DE;
+  --danger:#E27D7D;
+  --danger-soft:#FBEAEA;
+  --info:#4A90D9;
+  --info-soft:#E3F0FB;
+  --chart-3:#5FA8A3;
+  --chart-4:#E8B04B;
+  --chart-5:#C9975B;
+  --radius-card:20px;
+  --radius-control:12px;
+  --radius-pill:999px;
+  --shadow-sm:0 2px 8px rgba(74,144,217,.06);
+  --shadow-md:0 8px 24px rgba(46,58,70,.05);
+  --shadow-hover:0 3px 11px rgba(74,144,217,.09), 0 12px 34px rgba(46,58,70,.07);
+  --font-kr:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-num:'Nunito Sans','Pretendard',sans-serif;
+}
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{
+  margin:0; padding:0;
+  background:var(--bg);
+  color:var(--text-strong);
+  font-family:var(--font-kr);
+  -webkit-font-smoothing:antialiased;
+  font-size:15px;
+  line-height:1.6;
+}
+h1,h2,h3,h4,p,ul,figure{ margin:0; }
+ul{ list-style:none; padding:0; }
+button{ font-family:inherit; }
+img,svg{ display:block; }
+a{ color:inherit; }
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+.skip-link{
+  position:absolute; left:8px; top:-48px; background:var(--primary); color:#fff;
+  padding:10px 16px; border-radius:var(--radius-control); z-index:1000;
+  transition:top .2s ease-out; font-size:13px; font-weight:600;
+}
+.skip-link:focus{ top:8px; }
+:focus-visible{
+  outline:2px solid var(--primary); outline-offset:2px;
+  box-shadow:0 0 0 4px var(--primary-soft); border-radius:6px;
+}
+.icon{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+.tabular{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+
+/* ===== layout shell ===== */
+.drawer-check{ position:absolute; opacity:0; pointer-events:none; }
+.app{ display:grid; grid-template-columns:240px 1fr; min-height:100vh; }
+.drawer-overlay{
+  display:none; position:fixed; inset:0; background:rgba(46,58,70,.28);
+  opacity:0; pointer-events:none; transition:opacity .25s ease; z-index:90;
+}
+
+/* ===== sidebar ===== */
+.sidebar{
+  background:var(--surface); border-right:1px solid var(--border);
+  padding:32px 20px; display:flex; flex-direction:column; gap:32px;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.sidebar__logo{
+  display:flex; align-items:center; gap:10px; padding:0 4px;
+  font-family:var(--font-num); font-weight:800; font-size:22px; color:var(--text-strong);
+  opacity:0; animation:fadeIn .4s ease-out forwards; animation-delay:.1s;
+}
+.sidebar__logo .mark{
+  width:32px; height:32px; border-radius:var(--radius-pill); background:var(--primary-soft);
+  color:var(--primary); display:flex; align-items:center; justify-content:center;
+  font-size:15px; font-weight:700;
+}
+.sidebar__nav{ display:flex; flex-direction:column; gap:4px; flex:1; }
+.nav-item{
+  display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:var(--radius-control);
+  color:var(--text-mid); text-decoration:none; font-size:14px; font-weight:600;
+  transition:background .2s ease-out, color .2s ease-out;
+  opacity:0; animation:iconFade .3s ease-out forwards;
+  min-height:44px;
+}
+.nav-item:hover{ background:var(--warm-tint); color:var(--text-strong); }
+.nav-item.is-active{ background:var(--primary-soft); color:var(--primary-hover); }
+.sidebar__user{
+  display:flex; align-items:center; gap:10px; padding:12px 10px;
+  border-top:1px solid var(--border); margin-top:auto;
+}
+.avatar{
+  border-radius:50%; background:var(--primary-soft); color:var(--primary-hover);
+  display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;
+  font-family:var(--font-num);
+}
+.avatar--md{ width:40px; height:40px; font-size:15px; }
+.avatar--sm{ width:32px; height:32px; font-size:13px; }
+.sidebar__user-text{ display:flex; flex-direction:column; }
+.sidebar__user-name{ font-size:14px; font-weight:600; color:var(--text-strong); }
+.sidebar__user-role{ font-size:12px; color:var(--text-mid); }
+
+/* ===== main / topbar ===== */
+.main{ display:flex; flex-direction:column; min-width:0; }
+.topbar{
+  display:flex; align-items:center; gap:16px; padding:14px 32px;
+  background:var(--surface); border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:20;
+  opacity:0; animation:fadeIn .4s ease-out forwards;
+}
+.hamburger{
+  display:none; align-items:center; justify-content:center;
+  width:44px; height:44px; border-radius:var(--radius-control); border:1px solid var(--border);
+  background:var(--surface); color:var(--text-mid); cursor:pointer; flex-shrink:0;
+}
+.topbar__brand{ font-family:var(--font-num); font-weight:800; font-size:18px; margin-right:8px; white-space:nowrap; }
+.search{ position:relative; flex:1; max-width:340px; }
+.search .icon{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-mid); }
+.search input{
+  width:100%; height:40px; border-radius:var(--radius-control); border:1px solid var(--border);
+  background:var(--warm-tint); padding:0 14px 0 40px; font-size:14px; color:var(--text-strong);
+  font-family:inherit; transition:border-color .2s ease-out, box-shadow .2s ease-out, background .2s ease-out;
+}
+.search input::placeholder{ color:var(--text-weak); }
+.search input:focus{ outline:none; border-color:var(--primary); background:var(--surface); box-shadow:0 0 0 4px var(--primary-soft); }
+.topbar__spacer{ flex:1; }
+.icon-btn{
+  position:relative; width:44px; height:44px; border-radius:var(--radius-pill); border:1px solid transparent;
+  background:transparent; color:var(--text-mid); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; flex-shrink:0; transition:background .2s ease-out, color .2s ease-out;
+}
+.icon-btn:hover{ background:var(--warm-tint); color:var(--text-strong); }
+.badge-dot{
+  position:absolute; top:6px; right:6px; min-width:16px; height:16px; padding:0 4px;
+  border-radius:var(--radius-pill); background:var(--primary); color:#fff;
+  font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-num); border:2px solid var(--surface);
+}
+.btn{
+  height:40px; padding:0 18px; border-radius:var(--radius-control); border:1px solid transparent;
+  font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+  transition:box-shadow .22s ease-out, transform .22s ease-out, background .2s ease-out; white-space:nowrap;
+  position:relative;
+}
+.btn:hover{ box-shadow:var(--shadow-hover); transform:translateY(-1px); }
+.btn--primary{ background:var(--primary); color:var(--on-primary); }
+.btn--primary:hover{ background:var(--primary-hover); }
+.btn--primary::after{ content:''; position:absolute; inset:-2px; border-radius:inherit; pointer-events:none; }
+.btn--primary:active::after{ animation:ringPulse .25s ease-out; }
+.btn--secondary{ background:var(--surface); color:var(--text-strong); border-color:var(--border); }
+.btn--secondary:hover{ background:var(--warm-tint); }
+.btn--ghost{ background:transparent; color:var(--primary-hover); border-color:transparent; height:auto; padding:4px 8px; }
+.btn--ghost:hover{ background:var(--primary-soft); box-shadow:none; transform:none; }
+
+/* ===== content shell ===== */
+.content{ padding:32px; display:flex; flex-direction:column; gap:24px; max-width:1280px; width:100%; margin:0 auto; }
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-card);
+  padding:24px; box-shadow:var(--shadow-sm);
+  transition:box-shadow .22s ease-out, transform .22s ease-out;
+}
+.card:hover{ box-shadow:var(--shadow-hover); transform:translateY(-2px); }
+.card__header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.card__title{ font-size:18px; font-weight:600; letter-spacing:.1px; }
+.card__eyebrow{ font-size:12px; font-weight:600; color:var(--primary-hover); text-transform:none; letter-spacing:0; margin-bottom:6px; }
+
+/* ===== tabs + filter ===== */
+.tabs-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.tabs{ display:flex; gap:6px; background:var(--warm-tint); padding:4px; border-radius:var(--radius-pill); }
+.tab{
+  border:none; background:transparent; color:var(--text-mid); font-size:14px; font-weight:600;
+  padding:9px 18px; border-radius:var(--radius-pill); cursor:pointer; transition:background .2s ease-out, color .2s ease-out;
+  min-height:40px;
+}
+.tab:hover{ color:var(--text-strong); }
+.tab.is-active{ background:var(--surface); color:var(--primary-hover); box-shadow:var(--shadow-sm); }
+.filter-dropdown{
+  display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 14px;
+  border-radius:var(--radius-control); border:1px solid var(--border); background:var(--surface);
+  color:var(--text-mid); font-size:14px; font-weight:600; cursor:pointer; transition:background .2s ease-out;
+}
+.filter-dropdown:hover{ background:var(--warm-tint); }
+
+/* ===== banner ===== */
+.banner{
+  display:flex; align-items:flex-start; gap:12px; background:var(--primary-soft); border:1px solid transparent;
+  border-radius:var(--radius-card); padding:16px 20px; color:var(--text-strong);
+}
+.banner .icon{ color:var(--primary-hover); margin-top:2px; }
+.banner__text{ flex:1; font-size:14px; }
+.banner__close{
+  width:32px; height:32px; border-radius:50%; border:none; background:transparent; color:var(--primary-hover);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+}
+.banner__close:hover{ background:rgba(74,144,217,.12); }
+.banner__close .icon{ width:16px; height:16px; margin:0; }
+
+/* ===== KPI ===== */
+.kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
+.kpi-card{ opacity:0; animation:fadeUp .38s cubic-bezier(.25,.7,.4,1) forwards; }
+.kpi-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:14px; }
+.kpi-label{ font-size:13px; font-weight:600; color:var(--text-mid); }
+.kpi-spark{ width:64px; height:24px; overflow:visible; }
+.kpi-value-row{ display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.kpi-value{ font-family:var(--font-num); font-weight:700; font-size:clamp(22px,2.4vw,28px); letter-spacing:.1px; }
+.kpi-unit{ font-size:14px; color:var(--text-mid); font-weight:600; }
+.kpi-delta{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; font-family:var(--font-num); }
+.kpi-delta .icon{ width:14px; height:14px; }
+.kpi-delta--up{ color:var(--secondary); }
+.kpi-delta--down-neutral{ color:var(--text-mid); }
+.kpi-caption{ font-size:12px; color:var(--text-mid); font-weight:400; margin-left:2px; }
+
+/* ===== charts ===== */
+.charts-row{ display:grid; grid-template-columns:2fr 1fr; gap:24px; }
+.line-chart-svg{ width:100%; height:auto; overflow:visible; }
+.axis-label{ font-size:11px; fill:var(--text-mid); font-family:var(--font-num); }
+.grid-line{ stroke:var(--border); stroke-width:1; }
+.line-path{ fill:none; stroke:var(--primary); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1; pathLength:1; animation:drawLine .9s ease-in-out forwards; animation-delay:.9s; }
+.area-path{ fill:var(--primary-soft); opacity:0; animation:areaFade .6s ease-out forwards; animation-delay:1.5s; }
+.peak-dot{ fill:var(--surface); stroke:var(--primary); stroke-width:2.5; opacity:0; animation:areaFade .4s ease-out forwards; animation-delay:1.6s; }
+.peak-callout{ font-size:12px; font-weight:700; fill:var(--primary-hover); font-family:var(--font-num); opacity:0; animation:areaFade .4s ease-out forwards; animation-delay:1.7s; }
+.donut-wrap{ display:flex; flex-direction:column; align-items:center; gap:20px; }
+.donut-svg{ width:168px; height:168px; }
+.donut-seg{ fill:none; stroke-width:26; transition:stroke-width .2s ease-out; }
+.donut-legend{ width:100%; display:flex; flex-direction:column; gap:10px; }
+.legend-item{ display:flex; align-items:center; gap:10px; font-size:13px; }
+.legend-swatch{ width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+.legend-label{ flex:1; color:var(--text-strong); }
+.legend-pct{ font-family:var(--font-num); font-weight:700; color:var(--text-strong); }
+
+/* ===== secondary row ===== */
+.secondary-row{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.goal-body{ display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+.goal-ring-wrap{ position:relative; width:140px; height:140px; flex-shrink:0; }
+.goal-ring-svg{ width:140px; height:140px; transform:rotate(-90deg); }
+.goal-ring-track{ fill:none; stroke:var(--secondary-soft); stroke-width:12; }
+.goal-ring-fill{ fill:none; stroke:var(--secondary); stroke-width:12; stroke-linecap:round; }
+.goal-ring-text{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.goal-pct{ font-family:var(--font-num); font-weight:800; font-size:28px; }
+.goal-pct-sign{ font-size:14px; font-weight:700; color:var(--text-mid); }
+.goal-info{ flex:1; min-width:120px; }
+.goal-count{ font-family:var(--font-num); font-weight:700; font-size:20px; margin-bottom:4px; }
+.goal-count-label{ font-size:13px; color:var(--text-mid); }
+.toggle{ display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
+.toggle-input{ position:absolute; opacity:0; width:1px; height:1px; }
+.toggle-track{ width:38px; height:22px; border-radius:var(--radius-pill); background:var(--secondary-soft); position:relative; transition:background .3s ease; flex-shrink:0; }
+.toggle-thumb{ position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:var(--shadow-sm); transition:transform .3s ease; }
+.toggle-input:checked + .toggle-track{ background:var(--primary); }
+.toggle-input:checked + .toggle-track .toggle-thumb{ transform:translateX(16px); }
+.toggle-input:focus-visible + .toggle-track{ outline:2px solid var(--primary); outline-offset:2px; }
+.toggle-label{ font-size:13px; font-weight:600; color:var(--text-mid); }
+.segment{ display:inline-flex; gap:4px; background:var(--warm-tint); padding:4px; border-radius:var(--radius-pill); }
+.segment-btn{ border:none; background:transparent; padding:7px 16px; border-radius:var(--radius-pill); font-size:13px; font-weight:600; color:var(--text-mid); cursor:pointer; transition:background .2s ease-out, color .2s ease-out; }
+.segment-btn.is-active{ background:var(--primary); color:#fff; }
+.toplist{ display:flex; flex-direction:column; gap:12px; margin-top:16px; }
+.toplist-item{ display:grid; grid-template-columns:32px 1fr auto; align-items:center; gap:12px; position:relative; }
+.toplist-bar{ position:absolute; left:44px; right:0; bottom:-6px; height:4px; border-radius:var(--radius-pill); background:var(--border); overflow:hidden; }
+.toplist-bar-fill{ height:100%; background:var(--secondary); border-radius:var(--radius-pill); }
+.toplist-name{ font-size:14px; font-weight:500; color:var(--text-strong); }
+.toplist-value{ font-family:var(--font-num); font-weight:700; font-size:14px; }
+
+/* ===== table ===== */
+.table-scroll{ overflow-x:auto; border-radius:var(--radius-card); }
+table.data-table{ width:100%; min-width:640px; border-collapse:collapse; }
+.data-table thead th{
+  text-align:left; font-size:12px; font-weight:600; color:var(--text-mid); padding:10px 16px;
+  border-bottom:1px solid var(--border); white-space:nowrap;
+}
+.th-sort{ display:inline-flex; align-items:center; gap:4px; cursor:pointer; }
+.th-sort .icon{ width:13px; height:13px; }
+.data-table tbody td{ padding:16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle; }
+.data-table tbody tr{ opacity:0; animation:fadeUp .3s ease-out forwards; transition:background .2s ease-out; }
+.data-table tbody tr:hover{ background:var(--warm-tint); }
+.data-table tbody tr:last-child td{ border-bottom:none; }
+.cell-title{ font-weight:600; }
+.cell-wrap{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; max-width:280px; word-break:keep-all; }
+.cell-ellipsis{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px; }
+.cell-missing{ color:var(--text-mid); }
+.axis-chip{ display:inline-block; padding:3px 10px; border-radius:var(--radius-pill); border:1px solid var(--border); font-size:12px; font-weight:600; color:var(--text-mid); white-space:nowrap; }
+.status-badge{
+  position:relative; display:inline-flex; align-items:center; gap:6px; padding:5px 12px 5px 10px;
+  border-radius:var(--radius-pill); font-size:12px; font-weight:600; color:var(--text-strong); white-space:nowrap;
+  opacity:0; animation:badgePop .35s ease-out forwards;
+}
+.status-badge .icon{ width:13px; height:13px; }
+.status-badge[data-tone="success"]{ background:var(--success-soft); }
+.status-badge[data-tone="success"] .icon{ color:var(--success); }
+.status-badge[data-tone="warning"]{ background:var(--warning-soft); }
+.status-badge[data-tone="warning"] .icon{ color:var(--warning); }
+.status-badge[data-tone="danger"]{ background:var(--danger-soft); }
+.status-badge[data-tone="danger"] .icon{ color:var(--danger); }
+.status-badge[data-tone="info"]{ background:var(--info-soft); }
+.status-badge[data-tone="info"] .icon{ color:var(--info); }
+.status-badge::after{
+  content:attr(data-tip); position:absolute; top:calc(100% + 8px); left:50%; transform:translate(-50%,4px);
+  background:var(--surface); color:var(--text-strong); border:1px solid var(--border); box-shadow:var(--shadow-md);
+  font-size:12px; font-weight:500; padding:8px 12px; border-radius:10px; white-space:nowrap;
+  opacity:0; pointer-events:none; transition:opacity .2s ease-out, transform .2s ease-out; z-index:30;
+}
+.status-badge:hover::after, .status-badge:focus-visible::after{ opacity:1; transform:translate(-50%,0); }
+.row-actions{ display:flex; gap:6px; opacity:0; transition:opacity .2s ease-out; justify-content:flex-end; }
+.data-table tbody tr:hover .row-actions{ opacity:1; }
+.row-action-btn{
+  width:32px; height:32px; border-radius:50%; border:1px solid var(--border); background:var(--surface);
+  color:var(--text-mid); display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.row-action-btn:hover{ background:var(--primary-soft); color:var(--primary-hover); border-color:transparent; }
+.row-action-btn .icon{ width:15px; height:15px; }
+
+/* ===== conversation ===== */
+.conversation-row{ display:grid; grid-template-columns:2fr 1fr; gap:24px; align-items:start; }
+.chat-thread{ display:flex; flex-direction:column; gap:16px; margin-bottom:20px; }
+.msg{ display:flex; gap:10px; max-width:88%; }
+.msg--bot{ align-self:flex-start; }
+.msg--user{ align-self:flex-end; flex-direction:row-reverse; }
+.msg-avatar{ flex-shrink:0; }
+.msg-bubble{ padding:14px 18px; border-radius:18px; font-size:14px; line-height:1.6; }
+.msg--bot .msg-bubble{ background:var(--primary-soft); color:var(--text-strong); border-bottom-left-radius:6px; }
+.msg--user .msg-bubble{ background:var(--warm-tint); border:1px solid var(--border); color:var(--text-strong); border-bottom-right-radius:6px; }
+.msg-choices{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.choice-btn{
+  border:1px solid var(--primary); background:var(--surface); color:var(--primary-hover);
+  border-radius:var(--radius-pill); padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer;
+  transition:background .2s ease-out, color .2s ease-out;
+}
+.choice-btn:hover{ background:var(--primary); color:#fff; }
+.diagnosis-card{ background:var(--warm-tint); border:1px solid var(--border); border-radius:16px; padding:20px; }
+.diagnosis-label{ font-size:12px; font-weight:700; color:var(--secondary); margin-bottom:8px; }
+.diagnosis-text{ font-size:14px; color:var(--text-strong); margin-bottom:16px; }
+.story-card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:14px; }
+.story-card__top{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.chip{ display:inline-flex; align-items:center; padding:3px 10px; border-radius:var(--radius-pill); background:var(--secondary-soft); color:var(--secondary); font-size:12px; font-weight:700; }
+.story-source{ font-size:13px; color:var(--text-mid); font-weight:600; }
+.story-lesson{ font-size:14px; color:var(--text-strong); line-height:1.6; }
+.diagnosis-footer{ text-align:right; }
+.chat-input-row{ display:flex; gap:10px; align-items:center; border-top:1px solid var(--border); padding-top:16px; }
+.chat-input-row input{
+  flex:1; height:44px; border-radius:var(--radius-pill); border:1px solid var(--border);
+  background:var(--warm-tint); padding:0 18px; font-size:14px; color:var(--text-strong); font-family:inherit;
+  transition:border-color .2s ease-out, box-shadow .2s ease-out, background .2s ease-out;
+}
+.chat-input-row input::placeholder{ color:var(--text-weak); }
+.chat-input-row input:focus{ outline:none; border-color:var(--primary); background:var(--surface); box-shadow:0 0 0 4px var(--primary-soft); }
+.send-btn{
+  width:44px; height:44px; border-radius:50%; border:none; background:var(--primary); color:#fff;
+  display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  transition:background .2s ease-out;
+}
+.send-btn:hover{ background:var(--primary-hover); }
+.send-btn .icon{ width:18px; height:18px; }
+
+/* ===== empty state ===== */
+.empty-card{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:16px; padding:32px 24px; }
+.empty-illustration{ width:88px; height:88px; }
+.empty-title{ font-size:18px; font-weight:600; color:var(--text-strong); }
+.empty-desc{ font-size:14px; color:var(--text-mid); max-width:26ch; }
+
+/* ===== footer ===== */
+.site-footer{ text-align:center; padding:28px 32px 40px; font-size:12px; color:var(--text-mid); }
+
+/* ===== keyframes ===== */
+@keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:translateY(0); } }
+@keyframes iconFade{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes drawLine{ to{ stroke-dashoffset:0; } }
+@keyframes areaFade{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes badgePop{ 0%{ opacity:0; transform:scale(.85); } 70%{ opacity:1; transform:scale(1.05); } 100%{ opacity:1; transform:scale(1); } }
+@keyframes ringPulse{ from{ box-shadow:0 0 0 0 var(--primary-soft); } to{ box-shadow:0 0 0 10px rgba(74,144,217,0); } }
+
+/* ===== responsive ===== */
+@media (max-width:900px){
+  .app{ grid-template-columns:1fr; }
+  .sidebar{
+    position:fixed; top:0; left:0; width:270px; height:100vh; z-index:100;
+    transform:translateX(-100%); transition:transform .28s ease; box-shadow:var(--shadow-md);
+  }
+  .drawer-check:checked ~ .app .sidebar{ transform:translateX(0); }
+  .drawer-check:checked ~ .app .drawer-overlay{ display:block; opacity:1; pointer-events:auto; }
+  .hamburger{ display:flex; }
+  .topbar{ padding:14px 16px; }
+  .search{ max-width:none; }
+  .topbar__brand{ display:none; }
+  .content{ padding:20px 16px; }
+  .kpi-grid{ grid-template-columns:1fr 1fr; gap:16px; }
+  .charts-row{ grid-template-columns:1fr; }
+  .secondary-row{ grid-template-columns:1fr; }
+  .conversation-row{ grid-template-columns:1fr; }
+  .msg{ max-width:100%; }
+}
+@media (max-width:480px){
+  .kpi-grid{ grid-template-columns:1fr; }
+  .goal-body{ flex-direction:column; align-items:flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:0.001ms !important;
+    animation-delay:0s !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.001ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">본문으로 건너뛰기</a>
+
+<!-- icon sprite -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5c0 4.14-4.03 7.5-9 7.5-1.34 0-2.6-.24-3.75-.68L3 20l1.3-3.9A7.1 7.1 0 0 1 3 11.5C3 7.36 7.03 4 12 4s9 3.36 9 7.5z"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><polygon points="12 3 3 8 12 13 21 8 12 3"/><polyline points="3 16 12 21 21 16"/><polyline points="3 12 12 17 21 12"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="15.5 8.5 13 13 8.5 15.5 11 11 15.5 8.5"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21V5.5z"/><path d="M20 18.5H6.5A2.5 2.5 0 0 0 4 21"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7.5 12 12 15.5 14.5"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.5-2-3.4-2.4.9a7.6 7.6 0 0 0-1.7-1L15 3h-4l-.3 2.9a7.6 7.6 0 0 0-1.7 1l-2.4-.9-2 3.4L6.6 11a7.6 7.6 0 0 0 0 2l-2 1.5 2 3.4 2.4-.9a7.6 7.6 0 0 0 1.7 1L11 21h4l.3-2.9a7.6 7.6 0 0 0 1.7-1l2.4.9 2-3.4-2-1.6z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-alert-tri" viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3z"/><line x1="12" y1="9.5" x2="12" y2="13.5"/><circle cx="12" cy="16.3" r=".2" fill="currentColor" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 2 13.6 9 21 12 13.6 15 12 22 10.4 15 3 12 10.4 9 12 2z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></symbol>
+  <symbol id="i-arrow-down" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="5 12 12 19 19 12"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4-6 4v-17z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+</svg>
+
+<input type="checkbox" id="drawerToggle" class="drawer-check" aria-hidden="true">
+
+<div class="app">
+  <label for="drawerToggle" class="drawer-overlay" aria-hidden="true"></label>
+
+  <aside class="sidebar" aria-label="주 메뉴">
+    <div class="sidebar__logo"><span class="mark">연</span>연서</div>
+    <nav class="sidebar__nav" aria-label="워크스페이스 메뉴">
+      <a class="nav-item is-active" href="#" style="--i:0" aria-current="page"><svg class="icon"><use href="#i-chat"/></svg>대화</a>
+      <a class="nav-item" href="#" style="--i:1"><svg class="icon"><use href="#i-layers"/></svg>모아보기</a>
+      <a class="nav-item" href="#" style="--i:2"><svg class="icon"><use href="#i-compass"/></svg>결핍 지도</a>
+      <a class="nav-item" href="#" style="--i:3"><svg class="icon"><use href="#i-book"/></svg>작품 서가</a>
+      <a class="nav-item" href="#" style="--i:4"><svg class="icon"><use href="#i-clock"/></svg>기록</a>
+      <a class="nav-item" href="#" style="--i:5"><svg class="icon"><use href="#i-settings"/></svg>설정</a>
+    </nav>
+    <div class="sidebar__user">
+      <span class="avatar avatar--md">ㅇ</span>
+      <div class="sidebar__user-text">
+        <span class="sidebar__user-name">읽는 사람</span>
+        <span class="sidebar__user-role">회원</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <label for="drawerToggle" class="hamburger" aria-label="메뉴 열기"><svg class="icon"><use href="#i-menu"/></svg></label>
+      <span class="topbar__brand">연서</span>
+      <div class="search">
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input type="text" placeholder="작품·교훈 검색" aria-label="작품·교훈 검색">
+      </div>
+      <div class="topbar__spacer"></div>
+      <button class="icon-btn" aria-label="알림, 읽지 않음 3개">
+        <svg class="icon"><use href="#i-bell"/></svg>
+        <span class="badge-dot tabular">3</span>
+      </button>
+      <span class="avatar avatar--sm" aria-hidden="true">ㅇ</span>
+      <button class="btn btn--primary">새 대화</button>
+      <button class="btn btn--secondary">모아보기</button>
+    </header>
+
+    <main id="main-content" class="content">
+
+      <div class="tabs-row">
+        <div class="tabs" role="tablist" aria-label="축 필터">
+          <button class="tab is-active" role="tab" aria-selected="true">전체</button>
+          <button class="tab" role="tab" aria-selected="false">외적</button>
+          <button class="tab" role="tab" aria-selected="false">내적</button>
+          <button class="tab" role="tab" aria-selected="false">최근</button>
+        </div>
+        <button class="filter-dropdown">시대<svg class="icon"><use href="#i-chevron-down"/></svg></button>
+      </div>
+
+      <div class="banner" role="status">
+        <svg class="icon"><use href="#i-bell"/></svg>
+        <p class="banner__text">결핍을 짚으려면 두세 마디가 더 필요해요. 편한 만큼만 답해도 됩니다.</p>
+        <button class="banner__close" aria-label="배너 닫기"><svg class="icon"><use href="#i-x"/></svg></button>
+      </div>
+
+      <section class="kpi-grid" aria-label="핵심 지표">
+        <article class="card kpi-card" style="--i:0">
+          <div class="kpi-head">
+            <span class="kpi-label">들은 스토리</span>
+            <svg class="kpi-spark" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+              <polyline points="0,22 10,18 20,19 30,14 40,11 50,9 60,6 72,3" fill="none" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-value tabular" data-value="1284000">1,284,000</span>
+            <span class="kpi-unit">편</span>
+          </div>
+          <div class="kpi-delta kpi-delta--up">
+            <svg class="icon"><use href="#i-arrow-up"/></svg>
+            <span class="tabular">+12.4%</span>
+            <span class="kpi-caption">전주 대비</span>
+          </div>
+        </article>
+
+        <article class="card kpi-card" style="--i:1">
+          <div class="kpi-head">
+            <span class="kpi-label">짚어낸 결핍</span>
+            <svg class="kpi-spark" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+              <polyline points="0,6 10,8 20,9 30,10 40,12 50,13 60,16 72,18" fill="none" stroke="var(--text-mid)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-value tabular" data-value="7">7</span>
+            <span class="kpi-unit">개</span>
+          </div>
+          <div class="kpi-delta kpi-delta--down-neutral">
+            <svg class="icon"><use href="#i-arrow-down"/></svg>
+            <span class="tabular">-2</span>
+            <span class="kpi-caption">전주 대비</span>
+          </div>
+        </article>
+
+        <article class="card kpi-card" style="--i:2">
+          <div class="kpi-head">
+            <span class="kpi-label">평균 읽은 시간</span>
+            <svg class="kpi-spark" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+              <polyline points="0,16 10,15 20,14 30,13 40,12 50,10 60,9 72,7" fill="none" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-value tabular" data-value="58">58</span>
+            <span class="kpi-unit">초</span>
+          </div>
+          <div class="kpi-delta kpi-delta--up">
+            <svg class="icon"><use href="#i-arrow-up"/></svg>
+            <span class="tabular">+3초</span>
+            <span class="kpi-caption">전주 대비</span>
+          </div>
+        </article>
+
+        <article class="card kpi-card" style="--i:3">
+          <div class="kpi-head">
+            <span class="kpi-label">이어온 날</span>
+            <svg class="kpi-spark" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+              <polyline points="0,14 10,13 20,12 30,12 40,10 50,9 60,8 72,6" fill="none" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="kpi-value-row">
+            <span class="kpi-value tabular" data-value="26">26</span>
+            <span class="kpi-unit">일</span>
+          </div>
+          <div class="kpi-delta kpi-delta--up">
+            <svg class="icon"><use href="#i-arrow-up"/></svg>
+            <span class="tabular">+1일</span>
+            <span class="kpi-caption">전주 대비</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="charts-row">
+        <div class="card chart-card">
+          <div class="card__header"><h2 class="card__title">최근 10일 청취 추이</h2></div>
+          <svg class="line-chart-svg" viewBox="0 0 600 200" role="img" aria-label="최근 10일 청취 추이. 8일째 41편으로 최고치를 기록.">
+            <line class="grid-line" x1="44" y1="170" x2="580" y2="170"/>
+            <line class="grid-line" x1="44" y1="120" x2="580" y2="120"/>
+            <line class="grid-line" x1="44" y1="70" x2="580" y2="70"/>
+            <line class="grid-line" x1="44" y1="20" x2="580" y2="20"/>
+            <text class="axis-label" x="36" y="174" text-anchor="end">0</text>
+            <text class="axis-label" x="36" y="124" text-anchor="end">15</text>
+            <text class="axis-label" x="36" y="74" text-anchor="end">30</text>
+            <text class="axis-label" x="36" y="24" text-anchor="end">45</text>
+            <text class="axis-label" x="44" y="190">1일</text>
+            <text class="axis-label" x="163" y="190">3일</text>
+            <text class="axis-label" x="282" y="190">5일</text>
+            <text class="axis-label" x="401" y="190">7일</text>
+            <text class="axis-label" x="520" y="190">9일</text>
+            <path class="area-path" d="M44,130 103.6,110 163.1,120 222.7,140 282.2,90 341.8,66.7 401.3,80 460.9,33.3 520.4,60 580,73.3 580,170 44,170 Z"/>
+            <path class="line-path" pathLength="1" d="M44,130 103.6,110 163.1,120 222.7,140 282.2,90 341.8,66.7 401.3,80 460.9,33.3 520.4,60 580,73.3"/>
+            <circle class="peak-dot" cx="460.9" cy="33.3" r="5"/>
+            <text class="peak-callout" x="460.9" y="18" text-anchor="middle">최고 41 · 8일째</text>
+          </svg>
+        </div>
+
+        <div class="card chart-card">
+          <div class="card__header"><h2 class="card__title">축 구성비</h2></div>
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 200 200" role="img" aria-label="축 구성비: 내적 성찰 34%, 내적 마음 22%, 내적 성품 18%, 외적 첫인상 16%, 외적 조건 10%">
+              <g transform="rotate(-90 100 100)">
+                <circle class="donut-seg" cx="100" cy="100" r="70" stroke="var(--primary)" stroke-dasharray="149.54 290.28" stroke-dashoffset="0"/>
+                <circle class="donut-seg" cx="100" cy="100" r="70" stroke="var(--secondary)" stroke-dasharray="96.76 343.06" stroke-dashoffset="-149.54"/>
+                <circle class="donut-seg" cx="100" cy="100" r="70" stroke="var(--chart-3)" stroke-dasharray="79.17 360.65" stroke-dashoffset="-246.30"/>
+                <circle class="donut-seg" cx="100" cy="100" r="70" stroke="var(--chart-4)" stroke-dasharray="70.37 369.45" stroke-dashoffset="-325.47"/>
+                <circle class="donut-seg" cx="100" cy="100" r="70" stroke="var(--chart-5)" stroke-dasharray="43.98 395.84" stroke-dashoffset="-395.84"/>
+              </g>
+            </svg>
+            <ul class="donut-legend">
+              <li class="legend-item"><span class="legend-swatch" style="background:var(--primary)"></span><span class="legend-label">내적-성찰</span><span class="legend-pct tabular">34%</span></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:var(--secondary)"></span><span class="legend-label">내적-마음</span><span class="legend-pct tabular">22%</span></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:var(--chart-3)"></span><span class="legend-label">내적-성품</span><span class="legend-pct tabular">18%</span></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:var(--chart-4)"></span><span class="legend-label">외적-첫인상</span><span class="legend-pct tabular">16%</span></li>
+              <li class="legend-item"><span class="legend-swatch" style="background:var(--chart-5)"></span><span class="legend-label">외적-조건</span><span class="legend-pct tabular">10%</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="secondary-row">
+        <div class="card">
+          <div class="card__header">
+            <h2 class="card__title">이번 달 소양 목표</h2>
+            <label class="toggle">
+              <input type="checkbox" class="toggle-input" checked>
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              <span class="toggle-label">알림</span>
+            </label>
+          </div>
+          <div class="goal-body">
+            <div class="goal-ring-wrap">
+              <svg class="goal-ring-svg" viewBox="0 0 140 140" role="img" aria-label="목표 진행률 65%">
+                <circle class="goal-ring-track" cx="70" cy="70" r="54"/>
+                <circle class="goal-ring-fill" cx="70" cy="70" r="54" stroke-dasharray="220.54 118.75"/>
+              </svg>
+              <div class="goal-ring-text">
+                <span class="goal-pct tabular">65<span class="goal-pct-sign">%</span></span>
+              </div>
+            </div>
+            <div class="goal-info">
+              <div class="goal-count tabular">26 / 40편</div>
+              <div class="goal-count-label">이번 달 목표까지 14편 남았어요</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__header">
+            <h2 class="card__title">자주 나온 결핍</h2>
+            <div class="segment" role="group" aria-label="축 보기 전환">
+              <button class="segment-btn is-active" aria-pressed="true">내적</button>
+              <button class="segment-btn" aria-pressed="false">외적</button>
+            </div>
+          </div>
+          <ul class="toplist">
+            <li class="toplist-item">
+              <span class="avatar avatar--sm">ㄱ</span>
+              <span class="toplist-name">기대치 어긋남</span>
+              <span class="toplist-value tabular">32</span>
+              <span class="toplist-bar"><span class="toplist-bar-fill" style="width:100%"></span></span>
+            </li>
+            <li class="toplist-item">
+              <span class="avatar avatar--sm">ㅍ</span>
+              <span class="toplist-name">표현 부족</span>
+              <span class="toplist-value tabular">27</span>
+              <span class="toplist-bar"><span class="toplist-bar-fill" style="width:84%"></span></span>
+            </li>
+            <li class="toplist-item">
+              <span class="avatar avatar--sm">ㅈ</span>
+              <span class="toplist-name">자존감</span>
+              <span class="toplist-value tabular">21</span>
+              <span class="toplist-bar"><span class="toplist-bar-fill" style="width:66%"></span></span>
+            </li>
+            <li class="toplist-item">
+              <span class="avatar avatar--sm">ㄱ</span>
+              <span class="toplist-name">거리 조절</span>
+              <span class="toplist-value tabular">15</span>
+              <span class="toplist-bar"><span class="toplist-bar-fill" style="width:47%"></span></span>
+            </li>
+            <li class="toplist-item">
+              <span class="avatar avatar--sm">ㅅ</span>
+              <span class="toplist-name">신뢰 회복</span>
+              <span class="toplist-value tabular">9</span>
+              <span class="toplist-bar"><span class="toplist-bar-fill" style="width:28%"></span></span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="card table-section">
+        <div class="card__header"><h2 class="card__title">받은 스토리</h2></div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th><span class="th-sort">작품<svg class="icon"><use href="#i-chevron-down"/></svg></span></th>
+                <th>작가</th>
+                <th>축</th>
+                <th>교훈</th>
+                <th>상태</th>
+                <th><span class="sr-only">액션</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="--i:0">
+                <td class="cell-title">오만과 편견</td>
+                <td>제인 오스틴</td>
+                <td><span class="axis-chip">내적</span></td>
+                <td class="cell-wrap">첫인상은 자주 틀린다</td>
+                <td><span class="status-badge" data-tone="success" data-tip="이 이야기는 끝까지 들었어요" tabindex="0"><svg class="icon"><use href="#i-check"/></svg>들음</span></td>
+                <td><div class="row-actions"><button class="row-action-btn" aria-label="다시 듣기"><svg class="icon"><use href="#i-play"/></svg></button><button class="row-action-btn" aria-label="북마크"><svg class="icon"><use href="#i-bookmark"/></svg></button></div></td>
+              </tr>
+              <tr style="--i:1">
+                <td class="cell-title">위대한 개츠비</td>
+                <td>F. 스콧 피츠제럴드</td>
+                <td><span class="axis-chip">외적</span></td>
+                <td class="cell-wrap">조건으로 시작한 마음은 조건에서 끝난다</td>
+                <td><span class="status-badge" data-tone="danger" data-tip="천천히 다시 볼 수 있어요" tabindex="0"><svg class="icon"><use href="#i-alert-tri"/></svg>보류</span></td>
+                <td><div class="row-actions"><button class="row-action-btn" aria-label="다시 듣기"><svg class="icon"><use href="#i-play"/></svg></button><button class="row-action-btn" aria-label="북마크"><svg class="icon"><use href="#i-bookmark"/></svg></button></div></td>
+              </tr>
+              <tr style="--i:2">
+                <td class="cell-title cell-wrap" title="어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설">어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설</td>
+                <td class="cell-missing">—</td>
+                <td><span class="axis-chip">내적</span></td>
+                <td class="cell-wrap">기다림은 사람을 바꾼다</td>
+                <td><span class="status-badge" data-tone="warning" data-tip="다른 관점으로 다시 들어볼까요" tabindex="0"><svg class="icon"><use href="#i-refresh"/></svg>다시듣기</span></td>
+                <td><div class="row-actions"><button class="row-action-btn" aria-label="다시 듣기"><svg class="icon"><use href="#i-play"/></svg></button><button class="row-action-btn" aria-label="북마크"><svg class="icon"><use href="#i-bookmark"/></svg></button></div></td>
+              </tr>
+              <tr style="--i:3">
+                <td class="cell-title">폭풍의 언덕</td>
+                <td>에밀리 브론테</td>
+                <td><span class="axis-chip">내적</span></td>
+                <td class="cell-wrap">집착은 사랑의 이름을 빌린다</td>
+                <td><span class="status-badge" data-tone="success" data-tip="이 이야기는 끝까지 들었어요" tabindex="0"><svg class="icon"><use href="#i-check"/></svg>들음</span></td>
+                <td><div class="row-actions"><button class="row-action-btn" aria-label="다시 듣기"><svg class="icon"><use href="#i-play"/></svg></button><button class="row-action-btn" aria-label="북마크"><svg class="icon"><use href="#i-bookmark"/></svg></button></div></td>
+              </tr>
+              <tr style="--i:4">
+                <td class="cell-title">시라노 드 베르주라크</td>
+                <td>에드몽 로스탕</td>
+                <td><span class="axis-chip">외적</span></td>
+                <td class="cell-wrap">목소리는 얼굴보다 오래 남는다</td>
+                <td><span class="status-badge" data-tone="info" data-tip="아직 듣지 않은 새 이야기예요" tabindex="0"><svg class="icon"><use href="#i-sparkle"/></svg>새로움</span></td>
+                <td><div class="row-actions"><button class="row-action-btn" aria-label="다시 듣기"><svg class="icon"><use href="#i-play"/></svg></button><button class="row-action-btn" aria-label="북마크"><svg class="icon"><use href="#i-bookmark"/></svg></button></div></td>
+              </tr>
+              <tr style="--i:5">
+                <td class="cell-title">안나 카레니나</td>
+                <td>레프 톨스토이</td>
+                <td><span class="axis-chip">내적</span></td>
+                <td class="cell-wrap">불행한 사랑은 저마다의 이유로 불행하다</td>
+                <td><span class="status-badge" data-tone="danger" data-tip="천천히 다시 볼 수 있어요" tabindex="0"><svg class="icon"><use href="#i-alert-tri"/></svg>보류</span></td>
+                <td><div class="row-actions"><button class="row-action-btn" aria-label="다시 듣기"><svg class="icon"><use href="#i-play"/></svg></button><button class="row-action-btn" aria-label="북마크"><svg class="icon"><use href="#i-bookmark"/></svg></button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="conversation-row">
+        <div class="card">
+          <div class="card__header"><h2 class="card__title">연서와의 대화</h2></div>
+          <div class="chat-thread">
+            <div class="msg msg--bot">
+              <span class="avatar avatar--sm" aria-hidden="true">연</span>
+              <div class="msg-bubble">요즘 사랑에서 어떤 게 제일 어려우세요?</div>
+            </div>
+            <div class="msg msg--user">
+              <span class="avatar avatar--sm" aria-hidden="true">ㅇ</span>
+              <div class="msg-bubble">연락이 오면 반갑고 안 오면 하루가 다 망가져요. 제가 너무 매달리는 것 같기도 하고, 사실은 그냥 확인받고 싶은 건지도 모르겠어요.</div>
+            </div>
+            <div class="msg msg--bot">
+              <span class="avatar avatar--sm" aria-hidden="true">연</span>
+              <div>
+                <div class="msg-bubble">기다림이 힘든 건가요, 기다리는 자신이 싫은 건가요?</div>
+                <div class="msg-choices">
+                  <button class="choice-btn">기다림이 힘들다</button>
+                  <button class="choice-btn">그런 내가 싫다</button>
+                </div>
+              </div>
+            </div>
+            <div class="msg msg--user">
+              <span class="avatar avatar--sm" aria-hidden="true">ㅇ</span>
+              <div class="msg-bubble">후자요.</div>
+            </div>
+          </div>
+
+          <div class="diagnosis-card">
+            <div class="diagnosis-label">진단</div>
+            <p class="diagnosis-text">확인받아야 안심되는 마음이 보여요. 없는 건 상대의 애정이 아니라 스스로에 대한 확신 같습니다.</p>
+            <div class="story-card">
+              <div class="story-card__top">
+                <span class="chip">내적</span>
+                <span class="story-source">오만과 편견 · 제인 오스틴</span>
+              </div>
+              <p class="story-lesson">첫인상은 자주 틀린다 — 나에 대한 첫인상도 마찬가지다.</p>
+            </div>
+            <div class="diagnosis-footer">
+              <button class="btn btn--ghost">다른 이야기도 들어볼래요?</button>
+            </div>
+          </div>
+
+          <div class="chat-input-row">
+            <input type="text" placeholder="마음이 가는 대로 적어보세요" aria-label="메시지 입력">
+            <button class="send-btn" aria-label="보내기"><svg class="icon"><use href="#i-send"/></svg></button>
+          </div>
+        </div>
+
+        <div class="card empty-card">
+          <div class="card__eyebrow">모아보기 · 축 필터 결과</div>
+          <svg class="empty-illustration" viewBox="0 0 120 120" role="img" aria-label="빈 상태 일러스트">
+            <circle cx="60" cy="60" r="48" fill="var(--primary-soft)"/>
+            <path d="M60 82V52" stroke="var(--secondary)" stroke-width="3" stroke-linecap="round" fill="none"/>
+            <path d="M60 62c0-11 9-19 19-19-2 11-9 17-19 19z" fill="var(--secondary)"/>
+            <path d="M60 70c0-9-8-15-16-15 1 9 7 14 16 15z" fill="var(--secondary-soft)" stroke="var(--secondary)" stroke-width="1.5"/>
+          </svg>
+          <h3 class="empty-title">아직 이 축의 이야기가 없어요</h3>
+          <p class="empty-desc">대화를 두어 마디 더 나누면 맞는 이야기를 찾아드릴게요.</p>
+          <button class="btn btn--primary">대화 이어가기</button>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="site-footer">STYLE 24 · 헬스케어 웰니스</footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // KPI count-up — JS는 연출 전용. 실패해도 HTML의 최종 값이 이미 표시되어 있다.
+  function formatNumber(n){
+    return Math.round(n).toLocaleString('ko-KR');
+  }
+  var kpiValues = document.querySelectorAll('.kpi-value[data-value]');
+  kpiValues.forEach(function(el, idx){
+    var target = parseFloat(el.getAttribute('data-value'));
+    var finalText = formatNumber(target);
+    if (reduceMotion || !window.requestAnimationFrame) {
+      el.textContent = finalText;
+      return;
+    }
+    var duration = 800;
+    var delay = 450 + idx * 80;
+    el.textContent = formatNumber(0);
+    setTimeout(function(){
+      var start = null;
+      function step(ts){
+        if (start === null) start = ts;
+        var progress = Math.min((ts - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = formatNumber(target * eased);
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          el.textContent = finalText;
+        }
+      }
+      window.requestAnimationFrame(step);
+    }, delay);
+  });
+
+  // 드로어 바깥 클릭/링크 선택 시 자동 닫힘 (모바일)
+  var drawerToggle = document.getElementById('drawerToggle');
+  document.querySelectorAll('.sidebar .nav-item').forEach(function(link){
+    link.addEventListener('click', function(){
+      if (drawerToggle) drawerToggle.checked = false;
+    });
+  });
+})();
+</script>
+</body>
+</html>

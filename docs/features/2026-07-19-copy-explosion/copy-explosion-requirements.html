@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>요구사항: copy-explosion (카피 폭발)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    --pink: #ec4899;
+    --violet: #a78bfa;
+    --ink: #1f2430;
+    --sub: #5b6472;
+    --bg: #faf9fc;
+    --card: #ffffff;
+    --line: #eae7f2;
+    --chip-fr: #f3e8ff;
+    --chip-fr-text: #7c3aed;
+    --chip-nfr: #ffe4f1;
+    --chip-nfr-text: #be185d;
+    --chip-ac: #e0e7ff;
+    --chip-ac-text: #4338ca;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    background: linear-gradient(180deg, #fdf4ff 0%, var(--bg) 340px, var(--bg) 100%);
+    color: var(--ink);
+    line-height: 1.75;
+    letter-spacing: -0.01em;
+  }
+
+  .wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+
+  header.doc-header {
+    text-align: center;
+    padding: 12px 0 36px;
+  }
+
+  header.doc-header .eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--pink);
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #fce7f3, #ede9fe);
+    padding: 4px 14px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+
+  header.doc-header h1 {
+    font-size: 1.9rem;
+    margin: 0 0 10px;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--pink), var(--violet));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  header.doc-header .subtitle {
+    color: var(--sub);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  blockquote.next-step {
+    border-left: 4px solid var(--violet);
+    background: #f5f3ff;
+    margin: 0 0 32px;
+    padding: 16px 20px;
+    border-radius: 0 10px 10px 0;
+    color: #4c3d78;
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  blockquote.next-step strong {
+    color: #6d28d9;
+  }
+
+  section.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px 30px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 2px rgba(30, 20, 60, 0.03), 0 8px 24px -18px rgba(167, 139, 250, 0.35);
+  }
+
+  section.card h2 {
+    font-size: 1.25rem;
+    margin: 0 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
+  }
+
+  section.card h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--pink), var(--violet));
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  section.card h3 {
+    font-size: 1.02rem;
+    margin: 26px 0 12px;
+    color: #6d28d9;
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 8px;
+  }
+
+  section.card h3:first-of-type {
+    margin-top: 6px;
+  }
+
+  p { margin: 0 0 14px; }
+  p:last-child { margin-bottom: 0; }
+
+  em { color: var(--sub); font-style: italic; }
+
+  ul.story {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  ul.story li {
+    background: #fbf7ff;
+    border: 1px solid #f1e8fd;
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+
+  ul.story li b {
+    color: var(--pink);
+    margin-right: 6px;
+  }
+
+  /* FR / NFR / AC item blocks */
+  dl.req-list {
+    margin: 0 0 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  dl.req-list .req-item {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fcfbfe;
+    border: 1px solid var(--line);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-self: start;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+  }
+
+  .chip.fr { background: var(--chip-fr); color: var(--chip-fr-text); }
+  .chip.nfr { background: var(--chip-nfr); color: var(--chip-nfr-text); }
+  .chip.ac { background: var(--chip-ac); color: var(--chip-ac-text); }
+
+  .req-item dd {
+    margin: 0;
+  }
+
+  .req-item .req-title {
+    font-weight: 700;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.9rem;
+  }
+
+  /* Family grid A-F */
+  .family-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 12px;
+    margin: 14px 0 8px;
+  }
+
+  .family-card {
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    background: linear-gradient(160deg, #ffffff, #faf7ff);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .family-card::before {
+    content: attr(data-letter);
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: rgba(167, 139, 250, 0.14);
+    line-height: 1;
+  }
+
+  .family-card .fam-name {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #6d28d9;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .family-card .fam-items {
+    font-size: 0.87rem;
+    color: var(--sub);
+  }
+
+  code {
+    background: #f3f0fa;
+    color: #6d28d9;
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 0.88em;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+  }
+
+  strong { color: var(--ink); }
+
+  ul.plain, ol.plain {
+    margin: 0 0 10px;
+    padding-left: 22px;
+  }
+  ul.plain li, ol.plain li {
+    margin-bottom: 8px;
+  }
+  ul.plain li:last-child, ol.plain li:last-child {
+    margin-bottom: 0;
+  }
+
+  ul.scope {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  ul.scope li {
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #fff7f9;
+    border: 1px solid #fbe3ec;
+    position: relative;
+    padding-left: 40px;
+  }
+
+  ul.scope li::before {
+    content: "✕";
+    position: absolute;
+    left: 14px;
+    top: 12px;
+    color: var(--pink);
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  footer.changelog {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    color: #9aa0ab;
+    font-size: 0.85rem;
+  }
+
+  footer.changelog h2 {
+    font-size: 1rem;
+    color: var(--sub);
+    margin: 0 0 8px;
+    font-weight: 700;
+  }
+
+  footer.changelog .placeholder {
+    font-style: italic;
+    color: #b7bcc6;
+  }
+
+  @media (max-width: 600px) {
+    .req-item {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background: linear-gradient(180deg, #241a30 0%, #17141d 340px, #17141d 100%);
+      color: #e9e6f0;
+    }
+    section.card {
+      background: #211c2b;
+      border-color: #352c44;
+      box-shadow: none;
+    }
+    section.card h2 { color: #f1eef8; }
+    section.card h3 { color: #d8b4fe; border-bottom-color: #352c44; }
+    blockquote.next-step {
+      background: #2a2138;
+      color: #d8caf0;
+      border-left-color: var(--violet);
+    }
+    ul.story li { background: #29223a; border-color: #3a3050; }
+    .req-item { background: #241f30; border-color: #352c44; }
+    .req-item .req-title { color: #f1eef8; }
+    .chip.fr { background: #3b2a5c; color: #d8b4fe; }
+    .chip.nfr { background: #522139; color: #f9a8d4; }
+    .chip.ac { background: #29306b; color: #a5b4fc; }
+    .family-card { background: linear-gradient(160deg, #241f30, #2a2138); border-color: #352c44; }
+    .family-card .fam-name { color: #d8b4fe; }
+    .family-card .fam-items { color: #b3aec2; }
+    code { background: #3b2a5c; color: #d8b4fe; }
+    strong { color: #f1eef8; }
+    ul.scope li { background: #33202a; border-color: #4d2a3a; }
+    footer.changelog { border-top-color: #352c44; color: #837d90; }
+    .placeholder { color: #6b6578 !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc-header">
+    <span class="eyebrow">PRD · Requirements</span>
+    <h1>요구사항: copy-explosion (카피 폭발)</h1>
+    <p class="subtitle">이 페이지는 <code>copy-explosion-requirements.md</code> 의 사람이 읽기 편한 시각화 사본입니다 (내용 1:1 동일).</p>
+  </header>
+
+  <blockquote class="next-step">
+    <strong>다음 단계 안내</strong>: 이 문서는 PRD (기획 단계 요구사항만) 입니다. 다음 단계로 <code>tech-design</code> skill (또는 <code>/tech-design</code> 슬래시) 을 호출해서 <code>copy-explosion-tech-design.md</code> (기술 설계서) 를 만드세요. 기술 결정이나 구현 세부사항(파일 구조·프롬프트 포맷·린트 스크립트·병렬 실행 방식 등)은 여기 박지 마세요 — 그건 다음 두 산출물에 들어갑니다.
+  </blockquote>
+
+  <section class="card">
+    <h2><span class="num">1</span>배경/목적</h2>
+    <p><code>design-explosion-30-styles</code> 는 하나의 화면을 <strong>30가지 디자인 스타일</strong>로 폭발시킨다 — "어떻게 <strong>보이나</strong>" 축을 강제로 벌려 갤러리에서 비교하게 한다. 그 핵심 원칙은 <strong>"콘텐츠는 고정, 스타일만 변수"</strong> 다.</p>
+    <p>copy-explosion 은 그 <strong>짝(twin)</strong> 이다. 같은 도구를 <strong>"뭐라고 말하나"(메시지 각도)</strong> 축으로 뒤집는다. 랜딩페이지 히어로 섹션(헤드라인 + 서브카피 + CTA)을 하나의 제품에 대해 <strong>30가지 서로 다른 메시지 각도</strong>로 만들어 나란히 비교·조합하게 한다.</p>
+    <p><strong>왜 필요한가.</strong> 랜딩 카피는 "봐야 아는" 문제다. AI에게 "카피 잘 써줘" 하면 매번 비슷한 톤 한두 개(대개 이득 소구 + 대담한 주장)만 나오고, "다른 느낌으로" 몇 번 더 시켜도 거기서 거기다. 어떤 각도가 이 제품에 맞는지는 머릿속으로 상상해서 비교해야 한다. 이 도구는 그걸 <strong>30 각도로 강제로 벌려놓고 눈으로 비교</strong>하게 만든다.</p>
+    <p><strong>이 프로젝트가 지키는 것 — 지어내지 않는다.</strong> 30개는 <em>같은 하나의 제품</em>에 대한 30가지 표현 각도이지, 30개의 다른(허구의) 제품이 아니다. 입력에 없는 사실·수치·수상·고객사·기능을 만들어내면 그건 30갈래 거짓말이 된다. <strong>제품 사실은 고정, 표현 각도만 변수</strong> — design-explosion 의 "콘텐츠 고정, 스타일 변수" 를 메시지 축으로 옮긴 것이다.</p>
+    <p><strong>둘을 합치면.</strong> copy-explosion 으로 <strong>메시지</strong>를 고르고, design-explosion 으로 <strong>스타일</strong>을 고르면 <code>스타일 × 메시지 = 랜딩페이지 완성</code>. 두 스킬은 별개가 아니라 조합되는 한 쌍이다.</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">2</span>사용자 스토리 / 시나리오</h2>
+    <p><em>(간소 — 사용자층이 design-explosion 과 겹친다: 새 제품/기능의 랜딩·소개를 써야 하는 1인 개발자·창업자·기획자.)</em></p>
+    <ul class="story">
+      <li><b>누가:</b> 새 제품/기능의 랜딩 히어로 카피 방향을 잡아야 하는 사람이</li>
+      <li><b>무엇을:</b> 제품을 한 줄로 던지면 30가지 메시지 각도의 히어로 시안을 갤러리로 받아</li>
+      <li><b>왜:</b> 어떤 메시지 각도가 이 제품에 맞는지 상상이 아니라 <strong>눈으로 비교해</strong> 고르고, 골라서 다음(스타일 입히기·실제 카피 확정)으로 넘어가기 위해.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">3</span>기능 요구사항 (FR)</h2>
+
+    <h3>받기 (입력)</h3>
+    <dl class="req-list">
+      <div class="req-item">
+        <span class="chip fr">FR-1</span>
+        <dd>사용자는 제품/기능을 <strong>한 줄 설명</strong>으로 시작할 수 있다. (예: "DART 공시에서 숨은 관계를 찾는 GraphRAG")</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-2</span>
+        <dd>한 줄만으로 30개 각도를 제대로 뽑기에 정보가 부족하면, 스킬이 <strong>최소한만 되물어</strong> 채운다 — 되묻는 항목은 (a) 타겟(누구를 위한 것인가), (b) 핵심 이득 1개, (c) 뒷받침 근거/사실 1개. 사용자가 답을 모르거나 건너뛰면 그 각도군은 <strong>약하게 표시</strong>하되 진행을 막지 않는다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-3</span>
+        <dd>스킬은 되물어 얻은 것을 포함한 <strong>제품 사실 스펙</strong>(뭐하는 제품·타겟·이득·근거)을 2~3줄로 확정해 사용자에게 보여주고 진행한다. 이 스펙은 30개 전 시안에서 <strong>한 글자도 다르지 않게</strong> 고정된다 (FR-11 의 기준).</dd>
+      </div>
+    </dl>
+
+    <h3>생성 (30 각도)</h3>
+    <dl class="req-list">
+      <div class="req-item">
+        <span class="chip fr">FR-4</span>
+        <dd>
+          확정된 제품 스펙 하나로 <strong>30가지 메시지 각도</strong>의 히어로 시안을 생성한다. 각 각도는 <strong>이름이 붙어 있고</strong>, 아래 6개 패밀리로 묶인다(정확한 30개 각도명은 tech-design 에서 확정):
+          <div class="family-grid">
+            <div class="family-card" data-letter="A">
+              <span class="fam-name">A. 감정 소구</span>
+              <span class="fam-items">공포/불안, 열망, 안도/평온, 자부심/지위, 소속감</span>
+            </div>
+            <div class="family-card" data-letter="B">
+              <span class="fam-name">B. 논리·증거</span>
+              <span class="fam-items">데이터·수치, 비교·경쟁우위, ROI·비용, 보증·리스크제거, 메커니즘(왜 되는가)</span>
+            </div>
+            <div class="family-card" data-letter="C">
+              <span class="fam-name">C. 사회적 증명</span>
+              <span class="fam-items">고객 목소리, 권위·전문가, 밴드왜건, 희소성·긴급</span>
+            </div>
+            <div class="family-card" data-letter="D">
+              <span class="fam-name">D. 서사</span>
+              <span class="fam-items">스토리, 비포/애프터, 적(enemy) 프레이밍, 은유</span>
+            </div>
+            <div class="family-card" data-letter="E">
+              <span class="fam-name">E. 인지 단계 (Schwartz)</span>
+              <span class="fam-items">문제 인식, 해결책 인식, 제품 인식, 가장 의식적(오퍼), 미인식(교육형)</span>
+            </div>
+            <div class="family-card" data-letter="F">
+              <span class="fam-name">F. 구조·수사</span>
+              <span class="fam-items">질문형, 대담한 주장, How-to, 리스티클·숫자, 반전, 미니멀 한 문장</span>
+            </div>
+          </div>
+        </dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-5</span>
+        <dd>각 각도는 그 각도의 <strong>완성형 프롬프트</strong>(무드·설득 구조·헤드라인 공식·금지·좋은/나쁜 예 포함)를 근거로 생성한다. 각도별 프롬프트는 서로 오염되지 않게 <strong>각 시안은 자기 각도 프롬프트만</strong> 참조한다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-6</span>
+        <dd>서브에이전트가 가능한 환경(Claude Code / Workflow 등)에서는 <strong>각도당 1 에이전트로 병렬 생성</strong>한다. 순수 채팅 환경이면 배치 직렬로 자동 폴백한다. 어느 쪽이든 30개가 모두 나온다.</dd>
+      </div>
+    </dl>
+
+    <h3>산출물 (히어로 HTML)</h3>
+    <dl class="req-list">
+      <div class="req-item">
+        <span class="chip fr">FR-7</span>
+        <dd>각 시안은 <strong>실제 렌더링된 히어로 섹션 HTML</strong> 이다 — 헤드라인 + 서브카피 + 1차 CTA(+선택적 보조 요소: 신뢰 배지·마이크로카피)가 배치까지 되어 화면으로 보인다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-8</span>
+        <dd>모든 시안은 <strong>동일한 중립 스타일</strong>(색·타이포·레이아웃 공통)을 쓴다. 스타일을 고정해야 <strong>메시지만 변수</strong>가 되어 각도끼리 정직하게 비교된다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-9</span>
+        <dd>각 파일은 <strong>자기완결형 단일 <code>.html</code></strong> 이고, 하단 푸터에 <code>ANGLE {번호} · {각도명} · {패밀리}</code> 를 표기한다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-10</span>
+        <dd>30개 시안을 한눈에 보는 <strong>갤러리 <code>gallery.html</code></strong> 를 자동 생성한다 — 패밀리별로 묶은 카드 그리드 + 각 카드 미리보기 + 새 탭 링크.</dd>
+      </div>
+    </dl>
+
+    <h3>품질 규율 (린트 게이트)</h3>
+    <dl class="req-list">
+      <div class="req-item">
+        <span class="chip fr">FR-11</span>
+        <dd><span class="req-title">(진실성)</span>각 시안은 FR-3 의 제품 사실 스펙 안에서만 말한다. <strong>입력에 없는 사실·수치·수상·고객사·기능을 지어내지 않는다.</strong> 위반 시 그 시안을 표시하고 수정한다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-12</span>
+        <dd><span class="req-title">(각도 구별성)</span>30개는 서로 <strong>실제로 다른 각도</strong>여야 한다. 두 시안이 사실상 같은 각도이면(헤드라인 접근이 겹치면) 표시하고 재생성한다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-13</span>
+        <dd><span class="req-title">(히어로 제약)</span>각 시안은 히어로 형식을 지킨다 — 헤드라인·서브·CTA 각각의 길이 상한, <strong>CTA는 1개</strong>, 한 뷰포트 안에 완결. 구체 수치는 tech-design 에서 확정.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-14</span>
+        <dd>FR-11~13 을 <strong>자동 게이트</strong>(카피-린트)로 검사한다. 통과분만 사용자에게 제시하고, FAIL 은 해당 각도 프롬프트를 다시 읽고 수정 → 재검사한다.</dd>
+      </div>
+    </dl>
+
+    <h3>비교·조합·확정</h3>
+    <dl class="req-list">
+      <div class="req-item">
+        <span class="chip fr">FR-15</span>
+        <dd><span class="req-title">(퍼널)</span>30개를 한 번에 비교하지 않는다. <strong>패밀리 대표로 방향 좁히기 → 고른 패밀리 정독 → 결승 2~3개 나란히</strong> 로 좁힌다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-16</span>
+        <dd><span class="req-title">(조합)</span>"3번 헤드라인 + 8번 CTA" 같은 축(헤드라인/서브/CTA/톤)별 병합 하이브리드를 만들 수 있다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip fr">FR-17</span>
+        <dd><span class="req-title">(역추출 · 브릿지)</span>각도가 확정되면 그 각도를 <strong>재사용 가능한 메시지 지침</strong>(포지셔닝 한 줄 + 핵심 약속 + 톤 규칙)으로 역추출한다. 또한 확정 카피를 <strong>design-explosion 으로 넘길 수 있게</strong> 한다 — 그쪽에서 스타일을 골라 이 카피를 얹으면 랜딩이 완성된다(수동 핸드오프까지가 이번 범위, FR-연계는 §5 참조).</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">4</span>비기능 요구사항 (NFR)</h2>
+    <p><em>(간소)</em></p>
+    <dl class="req-list">
+      <div class="req-item">
+        <span class="chip nfr">NFR-1</span>
+        <dd><span class="req-title">(지어내지 않기 — 최상위 규율)</span>FR-11 을 제품 전체의 1순위 규율로 둔다. 애매하면 만들지 말고 <strong>약하게/보류</strong>로 표시한다. 지어낸 이득 하나가 이 제품의 가장 큰 사고다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip nfr">NFR-2</span>
+        <dd><span class="req-title">(각도 커버리지)</span>최종 제시분은 <strong>6개 패밀리를 모두</strong> 포함한다(한 패밀리에 쏠리지 않는다). 30개 중 린트 통과분이 30 미만이어도 각 패밀리 최소 1개는 남긴다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip nfr">NFR-3</span>
+        <dd><span class="req-title">(자기완결)</span>각 시안은 외부 런타임 의존 없이 단일 HTML 로 열린다(한글/디스플레이 폰트 CDN 만 허용). JS 는 연출 전용 — 꺼져도 카피는 온전히 읽힌다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip nfr">NFR-4</span>
+        <dd><span class="req-title">(언어)</span>출력 카피는 <strong>입력 제품의 언어</strong>를 따른다(기본 한국어). 실존 인물·기업명은 예시로도 쓰지 않는다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip nfr">NFR-5</span>
+        <dd><span class="req-title">(병렬 안전)</span>병렬 생성 시 각 에이전트는 <strong>공유된 제품 스펙(고정)</strong> 만 공유하고 자기 각도 프롬프트만 읽는다 — 각도 간 카피가 새지 않아야 한다.</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">5</span>범위 밖 (Out of Scope)</h2>
+    <ul class="scope">
+      <li><strong>실제 A/B 테스트 · 전환율 측정</strong> — 어떤 각도가 실제로 전환되는지 검증은 사용자 몫. 이 도구는 "비교할 30개를 만든다" 까지.</li>
+      <li><strong>각도 × 스타일 자동 결합</strong> — design-explosion 과의 연계는 <strong>수동 핸드오프</strong>(확정 카피를 넘기는 것)까지. 30 각도 × 30 스타일 자동 매트릭스 생성은 다음 버전.</li>
+      <li><strong>롱폼 카피</strong> — 히어로(헤드라인/서브/CTA)만. 본문·이메일 시퀀스·광고 카피 세트는 범위 밖.</li>
+      <li><strong>이미지 · 비주얼 에셋 생성</strong> — 히어로는 텍스트 + 레이아웃까지. 실제 사진·일러스트·로고는 만들지 않는다.</li>
+      <li><strong>다국어 동시 생성</strong> — 한 번에 한 언어.</li>
+      <li><strong>브랜드 보이스 학습 · 영구 저장 · 계정</strong> — 세션 단위로 끝난다.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">6</span>수용 기준 (Acceptance Criteria)</h2>
+    <dl class="req-list">
+      <div class="req-item">
+        <span class="chip ac">AC-1</span>
+        <dd>제품 한 줄 설명을 주면, 정보가 부족할 때 스킬이 (타겟/이득/근거) 중 부족한 것만 되묻고, 확정된 제품 스펙 2~3줄을 보여준 뒤 생성으로 넘어간다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip ac">AC-2</span>
+        <dd>30개(또는 린트 통과분) 히어로 시안이 생성되고, 각각 헤드라인·서브·CTA·<code>ANGLE n·각도명·패밀리</code> 푸터를 갖는다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip ac">AC-3</span>
+        <dd>30개는 <strong>모두 같은 중립 스타일</strong>로 렌더된다(색/타이포/레이아웃 공통) — 눈에 보이는 차이는 카피뿐이다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip ac">AC-4</span>
+        <dd>제시된 시안 집합이 <strong>6개 패밀리를 모두</strong> 포함한다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip ac">AC-5</span>
+        <dd><span class="req-title">(진실성)</span>입력 스펙에 없는 수치·수상·고객사를 넣은 시안은 린트에서 잡혀 수정/제외된다. (예: 입력에 "고객 1만 명" 이 없는데 헤드라인에 "1만 고객" 이 있으면 FAIL)</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip ac">AC-6</span>
+        <dd><span class="req-title">(구별성)</span>최종 제시분에 사실상 같은 각도의 중복 시안이 없다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip ac">AC-7</span>
+        <dd><span class="req-title">(히어로 제약)</span>모든 시안이 CTA 1개, 헤드라인/서브 길이 상한 이내, 한 뷰포트 완결을 지킨다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip ac">AC-8</span>
+        <dd><code>gallery.html</code> 을 열면 30개가 패밀리별로 묶여 한눈에 보이고, 각 시안 새 탭 링크가 동작한다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip ac">AC-9</span>
+        <dd>서브에이전트 가능 환경에서는 병렬로 생성되고, 순수 채팅 환경에서는 직렬로 폴백해도 30개가 모두 나온다.</dd>
+      </div>
+      <div class="req-item">
+        <span class="chip ac">AC-10</span>
+        <dd>각도 하나를 확정하면, 재사용 가능한 메시지 지침(포지셔닝 + 핵심 약속 + 톤)이 역추출되어 나온다.</dd>
+      </div>
+    </dl>
+  </section>
+
+  <footer class="changelog">
+    <h2>변경이력</h2>
+    <p class="placeholder">&lt;!-- change-history skill auto-appends entries here, oldest first --&gt;</p>
+  </footer>
+
+</div>
+</body>
+</html>
