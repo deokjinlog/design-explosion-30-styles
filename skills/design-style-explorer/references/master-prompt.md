@@ -33,6 +33,9 @@ references/archetypes.md 에서 원형 하나를 고르고, 그 원형의 컴포
 - **원형에 없는 컴포넌트를 이식하지 마라.** 대화형에 KPI·도넛 차트를, 읽기형에 목표 달성률을 넣는 순간 그 제품이 아닌 것을 비교하게 된다 — 시안이 아무리 잘 나와도 질문 자체가 틀린 갤러리가 된다 (archetypes.md 서두의 실제 사고 사례 참조)
 
 [기술 요건]
+- **의미 영역에 `data-region` 속성을 반드시 박는다** (archetypes.md 의 "표준 data-region 어휘"). 레이아웃·배치는 스타일 자유지만 **영역의 의미는 고정**이다 — archetype-lint 가 이 속성으로 결정론적 검사를 한다.
+  예: `<section data-region="conversation">` · `<article data-region="story-body">` · `<div data-region="collection">`
+  그 원형의 **필수 영역은 빠짐없이** 넣고, **금지 영역은 절대 넣지 않는다.**
 - 단일 .html 파일, 순수 HTML/CSS/JS (폰트 CDN만 허용, 차트/UI 라이브러리 금지)
 - 한글 본문 폰트: Pretendard CDN
   https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css

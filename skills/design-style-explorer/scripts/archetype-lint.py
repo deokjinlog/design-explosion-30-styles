@@ -9,73 +9,113 @@ style-lint.py 와 **직교**한다:
 "들은 스토리 1,284,000편 / 목표 달성률 65% / 축 구성비 도넛"이 30개 시안 전부에 들어갔고,
 style-lint 는 30/30 PASS 를 냈다. 스타일 규칙은 다 지켰지만 **질문 자체가 틀린 갤러리**였다.
 
+검사 모드 2가지:
+  ① 속성 모드 (결정론, 권장) — HTML 에 data-region="…" 이 있으면 그걸로 검사.
+     references/archetypes.md 의 "표준 data-region 어휘" 참조.
+  ② 키워드 모드 (폴백, 부정확) — data-region 이 하나도 없으면 키워드로 추측.
+  ※ 금지 요소는 두 모드 모두에서 항상 키워드로도 본다 (속성 없이 몰래 박힌 것 적발).
+
 사용법:
-  python3 archetype-lint.py <디렉토리>            # 같은 폴더의 _spec.json 에서 원형을 읽음
+  python3 archetype-lint.py <디렉토리>              # 폴더의 _spec.json 에서 원형을 읽음
   python3 archetype-lint.py <디렉토리> --archetype B
   python3 archetype-lint.py <파일.html> --archetype C
 
-_spec.json 형식 (1단계에서 확정한 콘텐츠 스펙과 함께 저장):
-  {"archetype": "B", "domain": "연서", "note": "대화형(주) + 읽기형(보조)"}
+_spec.json:  {"archetype": "B", "domain": "연서", "note": "대화형(주)+읽기형(보조)"}
 
-한계: 정규식 휴리스틱이라 오탐이 가능하다. FAIL 은 실제 위반인지 확인 후 수정한다.
+한계: 키워드 모드는 오탐이 가능하다. FAIL 은 실제 위반인지 확인 후 수정한다.
 종료코드: FAIL 있으면 1, 없으면 0.
 """
 import re, sys, os, glob, json
 
 ARCHETYPE_NAME = {
     "A": "대시보드형", "B": "대화형", "C": "읽기형", "D": "컬렉션형",
-    "E": "폼·마법사형", "F": "피드형", "G": "에디터·캔버스형", "H": "검색·결과형",
+    "E": "폼·입력형", "F": "피드형", "G": "에디터·캔버스형", "H": "검색·결과형",
+    "I": "온보딩형", "J": "인증형", "K": "프로필·설정형",
+}
+
+# 원형별 필수/금지 region (references/archetypes.md 와 일치해야 함)
+RULES = {
+    "A": {"required": ["kpi", "chart-trend", "table"], "forbidden": []},
+    "B": {"required": ["conversation", "composer"], "forbidden": ["kpi", "chart-trend", "chart-part", "goal"]},
+    "C": {"required": ["story-body", "meta"], "forbidden": ["kpi", "chart-trend", "chart-part", "goal"]},
+    "D": {"required": ["collection", "item-card", "filter"], "forbidden": ["kpi", "chart-part", "goal"]},
+    "E": {"required": ["form"], "forbidden": ["kpi", "chart-trend", "chart-part", "goal"]},
+    "F": {"required": ["feed", "feed-item"], "forbidden": ["kpi", "chart-part", "goal"]},
+    "G": {"required": ["canvas", "toolbar"], "forbidden": ["kpi", "chart-part", "goal"]},
+    "H": {"required": ["search", "results"], "forbidden": ["kpi", "chart-part", "goal"]},
+    "I": {"required": ["slides", "progress"], "forbidden": ["kpi", "chart-trend", "chart-part", "goal", "table"]},
+    "J": {"required": ["auth-form", "brand"], "forbidden": ["kpi", "chart-trend", "chart-part", "goal", "table"]},
+    "K": {"required": ["settings-list"], "forbidden": ["kpi", "chart-trend", "chart-part", "goal"]},
+}
+
+REGION_LABEL = {
+    "kpi": "KPI 지표 카드", "chart-trend": "추이 차트/스파크라인", "chart-part": "구성비(도넛/파이) 차트",
+    "goal": "목표 진행률/달성률", "table": "데이터 표",
+    "conversation": "대화 흐름", "composer": "입력창", "response-card": "응답 카드",
+    "story-body": "본문(긴 글)", "meta": "출처·저자", "excerpt": "인용/발췌",
+    "collection": "아이템 목록/그리드", "item-card": "아이템 카드", "filter": "필터/탭",
+    "form": "입력 폼", "steps": "단계 표시",
+    "feed": "피드", "feed-item": "피드 항목",
+    "canvas": "편집 캔버스", "toolbar": "툴바",
+    "search": "검색 입력", "results": "결과 목록",
+    "slides": "온보딩 슬라이드", "progress": "진행 표시",
+    "auth-form": "인증 폼", "brand": "로고/브랜드",
+    "settings-list": "설정 목록", "profile": "프로필 헤더",
+}
+
+# 키워드 감지기 — 금지 검사는 항상, 필수 검사는 속성이 없을 때만 사용
+KEYWORDS = {
+    "kpi": r"\bKPI\b|kpi-|전주 대비|전월 대비|전일 대비|지난주보다",
+    "chart-part": r"도넛|구성비|conic-gradient|stroke-dasharray",
+    "goal": r"달성률|목표 진행|진행률|goal-(bar|ring|pct)",
+    "chart-trend": r"추이|line-chart|linechart|area-fill|스파크라인|sparkline",
+    "table": r"<table\b|<tbody\b",
+    "conversation": r"말풍선|bubble|chat-|-chat|대화|발화|speaker",
+    "composer": r"<textarea\b|보내기|입력창|composer",
+    "meta": r"작가|저자|출처",
+    "collection": r"grid-template-columns|썸네일|thumb|card-grid",
+    "item-card": r"카드|card",
+    "filter": r"필터|filter|칩|chip",
+    "form": r"<input\b|<select\b|<textarea\b",
+    "feed": r"분 전|시간 전|방금|일 전",
+    "feed-item": r"분 전|시간 전|방금|일 전",
+    "canvas": r"캔버스|canvas",
+    "toolbar": r"툴바|toolbar|tool-",
+    "search": r"검색|search",
+    "results": r"결과|result",
+    "slides": r"슬라이드|slide|온보딩|튜토리얼|tutorial",
+    "progress": r"진행|progress",
+    "auth-form": r"로그인|비밀번호|password|회원가입|sign ?in|sign ?up",
+    "brand": r"로고|logo|brand",
+    "settings-list": r"설정|setting|토글|toggle",
 }
 
 
-def _has(s, pat):
-    return re.search(pat, s, re.I | re.S) is not None
+def _strip_noise(html):
+    """주석·script 를 지운다 — 설계 주석에 'KPI' 라 써서 자기가 걸리는 오탐 방지."""
+    html = re.sub(r"<!--.*?-->", " ", html, flags=re.S)
+    html = re.sub(r"<script\b.*?</script>", " ", html, flags=re.S | re.I)
+    return html
 
 
-def _longest_paragraph(s):
-    """가장 긴 <p> 의 순수 텍스트 길이 — 읽기형의 '본문이 주인공' 신호."""
+def _kw(html, key):
+    pat = KEYWORDS.get(key)
+    return bool(pat) and re.search(pat, html, re.I | re.S) is not None
+
+
+def _longest_paragraph(html):
     best = 0
-    for m in re.finditer(r"<p\b[^>]*>(.*?)</p>", s, re.I | re.S):
-        txt = re.sub(r"<[^>]+>", "", m.group(1))
-        txt = re.sub(r"\s+", " ", txt).strip()
+    for m in re.finditer(r"<p\b[^>]*>(.*?)</p>", html, re.I | re.S):
+        txt = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(1))).strip()
         best = max(best, len(txt))
     return best
 
 
-# 신호 감지기 — (이름, 설명, 감지 함수)
-SIGNALS = {
-    "kpi": ("KPI 지표 카드", lambda s: _has(s, r"\bKPI\b|kpi-|전주 대비|전월 대비|전일 대비|지난주보다")),
-    "donut": ("도넛/구성비 차트", lambda s: _has(s, r"도넛|구성비|conic-gradient|stroke-dasharray")),
-    "goal": ("목표 진행률/달성률", lambda s: _has(s, r"달성률|목표 진행|진행률|goal-(bar|ring|pct)")),
-    "spark": ("스파크라인", lambda s: _has(s, r"스파크라인|sparkline")),
-    "trend": ("시간 추이 차트", lambda s: _has(s, r"추이|line-chart|area-fill|linechart")),
-    "chat": ("대화/말풍선", lambda s: _has(s, r"말풍선|bubble|chat-|-chat|대화 기록|발화|speaker")),
-    "body": ("긴 본문(200자+)", lambda s: _longest_paragraph(s) >= 200),
-    "quote": ("인용/발췌", lambda s: _has(s, r"<blockquote|인용|발췌")),
-    "grid": ("카드 그리드", lambda s: _has(s, r"grid-template-columns|card-grid|썸네일|thumb")),
-    "form": ("입력 폼", lambda s: _has(s, r"<input\b|<textarea\b|<select\b")),
-    "steps": ("단계 표시", lambda s: _has(s, r"단계|스텝|step-")),
-    "feedtime": ("피드 시간 표기", lambda s: _has(s, r"분 전|시간 전|방금|일 전")),
-    "toolbar": ("툴바/도구", lambda s: _has(s, r"툴바|toolbar|tool-")),
-    "searchbar": ("검색 입력", lambda s: _has(s, r"검색|search")),
-    "highlight": ("검색어 하이라이트", lambda s: _has(s, r"<mark\b|하이라이트|highlight")),
-}
-
-# 원형별 규칙 — required(없으면 WARN) / forbidden(있으면 FAIL, 이식된 남의 장기)
-RULES = {
-    "A": {"required": ["kpi", "trend"], "forbidden": []},
-    "B": {"required": ["chat"], "forbidden": ["kpi", "donut", "goal", "spark"]},
-    "C": {"required": ["body"], "forbidden": ["kpi", "donut", "goal", "spark"]},
-    "D": {"required": ["grid"], "forbidden": ["kpi", "donut", "goal"]},
-    "E": {"required": ["form", "steps"], "forbidden": ["kpi", "donut", "goal", "trend"]},
-    "F": {"required": ["feedtime"], "forbidden": ["kpi", "donut", "goal"]},
-    "G": {"required": ["toolbar"], "forbidden": ["kpi", "donut", "goal"]},
-    "H": {"required": ["searchbar", "highlight"], "forbidden": ["kpi", "donut", "goal"]},
-}
+def regions_of(html):
+    return set(re.findall(r'data-region\s*=\s*["\']([^"\']+)["\']', html, re.I))
 
 
 def load_archetype(path):
-    """디렉토리(또는 파일이 속한 디렉토리)의 _spec.json 에서 원형 코드를 읽는다."""
     d = path if os.path.isdir(path) else os.path.dirname(path)
     p = os.path.join(d, "_spec.json")
     if not os.path.exists(p):
@@ -87,29 +127,46 @@ def load_archetype(path):
 
 
 def lint(path, code):
-    html = open(path, encoding="utf-8", errors="ignore").read()
+    raw = open(path, encoding="utf-8", errors="ignore").read()
+    html = _strip_noise(raw)
+    regions = regions_of(html)
+    attr_mode = bool(regions)
     rule = RULES[code]
     fails, warns = [], []
+
+    # 금지 — 속성 + 키워드 둘 다 (속성 없이 몰래 박힌 것도 잡는다)
     for key in rule["forbidden"]:
-        label, fn = SIGNALS[key]
-        if fn(html):
+        label = REGION_LABEL.get(key, key)
+        if key in regions:
+            fails.append(f"{label} — {ARCHETYPE_NAME[code]}에 없어야 할 영역 (data-region=\"{key}\")")
+        elif _kw(html, key):
             fails.append(f"{label} — {ARCHETYPE_NAME[code]}에 없어야 할 요소 (다른 원형에서 이식됨)")
+
+    # 필수 — 속성이 있으면 속성으로, 없으면 키워드 폴백
     for key in rule["required"]:
-        label, fn = SIGNALS[key]
-        if not fn(html):
-            warns.append(f"{label} 없음 — {ARCHETYPE_NAME[code]}의 필수 신호")
+        label = REGION_LABEL.get(key, key)
+        if attr_mode:
+            ok = key in regions
+        elif key == "story-body":
+            ok = _longest_paragraph(html) >= 200
+        else:
+            ok = _kw(html, key)
+        if not ok:
+            hint = f' (data-region="{key}" 누락)' if attr_mode else ""
+            warns.append(f"{label} 없음 — {ARCHETYPE_NAME[code]}의 필수 영역{hint}")
+
+    mode = "속성" if attr_mode else "키워드추측"
     tag = "FAIL" if fails else "PASS"
-    print(f"[{tag}] {os.path.basename(path)}  (원형 {code} · {ARCHETYPE_NAME[code]})")
+    print(f"[{tag}] {os.path.basename(path)}  (원형 {code} · {ARCHETYPE_NAME[code]} · {mode} 모드)")
     for f in fails:
         print(f"    ✗ {f}")
     for w in warns:
         print(f"    ⚠ {w}")
-    return len(fails)
+    return len(fails), attr_mode
 
 
 def main(argv):
-    code = None
-    args = []
+    code, args = None, []
     it = iter(argv)
     for a in it:
         if a == "--archetype":
@@ -122,8 +179,8 @@ def main(argv):
     target = args[0]
     code = code or load_archetype(target)
     if code not in RULES:
-        print(f"[SKIP] 원형을 알 수 없음 — {target} 폴더에 _spec.json 을 두거나 --archetype A~H 를 지정하세요.")
-        print(f"       사용 가능: " + " · ".join(f"{k}={v}" for k, v in ARCHETYPE_NAME.items()))
+        print(f"[SKIP] 원형을 알 수 없음 — {target} 폴더에 _spec.json 을 두거나 --archetype A~K 를 지정하세요.")
+        print("       " + " · ".join(f"{k}={v}" for k, v in ARCHETYPE_NAME.items()))
         return 0
     targets = []
     for a in args:
@@ -135,7 +192,14 @@ def main(argv):
     if not targets:
         print("검사할 *.html 없음")
         return 0
-    total = sum(lint(t, code) for t in targets)
+    total, legacy = 0, 0
+    for t in targets:
+        n, attr = lint(t, code)
+        total += n
+        legacy += 0 if attr else 1
+    if legacy:
+        print(f"\nℹ️ {legacy}개 파일이 data-region 없이 키워드추측으로 검사됐습니다 (부정확). "
+              f"생성 시 의미 영역에 data-region 을 박으면 결정론적으로 검사됩니다.")
     print(f"\n원형 위반: {total}건 " + (
         "→ 콘텐츠 스펙이 원형과 어긋납니다. 1단계로 돌아가 스펙을 고치세요 (시안만 고치면 재발합니다)"
         if total else "→ 통과 ✅"))
