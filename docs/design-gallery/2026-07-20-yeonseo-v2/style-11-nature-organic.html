@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 — 네이처 오가닉</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script>document.documentElement.classList.add('js-anim');</script>
+<style>
+  :root{
+    /* ── 팔레트 (모든 색 따뜻한 톤 · 순백/순흑 금지) ── */
+    --bg:#F4F1E8;
+    --paper:#FBF7EC;
+    --paper-alt:#EFE9D8;
+    --paper-warm:#F2E6CC;
+    --ink:#2B2A26;
+    --ink-soft:#55503F;
+    --deep-green:#2D4A3E;
+    --deep-green-soft:#3E5F50;
+    --sage:#8BA888;
+    --sage-soft:#E3EBDD;
+    --terracotta:#C4704B;
+    --terracotta-soft:#F3E1D4;
+    --terracotta-dark:#8B4632;
+    --border-hand:rgba(76,64,42,.32);
+    --border-hand-soft:rgba(76,64,42,.16);
+
+    --axis-inner-bg:#DCE6DF; --axis-inner-fg:#2D4A3E;
+    --axis-outer-bg:#F1E6D2; --axis-outer-fg:#6E4E1C;
+
+    --seed-bg:#F1E9CF;   --seed-fg:#6B5A2E;   --seed-dot:#C9B36B;
+    --sprout-bg:#E3EBDD; --sprout-fg:#3F5D3F; --sprout-dot:#8BA888;
+    --fruit-bg:#DCE6DF;  --fruit-fg:#2D4A3E;  --fruit-dot:#2D4A3E;
+    --wilted-bg:#F3E1D4; --wilted-fg:#8B4632; --wilted-dot:#C4704B;
+
+    /* ── 유기 radius — 단 하나의 비율 규칙을 스케일만 다르게 반복 ── */
+    --radius-lg:24px 40px 24px 40px;
+    --radius-lg-alt:40px 24px 40px 24px;
+    --radius-sm:12px 20px 12px 20px;
+    --radius-sm-alt:20px 12px 20px 12px;
+
+    /* ── 타이포 스케일 ── */
+    --fs-xs:12px; --fs-sm:13px; --fs-base:15px; --fs-md:16px;
+    --fs-story:18px; --fs-lg:20px; --fs-xl:24px; --fs-2xl:30px;
+
+    /* ── 모션 — 식물은 튀지 않는다: 500ms 미만 금지 ── */
+    --t-slow:.6s cubic-bezier(.22,.68,.32,1);
+    --t-grow:.7s cubic-bezier(.22,.68,.32,1);
+
+    --composer-h:132px;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0;
+    background:var(--bg);
+    color:var(--ink);
+  }
+  body{
+    font-family:'Pretendard', -apple-system, sans-serif;
+    font-size:var(--fs-base);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{ font-family:'Gowun Batang', 'Pretendard', serif; margin:0; font-weight:700; letter-spacing:-.01em; }
+  p{ margin:0; }
+  button{ font-family:inherit; cursor:pointer; }
+  input{ font-family:inherit; }
+  ::selection{ background:var(--sage-soft); color:var(--ink); }
+
+  /* ── 종이 질감 오버레이 (opacity .035 — 노이즈가 아니라 종이여야 함) ── */
+  .paper-texture{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    opacity:.035; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.16  0 0 0 0 0.14  0 0 0 0 0.1  0 0 0 0.9 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  .tabular{ font-variant-numeric:tabular-nums; }
+
+  /* ══════════ 진입 연출 — 대화가 자라나듯 쌓인다 (총 1.5s) ══════════ */
+  html.js-anim .reveal{
+    opacity:0;
+    transform:translateY(14px) scaleY(.94);
+    transform-origin:bottom center;
+  }
+  html.js-anim .reveal.show{
+    opacity:1;
+    transform:translateY(0) scaleY(1);
+    transition:opacity var(--t-grow), transform var(--t-grow);
+  }
+  html.js-anim .reveal.reveal-fade{ transform:translateY(10px); }
+  html.js-anim .reveal.reveal-fade.show{ transform:translateY(0); }
+
+  @media (prefers-reduced-motion: reduce){
+    html.js-anim .reveal,
+    html.js-anim .reveal.show{
+      opacity:1 !important; transform:none !important; transition:none !important;
+    }
+    .dot-pulse .dot{ animation:none !important; opacity:.85 !important; }
+  }
+
+  /* ══════════ 전체 골격 ══════════ */
+  .app-shell{ position:relative; z-index:2; min-height:100vh; display:flex; flex-direction:column; }
+
+  .topbar{
+    position:sticky; top:0; z-index:30;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+    background:var(--bg);
+    border-bottom:1.5px solid var(--border-hand-soft);
+  }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand-mark{ font-size:var(--fs-2xl); color:var(--deep-green); }
+  .brand-sub{ font-size:var(--fs-xs); color:var(--ink-soft); }
+  .topbar-actions{ display:flex; align-items:center; gap:12px; }
+
+  .avatar{
+    width:40px; height:40px; border-radius:var(--radius-sm);
+    background:var(--sage); color:var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:var(--fs-md); flex-shrink:0;
+    border:1.5px solid var(--border-hand-soft);
+  }
+
+  .layout{
+    flex:1; width:100%; max-width:1180px; margin:0 auto;
+    display:grid; grid-template-columns:260px 1fr;
+    gap:32px; padding:32px 24px calc(var(--composer-h) + 32px);
+  }
+
+  /* ── 좌측: 지난 대화 (내비게이션) ── */
+  .sidebar{ min-width:0; }
+  .sidebar-title{ font-size:var(--fs-xs); color:var(--ink-soft); letter-spacing:.04em; margin:0 0 12px 4px; }
+  .history-group + .history-group{ margin-top:20px; }
+  .history-label{ font-size:var(--fs-xs); color:var(--ink-soft); margin:0 0 8px 4px; }
+  .history-item{
+    display:block; width:100%; text-align:left;
+    background:var(--paper); border:1.5px solid var(--border-hand-soft);
+    border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:8px;
+    transition:background var(--t-slow), border-color var(--t-slow);
+  }
+  .history-item:hover{ background:var(--paper-warm); }
+  .history-item .h-text{
+    display:block; font-size:var(--fs-sm); color:var(--ink);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .history-item .h-date{ display:block; font-size:11px; color:var(--ink-soft); margin-top:4px; }
+  .history-item.active{
+    background:var(--sage-soft); border-color:var(--sage);
+  }
+
+  /* ── 메인 컬럼 ── */
+  .main{ min-width:0; display:flex; flex-direction:column; gap:28px; }
+
+  .section-eyebrow{
+    font-size:var(--fs-xs); color:var(--ink-soft); letter-spacing:.06em; margin:0 0 4px 2px;
+  }
+
+  /* ── 대화 흐름 — 화면의 주인공 ── */
+  .chat-flow{ display:flex; flex-direction:column; gap:16px; }
+
+  .msg{ display:flex; flex-direction:column; max-width:78%; }
+  .msg-yeonseo{ align-self:flex-start; align-items:flex-start; }
+  .msg-me{ align-self:flex-end; align-items:flex-end; }
+
+  .msg-speaker{
+    font-size:11px; color:var(--ink-soft); margin:0 4px 6px; letter-spacing:.02em;
+  }
+  .msg-yeonseo .msg-speaker{ color:var(--deep-green); font-weight:600; }
+
+  .bubble{
+    padding:14px 18px; font-size:var(--fs-md); line-height:1.65;
+    border:1.5px solid var(--border-hand);
+    word-break:keep-all; overflow-wrap:break-word;
+  }
+  .msg-yeonseo .bubble{
+    background:var(--paper); border-color:var(--sage);
+    border-radius:var(--radius-lg);
+  }
+  .msg-me .bubble{
+    background:var(--paper-alt); border-color:var(--border-hand);
+    border-radius:var(--radius-lg-alt); color:var(--ink);
+  }
+
+  .opt-row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+  .opt-btn{
+    background:var(--paper); border:1.5px solid var(--sage);
+    color:var(--deep-green); font-weight:600; font-size:var(--fs-sm);
+    padding:9px 18px; border-radius:var(--radius-sm);
+    transition:background var(--t-slow), color var(--t-slow);
+  }
+  .opt-btn:hover{ background:var(--sage-soft); }
+  .opt-btn:active{ background:var(--sage); color:var(--paper); }
+  .opt-btn:focus-visible{ outline:2px solid var(--deep-green); outline-offset:2px; }
+  .opt-btn.selected{ background:var(--deep-green); color:var(--paper); border-color:var(--deep-green); }
+
+  .typing-row{ display:flex; align-items:center; gap:10px; }
+  .typing-bubble{
+    display:flex; align-items:center; gap:6px;
+    padding:14px 18px; background:var(--paper); border:1.5px solid var(--sage);
+    border-radius:var(--radius-lg);
+  }
+  .dot-pulse{ display:flex; gap:5px; }
+  .dot-pulse .dot{
+    width:7px; height:7px; border-radius:50%; background:var(--sage); opacity:.4;
+    animation:dotgrow 1.4s ease-in-out infinite;
+  }
+  .dot-pulse .dot:nth-child(1){ animation-delay:0s; }
+  .dot-pulse .dot:nth-child(2){ animation-delay:.18s; }
+  .dot-pulse .dot:nth-child(3){ animation-delay:.36s; background:var(--deep-green); }
+  @keyframes dotgrow{ 0%,80%,100%{ opacity:.35; } 40%{ opacity:1; } }
+  .typing-caption{ font-size:var(--fs-xs); color:var(--ink-soft); }
+
+  /* ── 진단 카드 ── */
+  .diagnosis-card{
+    background:var(--paper); border:1.5px solid var(--border-hand);
+    border-left:4px solid var(--deep-green);
+    border-radius:var(--radius-lg);
+    padding:20px 24px; display:flex; flex-direction:column; gap:10px;
+  }
+  .diagnosis-text{ font-size:var(--fs-story); line-height:1.8; color:var(--ink); }
+  .axis-badge{
+    align-self:flex-start; display:inline-flex; align-items:center;
+    font-size:var(--fs-xs); font-weight:700; padding:4px 12px;
+    border-radius:var(--radius-sm);
+  }
+  .axis-badge.inner{ background:var(--axis-inner-bg); color:var(--axis-inner-fg); }
+  .axis-badge.outer{ background:var(--axis-outer-bg); color:var(--axis-outer-fg); }
+
+  /* ── 스토리 카드 — 두 번째 주인공 (읽기형: 승부처는 타이포) ── */
+  .story-card{
+    background:var(--paper); border:1.5px solid var(--border-hand);
+    border-radius:var(--radius-lg-alt);
+    padding:32px 36px;
+  }
+  .story-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+  .story-source{ font-family:'Gowun Batang', serif; font-size:var(--fs-xl); color:var(--ink); }
+  .story-author{ font-size:var(--fs-sm); color:var(--ink-soft); margin-top:2px; }
+  .story-body{
+    max-width:62ch; font-size:var(--fs-story); line-height:1.9; color:var(--ink);
+    letter-spacing:.001em;
+  }
+  .story-body::first-letter{ font-family:'Gowun Batang', serif; font-size:1.5em; color:var(--deep-green); }
+  .story-lesson{
+    margin-top:20px; padding:14px 18px;
+    background:var(--sage-soft); border-radius:var(--radius-sm);
+    font-size:var(--fs-md); color:var(--deep-green); font-weight:600; line-height:1.6;
+    max-width:62ch;
+  }
+  .story-foot{ margin-top:18px; }
+  .story-link{
+    background:none; border:none; padding:0; color:var(--deep-green);
+    font-size:var(--fs-sm); font-weight:600; text-decoration:underline;
+    text-decoration-color:var(--sage); text-underline-offset:3px;
+    transition:color var(--t-slow);
+  }
+  .story-link:hover{ color:var(--terracotta-dark); }
+
+  /* ── 되돌아보기 — 밀도 지점 + 상태 4종 ── */
+  .recall-header{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .recall-title{ font-size:var(--fs-xl); }
+  .chip-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .chip{
+    background:var(--paper); border:1.5px solid var(--border-hand);
+    color:var(--ink-soft); font-size:var(--fs-sm); font-weight:600;
+    padding:7px 16px; border-radius:var(--radius-sm);
+    display:inline-flex; align-items:center; gap:6px;
+    transition:background var(--t-slow), color var(--t-slow), border-color var(--t-slow);
+  }
+  .chip .chip-dot{
+    width:6px; height:6px; border-radius:50%; background:var(--sage);
+    transition:background var(--t-slow), box-shadow var(--t-slow);
+  }
+  .chip:hover .chip-dot{ background:var(--deep-green); box-shadow:0 0 0 3px var(--sage-soft); }
+  .chip[aria-pressed="true"]{ background:var(--deep-green); color:var(--paper); border-color:var(--deep-green); }
+  .chip[aria-pressed="true"] .chip-dot{ background:var(--paper); }
+  .chip:focus-visible{ outline:2px solid var(--deep-green); outline-offset:2px; }
+
+  .recall-list{ margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+  .recall-row{
+    display:grid; grid-template-columns:1.7fr 1fr .7fr .9fr;
+    gap:14px; align-items:center;
+    background:var(--paper); border:1.5px solid var(--border-hand-soft);
+    border-radius:var(--radius-sm); padding:14px 18px;
+    transition:background var(--t-slow);
+  }
+  .recall-row:nth-child(even){ transform:rotate(-.25deg); }
+  .recall-row:nth-child(odd){ transform:rotate(.2deg); }
+  .recall-row:hover{ background:var(--paper-warm); }
+  .r-title{
+    font-weight:600; color:var(--ink); font-size:var(--fs-base);
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden; line-height:1.4;
+  }
+  .r-author{ font-size:var(--fs-sm); color:var(--ink-soft); }
+  .r-author.missing{ color:var(--ink-soft); font-style:italic; }
+  .r-axis{ justify-self:start; }
+  .r-status{
+    justify-self:start; display:inline-flex; align-items:center; gap:6px;
+    font-size:var(--fs-xs); font-weight:700; padding:5px 12px; border-radius:var(--radius-sm-alt);
+    white-space:nowrap;
+  }
+  .r-status .s-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .r-status.heard{ background:var(--fruit-bg); color:var(--fruit-fg); }
+  .r-status.heard .s-dot{ background:var(--fruit-dot); }
+  .r-status.hold{ background:var(--wilted-bg); color:var(--wilted-fg); }
+  .r-status.hold .s-dot{ background:var(--wilted-dot); }
+  .r-status.relisten{ background:var(--sprout-bg); color:var(--sprout-fg); }
+  .r-status.relisten .s-dot{ background:var(--sprout-dot); }
+  .r-status.new{ background:var(--seed-bg); color:var(--seed-fg); }
+  .r-status.new .s-dot{ background:var(--seed-dot); }
+
+  .empty-state{
+    display:none; margin-top:16px; padding:40px 24px; text-align:center;
+    background:var(--paper); border:1.5px solid var(--border-hand-soft);
+    border-radius:var(--radius-lg);
+  }
+  .empty-state.show-empty{ display:block; }
+  .empty-headline{ font-size:var(--fs-lg); color:var(--ink); margin-bottom:8px; }
+  .empty-desc{ font-size:var(--fs-sm); color:var(--ink-soft); max-width:44ch; margin:0 auto 18px; line-height:1.6; }
+
+  /* ── 버튼 (primary / secondary / ghost) ── */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    height:40px; padding:0 20px; font-size:var(--fs-sm); font-weight:700;
+    border-radius:var(--radius-sm); border:1.5px solid transparent;
+    transition:background var(--t-slow), border-color var(--t-slow), color var(--t-slow), opacity var(--t-slow);
+  }
+  .btn-primary{ background:var(--deep-green); color:var(--paper); }
+  .btn-primary:hover{ background:var(--deep-green-soft); }
+  .btn-primary:active{ background:var(--deep-green); }
+  .btn-primary:focus-visible{ outline:2px solid var(--deep-green); outline-offset:2px; }
+  .btn-primary:disabled{ background:var(--paper-alt); color:var(--ink-soft); cursor:not-allowed; border-color:var(--border-hand-soft); }
+  .btn-primary .leaf-dot{
+    width:7px; height:7px; border-radius:50%; background:var(--sage-soft); opacity:.55;
+    transition:opacity var(--t-slow), background var(--t-slow);
+  }
+  .btn-primary:hover .leaf-dot{ opacity:1; background:var(--sage); }
+
+  .btn-secondary{ background:transparent; color:var(--ink); border-color:var(--border-hand); }
+  .btn-secondary:hover{ background:var(--paper-warm); }
+  .btn-secondary:focus-visible{ outline:2px solid var(--deep-green); outline-offset:2px; }
+
+  /* ── 하단 고정 입력창 ── */
+  .composer-fixed{
+    position:fixed; left:0; right:0; bottom:0; z-index:40;
+    background:var(--bg); border-top:1.5px solid var(--border-hand-soft);
+  }
+  .composer-inner{
+    max-width:1180px; margin:0 auto; padding:12px 24px 16px;
+    display:grid; grid-template-columns:260px 1fr; gap:32px;
+  }
+  .composer-content{ grid-column:2; min-width:0; }
+  .composer-hint{
+    display:flex; align-items:center; gap:8px;
+    font-size:var(--fs-xs); color:var(--deep-green); margin-bottom:10px;
+    background:var(--sage-soft); border-radius:var(--radius-sm-alt);
+    padding:7px 14px; width:fit-content;
+  }
+  .composer-hint .hint-dot{ width:6px; height:6px; border-radius:50%; background:var(--sage); flex-shrink:0; }
+  .composer-row{ display:flex; gap:10px; }
+  .composer-input{
+    flex:1; min-width:0; height:48px; padding:0 18px;
+    background:var(--paper); color:var(--ink);
+    border:1.5px solid var(--border-hand); border-radius:var(--radius-sm);
+    font-size:var(--fs-md);
+    transition:border-color var(--t-slow), box-shadow var(--t-slow);
+  }
+  .composer-input::placeholder{ color:var(--ink-soft); }
+  .composer-input:focus{ outline:none; border-color:var(--deep-green); box-shadow:0 0 0 3px var(--sage-soft); }
+  .composer-row .btn-primary{ min-width:96px; flex-shrink:0; }
+
+  /* ── 사이트 푸터 ── */
+  .site-footer{
+    position:relative; z-index:2;
+    text-align:center; padding:20px 24px calc(var(--composer-h) + 20px);
+    font-size:11px; color:var(--ink-soft); letter-spacing:.06em;
+  }
+
+  /* ══════════ 반응형 900px↓ ══════════ */
+  @media (max-width:900px){
+    .layout{
+      grid-template-columns:1fr;
+      grid-template-areas:"sidebar" "main";
+      padding:24px 16px calc(var(--composer-h) + 24px);
+      gap:20px;
+    }
+    .sidebar{ grid-area:sidebar; }
+    .main{ grid-area:main; }
+    .sidebar-title{ margin-bottom:8px; }
+    .history-group{ display:inline-block; vertical-align:top; margin-right:16px; }
+    .history-group + .history-group{ margin-top:0; }
+    .sidebar{ display:flex; overflow-x:auto; gap:16px; padding-bottom:4px; }
+    .history-item{ width:200px; flex-shrink:0; }
+
+    .msg{ max-width:92%; }
+    .story-card{ padding:24px 20px; }
+    .recall-row{ grid-template-columns:1fr; gap:8px; }
+    .r-axis, .r-status{ justify-self:start; }
+
+    .composer-inner{ grid-template-columns:1fr; padding:12px 16px 14px; }
+    .composer-content{ grid-column:1; }
+  }
+  @media (max-width:640px){
+    .brand-sub{ display:none; }
+    .story-card{ padding:20px 16px; }
+    .story-body{ font-size:16px; }
+    .opt-row{ flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="paper-texture" aria-hidden="true"></div>
+
+<div class="app-shell">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">연서</span>
+      <span class="brand-sub">이야기로 듣는 마음</span>
+    </div>
+    <div class="topbar-actions">
+      <button type="button" class="btn btn-secondary">모아보기</button>
+      <div class="avatar" aria-label="내 프로필">ㅇ</div>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <aside class="sidebar" aria-label="지난 대화">
+      <p class="sidebar-title">지난 대화</p>
+
+      <div class="history-group">
+        <p class="history-label">오늘</p>
+        <button type="button" class="history-item active">
+          <span class="h-text">연락이 오면 반갑고 안 오면…</span>
+          <span class="h-date tabular">오늘 · 오후 3:12</span>
+        </button>
+        <button type="button" class="history-item">
+          <span class="h-text">자꾸 먼저 연락하게 돼요</span>
+          <span class="h-date tabular">오늘 · 오전 10:47</span>
+        </button>
+      </div>
+
+      <div class="history-group">
+        <p class="history-label">지난주</p>
+        <button type="button" class="history-item">
+          <span class="h-text">헤어질 때가 된 걸까요</span>
+          <span class="h-date tabular">07.14</span>
+        </button>
+        <button type="button" class="history-item">
+          <span class="h-text">좋은 사람인데 설레지 않아요</span>
+          <span class="h-date tabular">07.11</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <section class="chat-flow" aria-label="대화 흐름">
+        <div class="msg msg-yeonseo reveal">
+          <span class="msg-speaker">연서</span>
+          <div class="bubble">요즘 사랑에서 어떤 게 제일 어려우세요?</div>
+        </div>
+
+        <div class="msg msg-me reveal">
+          <span class="msg-speaker">나</span>
+          <div class="bubble">연락이 오면 반갑고 안 오면 하루가 다 망가져요. 제가 너무 매달리는 것 같기도 하고, 사실은 그냥 확인받고 싶은 건지도 모르겠어요.</div>
+        </div>
+
+        <div class="msg msg-yeonseo reveal">
+          <span class="msg-speaker">연서</span>
+          <div class="bubble">기다림이 힘든 건가요, 기다리는 자신이 싫은 건가요?</div>
+          <div class="opt-row">
+            <button type="button" class="opt-btn" data-choice="a">기다림이 힘들다</button>
+            <button type="button" class="opt-btn selected" data-choice="b">그런 내가 싫다</button>
+          </div>
+        </div>
+
+        <div class="msg msg-me reveal">
+          <span class="msg-speaker">나</span>
+          <div class="bubble">후자요.</div>
+        </div>
+
+        <div class="msg msg-yeonseo reveal typing-row">
+          <span class="msg-speaker">연서</span>
+          <div class="typing-bubble" role="status" aria-label="연서가 답을 준비하고 있습니다">
+            <span class="dot-pulse"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+          </div>
+          <span class="typing-caption">쓰는 중</span>
+        </div>
+      </section>
+
+      <section class="diagnosis-card reveal reveal-fade" aria-label="연서의 진단">
+        <span class="axis-badge inner">내적</span>
+        <p class="diagnosis-text">확인받아야 안심되는 마음이 보여요. 없는 건 상대의 애정이 아니라 스스로에 대한 확신 같습니다.</p>
+      </section>
+
+      <section class="story-card reveal reveal-fade" aria-label="오늘의 이야기">
+        <div class="story-head">
+          <div>
+            <h2 class="story-source">오만과 편견</h2>
+            <p class="story-author">제인 오스틴</p>
+          </div>
+          <span class="axis-badge inner">내적</span>
+        </div>
+        <p class="story-body">엘리자베스는 그를 오만하다고 단정했다. 첫인상은 선명했고, 선명한 만큼 의심할 이유가 없었다. 그러나 그 확신은 그녀가 그를 알아갈수록 조금씩 어긋났다. 편지 한 장이 도착했을 때, 그녀가 흔들린 것은 그의 해명이 아니라 자신이 그토록 확신했다는 사실이었다. 사람을 잘못 본 것보다 무서운 건, 잘못 볼 수 있다는 걸 몰랐다는 쪽이다. 그녀는 그날 이후 자신의 판단을 한 번 더 들여다보는 사람이 되었다.</p>
+        <p class="story-lesson">첫인상은 자주 틀린다 — 나에 대한 첫인상도 마찬가지다.</p>
+        <div class="story-foot">
+          <button type="button" class="story-link">다른 이야기도 들어볼래요?</button>
+        </div>
+      </section>
+
+      <section class="recall-section" aria-label="되돌아보기 — 받은 스토리">
+        <div class="recall-header">
+          <h2 class="recall-title">되돌아보기</h2>
+          <div class="chip-row" role="group" aria-label="축 필터">
+            <button type="button" class="chip" data-axis="all" aria-pressed="true"><span class="chip-dot"></span>전체</button>
+            <button type="button" class="chip" data-axis="외적" aria-pressed="false"><span class="chip-dot"></span>외적</button>
+            <button type="button" class="chip" data-axis="내적" aria-pressed="false"><span class="chip-dot"></span>내적</button>
+          </div>
+        </div>
+
+        <div class="recall-list" id="recallList">
+          <div class="recall-row" data-axis="내적">
+            <span class="r-title">오만과 편견</span>
+            <span class="r-author">제인 오스틴</span>
+            <span class="r-axis axis-badge inner">내적</span>
+            <span class="r-status heard"><span class="s-dot"></span>들음</span>
+          </div>
+          <div class="recall-row" data-axis="외적">
+            <span class="r-title">위대한 개츠비</span>
+            <span class="r-author">F. 스콧 피츠제럴드</span>
+            <span class="r-axis axis-badge outer">외적</span>
+            <span class="r-status hold"><span class="s-dot"></span>보류</span>
+          </div>
+          <div class="recall-row" data-axis="내적">
+            <span class="r-title">어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설</span>
+            <span class="r-author missing">—</span>
+            <span class="r-axis axis-badge inner">내적</span>
+            <span class="r-status relisten"><span class="s-dot"></span>다시듣기</span>
+          </div>
+          <div class="recall-row" data-axis="내적">
+            <span class="r-title">폭풍의 언덕</span>
+            <span class="r-author">에밀리 브론테</span>
+            <span class="r-axis axis-badge inner">내적</span>
+            <span class="r-status heard"><span class="s-dot"></span>들음</span>
+          </div>
+          <div class="recall-row" data-axis="외적">
+            <span class="r-title">시라노 드 베르주라크</span>
+            <span class="r-author">에드몽 로스탕</span>
+            <span class="r-axis axis-badge outer">외적</span>
+            <span class="r-status new"><span class="s-dot"></span>새로움</span>
+          </div>
+          <div class="recall-row" data-axis="내적">
+            <span class="r-title">안나 카레니나</span>
+            <span class="r-author">레프 톨스토이</span>
+            <span class="r-axis axis-badge inner">내적</span>
+            <span class="r-status hold"><span class="s-dot"></span>보류</span>
+          </div>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+          <p class="empty-headline">아직 이 축의 이야기가 없어요</p>
+          <p class="empty-desc">대화를 두어 마디 더 나누면 맞는 이야기를 찾아드릴게요.</p>
+          <button type="button" class="btn btn-primary"><span class="leaf-dot"></span>대화 이어가기</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="composer-fixed">
+    <div class="composer-inner">
+      <div class="composer-content">
+        <div class="composer-hint"><span class="hint-dot"></span>결핍을 짚으려면 두세 마디가 더 필요해요.</div>
+        <div class="composer-row">
+          <input type="text" class="composer-input" id="composerInput" placeholder="편한 만큼만 답해도 됩니다" aria-label="답장 입력">
+          <button type="button" class="btn btn-primary" id="sendBtn" disabled><span class="leaf-dot"></span>보내기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">STYLE 11 · 네이처 오가닉</footer>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reveals = document.querySelectorAll('.reveal');
+
+  function run(){
+    if(reduceMotion){
+      reveals.forEach(function(el){ el.classList.add('show'); });
+      return;
+    }
+    reveals.forEach(function(el, i){
+      setTimeout(function(){ el.classList.add('show'); }, 300 + i * 160);
+    });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+
+  // 옵션 버튼 — 단일 선택 토글
+  document.querySelectorAll('.opt-row').forEach(function(row){
+    var btns = row.querySelectorAll('.opt-btn');
+    btns.forEach(function(b){
+      b.addEventListener('click', function(){
+        btns.forEach(function(o){ o.classList.remove('selected'); o.setAttribute('aria-pressed','false'); });
+        b.classList.add('selected'); b.setAttribute('aria-pressed','true');
+      });
+    });
+  });
+
+  // 축 필터 칩 — 다시 누르면 해제(빈 상태 데모)
+  var chips = document.querySelectorAll('.chip');
+  var rows = document.querySelectorAll('.recall-row');
+  var emptyState = document.getElementById('emptyState');
+
+  chips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      var already = chip.getAttribute('aria-pressed') === 'true';
+      chips.forEach(function(c){ c.setAttribute('aria-pressed','false'); });
+
+      if(already){
+        rows.forEach(function(r){ r.style.display = 'none'; });
+        emptyState.classList.add('show-empty');
+        return;
+      }
+      chip.setAttribute('aria-pressed','true');
+      emptyState.classList.remove('show-empty');
+      var axis = chip.getAttribute('data-axis');
+      rows.forEach(function(r){
+        var match = axis === 'all' || r.getAttribute('data-axis') === axis;
+        r.style.display = match ? '' : 'none';
+      });
+    });
+  });
+
+  // 입력창 — 내용 있을 때만 보내기 활성화
+  var input = document.getElementById('composerInput');
+  var sendBtn = document.getElementById('sendBtn');
+  if(input && sendBtn){
+    input.addEventListener('input', function(){
+      sendBtn.disabled = input.value.trim().length === 0;
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연서 · STYLE 07 미니멀 모노크롬</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* =========================================================
+     STYLE 07 — 미니멀 모노크롬
+     시그니처: 후퇴에 의한 강조 · 주황(#FF4D00) 정확히 3곳 · 64px 극단 여백
+     원형: B 대화형(주) + C 읽기형(보조) — 대시보드형 계량 위젯 일체 배제(archetype-lint B 금지 목록 준수)
+     주황 3곳 매핑(등가치환, 대시보드형 원소 없음):
+       ① 대화의 "피크" = 가장 결정적인 한 마디("후자요.") 옆 2px 세로 바
+       ② "문제/주의" 인디케이터 = 되돌아보기 목록의 유일한 "다시듣기" 행의 8px 사각 점
+       ③ ②와 연결된 강조 값 = 진단 박스의 축 배지 "내적" 테두리(②행의 축도 내적 — 실로 연결)
+     ※ 배지·테이블 텍스트 자체는 전부 잉크색 유지 — 주황은 텍스트가 아닌 획(bar/점/테두리)에만
+        사용해 흰 배경 대비(약 3.3:1)가 그래픽 요소 기준(3:1)에 들도록 함(본문 대비 4.5:1과 별개).
+     ========================================================= */
+
+  :root{
+    --bg:#FFFFFF;
+    --ink:#111111;
+    --mid:#767676;
+    --pale:#A8A8A8;
+    --hair:#E5E5E5;
+    --accent:#FF4D00;
+
+    --sp-1:8px;
+    --sp-2:16px;
+    --sp-3:32px;
+    --sp-4:64px;
+
+    --fs-1:11px;
+    --fs-2:16px;
+    --fs-3:24px;
+    --fs-4:36px;
+    --fs-5:54px;
+
+    --frame:1280px;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,system-ui,Roboto,sans-serif;
+    font-size:var(--fs-2);
+    font-weight:400;
+    line-height:1.5;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+    word-break:keep-all;
+  }
+  ::selection{ background:var(--ink); color:#fff; }
+  a{ color:inherit; text-decoration:none; }
+  ul,ol{ margin:0; padding:0; list-style:none; }
+  p{ margin:0; }
+  h1,h2,h3{ margin:0; font-weight:700; }
+
+  button, input, textarea, select{
+    font-family:inherit;
+    border-radius:0;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+
+  a:focus-visible, button:focus-visible, input:focus-visible,
+  label:focus-within, [tabindex]:focus-visible{
+    outline:2px solid var(--ink);
+    outline-offset:2px;
+  }
+
+  /* 엔트리 연출 — 허용 모션 단 하나: 400ms 일괄 페이드인(opacity만, translate/scale 없음) */
+  @keyframes fadeInOnce{ from{ opacity:0; } to{ opacity:1; } }
+  .page{ animation:fadeInOnce 400ms ease both; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+    .page{ opacity:1; }
+  }
+
+  /* ---------- 공통 라벨 ---------- */
+  /* 11px 텍스트는 회색(#767676) 대신 잉크색 고정 — 스타일 안전장치("12px 미만 회색 금지")를 지키고
+     위계는 색이 아닌 크기·자간·대문자화만으로 만든다 */
+  .eyebrow{
+    font-size:var(--fs-1);
+    font-weight:500;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink);
+    margin:0 0 var(--sp-2) 0;
+  }
+
+  /* ---------- 레이아웃 골격 ---------- */
+  .page{ min-height:100vh; display:flex; flex-direction:column; }
+
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:var(--bg);
+    border-bottom:1px solid var(--hair);
+  }
+  .topbar-inner{
+    max-width:var(--frame); margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:var(--sp-2) var(--sp-3);
+  }
+  .brand{ font-size:var(--fs-3); font-weight:700; letter-spacing:-.02em; }
+  .topbar-actions{ display:flex; align-items:center; gap:var(--sp-2); }
+  .avatar{
+    width:32px; height:32px; flex:none;
+    display:inline-flex; align-items:center; justify-content:center;
+    border:1px solid var(--ink);
+    font-size:var(--fs-2); font-weight:700;
+  }
+
+  .layout{
+    flex:1 1 auto;
+    max-width:var(--frame); margin:0 auto; width:100%;
+    display:grid;
+    grid-template-columns:264px 1fr;
+    align-items:start;
+  }
+
+  /* ---------- 좌측 내비게이션(지난 대화) ---------- */
+  .nav-col{
+    padding:var(--sp-3);
+    border-right:1px solid var(--hair);
+  }
+  .nav-detail summary{ cursor:pointer; }
+  .nav-detail summary::-webkit-details-marker{ display:none; }
+  .nav-summary{
+    font-size:var(--fs-3); font-weight:700;
+    margin-bottom:var(--sp-3);
+    list-style:none;
+  }
+  .nav-list{ display:flex; flex-direction:column; gap:var(--sp-3); }
+  .nav-group{ display:flex; flex-direction:column; gap:var(--sp-1); }
+  .nav-item{
+    display:flex; align-items:baseline; justify-content:space-between; gap:var(--sp-2);
+    padding:var(--sp-1) 0 var(--sp-1) var(--sp-1);
+    border-left:2px solid transparent;
+    transition:color .18s ease, border-color .18s ease;
+  }
+  .nav-item.is-active{ border-left-color:var(--ink); }
+  .nav-item.is-active .nav-item-text{ font-weight:700; }
+  .nav-item-text{ font-size:var(--fs-2); color:var(--ink); }
+  .nav-item-time{ font-size:var(--fs-1); letter-spacing:.08em; color:var(--ink); white-space:nowrap; }
+  /* 후퇴에 의한 강조 — 그룹 hover 시 나머지가 물러나고, 실제 hover 대상만 잉크로 남는다 */
+  .nav-list:hover .nav-item-text{ color:var(--mid); }
+  .nav-list .nav-item:hover .nav-item-text{ color:var(--ink); }
+
+  /* ---------- 본문 컬럼 ---------- */
+  .content{
+    padding:var(--sp-3) var(--sp-3) var(--sp-4) var(--sp-3);
+    max-width:720px;
+  }
+  .block{ margin-top:var(--sp-4); }
+  .block:first-child{ margin-top:0; }
+  .measure{ max-width:60ch; }
+
+  /* ---------- 대화 흐름 (화면의 주인공) ---------- */
+  .chat-flow{ display:flex; flex-direction:column; gap:var(--sp-3); }
+  .chat-turn{ display:flex; flex-direction:column; gap:var(--sp-1); }
+  .chat-turn--user{ padding-left:var(--sp-3); }
+  .speaker-label{
+    font-size:var(--fs-1); font-weight:500; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink);
+  }
+  .chat-text{ font-size:var(--fs-2); line-height:1.5; max-width:60ch; }
+  .option-row{ display:flex; flex-wrap:wrap; gap:var(--sp-2); margin-top:var(--sp-1); }
+
+  .chat-text--peak{
+    display:flex; align-items:baseline; gap:var(--sp-2);
+    font-size:var(--fs-5); font-weight:800; letter-spacing:-.04em;
+    margin:var(--sp-1) 0;
+  }
+  .peak-mark{
+    width:2px; height:var(--sp-4); flex:none; align-self:center;
+    background:var(--accent); /* 주황 ① — 대화의 결정적 순간(피크) */
+  }
+
+  .typing-indicator{ display:flex; align-items:center; gap:var(--sp-1); }
+  .typing-indicator .dot{ width:6px; height:6px; background:var(--pale); flex:none; }
+  .typing-label{
+    font-size:var(--fs-1); letter-spacing:.08em; text-transform:uppercase; color:var(--ink);
+    margin-left:var(--sp-1);
+  }
+
+  /* ---------- 버튼 ---------- */
+  .btn{
+    font-size:var(--fs-2); font-weight:500; cursor:pointer;
+    border:1px solid var(--ink); background:transparent; color:var(--ink);
+    padding:var(--sp-1) var(--sp-2);
+    transition:font-weight .15s ease, background-color .15s ease, color .15s ease;
+  }
+  .btn--primary{ background:var(--ink); color:var(--bg); font-weight:700; }
+  .btn--primary:hover{ background:#2b2b2b; } /* 무채색 명도만 이동 — 색상 변화 없음 */
+  .btn--ghost{ background:transparent; color:var(--ink); }
+  .btn--ghost:hover{ font-weight:700; }
+  .btn--option:hover{ font-weight:700; }
+  .btn--link{
+    border:none; padding:0; position:relative; display:inline-block; font-weight:500;
+  }
+  .btn--link::after{
+    content:''; position:absolute; left:0; bottom:-4px; height:1px; width:0;
+    background:var(--ink); transition:width .18s ease;
+  }
+  .btn--link:hover::after, .btn--link:focus-visible::after{ width:100%; }
+
+  /* ---------- 배지 ---------- */
+  .badge{
+    display:inline-block; font-size:var(--fs-1); font-weight:500;
+    letter-spacing:.08em; text-transform:uppercase;
+    padding:var(--sp-1) var(--sp-2);
+    border:1px solid var(--ink); color:var(--ink);
+  }
+  .badge--flagged{ border:2px solid var(--accent); } /* 주황 ③ — ②(다시듣기·내적)와 연결된 축 표식, 텍스트는 잉크 유지 */
+
+  /* ---------- 진단 ---------- */
+  .diagnosis{ display:flex; flex-direction:column; align-items:flex-start; gap:var(--sp-2); }
+  .diagnosis-text{ font-size:var(--fs-2); line-height:1.5; max-width:60ch; }
+
+  /* ---------- 스토리 카드 (읽기형 — 두 번째 주인공) ---------- */
+  .story{ display:flex; flex-direction:column; gap:var(--sp-2); }
+  .story-meta{ display:flex; align-items:baseline; flex-wrap:wrap; gap:var(--sp-2); }
+  .story-title{ font-size:var(--fs-3); }
+  .story-author{ font-size:var(--fs-2); color:var(--mid); }
+  .story-body{ font-size:var(--fs-2); line-height:1.5; max-width:60ch; }
+  .story-lesson{
+    position:relative; display:inline-block;
+    font-size:var(--fs-4); font-weight:700; line-height:1.5;
+    max-width:60ch; margin-top:var(--sp-1); padding-bottom:var(--sp-1);
+  }
+  .story-lesson::after{
+    content:''; position:absolute; left:0; bottom:0; height:1px; width:0;
+    background:var(--ink); transition:width .2s ease;
+  }
+  .story-lesson:hover::after, .story-lesson:focus-within::after{ width:100%; }
+
+  /* ---------- 안내 배너 ---------- */
+  .banner{ display:flex; align-items:center; gap:var(--sp-2); }
+  .banner-mark{ width:2px; height:var(--sp-3); flex:none; background:var(--mid); }
+  .banner-text{ font-size:var(--fs-2); color:var(--mid); max-width:60ch; }
+
+  /* ---------- 되돌아보기 ---------- */
+  .review{
+    display:flex; flex-wrap:wrap; align-items:center;
+    column-gap:var(--sp-2); row-gap:var(--sp-2);
+  }
+  .review-heading{ flex-basis:100%; font-size:var(--fs-3); }
+
+  .vh-radio{ position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; }
+  .chip{
+    display:inline-block; font-size:var(--fs-2); color:var(--mid); cursor:pointer;
+    padding:var(--sp-1) var(--sp-2); border:1px solid var(--hair);
+    transition:color .15s ease, border-color .15s ease, font-weight .15s ease;
+  }
+  .vh-radio:checked + .chip{ color:var(--ink); border-color:var(--ink); font-weight:700; }
+  .vh-radio:focus-visible + .chip{ outline:2px solid var(--ink); outline-offset:2px; }
+  .chip--ghost{
+    margin-left:auto; border:none; padding:var(--sp-1) 0;
+    font-size:var(--fs-1); color:var(--ink); letter-spacing:.08em; text-transform:uppercase;
+    text-decoration:underline; text-underline-offset:3px;
+  }
+  .vh-radio:checked + .chip--ghost{ color:var(--ink); font-weight:700; }
+
+  .review-table{ flex-basis:100%; margin-top:var(--sp-2); overflow-x:auto; }
+  .review-row{
+    display:grid;
+    grid-template-columns:2.3fr 1.6fr .9fr 1fr;
+    column-gap:var(--sp-2);
+    align-items:baseline;
+    min-width:620px;
+    padding:var(--sp-2) 0 var(--sp-2) var(--sp-2);
+    border-left:2px solid transparent;
+    color:var(--mid);
+    transition:border-color .18s ease;
+  }
+  .review-row--head{
+    font-size:var(--fs-1); font-weight:500; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink);
+    border-bottom:1px solid var(--hair);
+    padding-bottom:var(--sp-1);
+  }
+  .review-row:not(.review-row--head):hover{ border-left-color:var(--ink); }
+  .review-row:last-child{ border-bottom:1px solid var(--hair); padding-bottom:var(--sp-2); }
+  .review-title{ color:var(--ink); font-weight:500; }
+  .is-missing{ color:var(--mid); }
+  .status{ display:inline-flex; align-items:center; gap:var(--sp-1); color:var(--ink); font-weight:500; }
+  .status-mark{ width:8px; height:8px; flex:none; display:inline-block; }
+  .status-mark--done{ background:var(--ink); }
+  .status-mark--hold{ background:transparent; border:1px solid var(--ink); }
+  .status-mark--relisten{ background:var(--accent); } /* 주황 ② — 유일한 "다시듣기" 행의 문제 인디케이터 */
+  .status-mark--new{
+    width:0; height:0; background:transparent;
+    border-left:4px solid transparent; border-right:4px solid transparent;
+    border-bottom:8px solid var(--ink);
+  }
+
+  .review-empty{ flex-basis:100%; display:none; padding:var(--sp-4) 0 var(--sp-2) 0; }
+  .empty-headline{ font-size:var(--fs-4); font-weight:700; margin-bottom:var(--sp-2); }
+  .empty-desc{ font-size:var(--fs-2); color:var(--mid); max-width:60ch; margin-bottom:var(--sp-3); }
+
+  /* 순수 CSS 필터·빈 상태 미리보기 — JS 없이 라디오+형제 결합자로 동작 */
+  #axis-outer:checked ~ .review-table .review-row[data-axis="내적"]{ display:none; }
+  #axis-inner:checked ~ .review-table .review-row[data-axis="외적"]{ display:none; }
+  #axis-preview:checked ~ .review-table{ display:none; }
+  #axis-preview:checked ~ .review-empty{ display:block; }
+
+  /* ---------- 하단 고정 입력창 ---------- */
+  .composer{
+    position:fixed; left:0; right:0; bottom:0; z-index:20;
+    background:var(--bg);
+    border-top:1px solid var(--hair);
+  }
+  .composer-inner{
+    max-width:var(--frame); margin:0 auto;
+    display:flex; align-items:center; gap:var(--sp-2);
+    padding:var(--sp-2) var(--sp-3);
+  }
+  .composer-input{
+    flex:1 1 auto; min-width:0;
+    border:1px solid var(--ink); background:transparent; color:var(--ink);
+    font-size:var(--fs-2); padding:var(--sp-2);
+  }
+  .composer-input::placeholder{ color:var(--mid); }
+
+  /* 본문이 고정 입력창 아래 가려지지 않도록 확보 (동일 토큰 2회 사용) */
+  .composer-clearance{ height:var(--sp-4); }
+
+  .footer{
+    padding:var(--sp-3);
+    border-top:1px solid var(--hair);
+    font-size:var(--fs-1); font-weight:500; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink);
+  }
+
+  /* ---------- 반응형: 900px 이하 ---------- */
+  @media (max-width:900px){
+    .layout{ grid-template-columns:1fr; }
+    .nav-col{ border-right:none; border-bottom:1px solid var(--hair); padding:var(--sp-2) var(--sp-2); }
+    .content{ padding:var(--sp-2) var(--sp-2) var(--sp-4) var(--sp-2); max-width:100%; }
+    .topbar-inner, .composer-inner{ padding:var(--sp-2); }
+    .chat-turn--user{ padding-left:var(--sp-2); }
+    .composer{ left:0; }
+  }
+  @media (min-width:901px){
+    .composer{ left:264px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <span class="brand">연서</span>
+      <div class="topbar-actions">
+        <button type="button" class="btn btn--ghost">모아보기</button>
+        <span class="avatar">ㅇ</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="nav-col">
+      <details class="nav-detail" open>
+        <summary class="nav-summary">지난 대화</summary>
+        <nav class="nav-list" aria-label="지난 대화 목록">
+          <div class="nav-group">
+            <p class="eyebrow">오늘</p>
+            <a class="nav-item is-active" href="#chat-flow" aria-current="true">
+              <span class="nav-item-text">연락이 오면 반갑고 안 오면…</span>
+              <time class="nav-item-time">오전 10:12</time>
+            </a>
+            <a class="nav-item" href="#chat-flow">
+              <span class="nav-item-text">자꾸 먼저 연락하게 돼요</span>
+              <time class="nav-item-time">오전 07:48</time>
+            </a>
+          </div>
+          <div class="nav-group">
+            <p class="eyebrow">지난주</p>
+            <a class="nav-item" href="#chat-flow">
+              <span class="nav-item-text">헤어질 때가 된 걸까요</span>
+              <time class="nav-item-time">7월 14일</time>
+            </a>
+            <a class="nav-item" href="#chat-flow">
+              <span class="nav-item-text">좋은 사람인데 설레지 않아요</span>
+              <time class="nav-item-time">7월 11일</time>
+            </a>
+          </div>
+        </nav>
+      </details>
+    </aside>
+
+    <main class="content">
+
+      <section class="chat-flow block" id="chat-flow" aria-label="대화 흐름">
+        <div class="chat-turn chat-turn--agent">
+          <p class="speaker-label">연서</p>
+          <p class="chat-text">요즘 사랑에서 어떤 게 제일 어려우세요?</p>
+        </div>
+
+        <div class="chat-turn chat-turn--user">
+          <p class="speaker-label">나</p>
+          <p class="chat-text">연락이 오면 반갑고 안 오면 하루가 다 망가져요. 제가 너무 매달리는 것 같기도 하고, 사실은 그냥 확인받고 싶은 건지도 모르겠어요.</p>
+        </div>
+
+        <div class="chat-turn chat-turn--agent">
+          <p class="speaker-label">연서</p>
+          <p class="chat-text">기다림이 힘든 건가요, 기다리는 자신이 싫은 건가요?</p>
+          <div class="option-row">
+            <button type="button" class="btn btn--option">기다림이 힘들다</button>
+            <button type="button" class="btn btn--option">그런 내가 싫다</button>
+          </div>
+        </div>
+
+        <div class="chat-turn chat-turn--user">
+          <p class="speaker-label">나</p>
+          <p class="chat-text chat-text--peak">
+            <span class="peak-mark" aria-hidden="true"></span>후자요.
+          </p>
+        </div>
+
+        <div class="chat-turn chat-turn--agent" aria-live="polite">
+          <p class="speaker-label">연서</p>
+          <p class="typing-indicator">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="typing-label">작성 중</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="diagnosis block" aria-label="진단">
+        <p class="eyebrow">진단</p>
+        <span class="badge badge--flagged">내적</span>
+        <p class="diagnosis-text">확인받아야 안심되는 마음이 보여요. 없는 건 상대의 애정이 아니라 스스로에 대한 확신 같습니다.</p>
+      </section>
+
+      <section class="story block" aria-label="스토리">
+        <p class="eyebrow">스토리</p>
+        <div class="story-meta">
+          <h2 class="story-title">오만과 편견</h2>
+          <p class="story-author">제인 오스틴</p>
+          <span class="badge">내적</span>
+        </div>
+        <p class="story-body">엘리자베스는 그를 오만하다고 단정했다. 첫인상은 선명했고, 선명한 만큼 의심할 이유가 없었다. 그러나 그 확신은 그녀가 그를 알아갈수록 조금씩 어긋났다. 편지 한 장이 도착했을 때, 그녀가 흔들린 것은 그의 해명이 아니라 자신이 그토록 확신했다는 사실이었다. 사람을 잘못 본 것보다 무서운 건, 잘못 볼 수 있다는 걸 몰랐다는 쪽이다. 그녀는 그날 이후 자신의 판단을 한 번 더 들여다보는 사람이 되었다.</p>
+        <p class="story-lesson" tabindex="0">첫인상은 자주 틀린다 — 나에 대한 첫인상도 마찬가지다.</p>
+        <a class="btn btn--link" href="#review">다른 이야기도 들어볼래요?</a>
+      </section>
+
+      <section class="banner block" role="status">
+        <span class="banner-mark" aria-hidden="true"></span>
+        <p class="banner-text">결핍을 짚으려면 두세 마디가 더 필요해요.</p>
+      </section>
+
+      <section class="review block" id="review" aria-label="되돌아보기">
+        <h2 class="review-heading">되돌아보기</h2>
+
+        <input type="radio" name="axis" id="axis-all" class="vh-radio" checked>
+        <label for="axis-all" class="chip">전체</label>
+        <input type="radio" name="axis" id="axis-outer" class="vh-radio">
+        <label for="axis-outer" class="chip">외적</label>
+        <input type="radio" name="axis" id="axis-inner" class="vh-radio">
+        <label for="axis-inner" class="chip">내적</label>
+        <input type="radio" name="axis" id="axis-preview" class="vh-radio">
+        <label for="axis-preview" class="chip chip--ghost">빈 상태 미리보기</label>
+
+        <div class="review-table" role="table" aria-label="받은 스토리 목록">
+          <div class="review-row review-row--head" role="row">
+            <span role="columnheader">작품</span>
+            <span role="columnheader">작가</span>
+            <span role="columnheader">축</span>
+            <span role="columnheader">상태</span>
+          </div>
+
+          <div class="review-row" role="row" data-axis="내적">
+            <span class="review-title">오만과 편견</span>
+            <span>제인 오스틴</span>
+            <span>내적</span>
+            <span class="status"><span class="status-mark status-mark--done" aria-hidden="true"></span>들음</span>
+          </div>
+
+          <div class="review-row" role="row" data-axis="외적">
+            <span class="review-title">위대한 개츠비</span>
+            <span>F. 스콧 피츠제럴드</span>
+            <span>외적</span>
+            <span class="status"><span class="status-mark status-mark--hold" aria-hidden="true"></span>보류</span>
+          </div>
+
+          <div class="review-row" role="row" data-axis="내적">
+            <span class="review-title">어느 시골 사제의 일기에서 사랑에 대해 남긴 긴 각주와 그 해설</span>
+            <span class="is-missing">—</span>
+            <span>내적</span>
+            <span class="status"><span class="status-mark status-mark--relisten" aria-hidden="true"></span>다시듣기</span>
+          </div>
+
+          <div class="review-row" role="row" data-axis="내적">
+            <span class="review-title">폭풍의 언덕</span>
+            <span>에밀리 브론테</span>
+            <span>내적</span>
+            <span class="status"><span class="status-mark status-mark--done" aria-hidden="true"></span>들음</span>
+          </div>
+
+          <div class="review-row" role="row" data-axis="외적">
+            <span class="review-title">시라노 드 베르주라크</span>
+            <span>에드몽 로스탕</span>
+            <span>외적</span>
+            <span class="status"><span class="status-mark status-mark--new" aria-hidden="true"></span>새로움</span>
+          </div>
+
+          <div class="review-row" role="row" data-axis="내적">
+            <span class="review-title">안나 카레니나</span>
+            <span>레프 톨스토이</span>
+            <span>내적</span>
+            <span class="status"><span class="status-mark status-mark--hold" aria-hidden="true"></span>보류</span>
+          </div>
+        </div>
+
+        <div class="review-empty">
+          <p class="empty-headline">아직 이 축의 이야기가 없어요</p>
+          <p class="empty-desc">대화를 두어 마디 더 나누면 맞는 이야기를 찾아드릴게요.</p>
+          <a class="btn btn--primary empty-cta" href="#composer-input">대화 이어가기</a>
+        </div>
+      </section>
+
+      <div class="composer-clearance" aria-hidden="true"></div>
+    </main>
+  </div>
+
+  <div class="composer">
+    <div class="composer-inner">
+      <input id="composer-input" type="text" class="composer-input" placeholder="편한 만큼만 답해도 됩니다">
+      <button type="button" class="btn btn--primary">보내기</button>
+    </div>
+  </div>
+
+  <footer class="footer">STYLE 07 · 미니멀 모노크롬</footer>
+</div>
+</body>
+</html>
