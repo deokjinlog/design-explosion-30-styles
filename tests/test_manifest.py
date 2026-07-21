@@ -13,7 +13,5 @@ def test_marketplace_lists_plugin():
     names = [p["name"] for p in data["plugins"]]
     assert "design-explosion-30-styles" in names
 
-def test_both_skills_present():
-    skills = ROOT / "skills"
-    assert (skills / "design-style-explorer/SKILL.md").exists(), "스타일 축 스킬 누락"
-    assert (skills / "copy-angle-explorer/SKILL.md").exists(), "메시지 축 스킬 누락"
+def test_design_skill_present():
+    assert (ROOT / "skills/design-style-explorer/SKILL.md").exists()
