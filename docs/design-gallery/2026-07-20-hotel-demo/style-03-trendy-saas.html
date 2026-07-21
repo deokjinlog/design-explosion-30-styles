@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>여기묵자 — 서울 호텔 검색 결과</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* ============ 토큰 ============ */
+  :root{
+    --bg:#FBFAFF;
+    --violet:#7C5CFF;
+    --violet-dark:#6A45F5;
+    --violet-tint:#EFEAFF;
+    --pink:#FF8FC0;
+    --pink-tint:#FFEAF3;
+    --mint:#5EE6C8;
+    --mint-tint:#E3FBF5;
+    --ink:#17143A;
+    --muted:#7B7897;
+    --muted-strong:#5D5A78;
+    --border:rgba(23,20,58,.08);
+    --surface:#FFFFFF;
+
+    --success:#0B7A5B;
+    --success-tint:#E3FBF5;
+    --urgent:#C23B1D;
+    --urgent-tint:#FFEDE8;
+    --info:#4B32B0;
+    --info-tint:#EFEAFF;
+    --deal:#C2266E;
+    --deal-tint:#FFEAF3;
+
+    --radius-lg:28px;
+    --radius-md:20px;
+    --radius-sm:12px;
+    --radius-pill:999px;
+
+    --shadow-rest:0 10px 30px rgba(23,20,58,.06);
+    --shadow-hover:0 20px 40px rgba(124,92,255,.15);
+
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px; --sp-16:64px;
+
+    --grad-brand:linear-gradient(90deg,var(--violet) 0%,var(--pink) 100%);
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .num{
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:'tnum' 1;
+  }
+  button{font-family:inherit;}
+  a{color:inherit;}
+  ul{list-style:none;margin:0;padding:0;}
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+
+  /* ============ L0 배경 블롭 ============ */
+  .blob{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(90px);
+    z-index:0;
+    pointer-events:none;
+  }
+  .blob--violet{
+    top:-160px; right:-140px;
+    width:480px; height:480px;
+    background:rgba(124,92,255,.28);
+  }
+  .blob--mint{
+    bottom:-180px; left:-160px;
+    width:440px; height:440px;
+    background:rgba(94,230,200,.24);
+  }
+
+  /* ============ 상단 정체성/검색 바 ============ */
+  .identity-bar{
+    position:sticky; top:0; z-index:20;
+    background:rgba(251,250,255,.86);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+    opacity:0; transform:translateY(-10px);
+    animation:settleIn .32s ease-out .0s forwards;
+  }
+  .identity-inner{
+    max-width:1280px; margin:0 auto;
+    padding:var(--sp-4) var(--sp-8);
+    display:flex; flex-direction:column; gap:var(--sp-2);
+  }
+  .identity-top{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:var(--sp-4); flex-wrap:wrap;
+  }
+  .brand-row{display:flex;align-items:center;gap:var(--sp-3);}
+  .logo{
+    font-size:22px; font-weight:800; letter-spacing:-.02em;
+    background:var(--grad-brand);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; color:var(--violet);
+  }
+  .live-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--violet-tint); color:var(--violet-dark);
+    font-size:11px; font-weight:700;
+    padding:5px 10px 5px 8px; border-radius:var(--radius-pill);
+  }
+  .live-dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--mint);
+    box-shadow:0 0 0 0 rgba(94,230,200,.5);
+    animation:breathe 2s ease-in-out infinite;
+    flex:none;
+  }
+  .search-summary{
+    display:flex; align-items:center; gap:var(--sp-2); flex-wrap:wrap;
+  }
+  .search-chip{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-pill);
+    padding:8px 14px;
+    font-size:13px; font-weight:600; color:var(--ink);
+    box-shadow:var(--shadow-rest);
+  }
+  .btn-edit-search{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-pill);
+    padding:8px 16px;
+    font-size:13px; font-weight:700; color:var(--violet-dark);
+    cursor:pointer;
+    transition:background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    box-shadow:var(--shadow-rest);
+  }
+  .btn-edit-search:hover,.btn-edit-search:focus-visible{
+    background:var(--violet-tint);
+    box-shadow:var(--shadow-hover);
+    transform:translateY(-1px);
+    outline:none;
+  }
+  .btn-edit-search:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+  .breadcrumb{
+    font-size:12px; color:var(--muted-strong); font-weight:500;
+  }
+
+  /* ============ 레이아웃 ============ */
+  .page{
+    position:relative; z-index:1;
+    max-width:1280px; margin:0 auto;
+    padding:var(--sp-8);
+    display:grid;
+    grid-template-columns:272px 1fr;
+    gap:var(--sp-8);
+    align-items:start;
+  }
+
+  /* ============ 좌측 필터 ============ */
+  .filter-panel{
+    background:var(--surface);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-rest);
+    padding:var(--sp-6);
+    display:flex; flex-direction:column; gap:var(--sp-6);
+    position:sticky; top:96px;
+  }
+  .filter-panel h2{
+    margin:0; font-size:16px; font-weight:800; letter-spacing:-.02em;
+  }
+  .filter-group{display:flex; flex-direction:column; gap:var(--sp-3);}
+  .filter-group__label{
+    font-size:12px; font-weight:700; color:var(--muted-strong);
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+
+  /* 가격 슬라이더 */
+  .price-range-values{
+    display:flex; justify-content:space-between;
+    font-size:13px; font-weight:700; color:var(--ink);
+  }
+  .range-track{
+    position:relative; height:32px;
+  }
+  .range-track::before{
+    content:"";
+    position:absolute; left:0; right:0; top:50%;
+    height:4px; margin-top:-2px;
+    background:var(--border);
+    border-radius:var(--radius-pill);
+  }
+  .range-fill{
+    position:absolute; top:50%; height:4px; margin-top:-2px;
+    background:var(--grad-brand);
+    border-radius:var(--radius-pill);
+    pointer-events:none;
+  }
+  input[type="range"].range{
+    -webkit-appearance:none; appearance:none;
+    position:absolute; left:0; right:0; top:50%;
+    transform:translateY(-50%);
+    width:100%; height:32px; background:transparent; margin:0;
+    pointer-events:none;
+  }
+  input[type="range"].range::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    pointer-events:auto;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--surface);
+    border:3px solid var(--violet);
+    box-shadow:var(--shadow-rest);
+    cursor:pointer;
+    transition:box-shadow .18s ease, transform .18s ease;
+  }
+  input[type="range"].range::-webkit-slider-thumb:hover,
+  input[type="range"].range:focus-visible::-webkit-slider-thumb{
+    box-shadow:var(--shadow-hover);
+    transform:scale(1.08);
+  }
+  input[type="range"].range::-moz-range-thumb{
+    pointer-events:auto;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--surface);
+    border:3px solid var(--violet);
+    box-shadow:var(--shadow-rest);
+    cursor:pointer;
+  }
+  input[type="range"].range:focus-visible{outline:none;}
+
+  /* 체크박스 필터 */
+  .check-list{display:flex; flex-direction:column; gap:var(--sp-2);}
+  .check-item{
+    display:flex; align-items:center; gap:var(--sp-3);
+    padding:8px 10px; border-radius:var(--radius-sm);
+    cursor:pointer;
+    transition:background-color .16s ease;
+  }
+  .check-item:hover,.check-item:focus-within{
+    background:var(--violet-tint);
+  }
+  .check-item:hover .check-item__text,.check-item:focus-within .check-item__text{
+    color:var(--violet-dark);
+  }
+  .check-item input[type="checkbox"]{
+    width:18px; height:18px; margin:0; flex:none;
+    accent-color:var(--violet);
+    cursor:pointer;
+  }
+  .check-item input[type="checkbox"]:focus-visible{
+    outline:2px solid var(--violet); outline-offset:2px;
+  }
+  .check-item__text{
+    font-size:14px; font-weight:600; color:var(--ink);
+    transition:color .16s ease;
+  }
+
+  .demo-toggle{
+    margin-top:var(--sp-2);
+    background:none; border:1px dashed var(--border);
+    border-radius:var(--radius-sm);
+    padding:8px 12px;
+    font-size:12px; font-weight:600; color:var(--muted-strong);
+    cursor:pointer;
+    transition:background-color .16s ease,color .16s ease,border-color .16s ease;
+  }
+  .demo-toggle:hover,.demo-toggle:focus-visible{
+    background:var(--violet-tint); color:var(--violet-dark); border-color:var(--violet);
+    outline:none;
+  }
+
+  /* ============ 결과 헤더 ============ */
+  .results-header{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:var(--sp-4); flex-wrap:wrap;
+    margin-bottom:var(--sp-6);
+    opacity:0; transform:translateY(10px);
+    animation:cardIn .4s ease-out .06s forwards;
+  }
+  .result-count{
+    font-size:20px; font-weight:800; letter-spacing:-.02em; color:var(--ink);
+  }
+  .result-count .count-num{font-size:inherit;}
+  .sort-select{
+    -webkit-appearance:none; appearance:none;
+    background:var(--surface) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0L5 6L10 0Z' fill='%237B7897'/></svg>") no-repeat right 14px center;
+    border:1px solid var(--border);
+    border-radius:var(--radius-pill);
+    padding:9px 34px 9px 16px;
+    font-size:13px; font-weight:700; color:var(--ink);
+    cursor:pointer;
+    box-shadow:var(--shadow-rest);
+    transition:box-shadow .18s ease;
+  }
+  .sort-select:hover,.sort-select:focus-visible{
+    box-shadow:var(--shadow-hover);
+    outline:none;
+  }
+  .sort-select:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+
+  /* ============ 카드 그리드 ============ */
+  .collection{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:var(--sp-6);
+  }
+
+  .item-card{
+    background:var(--surface);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-rest);
+    overflow:hidden;
+    display:flex; flex-direction:column;
+    opacity:0; transform:translateY(12px);
+    animation:cardIn .42s ease-out forwards;
+    transition:transform .22s ease, box-shadow .22s ease;
+  }
+  .item-card:hover,.item-card:focus-within{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow-hover);
+  }
+  .item-card:nth-child(1){animation-delay:.10s;}
+  .item-card:nth-child(2){animation-delay:.16s;}
+  .item-card:nth-child(3){animation-delay:.22s;}
+  .item-card:nth-child(4){animation-delay:.28s;}
+  .item-card:nth-child(5){animation-delay:.34s;}
+  .item-card:nth-child(6){animation-delay:.40s;}
+
+  .thumb{
+    position:relative;
+    height:150px;
+    background:linear-gradient(135deg,#EFEAFF 0%,#FFEAF3 100%);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .thumb svg{opacity:.5;}
+  .status-badge{
+    position:absolute; top:12px; left:12px;
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:11px; font-weight:800;
+    padding:5px 10px; border-radius:var(--radius-pill);
+  }
+  .status-badge__dot{width:6px;height:6px;border-radius:50%;flex:none;}
+  .status-badge--available{background:var(--success-tint); color:var(--success);}
+  .status-badge--available .status-badge__dot{background:var(--success);}
+  .status-badge--urgent{background:var(--urgent-tint); color:var(--urgent);}
+  .status-badge--urgent .status-badge__dot{
+    background:var(--urgent);
+    animation:breathe 2s ease-in-out infinite;
+  }
+  .status-badge--free{background:var(--info-tint); color:var(--info);}
+  .status-badge--free .status-badge__dot{background:var(--info);}
+  .status-badge--deal{background:var(--deal-tint); color:var(--deal);}
+  .status-badge--deal .status-badge__dot{background:var(--deal);}
+
+  .card-body{
+    padding:var(--sp-4) var(--sp-5,20px) var(--sp-5,20px);
+    display:flex; flex-direction:column; gap:var(--sp-2);
+    flex:1;
+  }
+  .hotel-name{
+    margin:0;
+    font-size:16px; font-weight:800; letter-spacing:-.01em; line-height:1.35;
+    color:var(--ink);
+    display:-webkit-box;
+    -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .hotel-location{
+    margin:0; font-size:13px; font-weight:500; color:var(--muted-strong);
+  }
+  .rating{display:flex; align-items:center; gap:6px; height:20px;}
+  .stars-wrap{position:relative; font-size:14px; line-height:1; letter-spacing:2px;}
+  .stars-base{color:var(--border); background:none;}
+  .stars-fill{
+    position:absolute; top:0; left:0; overflow:hidden;
+    color:var(--violet); white-space:nowrap;
+    width:0;
+    animation:starFill .5s ease-out forwards;
+  }
+  .rating-num{font-size:13px; font-weight:700; color:var(--ink);}
+  .rating--missing{font-size:13px; font-weight:700; color:var(--muted);}
+
+  .amenities{display:flex; gap:var(--sp-2); flex-wrap:wrap;}
+  .amenity{
+    font-size:11px; font-weight:600; color:var(--muted-strong);
+    background:#F4F2FB;
+    padding:4px 9px; border-radius:var(--radius-pill);
+  }
+
+  .card-footer{
+    margin-top:auto; padding-top:var(--sp-3);
+    display:flex; align-items:flex-end; justify-content:space-between; gap:var(--sp-3);
+  }
+  .price-label{display:block; font-size:11px; color:var(--muted); font-weight:600;}
+  .price-value{
+    font-size:19px; font-weight:800; letter-spacing:-.02em; color:var(--ink);
+  }
+  .btn-primary{
+    background:var(--grad-brand);
+    color:#fff; border:none; border-radius:var(--radius-pill);
+    padding:10px 22px; font-size:14px; font-weight:700;
+    cursor:pointer; flex:none;
+    box-shadow:0 6px 16px rgba(124,92,255,.28);
+    transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+  }
+  .btn-primary:hover,.btn-primary:focus-visible{
+    transform:translateY(-2px);
+    box-shadow:0 10px 22px rgba(124,92,255,.38);
+    filter:brightness(1.04);
+    outline:none;
+  }
+  .btn-primary:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+  .btn-primary:active{transform:translateY(0); filter:brightness(.98);}
+
+  /* 피크 카드(최고 평점) 강조 */
+  .item-card--peak .stars-fill{
+    animation:starFill .5s ease-out forwards, peakGlow .6s ease-out .55s forwards;
+  }
+  .item-card--peak .rating-num{
+    display:inline-block;
+    animation:peakBounce .5s ease-out .6s;
+  }
+
+  /* ============ 빈 상태 ============ */
+  .empty-state{
+    display:none;
+    flex-direction:column; align-items:center; text-align:center;
+    gap:var(--sp-3);
+    padding:var(--sp-16) var(--sp-8);
+    background:var(--surface);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-rest);
+  }
+  .empty-state.is-visible{display:flex;}
+  .empty-state__icon{
+    width:56px; height:56px; border-radius:50%;
+    background:var(--violet-tint);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:var(--sp-2);
+  }
+  .empty-state h3{margin:0; font-size:18px; font-weight:800; color:var(--ink);}
+  .empty-state p{margin:0; font-size:14px; color:var(--muted-strong); max-width:360px;}
+  .empty-state .btn-primary{margin-top:var(--sp-3);}
+
+  /* ============ 페이지네이션/보조 액션 ============ */
+  .action-row{
+    margin-top:var(--sp-8);
+    display:flex; align-items:center; justify-content:space-between;
+    gap:var(--sp-4); flex-wrap:wrap;
+  }
+  .pagination{display:flex; align-items:center; gap:6px;}
+  .page-btn{
+    min-width:34px; height:34px; padding:0 8px;
+    border:1px solid var(--border); background:var(--surface);
+    border-radius:var(--radius-sm);
+    font-size:13px; font-weight:700; color:var(--ink);
+    cursor:pointer;
+    transition:background-color .16s ease, box-shadow .16s ease, color .16s ease;
+  }
+  .page-btn:hover,.page-btn:focus-visible{
+    background:var(--violet-tint); color:var(--violet-dark); outline:none;
+  }
+  .page-btn.is-active{
+    background:var(--grad-brand); color:#fff; border-color:transparent;
+    box-shadow:0 6px 14px rgba(124,92,255,.28);
+  }
+  .page-ellipsis{color:var(--muted); font-size:13px; padding:0 4px;}
+  .btn-secondary{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-pill);
+    padding:9px 20px;
+    font-size:13px; font-weight:700; color:var(--violet-dark);
+    cursor:pointer;
+    box-shadow:var(--shadow-rest);
+    transition:background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+  }
+  .btn-secondary:hover,.btn-secondary:focus-visible{
+    background:var(--violet-tint);
+    box-shadow:var(--shadow-hover);
+    transform:translateY(-1px);
+    outline:none;
+  }
+  .btn-secondary:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+
+  /* ============ 푸터 ============ */
+  .page-footer{
+    position:relative; z-index:1;
+    text-align:center;
+    padding:var(--sp-8) var(--sp-4) var(--sp-16);
+    font-size:12px; font-weight:600; color:var(--muted);
+  }
+
+  /* ============ 키프레임 ============ */
+  @keyframes settleIn{
+    from{opacity:0; transform:translateY(-10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  @keyframes cardIn{
+    from{opacity:0; transform:translateY(12px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  @keyframes starFill{
+    from{width:0;}
+    to{width:var(--fill,0%);}
+  }
+  @keyframes peakBounce{
+    0%{transform:translateY(0) scale(1);}
+    40%{transform:translateY(-3px) scale(1.12);}
+    70%{transform:translateY(1px) scale(.98);}
+    100%{transform:translateY(0) scale(1);}
+  }
+  @keyframes peakGlow{
+    from{color:var(--violet);}
+    to{color:var(--pink);}
+  }
+  @keyframes breathe{
+    0%,100%{opacity:1; box-shadow:0 0 0 0 rgba(94,230,200,.5);}
+    50%{opacity:.45; box-shadow:0 0 0 5px rgba(94,230,200,0);}
+  }
+
+  /* ============ 반응형 ============ */
+  @media (max-width:900px){
+    .page{grid-template-columns:1fr; padding:var(--sp-4);}
+    .filter-panel{position:static;}
+    .identity-inner{padding:var(--sp-3) var(--sp-4);}
+    .collection{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}
+    .action-row{flex-direction:column; align-items:stretch;}
+    .pagination{justify-content:center; flex-wrap:wrap;}
+  }
+
+  /* ============ 접근성: 모션 감소 ============ */
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{
+      animation-duration:0.001ms !important;
+      animation-delay:0s !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.001ms !important;
+    }
+    .identity-bar,.results-header,.item-card{opacity:1; transform:none;}
+    .stars-fill{width:var(--fill,0%);}
+    .live-dot,.status-badge--urgent .status-badge__dot{animation:none; opacity:1;}
+  }
+</style>
+</head>
+<body>
+
+<div class="blob blob--violet" aria-hidden="true"></div>
+<div class="blob blob--mint" aria-hidden="true"></div>
+
+<header class="identity-bar" data-region="identity">
+  <div class="identity-inner">
+    <div class="identity-top">
+      <div class="brand-row">
+        <span class="logo">여기묵자</span>
+        <span class="live-chip"><span class="live-dot" aria-hidden="true"></span>실시간 요금 반영</span>
+      </div>
+      <div class="search-summary">
+        <span class="search-chip">서울</span>
+        <span class="search-chip">9/12 – 9/14 (2박)</span>
+        <span class="search-chip">성인 2</span>
+        <button type="button" class="btn-edit-search">검색 수정</button>
+      </div>
+    </div>
+    <p class="breadcrumb">여행지 &gt; 서울 &gt; 호텔</p>
+  </div>
+</header>
+
+<div class="page">
+
+  <aside class="filter-panel" data-region="filter">
+    <h2>필터</h2>
+
+    <div class="filter-group">
+      <span class="filter-group__label">가격</span>
+      <div class="price-range-values">
+        <span id="priceMinLabel" class="num">₩50,000</span>
+        <span id="priceMaxLabel" class="num">₩500,000+</span>
+      </div>
+      <div class="range-track">
+        <div class="range-fill" id="rangeFill"></div>
+        <input type="range" class="range range--min" id="rangeMin" min="50000" max="500000" step="10000" value="50000" aria-label="최소 가격">
+        <input type="range" class="range range--max" id="rangeMax" min="50000" max="500000" step="10000" value="500000" aria-label="최대 가격">
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-group__label">성급</span>
+      <ul class="check-list">
+        <li><label class="check-item"><input type="checkbox"><span class="check-item__text">5성</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="check-item__text">4성</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="check-item__text">3성</span></label></li>
+      </ul>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-group__label">편의</span>
+      <ul class="check-list">
+        <li><label class="check-item"><input type="checkbox"><span class="check-item__text">조식</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="check-item__text">무료취소</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="check-item__text">수영장</span></label></li>
+        <li><label class="check-item"><input type="checkbox"><span class="check-item__text">와이파이</span></label></li>
+      </ul>
+    </div>
+
+    <button type="button" class="demo-toggle" id="emptyDemoToggle">빈 결과 상태 보기 (데모)</button>
+  </aside>
+
+  <main>
+    <div class="results-header" data-region="results">
+      <h1 class="result-count">서울 호텔 <span class="count-num num" data-target="128">128</span>곳</h1>
+      <select class="sort-select" aria-label="정렬 기준">
+        <option>추천순 ▾</option>
+        <option>낮은 가격순</option>
+        <option>평점순</option>
+      </select>
+    </div>
+
+    <div class="collection" data-region="collection" id="collection">
+
+      <article class="item-card" data-region="item-card">
+        <div class="thumb" aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="#7C5CFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="status-badge status-badge--available"><span class="status-badge__dot"></span>예약가능</span>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name">남산 그랜드 호텔</h3>
+          <p class="hotel-location">중구 회현동</p>
+          <div class="rating">
+            <span class="stars-wrap" aria-hidden="true">
+              <span class="stars-base">★★★★★</span>
+              <span class="stars-fill" style="--fill:92%">★★★★★</span>
+            </span>
+            <span class="rating-num num">4.6</span>
+          </div>
+          <div class="amenities">
+            <span class="amenity">조식</span>
+            <span class="amenity">와이파이</span>
+          </div>
+          <div class="card-footer">
+            <div>
+              <span class="price-label">1박</span>
+              <span class="price-value num">₩<span class="count-num" data-target="182000">182,000</span></span>
+            </div>
+            <button type="button" class="btn-primary">예약</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="item-card" data-region="item-card">
+        <div class="thumb" aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="#7C5CFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="status-badge status-badge--deal"><span class="status-badge__dot"></span>단독특가</span>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name">한강뷰 레지던스</h3>
+          <p class="hotel-location">영등포구 여의도동</p>
+          <div class="rating">
+            <span class="stars-wrap" aria-hidden="true">
+              <span class="stars-base">★★★★★</span>
+              <span class="stars-fill" style="--fill:96%">★★★★★</span>
+            </span>
+            <span class="rating-num num">4.8</span>
+          </div>
+          <div class="amenities">
+            <span class="amenity">수영장</span>
+            <span class="amenity">조식</span>
+          </div>
+          <div class="card-footer">
+            <div>
+              <span class="price-label">1박</span>
+              <span class="price-value num">₩<span class="count-num" data-target="1240000">1,240,000</span></span>
+            </div>
+            <button type="button" class="btn-primary">예약</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="item-card" data-region="item-card">
+        <div class="thumb" aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="#7C5CFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="status-badge status-badge--urgent"><span class="status-badge__dot"></span>마감임박</span>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name">서울역 앞 밤에도 불이 꺼지지 않는 24시간 캡슐 스테이 신관 리노베이션 완료</h3>
+          <p class="hotel-location">용산구</p>
+          <div class="rating">
+            <span class="rating--missing" title="평점 정보 없음">—</span>
+          </div>
+          <div class="amenities">
+            <span class="amenity">와이파이</span>
+            <span class="amenity">무료취소</span>
+          </div>
+          <div class="card-footer">
+            <div>
+              <span class="price-label">1박</span>
+              <span class="price-value num">₩<span class="count-num" data-target="39000">39,000</span></span>
+            </div>
+            <button type="button" class="btn-primary">예약</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="item-card item-card--peak" data-region="item-card">
+        <div class="thumb" aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="#7C5CFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="status-badge status-badge--free"><span class="status-badge__dot"></span>무료취소</span>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name">북촌 한옥 스테이</h3>
+          <p class="hotel-location">종로구 가회동</p>
+          <div class="rating">
+            <span class="stars-wrap" aria-hidden="true">
+              <span class="stars-base">★★★★★</span>
+              <span class="stars-fill" style="--fill:98%">★★★★★</span>
+            </span>
+            <span class="rating-num num">4.9</span>
+          </div>
+          <div class="amenities">
+            <span class="amenity">조식</span>
+            <span class="amenity">수영장</span>
+          </div>
+          <div class="card-footer">
+            <div>
+              <span class="price-label">1박</span>
+              <span class="price-value num">₩<span class="count-num" data-target="165000">165,000</span></span>
+            </div>
+            <button type="button" class="btn-primary">예약</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="item-card" data-region="item-card">
+        <div class="thumb" aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="#7C5CFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="status-badge status-badge--available"><span class="status-badge__dot"></span>예약가능</span>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name">강남 비즈니스 호텔</h3>
+          <p class="hotel-location">강남구 역삼동</p>
+          <div class="rating">
+            <span class="stars-wrap" aria-hidden="true">
+              <span class="stars-base">★★★★★</span>
+              <span class="stars-fill" style="--fill:84%">★★★★★</span>
+            </span>
+            <span class="rating-num num">4.2</span>
+          </div>
+          <div class="amenities">
+            <span class="amenity">와이파이</span>
+            <span class="amenity">조식</span>
+          </div>
+          <div class="card-footer">
+            <div>
+              <span class="price-label">1박</span>
+              <span class="price-value num">₩<span class="count-num" data-target="98000">98,000</span></span>
+            </div>
+            <button type="button" class="btn-primary">예약</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="item-card" data-region="item-card">
+        <div class="thumb" aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="#7C5CFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="status-badge status-badge--urgent"><span class="status-badge__dot"></span>마감임박</span>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name">홍대 게스트하우스</h3>
+          <p class="hotel-location">마포구 서교동</p>
+          <div class="rating">
+            <span class="stars-wrap" aria-hidden="true">
+              <span class="stars-base">★★★★★</span>
+              <span class="stars-fill" style="--fill:80%">★★★★★</span>
+            </span>
+            <span class="rating-num num">4.0</span>
+          </div>
+          <div class="amenities">
+            <span class="amenity">와이파이</span>
+            <span class="amenity">무료취소</span>
+          </div>
+          <div class="card-footer">
+            <div>
+              <span class="price-label">1박</span>
+              <span class="price-value num">₩<span class="count-num" data-target="41000">41,000</span></span>
+            </div>
+            <button type="button" class="btn-primary">예약</button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="empty-state" data-region="empty" id="emptyState">
+      <div class="empty-state__icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#7C5CFF" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="#7C5CFF" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <h3>조건에 맞는 호텔이 없어요</h3>
+      <p>가격 범위를 넓히거나 편의 조건을 줄여보세요.</p>
+      <button type="button" class="btn-primary" id="resetFilterBtn">필터 초기화</button>
+    </div>
+
+    <div class="action-row" data-region="action">
+      <nav class="pagination" aria-label="페이지네이션">
+        <button type="button" class="page-btn" aria-label="이전 페이지">‹</button>
+        <button type="button" class="page-btn is-active" aria-current="page">1</button>
+        <button type="button" class="page-btn">2</button>
+        <button type="button" class="page-btn">3</button>
+        <span class="page-ellipsis">…</span>
+        <button type="button" class="page-btn">22</button>
+        <button type="button" class="page-btn" aria-label="다음 페이지">›</button>
+      </nav>
+      <button type="button" class="btn-secondary">지도로 보기</button>
+    </div>
+  </main>
+</div>
+
+<footer class="page-footer">STYLE 03 · 트렌디 SaaS</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- 카운트업 (숫자는 이미 HTML에 최종값으로 존재 — JS는 연출만) ----
+  function countUp(el){
+    var target = parseFloat(el.getAttribute('data-target'));
+    if (isNaN(target)) return;
+    if (reduceMotion){ return; } // 최종값 그대로 둠
+    var duration = 750;
+    var start = null;
+    function frame(ts){
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var current = Math.round(target * eased);
+      el.textContent = current.toLocaleString('ko-KR');
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = target.toLocaleString('ko-KR');
+    }
+    requestAnimationFrame(frame);
+  }
+  try{
+    document.querySelectorAll('.count-num').forEach(function(el){ countUp(el); });
+  }catch(e){ /* JS 실패해도 HTML의 최종 숫자가 그대로 보임 */ }
+
+  // ---- 가격 듀얼 슬라이더 ----
+  try{
+    var rangeMin = document.getElementById('rangeMin');
+    var rangeMax = document.getElementById('rangeMax');
+    var fill = document.getElementById('rangeFill');
+    var minLabel = document.getElementById('priceMinLabel');
+    var maxLabel = document.getElementById('priceMaxLabel');
+    var lo = parseInt(rangeMin.min, 10), hi = parseInt(rangeMin.max, 10);
+
+    function fmt(v, isMax){
+      if (isMax && v >= hi) return '₩' + hi.toLocaleString('ko-KR') + '+';
+      return '₩' + v.toLocaleString('ko-KR');
+    }
+    function update(){
+      var a = parseInt(rangeMin.value, 10);
+      var b = parseInt(rangeMax.value, 10);
+      if (a > b){ var t = a; a = b; b = t; }
+      var pctA = ((a - lo) / (hi - lo)) * 100;
+      var pctB = ((b - lo) / (hi - lo)) * 100;
+      fill.style.left = pctA + '%';
+      fill.style.width = (pctB - pctA) + '%';
+      minLabel.textContent = fmt(a, false);
+      maxLabel.textContent = fmt(b, true);
+    }
+    rangeMin.addEventListener('input', update);
+    rangeMax.addEventListener('input', update);
+    update();
+  }catch(e){}
+
+  // ---- 빈 상태 데모 토글 ----
+  try{
+    var toggleBtn = document.getElementById('emptyDemoToggle');
+    var collection = document.getElementById('collection');
+    var emptyState = document.getElementById('emptyState');
+    var resetBtn = document.getElementById('resetFilterBtn');
+
+    function showEmpty(){
+      collection.style.display = 'none';
+      emptyState.classList.add('is-visible');
+      toggleBtn.textContent = '검색 결과 다시 보기';
+    }
+    function showResults(){
+      collection.style.display = '';
+      emptyState.classList.remove('is-visible');
+      toggleBtn.textContent = '빈 결과 상태 보기 (데모)';
+    }
+    toggleBtn.addEventListener('click', function(){
+      if (emptyState.classList.contains('is-visible')) showResults();
+      else showEmpty();
+    });
+    resetBtn.addEventListener('click', showResults);
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

@@ -1,11 +1,12 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/deokjinlog/design-explosion-30-styles/main/docs/banner.svg" alt="design-explosion — 하나의 화면을 30가지 디자인 스타일로" width="100%">
+  <img src="https://raw.githubusercontent.com/deokjinlog/design-explosion-30-styles/main/docs/banner.svg" alt="design-explosion — 도메인 맞춤형 디자인 30가지 스타일" width="100%">
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-ec4899?style=flat-square&labelColor=0d1117">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.3.0-ec4899?style=flat-square&labelColor=0d1117">
   <img alt="Claude Code" src="https://img.shields.io/badge/Claude%20Code-Plugin-a78bfa?style=flat-square&labelColor=0d1117">
   <img alt="Styles" src="https://img.shields.io/badge/styles-30-ec4899?style=flat-square&labelColor=0d1117">
+  <img alt="Archetypes" src="https://img.shields.io/badge/archetypes-11-a78bfa?style=flat-square&labelColor=0d1117">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-22c55e?style=flat-square&labelColor=0d1117">
   <img alt="Zero deps" src="https://img.shields.io/badge/dependencies-zero-22c55e?style=flat-square&labelColor=0d1117">
 </p>
@@ -16,12 +17,52 @@
 
 <br/>
 
-> ## 막연한 "예쁘게 해줘"를, 30가지 확실히 다른 방향으로
+> ## 막연한 "예쁘게 해줘"를, 도메인 맞춤형 30가지 방향으로
 >
-> 도메인 하나만 던지면 **같은 화면을 30가지 디자인 스타일로 폭발**시킵니다.
-> 콘텐츠는 고정하고 **시각 언어만 30갈래**로 벌려서, 갤러리에서 나란히 보고 방향을 고릅니다.
+> **업종을 고르면** 그 도메인에 맞는 화면을 잡고, **같은 화면을 30가지 디자인 스타일로 폭발**시킵니다.
+> 화면 구성은 실제 데이터로 정하고(→ 아래 "무엇을 근거로"), **시각 언어만 30갈래**로 벌려 나란히 비교합니다.
 >
-> <sub><i>Turns a vague "make it nice" into 30 concrete design directions — same content, 30 visual languages, side by side.</i></sub>
+> <sub><i>Pick a domain → get the right screen for it → 30 visual languages of it, side by side. Screen structure grounded in real UX datasets.</i></sub>
+
+---
+
+## 무엇을 근거로 만드나 — 공개 UX 데이터셋
+
+이 도구가 "호텔 예약 = 검색 → 결과 그리드 → 예약폼" 이라고 아는 건 **제 감이 아니라 공개 데이터**입니다. 두 개를 씁니다:
+
+| 데이터셋 | 규모 · 라이선스 | 무엇에 쓰나 |
+|---|---|---|
+| **[Mind2Web](https://osu-nlp-group.github.io/Mind2Web/)** (NeurIPS'23) | 136개 실제 사이트 · 2,022개 사람 주석 태스크 · 5상위×31하위 도메인 · CC BY 4.0 | **도메인 프리셋** — 업종별로 "사람이 실제로 뭘 하나"(태스크)를 집계해 화면 원형·흐름을 정함 |
+| **[Enrico](https://github.com/luileito/enrico)** (RICO 파생) | 1,460개 UI · 20개 화면 유형 · MIT | **화면 원형 11종 검증** — Tutorial·Login·Profile 누락을 발견해 보강 |
+
+**어떻게 근거가 되나** (호텔 예시):
+1. Mind2Web 에서 호텔 사이트(marriott·airbnb 등)의 실제 태스크 수십 개를 봄 → "필터로 거르고(D) → 예약폼(E)" 패턴이 반복됨
+2. → `domains.md` 에 `Travel > Hotel = D 컬렉션형` 으로 굳힘 (대표 사이트·평균 스텝까지)
+3. → 그래서 호텔 화면엔 **검색 결과 그리드**가 나오고, 관제 대시보드의 KPI·도넛은 `archetype-lint` 가 자동 차단
+
+집계 원본(`references/data/mind2web_tasks.csv`, 2,039 태스크)까지 repo 에 넣어 **재현 가능**하게 했습니다. 한계도 정직하게 — Mind2Web 은 공개 B2C 웹이라 **로그인 뒤 업무 화면(B2B SaaS·백오피스)은 데이터가 없습니다** (아래 참조).
+
+---
+
+## 지금 지원하는 도메인 (데이터 근거가 있는 것)
+
+**되는 것만 완성도 있게** 만들기 위해, 아무 업종이나 받지 않고 **데이터가 뒷받침하는 도메인**을 선택지로 줍니다.
+
+**① 근거 있음 — Mind2Web 31칸** (바로 됨, 프리셋 자동)
+
+| 상위 | 하위 도메인 |
+|---|---|
+| **여행** | 항공 · 호텔 · 렌터카 · 기차/버스 · 식당 · 투어/주차 · 종합 OTA |
+| **쇼핑** | 종합몰 · 전자제품 · 패션 · 자동차 · 백화점 · 전문몰(약국·가구·서점) |
+| **서비스** | 병원/건강 · 정부/공공 · 집수리 · 반려동물 · 배송 · 이사 |
+| **정보** | 부동산 · 채용 · 소셜미디어 · 교육 · 금융 · 날씨 · 레시피 |
+| **엔터** | 티켓/이벤트 · 영화 · 음악 · 스포츠 · 게임 |
+
+**② 근거 없음 — 데이터 갭** (되긴 하나 "약함"으로 표시): B2B SaaS · 개발자 도구 · 금융 백오피스 · 사내 대시보드 · 대화형 AI. 공개 웹에 없어 우리가 수동 정의한 것이라, 프리셋 대신 질문으로 채웁니다.
+
+**③ 가장 정확 — 내 프로젝트 폴더**: 위 목록에 없어도, **실제 프로젝트 경로를 주면** 요구사항·코드를 읽어 화면을 역산합니다. 이 경우 도메인 제한을 받지 않습니다 (가장 정확한 소스).
+
+> 우선순위: **내 프로젝트(③) > 데이터 프리셋(①) > 수동 갭(②)**. 프리셋은 출발점일 뿐, 내 프로젝트가 있으면 그게 이깁니다.
 
 ---
 

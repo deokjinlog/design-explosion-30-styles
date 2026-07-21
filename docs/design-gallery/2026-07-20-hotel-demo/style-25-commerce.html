@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>여기묵자 · 서울 호텔 검색결과</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --surface:#FFFFFF; --canvas-tint:#FFF7F7; --border:#F0E9F5; --line:#ECECF2;
+    --coral:#FF5A5F; --coral-strong:#E8484D; --coral-light:#FFE7E8; --on-coral:#FFFFFF;
+    --purple:#7B2FF7; --purple-strong:#6522D6; --purple-light:#EFE4FF; --on-purple:#FFFFFF;
+    --text:#1B1533; --sub:#6B6480; --hint:#A29CB5;
+    --success:#17B26A; --success-strong:#0E7A46; --success-tint:rgba(23,178,106,.12); --success-border:rgba(23,178,106,.32);
+    --warning:#F5A623; --warning-strong:#92600A; --warning-tint:rgba(245,166,35,.14); --warning-border:rgba(245,166,35,.36);
+    --danger:#E8484D;
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px; --sp-16:64px;
+    --r-card:16px; --r-thumb:14px; --r-control:12px; --r-pill:999px;
+    --shadow-card:0 2px 8px rgba(27,21,51,.06);
+    --shadow-card-hover:0 8px 24px rgba(255,90,95,.14);
+    --font-kr:'Pretendard', -apple-system, sans-serif;
+    --font-num:'Manrope','Pretendard', sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-kr);
+    font-size:14px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  img,svg{ display:block; max-width:100%; }
+  button{ font-family:inherit; cursor:pointer; }
+  a{ color:inherit; }
+  ul{ list-style:none; margin:0; padding:0; }
+  fieldset{ border:none; margin:0; padding:0; }
+
+  .num{ font-family:var(--font-num); font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+
+  /* ---------- focus ---------- */
+  :focus-visible{ outline:3px solid var(--coral); outline-offset:2px; border-radius:4px; }
+
+  /* ---------- top bar : identity ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:var(--surface);
+    border-bottom:1px solid var(--line);
+    padding:var(--sp-3) var(--sp-6);
+  }
+  .topbar-inner{
+    max-width:1280px; margin:0 auto;
+    display:flex; align-items:center; gap:var(--sp-6);
+    flex-wrap:wrap;
+  }
+  .brand{
+    font-family:var(--font-num);
+    font-weight:800;
+    font-size:22px;
+    letter-spacing:-0.02em;
+    white-space:nowrap;
+    background:linear-gradient(90deg, var(--coral) 0%, var(--purple) 100%);
+    background-size:200% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:brandSweep .4s ease-out both;
+  }
+  @keyframes brandSweep{ from{ background-position:100% 0; } to{ background-position:0 0; } }
+
+  .search-summary{
+    display:flex; align-items:center; gap:var(--sp-2); flex-wrap:wrap; flex:1 1 320px;
+  }
+  .chip-static{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--canvas-tint);
+    border:1px solid var(--border);
+    color:var(--text);
+    font-weight:600; font-size:13px;
+    padding:8px 14px;
+    border-radius:var(--r-pill);
+    white-space:nowrap;
+  }
+  .chip-static .num{ font-weight:700; }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    height:40px; padding:0 18px;
+    border-radius:var(--r-control);
+    font-weight:700; font-size:14px;
+    border:1.5px solid transparent;
+    transition:transform .15s ease, box-shadow .15s ease, background-color .15s ease, color .15s ease;
+    white-space:nowrap;
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn-primary{
+    background:var(--coral); color:var(--on-coral);
+    box-shadow:0 2px 8px rgba(255,90,95,.28);
+  }
+  .btn-primary:hover{ background:var(--coral-strong); box-shadow:0 4px 14px rgba(232,72,77,.34); }
+  .btn-secondary{
+    background:var(--surface); color:var(--purple);
+    border-color:var(--purple);
+  }
+  .btn-secondary:hover{ background:var(--purple-light); }
+  .btn-secondary:disabled{ opacity:.45; cursor:not-allowed; }
+  .btn-sm{ height:32px; padding:0 12px; font-size:13px; border-radius:10px; }
+
+  /* ---------- layout ---------- */
+  .page{
+    max-width:1280px; margin:0 auto;
+    padding:var(--sp-8) var(--sp-6) var(--sp-16);
+    display:grid;
+    grid-template-columns:260px 1fr;
+    gap:var(--sp-8);
+    align-items:start;
+  }
+
+  /* ---------- filter panel ---------- */
+  .filter-panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    padding:var(--sp-6);
+    position:sticky; top:88px;
+    display:flex; flex-direction:column; gap:var(--sp-6);
+    box-shadow:var(--shadow-card);
+    opacity:0; animation:fadeUp .5s ease-out .1s both;
+  }
+  .filter-title{
+    font-size:16px; font-weight:700; margin:0 0 var(--sp-2);
+    display:flex; align-items:center; gap:8px;
+  }
+  .filter-group + .filter-group{ border-top:1px solid var(--line); padding-top:var(--sp-6); }
+  .filter-group legend{
+    font-size:13px; font-weight:700; color:var(--sub);
+    text-transform:uppercase; letter-spacing:.04em;
+    margin-bottom:var(--sp-3); padding:0;
+  }
+
+  /* price slider */
+  .price-slider{ position:relative; height:36px; margin-top:var(--sp-2); }
+  .price-track{
+    position:absolute; left:0; right:0; top:16px; height:4px;
+    background:var(--line); border-radius:var(--r-pill);
+    overflow:hidden;
+  }
+  .price-fill{
+    position:absolute; top:0; height:100%;
+    background:linear-gradient(90deg, var(--coral), var(--purple));
+    border-radius:var(--r-pill);
+  }
+  .price-slider input[type="range"]{
+    -webkit-appearance:none; appearance:none;
+    position:absolute; left:0; right:0; top:8px;
+    width:100%; height:20px; margin:0;
+    background:transparent; pointer-events:none;
+  }
+  .price-slider input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; pointer-events:auto;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--surface); border:3px solid var(--coral);
+    box-shadow:0 1px 4px rgba(27,21,51,.25);
+    cursor:pointer; margin-top:0;
+  }
+  .price-slider input[type="range"]::-moz-range-thumb{
+    pointer-events:auto; width:18px; height:18px; border-radius:50%;
+    background:var(--surface); border:3px solid var(--coral); cursor:pointer;
+  }
+  .price-slider input[type="range"]::-moz-range-track{ background:transparent; border:none; }
+  .price-values{
+    display:flex; justify-content:space-between; margin-top:var(--sp-2);
+    font-weight:700; font-size:13px; color:var(--text);
+  }
+
+  .check-row{
+    display:flex; align-items:center; gap:8px; padding:6px 0; font-size:14px; color:var(--text);
+  }
+  .check-row input[type="checkbox"]{
+    width:18px; height:18px; accent-color:var(--coral); flex:none;
+  }
+  .check-row .star-hint{ color:var(--warning); font-size:12px; }
+
+  .chip-toggle-group{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip-toggle{ position:relative; }
+  .chip-toggle input{ position:absolute; opacity:0; width:1px; height:1px; }
+  .chip-toggle label{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 14px; border-radius:var(--r-pill);
+    background:var(--coral-light); color:var(--coral-strong);
+    font-weight:700; font-size:13px;
+    border:1.5px solid transparent;
+    transition:background-color .15s ease, color .15s ease;
+    user-select:none;
+  }
+  .chip-toggle input:checked + label{
+    background:var(--coral-strong); color:var(--on-coral);
+  }
+  .chip-toggle input:focus-visible + label{ outline:3px solid var(--coral); outline-offset:2px; }
+
+  /* ---------- results main ---------- */
+  .results-main{ display:flex; flex-direction:column; gap:var(--sp-6); min-width:0; }
+
+  .results-header{
+    display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); flex-wrap:wrap;
+    opacity:0; animation:fadeUp .5s ease-out .2s both;
+  }
+  .results-title{
+    font-size:26px; line-height:32px; font-weight:800; margin:0; letter-spacing:-.01em;
+  }
+  .sort-wrap{ position:relative; }
+  .sort-select{
+    -webkit-appearance:none; appearance:none;
+    height:40px; padding:0 36px 0 16px;
+    border-radius:var(--r-control);
+    border:1.5px solid var(--border);
+    background:var(--surface);
+    font-weight:700; font-size:14px; color:var(--text);
+  }
+  .sort-wrap::after{
+    content:""; position:absolute; right:14px; top:50%; width:10px; height:10px;
+    border-right:2px solid var(--sub); border-bottom:2px solid var(--sub);
+    transform:translateY(-70%) rotate(45deg); pointer-events:none;
+  }
+
+  /* ---------- collection grid ---------- */
+  .collection{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--sp-6);
+  }
+
+  .item-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    box-shadow:var(--shadow-card);
+    padding:var(--sp-4);
+    display:flex; flex-direction:column; gap:var(--sp-3);
+    transition:transform .18s ease, box-shadow .18s ease;
+    opacity:0; animation:popIn .4s ease-out both;
+  }
+  .item-card:hover{ transform:translateY(-4px); box-shadow:var(--shadow-card-hover); }
+  .item-card:hover .thumb img,
+  .item-card:hover .thumb-fake{ transform:scale(1.04); }
+
+  .thumb-row{ position:relative; }
+  .thumb-fake{
+    width:100%; aspect-ratio:1/1; max-height:96px;
+    border-radius:var(--r-thumb);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:var(--font-num); font-weight:800; font-size:24px; letter-spacing:0;
+    transition:transform .25s ease;
+  }
+  .tone-a{ background:linear-gradient(135deg, var(--coral), var(--purple)); }
+  .tone-b{ background:linear-gradient(135deg, var(--purple), var(--coral)); }
+
+  .wishlist-btn{
+    position:absolute; top:8px; left:8px; z-index:2;
+    width:30px; height:30px; border-radius:50%;
+    background:rgba(255,255,255,.92);
+    border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 1px 4px rgba(27,21,51,.14);
+  }
+  .wishlist-btn svg{ width:15px; height:15px; stroke:var(--sub); fill:none; stroke-width:2; }
+  .wishlist-toggle{ position:absolute; opacity:0; width:1px; height:1px; }
+  .wishlist-toggle:checked ~ .wishlist-btn svg{ stroke:var(--coral-strong); fill:var(--coral); animation:heartPop .35s ease; }
+  .wishlist-toggle:focus-visible ~ .wishlist-btn{ outline:3px solid var(--coral); outline-offset:2px; }
+  .wishlist-toggle:checked ~ .wishlist-btn::before,
+  .wishlist-toggle:checked ~ .wishlist-btn::after{
+    content:""; position:absolute; width:5px; height:5px; border-radius:50%;
+    background:var(--coral); opacity:0;
+  }
+  .wishlist-toggle:checked ~ .wishlist-btn::before{ animation:particleA .5s ease-out; }
+  .wishlist-toggle:checked ~ .wishlist-btn::after{ animation:particleB .5s ease-out; }
+
+  .promo-corner{
+    position:absolute; top:-8px; right:-8px; z-index:2;
+    display:inline-flex; align-items:center; gap:4px;
+    padding:6px 12px; border-radius:var(--r-pill);
+    color:#fff; font-weight:700; font-size:12px; line-height:16px;
+    text-transform:uppercase; letter-spacing:.04em;
+    box-shadow:0 3px 10px rgba(27,21,51,.2);
+    animation:badgePop .4s ease-out .7s both;
+    transition:transform .2s ease;
+  }
+  .promo-corner svg{ width:12px; height:12px; stroke:#fff; fill:none; stroke-width:2.4; }
+  .promo-corner:hover{ animation:wiggle .3s ease; }
+  .promo-corner .tip{
+    position:absolute; bottom:calc(100% + 8px); right:0;
+    background:var(--text); color:#fff; font-weight:600; font-size:12px; text-transform:none; letter-spacing:0;
+    padding:6px 10px; border-radius:8px; white-space:nowrap;
+    opacity:0; pointer-events:none; transform:translateY(4px);
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .promo-corner:hover .tip, .promo-corner:focus-visible .tip{ opacity:1; transform:translateY(0); }
+  .tone-exclusive{ background:var(--coral-strong); }
+  .tone-freecancel{ background:var(--purple-strong); }
+
+  .card-body{ display:flex; flex-direction:column; gap:6px; flex:1; }
+  .hotel-name{
+    font-size:15px; line-height:20px; font-weight:600; margin:0;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden; min-height:40px;
+  }
+  .hotel-loc{
+    display:flex; align-items:center; gap:4px;
+    font-size:12px; line-height:16px; color:var(--sub); margin:0;
+  }
+  .hotel-loc svg{ width:12px; height:12px; stroke:var(--hint); fill:none; stroke-width:2; flex:none; }
+
+  .rating-row{ display:flex; align-items:center; gap:4px; font-size:13px; font-weight:700; }
+  .rating-row svg{ width:14px; height:14px; fill:var(--warning); stroke:none; }
+  .rating-row .rating-missing{ color:var(--hint); font-weight:700; }
+
+  .amenity-row{ display:flex; flex-wrap:wrap; gap:6px; }
+  .amenity-badge{
+    display:inline-flex; align-items:center; gap:4px;
+    padding:4px 10px; border-radius:var(--r-pill);
+    font-size:12px; line-height:16px; font-weight:700; color:var(--text);
+  }
+  .amenity-badge.tint-coral{ background:var(--coral-light); }
+  .amenity-badge.tint-purple{ background:var(--purple-light); }
+
+  .status-inline{
+    display:inline-flex; align-items:center; gap:6px; align-self:flex-start;
+    padding:5px 12px; border-radius:var(--r-pill);
+    font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+    border:1px solid transparent;
+  }
+  .status-inline svg{ width:13px; height:13px; fill:none; stroke-width:2.4; }
+  .status-available{ background:var(--success-tint); border-color:var(--success-border); color:var(--success-strong); }
+  .status-available svg{ stroke:var(--success-strong); }
+  .status-lowstock{ background:var(--warning-tint); border-color:var(--warning-border); color:var(--warning-strong); }
+  .status-lowstock svg{ stroke:var(--warning-strong); }
+  .status-lowstock.blink-once{ animation:lowStockBlink .9s ease 1.1s 1; }
+
+  .price-row{
+    margin-top:auto; padding-top:var(--sp-3); border-top:1px solid var(--line);
+    display:flex; align-items:flex-end; justify-content:space-between; gap:var(--sp-3);
+  }
+  .price-block .price-label{ font-size:11px; color:var(--hint); margin:0 0 2px; }
+  .price-value{ font-family:var(--font-num); font-weight:800; font-size:20px; letter-spacing:-.02em; color:var(--text); }
+  .price-value .unit{ font-family:var(--font-kr); font-weight:600; font-size:12px; color:var(--sub); margin-left:2px; }
+
+  /* ---------- pagination / action ---------- */
+  .action-row{
+    display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); flex-wrap:wrap;
+    padding-top:var(--sp-4);
+  }
+  .pagination{ display:flex; align-items:center; gap:6px; }
+  .page-btn{
+    min-width:36px; height:36px; padding:0 8px;
+    border-radius:10px; border:1px solid var(--border);
+    background:var(--surface); font-weight:700; font-size:14px; color:var(--sub);
+  }
+  .page-btn[aria-current="page"]{ background:var(--coral); border-color:var(--coral); color:#fff; }
+  .page-btn:hover:not([aria-current="page"]){ background:var(--coral-light); color:var(--coral-strong); }
+  .page-ellipsis{ color:var(--hint); padding:0 4px; font-weight:700; }
+
+  /* ---------- empty demo ---------- */
+  .empty-demo{ border:1px dashed var(--border); border-radius:var(--r-card); overflow:hidden; }
+  .empty-demo summary{
+    cursor:pointer; padding:var(--sp-4) var(--sp-6); font-weight:700; font-size:13px; color:var(--sub);
+    background:var(--canvas-tint); list-style:none; display:flex; align-items:center; gap:8px;
+  }
+  .empty-demo summary::-webkit-details-marker{ display:none; }
+  .empty-demo summary::before{
+    content:"▸"; display:inline-block; transition:transform .15s ease; color:var(--coral);
+  }
+  .empty-demo[open] summary::before{ transform:rotate(90deg); }
+  .empty-state{
+    padding:var(--sp-12) var(--sp-6);
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:var(--sp-2);
+  }
+  .empty-state .empty-icon{
+    width:56px; height:56px; border-radius:50%;
+    background:var(--coral-light); display:flex; align-items:center; justify-content:center;
+    margin-bottom:var(--sp-2);
+  }
+  .empty-state .empty-icon svg{ width:26px; height:26px; stroke:var(--coral-strong); fill:none; stroke-width:2; }
+  .empty-state h3{ font-size:18px; line-height:24px; font-weight:700; margin:0; }
+  .empty-state p{ font-size:14px; color:var(--sub); margin:0 0 var(--sp-2); max-width:320px; }
+
+  /* ---------- footer ---------- */
+  .site-footer{
+    text-align:center; padding:var(--sp-8) var(--sp-6);
+    border-top:1px solid var(--line);
+    font-size:12px; color:var(--hint); font-weight:600; letter-spacing:.02em;
+  }
+
+  /* ---------- keyframes ---------- */
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes popIn{ from{ opacity:0; transform:scale(.92); } to{ opacity:1; transform:scale(1); } }
+  @keyframes badgePop{
+    0%{ opacity:0; transform:scale(.6); }
+    70%{ opacity:1; transform:scale(1.08); }
+    100%{ opacity:1; transform:scale(1); }
+  }
+  @keyframes wiggle{
+    0%,100%{ transform:rotate(0); } 25%{ transform:rotate(-3deg); } 75%{ transform:rotate(3deg); }
+  }
+  @keyframes heartPop{ 0%{ transform:scale(1); } 45%{ transform:scale(1.32); } 100%{ transform:scale(1); } }
+  @keyframes particleA{
+    0%{ opacity:1; transform:translate(0,0) scale(1); left:6px; top:2px; }
+    100%{ opacity:0; transform:translate(-10px,-12px) scale(.3); left:6px; top:2px; }
+  }
+  @keyframes particleB{
+    0%{ opacity:1; transform:translate(0,0) scale(1); right:6px; top:2px; }
+    100%{ opacity:0; transform:translate(10px,-12px) scale(.3); right:6px; top:2px; }
+  }
+  @keyframes lowStockBlink{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
+
+  /* card entrance stagger */
+  .item-card:nth-child(1){ animation-delay:.50s; }
+  .item-card:nth-child(2){ animation-delay:.54s; }
+  .item-card:nth-child(3){ animation-delay:.58s; }
+  .item-card:nth-child(4){ animation-delay:.62s; }
+  .item-card:nth-child(5){ animation-delay:.66s; }
+  .item-card:nth-child(6){ animation-delay:.70s; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .page{ grid-template-columns:1fr; }
+    .filter-panel{ position:static; }
+    .collection{ grid-template-columns:repeat(2, 1fr); }
+  }
+  @media (max-width:560px){
+    .collection{ grid-template-columns:1fr; }
+    .topbar-inner{ gap:var(--sp-3); }
+    .action-row{ flex-direction:column; align-items:stretch; }
+    .pagination{ justify-content:center; }
+  }
+
+  /* ---------- reduced motion : kill all choreography, show final state instantly ---------- */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation:none !important; transition:none !important; }
+    .brand, .filter-panel, .results-header, .item-card{ opacity:1 !important; transform:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- icon sprite -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.7-5.4 4.8 1.6 7-6.2-3.7L5.8 21l1.6-7L2 9.3l7.1-.7L12 2z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.1 7-12A7 7 0 0 0 5 10c0 5.9 7 12 7 12z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5s-7.6-4.7-10-9.4C.4 7.9 2.2 4 6 4c2.1 0 3.6 1.2 4.5 2.6C11.4 5.2 12.9 4 15 4c3.8 0 5.6 3.9 4 7.1-2.4 4.7-7 9.4-7 9.4z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3.5v5.6c0 5-3.4 8.4-8 9.9-4.6-1.5-8-4.9-8-9.9V6.5L12 3z"/><path d="M9 12l2 2 4-4.2"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l7 7a2 2 0 0 1 0 2.8l-6.6 6.6a2 2 0 0 1-2.8 0l-7-7A2 2 0 0 1 3 12.6z"/><circle cx="8" cy="8" r="1.4"/></symbol>
+  <symbol id="i-chevronL" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-chevronR" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></symbol>
+  <symbol id="i-empty" viewBox="0 0 24 24"><path d="M4 8h16l-1.5 11a2 2 0 0 1-2 1.8H7.5A2 2 0 0 1 5.5 19L4 8z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><path d="M9.5 3l5 5"/></symbol>
+</svg>
+
+<!-- ================= 1. 상단 정체성/검색 바 ================= -->
+<header class="topbar" data-region="identity">
+  <div class="topbar-inner">
+    <span class="brand">여기묵자</span>
+    <div class="search-summary">
+      <span class="chip-static">서울</span>
+      <span class="chip-static">9/12 – 9/14 (2박)</span>
+      <span class="chip-static">성인 2</span>
+    </div>
+    <button type="button" class="btn btn-secondary">검색 수정</button>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ================= 2. 좌측 필터 ================= -->
+  <aside class="filter-panel" data-region="filter" aria-label="검색 필터">
+    <h2 class="filter-title">필터</h2>
+
+    <fieldset class="filter-group">
+      <legend>가격</legend>
+      <div class="price-slider">
+        <div class="price-track"><div class="price-fill" id="priceFill"></div></div>
+        <input type="range" id="priceMin" min="50000" max="500000" step="10000" value="50000" aria-label="최소 가격">
+        <input type="range" id="priceMax" min="50000" max="500000" step="10000" value="500000" aria-label="최대 가격">
+      </div>
+      <div class="price-values">
+        <span class="num">₩50,000</span>
+        <span>–</span>
+        <span class="num">₩500,000+</span>
+      </div>
+    </fieldset>
+
+    <fieldset class="filter-group">
+      <legend>성급</legend>
+      <label class="check-row"><input type="checkbox">5성 <span class="star-hint">★★★★★</span></label>
+      <label class="check-row"><input type="checkbox">4성 <span class="star-hint">★★★★</span></label>
+      <label class="check-row"><input type="checkbox">3성 <span class="star-hint">★★★</span></label>
+    </fieldset>
+
+    <fieldset class="filter-group">
+      <legend>편의</legend>
+      <div class="chip-toggle-group">
+        <span class="chip-toggle"><input type="checkbox" id="am-1"><label for="am-1">조식</label></span>
+        <span class="chip-toggle"><input type="checkbox" id="am-2"><label for="am-2">무료취소</label></span>
+        <span class="chip-toggle"><input type="checkbox" id="am-3"><label for="am-3">수영장</label></span>
+        <span class="chip-toggle"><input type="checkbox" id="am-4"><label for="am-4">와이파이</label></span>
+      </div>
+    </fieldset>
+  </aside>
+
+  <!-- ================= 결과 컬럼 ================= -->
+  <main class="results-main">
+
+    <!-- 3. 결과 헤더 -->
+    <div class="results-header" data-region="results">
+      <h1 class="results-title">서울 호텔 <span class="num" id="resultCount">128</span>곳</h1>
+      <div class="sort-wrap">
+        <select class="sort-select" aria-label="정렬 기준">
+          <option>추천순 ▾</option>
+          <option>낮은 가격순</option>
+          <option>평점순</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 4. 호텔 카드 그리드 -->
+    <div class="collection" data-region="collection">
+
+      <!-- 1. 남산 그랜드 호텔 — 예약가능 -->
+      <article class="item-card" data-region="item-card">
+        <div class="thumb-row">
+          <input type="checkbox" class="wishlist-toggle" id="wish-1" aria-label="남산 그랜드 호텔 찜하기">
+          <label class="wishlist-btn" for="wish-1"><svg><use href="#i-heart"/></svg></label>
+          <div class="thumb-fake tone-a">남산</div>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name" title="남산 그랜드 호텔">남산 그랜드 호텔</h3>
+          <p class="hotel-loc"><svg><use href="#i-pin"/></svg>중구 회현동</p>
+          <div class="rating-row"><svg><use href="#i-star"/></svg><span class="num">4.6</span></div>
+          <div class="amenity-row">
+            <span class="amenity-badge tint-coral">조식</span>
+            <span class="amenity-badge tint-purple">와이파이</span>
+          </div>
+          <span class="status-inline status-available"><svg><use href="#i-check"/></svg>예약가능</span>
+          <div class="price-row">
+            <div class="price-block">
+              <p class="price-label">1박 요금</p>
+              <div class="price-value num">₩182,000<span class="unit">/박</span></div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm">예약</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- 2. 한강뷰 레지던스 — 단독특가 (프로모 코너) -->
+      <article class="item-card" data-region="item-card">
+        <div class="thumb-row">
+          <input type="checkbox" class="wishlist-toggle" id="wish-2" aria-label="한강뷰 레지던스 찜하기">
+          <label class="wishlist-btn" for="wish-2"><svg><use href="#i-heart"/></svg></label>
+          <div class="thumb-fake tone-b">한강</div>
+          <span class="promo-corner tone-exclusive" tabindex="0">
+            <svg><use href="#i-tag"/></svg>단독특가
+            <span class="tip">7/21–7/25 한정 특가</span>
+          </span>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name" title="한강뷰 레지던스">한강뷰 레지던스</h3>
+          <p class="hotel-loc"><svg><use href="#i-pin"/></svg>영등포구 여의도동</p>
+          <div class="rating-row"><svg><use href="#i-star"/></svg><span class="num">4.8</span></div>
+          <div class="amenity-row">
+            <span class="amenity-badge tint-purple">수영장</span>
+            <span class="amenity-badge tint-coral">조식</span>
+          </div>
+          <div class="price-row">
+            <div class="price-block">
+              <p class="price-label">1박 요금</p>
+              <div class="price-value num">₩1,240,000<span class="unit">/박</span></div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm">예약</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- 3. 서울역 초장문 이름 — 마감임박, 평점 결측 -->
+      <article class="item-card" data-region="item-card">
+        <div class="thumb-row">
+          <input type="checkbox" class="wishlist-toggle" id="wish-3" aria-label="서울역 캡슐 스테이 찜하기">
+          <label class="wishlist-btn" for="wish-3"><svg><use href="#i-heart"/></svg></label>
+          <div class="thumb-fake tone-a">서울</div>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name" title="서울역 앞 밤에도 불이 꺼지지 않는 24시간 캡슐 스테이 신관 리노베이션 완료">서울역 앞 밤에도 불이 꺼지지 않는 24시간 캡슐 스테이 신관 리노베이션 완료</h3>
+          <p class="hotel-loc"><svg><use href="#i-pin"/></svg>용산구</p>
+          <div class="rating-row"><span class="rating-missing">—</span></div>
+          <div class="amenity-row">
+            <span class="amenity-badge tint-purple">와이파이</span>
+            <span class="amenity-badge tint-coral">무료취소</span>
+          </div>
+          <span class="status-inline status-lowstock blink-once"><svg><use href="#i-clock"/></svg>마감임박</span>
+          <div class="price-row">
+            <div class="price-block">
+              <p class="price-label">1박 요금</p>
+              <div class="price-value num">₩39,000<span class="unit">/박</span></div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm">예약</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4. 북촌 한옥 스테이 — 무료취소 (프로모 코너) -->
+      <article class="item-card" data-region="item-card">
+        <div class="thumb-row">
+          <input type="checkbox" class="wishlist-toggle" id="wish-4" aria-label="북촌 한옥 스테이 찜하기">
+          <label class="wishlist-btn" for="wish-4"><svg><use href="#i-heart"/></svg></label>
+          <div class="thumb-fake tone-b">북촌</div>
+          <span class="promo-corner tone-freecancel" tabindex="0">
+            <svg><use href="#i-shield"/></svg>무료취소
+            <span class="tip">체크인 3일 전까지 무료</span>
+          </span>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name" title="북촌 한옥 스테이">북촌 한옥 스테이</h3>
+          <p class="hotel-loc"><svg><use href="#i-pin"/></svg>종로구 가회동</p>
+          <div class="rating-row"><svg><use href="#i-star"/></svg><span class="num">4.9</span></div>
+          <div class="amenity-row">
+            <span class="amenity-badge tint-coral">조식</span>
+            <span class="amenity-badge tint-purple">와이파이</span>
+          </div>
+          <div class="price-row">
+            <div class="price-block">
+              <p class="price-label">1박 요금</p>
+              <div class="price-value num">₩165,000<span class="unit">/박</span></div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm">예약</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- 5. 강남 비즈니스 호텔 — 예약가능 -->
+      <article class="item-card" data-region="item-card">
+        <div class="thumb-row">
+          <input type="checkbox" class="wishlist-toggle" id="wish-5" aria-label="강남 비즈니스 호텔 찜하기">
+          <label class="wishlist-btn" for="wish-5"><svg><use href="#i-heart"/></svg></label>
+          <div class="thumb-fake tone-a">강남</div>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name" title="강남 비즈니스 호텔">강남 비즈니스 호텔</h3>
+          <p class="hotel-loc"><svg><use href="#i-pin"/></svg>강남구 역삼동</p>
+          <div class="rating-row"><svg><use href="#i-star"/></svg><span class="num">4.2</span></div>
+          <div class="amenity-row">
+            <span class="amenity-badge tint-purple">와이파이</span>
+            <span class="amenity-badge tint-coral">무료취소</span>
+          </div>
+          <span class="status-inline status-available"><svg><use href="#i-check"/></svg>예약가능</span>
+          <div class="price-row">
+            <div class="price-block">
+              <p class="price-label">1박 요금</p>
+              <div class="price-value num">₩98,000<span class="unit">/박</span></div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm">예약</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- 6. 홍대 게스트하우스 — 마감임박 -->
+      <article class="item-card" data-region="item-card">
+        <div class="thumb-row">
+          <input type="checkbox" class="wishlist-toggle" id="wish-6" aria-label="홍대 게스트하우스 찜하기">
+          <label class="wishlist-btn" for="wish-6"><svg><use href="#i-heart"/></svg></label>
+          <div class="thumb-fake tone-b">홍대</div>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name" title="홍대 게스트하우스">홍대 게스트하우스</h3>
+          <p class="hotel-loc"><svg><use href="#i-pin"/></svg>마포구 서교동</p>
+          <div class="rating-row"><svg><use href="#i-star"/></svg><span class="num">4.0</span></div>
+          <div class="amenity-row">
+            <span class="amenity-badge tint-coral">조식</span>
+            <span class="amenity-badge tint-purple">와이파이</span>
+          </div>
+          <span class="status-inline status-lowstock blink-once"><svg><use href="#i-clock"/></svg>마감임박</span>
+          <div class="price-row">
+            <div class="price-block">
+              <p class="price-label">1박 요금</p>
+              <div class="price-value num">₩41,000<span class="unit">/박</span></div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm">예약</button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- 5. 페이지네이션 -->
+    <div class="action-row">
+      <nav class="pagination" aria-label="페이지 이동">
+        <button type="button" class="page-btn" aria-label="이전 페이지"><svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4"><use href="#i-chevronL"/></svg></button>
+        <button type="button" class="page-btn" aria-current="page">1</button>
+        <button type="button" class="page-btn">2</button>
+        <button type="button" class="page-btn">3</button>
+        <span class="page-ellipsis">…</span>
+        <button type="button" class="page-btn">22</button>
+        <button type="button" class="page-btn" aria-label="다음 페이지"><svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4"><use href="#i-chevronR"/></svg></button>
+      </nav>
+      <button type="button" class="btn btn-secondary"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><use href="#i-map"/></svg>지도로 보기</button>
+    </div>
+
+    <!-- 6. 빈 상태 (시연) -->
+    <details class="empty-demo">
+      <summary>예시 — 필터 결과가 0건일 때</summary>
+      <div class="empty-state" data-region="empty">
+        <div class="empty-icon"><svg><use href="#i-empty"/></svg></div>
+        <h3>조건에 맞는 호텔이 없어요</h3>
+        <p>가격 범위를 넓히거나 편의 조건을 줄여보세요.</p>
+        <button type="button" class="btn btn-primary">필터 초기화</button>
+      </div>
+    </details>
+
+  </main>
+</div>
+
+<footer class="site-footer">STYLE 25 · 커머스 리테일</footer>
+
+<script>
+  // 카운트업 — 결과 수 (진행 표시가 아니라 단순 로드 연출. reduced-motion 시 즉시 최종값)
+  (function(){
+    var el = document.getElementById('resultCount');
+    if(!el) return;
+    var target = 128;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce){ el.textContent = target; return; }
+    var start = null, duration = 700;
+    function step(ts){
+      if(!start) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      el.textContent = Math.floor(p * target);
+      if(p < 1) requestAnimationFrame(step); else el.textContent = target;
+    }
+    requestAnimationFrame(step);
+  })();
+
+  // 듀얼 가격 슬라이더 — fill 바 위치 계산 (JS 실패 시에도 두 range 는 각자 독립 동작)
+  (function(){
+    var minR = document.getElementById('priceMin');
+    var maxR = document.getElementById('priceMax');
+    var fill = document.getElementById('priceFill');
+    if(!minR || !maxR || !fill) return;
+    function update(){
+      var lo = +minR.min, hi = +minR.max;
+      var vMin = +minR.value, vMax = +maxR.value;
+      if(vMin > vMax){ var t = vMin; vMin = vMax; vMax = t; }
+      var pctMin = (vMin - lo) / (hi - lo) * 100;
+      var pctMax = (vMax - lo) / (hi - lo) * 100;
+      fill.style.left = pctMin + '%';
+      fill.style.width = (pctMax - pctMin) + '%';
+    }
+    minR.addEventListener('input', update);
+    maxR.addEventListener('input', update);
+    update();
+  })();
+</script>
+</body>
+</html>
