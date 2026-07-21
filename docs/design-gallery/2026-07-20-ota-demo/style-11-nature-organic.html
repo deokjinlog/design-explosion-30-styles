@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>떠나요트립 · 서울 숙소 검색</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    /* ---- 팔레트 (지정 5색 + 파생 톤 — 전부 따뜻한 톤) ---- */
+    --paper:            #F4F1E8;  /* 배경 */
+    --paper-card:       #FBF8F1;  /* 카드 표면 (순백 아님) */
+    --paper-card-warm:  #F3EAD3;  /* 카드 hover — 배경이 한 톤 따뜻해짐 */
+    --paper-line:       rgba(43,42,38,.16);
+    --paper-line-soft:  rgba(43,42,38,.10);
+
+    --ink:        #2B2A26;
+    --ink-soft:   #6E6656;
+    --ink-faint:  #726A57;
+
+    --deep:       #2D4A3E;  /* 딥그린 — 주 */
+    --deep-dark:  #203a2f;
+    --sage:       #8BA888;
+    --sage-tint:  #E4EBDE;
+    --terracotta: #C4704B;  /* 경고·문제 */
+    --terracotta-tint: #F5E1D4;
+    --terracotta-text: #7C3B20;
+
+    --cream: #F6F1E4; /* 어두운 면 위 텍스트 (순백 대체) */
+
+    /* 상태 색 은유: 씨앗(대기)→새싹(진행)→열매(완료)→시듦(문제) */
+    --seed-tint:  #ECE4D2;
+    --seed-text:  #5B4F38;
+    --sprout-tint:#E4EBDE;
+    --sprout-text:var(--deep);
+    --fruit-bg:   var(--deep);
+    --fruit-text: var(--cream);
+    --wither-tint:var(--terracotta-tint);
+    --wither-text:var(--terracotta-text);
+
+    /* ---- 유기 radius — 단일 비율(≈1:1.6)을 스케일만 바꿔 일관 적용 ---- */
+    --r-lg: 28px 44px 28px 44px;
+    --r-md: 16px 26px 16px 26px;
+    --r-sm: 10px 16px 10px 16px;
+    --r-xs: 6px 10px 6px 10px;
+
+    /* ---- 8px 그리드 스페이싱 ---- */
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px; --sp-16:64px;
+
+    /* ---- 타이포 스케일 ---- */
+    --fs-xs:12px; --fs-sm:13px; --fs-base:14px; --fs-md:16px; --fs-lg:20px; --fs-xl:24px; --fs-2xl:32px;
+
+    --ease-grow: cubic-bezier(.19,.79,.32,1); /* ease-out, 바운스 없음 */
+
+    --paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    font-variant-numeric: tabular-nums;
+    line-height:1.6;
+    position:relative;
+    min-height:100vh;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image: var(--paper-noise);
+    background-size:240px 240px;
+    opacity:.03;
+    mix-blend-mode:multiply;
+    pointer-events:none;
+    z-index:0;
+  }
+  h1,h2,h3,p,ul,li{ margin:0; padding:0; list-style:none; }
+  button, input, select{ font:inherit; color:inherit; }
+  a{ color:inherit; }
+  .visually-hidden{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+  svg.icon{ width:20px; height:20px; stroke:currentColor; stroke-width:1.7; fill:none; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  .page{ position:relative; z-index:1; max-width:1280px; margin:0 auto; padding: var(--sp-6) var(--sp-6) var(--sp-16); }
+
+  /* ================= 성장 히어로 연출 (총 1.5s, 바운스 없음) ================= */
+  @keyframes settleIn{ from{ opacity:0; transform:translateY(-8px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes growUp{ from{ opacity:0; transform:translateY(14px) scaleY(.86); } to{ opacity:1; transform:translateY(0) scaleY(1); } }
+  @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes stemWidth{ from{ width:0; } to{ width:var(--tab-w, 64px); } }
+  @keyframes blobGrow{ from{ opacity:0; transform:scale(.7); } to{ opacity:1; transform:scale(1); } }
+  @keyframes deepenTone{ from{ background-color:var(--sage); } to{ background-color:var(--deep); } }
+
+  .anim-settle{ animation: settleIn .5s var(--ease-grow) both; }
+  .anim-grow{ animation: growUp .7s var(--ease-grow) both; transform-origin:bottom center; }
+  .anim-fade{ animation: fadeIn .6s ease-out both; }
+  .anim-blob{ animation: blobGrow .8s var(--ease-grow) both; }
+
+  @media (prefers-reduced-motion: reduce){
+    .anim-settle, .anim-grow, .anim-fade, .anim-blob, .vtab-indicator{ animation:none !important; }
+    *{ transition-duration:.01ms !important; }
+  }
+
+  /* ================= 정체성 (identity) ================= */
+  .identity{
+    position:relative;
+    background:var(--paper-card);
+    border:1.5px solid var(--paper-line);
+    border-radius: var(--r-lg);
+    padding: var(--sp-6) var(--sp-6) var(--sp-4);
+    margin-bottom: var(--sp-6);
+    overflow:hidden;
+  }
+  .identity::after{
+    content:""; position:absolute; inset:0;
+    background-image:var(--paper-noise); background-size:240px 240px;
+    opacity:.025; mix-blend-mode:multiply; pointer-events:none;
+  }
+  .identity-blob{
+    position:absolute; z-index:0; pointer-events:none;
+    width:220px; height:220px; right:-60px; top:-90px;
+    background:var(--sage-tint);
+    border-radius:42% 58% 61% 39% / 45% 41% 59% 55%;
+    opacity:.55;
+  }
+  .identity-top, .vtabs, .search-summary{ position:relative; z-index:1; }
+  .identity-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:var(--sp-6); flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:var(--sp-3); }
+  .brand-mark{ width:34px; height:34px; color:var(--deep); flex-shrink:0; }
+  .brand-word{ font-family:'Gowun Batang',serif; font-weight:700; font-size:22px; letter-spacing:-.01em; color:var(--deep); }
+
+  .search-summary{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; }
+  .search-chips{ display:flex; gap:var(--sp-2); flex-wrap:wrap; }
+  .chip{
+    display:inline-flex; align-items:center;
+    background:var(--sage-tint); color:var(--deep);
+    font-size:var(--fs-sm); font-weight:600;
+    padding: 6px 14px; border-radius:var(--r-xs);
+    border:1.5px solid transparent;
+  }
+
+  .vtabs{ display:flex; gap:var(--sp-2); margin-top:var(--sp-6); border-top:1.5px solid var(--paper-line); padding-top:var(--sp-4); flex-wrap:wrap; }
+  .vtab{
+    position:relative;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--sp-1);
+    min-width:88px;
+    padding: var(--sp-2) var(--sp-4);
+    background:transparent; border:1.5px solid transparent;
+    border-radius: var(--r-sm);
+    cursor:pointer;
+    color:var(--ink-soft);
+    transition: background-color .28s ease, color .28s ease, border-color .28s ease;
+  }
+  .vtab-icon{ width:20px; height:20px; }
+  .vtab-label{ font-size:var(--fs-sm); font-weight:600; }
+  .vtab:hover{ background:var(--sage-tint); color:var(--deep); }
+  .vtab:focus-visible{ outline:2px solid var(--deep); outline-offset:2px; }
+  .vtab.is-active{ background:var(--paper-card-warm); border-color:var(--paper-line); color:var(--deep); }
+  .vtab-indicator{
+    position:absolute; left:0; bottom:-13px; height:4px;
+    background:var(--sage);
+    border-radius:6px;
+    animation: stemWidth .7s var(--ease-grow) .3s both, deepenTone .7s ease-out 1s both;
+  }
+
+  /* ================= 레이아웃 ================= */
+  .layout{ display:grid; grid-template-columns: 260px 1fr; gap:var(--sp-8); align-items:start; }
+
+  /* ---- 필터 ---- */
+  .filter{ display:flex; flex-direction:column; gap:var(--sp-4); }
+  .filter-card{
+    background:var(--paper-card);
+    border:1.5px solid var(--paper-line);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+    box-shadow: 0 2px 8px rgba(43,42,38,.06);
+  }
+  .field-title{ display:block; font-weight:700; font-size:var(--fs-base); color:var(--ink); margin-bottom:var(--sp-3); }
+
+  .price-labels{ display:flex; justify-content:space-between; font-size:var(--fs-sm); font-weight:600; color:var(--deep); margin-bottom:var(--sp-3); }
+  .range-track{ position:relative; height:22px; }
+  .track-bg{ position:absolute; top:9px; left:0; right:0; height:4px; background:var(--sage-tint); border-radius:6px; }
+  .range-fill{ position:absolute; top:9px; height:4px; background:var(--sage); border-radius:6px; }
+  .range-track input[type="range"]{
+    position:absolute; top:0; left:0; width:100%; height:22px;
+    margin:0; background:transparent; appearance:none; -webkit-appearance:none; pointer-events:none;
+  }
+  .range-track input[type="range"]::-webkit-slider-thumb{
+    pointer-events:auto; -webkit-appearance:none; appearance:none;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--deep); border:2px solid var(--paper-card);
+    box-shadow:0 0 0 1.5px var(--paper-line);
+    cursor:pointer; transition: box-shadow .28s ease, background-color .28s ease;
+  }
+  .range-track input[type="range"]::-webkit-slider-thumb:hover,
+  .range-track input[type="range"]::-webkit-slider-thumb:active{
+    background:var(--sage);
+    box-shadow: 0 0 0 6px rgba(139,168,136,.35);
+  }
+  .range-track input[type="range"]::-moz-range-thumb{
+    pointer-events:auto;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--deep); border:2px solid var(--paper-card);
+    box-shadow:0 0 0 1.5px var(--paper-line);
+    cursor:pointer; transition: box-shadow .28s ease, background-color .28s ease;
+  }
+  .range-track input[type="range"]::-moz-range-thumb:hover,
+  .range-track input[type="range"]::-moz-range-thumb:active{
+    background:var(--sage);
+    box-shadow: 0 0 0 6px rgba(139,168,136,.35);
+  }
+  .range-track input[type="range"]::-moz-range-track{ background:transparent; }
+
+  .check-row{ display:flex; align-items:center; gap:var(--sp-2); padding:var(--sp-2) 0; cursor:pointer; font-size:var(--fs-base); }
+  .check-row input{ position:absolute; opacity:0; width:20px; height:20px; margin:0; cursor:pointer; }
+  .check-box{
+    width:20px; height:20px; flex-shrink:0;
+    border:1.5px solid var(--paper-line); border-radius:var(--r-xs);
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--paper-card);
+    transition: background-color .2s ease, border-color .2s ease;
+  }
+  .check-icon{ width:12px; height:12px; stroke:var(--deep); stroke-width:2.2; fill:none; opacity:0; transition:opacity .2s ease; }
+  .check-row input:checked + .check-box{ background:var(--sage-tint); border-color:var(--deep); }
+  .check-row input:checked + .check-box .check-icon{ opacity:1; }
+  .check-row input:focus-visible + .check-box{ outline:2px solid var(--deep); outline-offset:2px; }
+
+  .switch-row{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-3); }
+  .m-switch{ position:relative; display:inline-flex; cursor:pointer; }
+  .m-switch input{ position:absolute; opacity:0; width:40px; height:22px; margin:0; cursor:pointer; }
+  .switch-track{
+    width:40px; height:22px; border-radius:11px 16px 11px 16px;
+    background:var(--seed-tint); border:1.5px solid var(--paper-line);
+    display:flex; align-items:center; padding:2px;
+    transition: background-color .3s ease;
+  }
+  .switch-thumb{
+    width:16px; height:16px; border-radius:50%;
+    background:var(--ink-faint);
+    transition: transform .3s var(--ease-grow), background-color .3s ease;
+  }
+  .m-switch input:checked + .switch-track{ background:var(--sage-tint); border-color:var(--deep); }
+  .m-switch input:checked + .switch-track .switch-thumb{ transform:translateX(18px); background:var(--deep); }
+  .m-switch input:focus-visible + .switch-track{ outline:2px solid var(--deep); outline-offset:2px; }
+
+  /* ---- 결과 헤더 ---- */
+  .results-header{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); flex-wrap:wrap; margin-bottom:var(--sp-4); }
+  .results-count{ font-family:'Gowun Batang',serif; font-weight:700; font-size:var(--fs-xl); color:var(--ink); }
+  .results-count .num{ color:var(--deep); }
+  .sort-field{ position:relative; display:inline-flex; align-items:center; }
+  .sort-select{
+    appearance:none; -webkit-appearance:none;
+    background:var(--paper-card); border:1.5px solid var(--paper-line); border-radius:var(--r-xs);
+    padding:8px 36px 8px 14px; font-size:var(--fs-sm); font-weight:600; color:var(--ink);
+    cursor:pointer;
+  }
+  .sort-select:focus-visible{ outline:2px solid var(--deep); outline-offset:2px; }
+  .sort-field .icon{ position:absolute; right:10px; width:16px; height:16px; color:var(--ink-soft); pointer-events:none; }
+
+  /* ---- 컬렉션 ---- */
+  .collection-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--sp-6); }
+
+  .item-card{
+    position:relative;
+    background:var(--paper-card);
+    border:1.5px solid var(--paper-line);
+    border-radius: var(--r-lg);
+    box-shadow: 0 2px 10px rgba(43,42,38,.07);
+    overflow:hidden;
+    display:flex; flex-direction:column;
+    transition: background-color .32s ease, transform .32s ease;
+  }
+  .item-card:nth-child(odd){ transform:rotate(-.6deg); }
+  .item-card:nth-child(even){ transform:rotate(.5deg); }
+  .item-card:hover, .item-card:focus-within{
+    background:var(--paper-card-warm);
+    transform: rotate(0deg) translateY(-3px);
+  }
+
+  .item-thumb{
+    position:relative; height:150px;
+    background:var(--sage-tint);
+    display:flex; align-items:center; justify-content:center;
+    border-bottom:1.5px solid var(--paper-line);
+  }
+  .item-thumb::after{
+    content:""; position:absolute; inset:0;
+    background-image:var(--paper-noise); background-size:240px 240px;
+    opacity:.03; mix-blend-mode:multiply;
+  }
+  .thumb-icon{ width:44px; height:44px; color:var(--sage); position:relative; z-index:1; }
+
+  .status-badge{
+    position:absolute; top:var(--sp-3); left:var(--sp-3); z-index:2;
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:var(--fs-xs); font-weight:700;
+    padding:5px 12px; border-radius:var(--r-xs);
+  }
+  .status-badge::before{ content:""; width:7px; height:7px; border-radius:50%; }
+  .status--ok{ background:var(--sprout-tint); color:var(--sprout-text); }
+  .status--ok::before{ background:var(--deep); }
+  .status--deal{ background:var(--fruit-bg); color:var(--fruit-text); }
+  .status--deal::before{ background:var(--cream); }
+  .status--soon{ background:var(--wither-tint); color:var(--wither-text); }
+  .status--soon::before{ background:var(--terracotta); }
+  .status--free{ background:var(--seed-tint); color:var(--seed-text); }
+  .status--free::before{ background:var(--ink-faint); }
+
+  .discount-tag{
+    position:absolute; top:var(--sp-3); right:-2px; z-index:2;
+    display:flex; align-items:center;
+    background:var(--paper-card); color:var(--terracotta-text);
+    border:1.5px solid var(--terracotta);
+    font-size:var(--fs-xs); font-weight:700;
+    padding:5px 12px 5px 16px;
+    border-radius:4px 10px 10px 4px;
+    transform:rotate(-3deg);
+  }
+  .discount-tag::before{
+    content:""; position:absolute; left:6px; top:50%; transform:translateY(-50%);
+    width:4px; height:4px; border-radius:50%;
+    background:var(--sage-tint); border:1px solid var(--terracotta);
+  }
+
+  .item-body{ padding:var(--sp-4); display:flex; flex-direction:column; gap:var(--sp-2); flex:1; }
+  .item-name{
+    font-family:'Gowun Batang',serif; font-weight:700; font-size:var(--fs-md); line-height:1.4;
+    color:var(--ink); word-break:keep-all; overflow-wrap:break-word;
+  }
+  .item-location{ font-size:var(--fs-sm); color:var(--ink-soft); }
+  .item-rating{ display:flex; align-items:center; gap:6px; font-size:var(--fs-sm); }
+  .star{ color:var(--terracotta); font-size:14px; }
+  .rating-value{ font-weight:700; color:var(--ink); }
+  .rating-missing{ font-weight:700; color:var(--ink-faint); }
+  .review-count{ color:var(--ink-faint); }
+
+  .amenity-list{ display:flex; gap:var(--sp-2); flex-wrap:wrap; }
+  .amenity-chip{
+    font-size:var(--fs-xs); font-weight:600; color:var(--ink-soft);
+    background:var(--paper); border:1.5px solid var(--paper-line);
+    padding:3px 10px; border-radius:var(--r-xs);
+  }
+
+  .price-row{ display:flex; flex-direction:column; gap:2px; margin-top:auto; padding-top:var(--sp-2); }
+  .price-old{ font-size:var(--fs-sm); color:var(--ink-faint); text-decoration:line-through; text-decoration-color:var(--terracotta); }
+  .price-new{ font-size:var(--fs-xl); font-weight:700; color:var(--deep); letter-spacing:-.01em; }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    font-size:var(--fs-base); font-weight:700;
+    height:40px; padding:0 20px;
+    border-radius:var(--r-md); border:1.5px solid transparent;
+    cursor:pointer; transition: background-color .25s ease, color .25s ease, border-color .25s ease, opacity .25s ease;
+  }
+  .btn-primary{ background:var(--deep); color:var(--cream); }
+  .btn-primary:hover{ background:var(--deep-dark); }
+  .btn-primary:active{ background:var(--deep-dark); transform:translateY(1px); }
+  .btn-primary:focus-visible{ outline:2px solid var(--deep); outline-offset:2px; }
+  .btn-primary:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .btn-outline{ background:transparent; color:var(--deep); border-color:var(--deep); }
+  .btn-outline:hover{ background:var(--sage-tint); }
+  .btn-outline:focus-visible{ outline:2px solid var(--deep); outline-offset:2px; }
+  .btn-outline:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .item-cta{ width:100%; margin-top:var(--sp-2); }
+
+  /* ---- 페이지네이션 / 액션 ---- */
+  .pagination{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); margin-top:var(--sp-8); flex-wrap:wrap; }
+  .page-nums{ display:flex; align-items:center; gap:var(--sp-2); }
+  .page-btn{
+    min-width:36px; height:36px; padding:0 10px;
+    background:var(--paper-card); border:1.5px solid var(--paper-line); border-radius:var(--r-xs);
+    font-size:var(--fs-sm); font-weight:600; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    transition: background-color .22s ease, border-color .22s ease;
+  }
+  .page-btn:hover{ background:var(--sage-tint); }
+  .page-btn:focus-visible{ outline:2px solid var(--deep); outline-offset:2px; }
+  .page-btn.is-active{ background:var(--deep); color:var(--cream); border-color:var(--deep); }
+  .page-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .page-btn:disabled:hover{ background:var(--paper-card); }
+  .page-ellipsis{ color:var(--ink-faint); padding:0 4px; }
+
+  .demo-note{ text-align:center; margin-top:var(--sp-6); }
+  .link-btn{ background:none; border:none; color:var(--ink-soft); font-size:var(--fs-sm); text-decoration:underline; text-underline-offset:3px; cursor:pointer; padding:var(--sp-2); }
+  .link-btn:hover{ color:var(--deep); }
+  .link-btn:focus-visible{ outline:2px solid var(--deep); outline-offset:2px; }
+
+  /* ---- 빈 상태 ---- */
+  .empty-state{
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:var(--sp-3);
+    background:var(--paper-card); border:1.5px solid var(--paper-line); border-radius:var(--r-lg);
+    padding:var(--sp-16) var(--sp-8);
+    position:relative; overflow:hidden;
+  }
+  .empty-mark{ width:56px; height:56px; color:var(--terracotta); margin-bottom:var(--sp-2); }
+  .empty-title{ font-family:'Gowun Batang',serif; font-weight:700; font-size:var(--fs-xl); color:var(--ink); }
+  .empty-desc{ font-size:var(--fs-base); color:var(--ink-soft); max-width:380px; }
+  .empty-state .btn{ margin-top:var(--sp-4); }
+
+  footer{ text-align:center; color:var(--ink-faint); font-size:var(--fs-xs); letter-spacing:.04em; margin-top:var(--sp-16); position:relative; z-index:1; }
+
+  /* ================= 반응형 (900px 이하 1~2열) ================= */
+  @media (max-width:900px){
+    .layout{ grid-template-columns:1fr; }
+    .collection-grid{ grid-template-columns:repeat(2, 1fr); }
+    .identity-top{ flex-direction:column; align-items:flex-start; }
+  }
+  @media (max-width:640px){
+    .page{ padding: var(--sp-4) var(--sp-4) var(--sp-12); }
+    .collection-grid{ grid-template-columns:1fr; }
+    .vtabs{ overflow-x:auto; }
+    .results-header{ align-items:flex-start; }
+    .pagination{ justify-content:center; }
+  }
+</style>
+</head>
+<body>
+
+<svg class="visually-hidden" aria-hidden="true">
+  <symbol id="ic-sprout" viewBox="0 0 24 24"><path d="M12 21v-8M12 13c-3 0-6-2-6-6 4 0 6 2 6 6zM12 13c3 0 6-3 6-7-4 0-6 3-6 7z"/></symbol>
+  <symbol id="ic-bed" viewBox="0 0 24 24"><path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6M3 18v2M21 18v2M3 12V8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M13 10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="ic-plane" viewBox="0 0 24 24"><path d="M10.5 20.5 12 17l-5-2 1-2 6 1 3.5-5c.6-.9 1.9-1.1 2.7-.4.6.6.6 1.6 0 2.3l-4 4.6 1 6-2-.6-1.3-3.8-3.4 2.9.3 2.2z"/></symbol>
+  <symbol id="ic-combo" viewBox="0 0 24 24"><path d="M4 13v-3a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3M2 17h12M14 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM4 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0z"/><path d="M19.5 9 21 6.2c.4-.7 1.3-.8 1.8-.3.4.4.4 1 .1 1.5l-2.4 3.2"/></symbol>
+  <symbol id="ic-car" viewBox="0 0 24 24"><path d="M4 16V11l2-4h12l2 4v5M4 16h16M4 16v2M20 16v2"/><circle cx="7.5" cy="16.5" r="1.4"/><circle cx="16.5" cy="16.5" r="1.4"/></symbol>
+  <symbol id="ic-building" viewBox="0 0 24 24"><path d="M5 21V6a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v15M5 21h13M13 21V10h5a1 1 0 0 1 1 1v10M8 8h1M8 12h1M8 16h1"/></symbol>
+  <symbol id="ic-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="ic-chevron-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="ic-chevron-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="ic-map" viewBox="0 0 24 24"><path d="M9 4 4 6v14l5-2 6 2 5-2V4l-5 2-6-2z M9 4v14M15 6v14"/></symbol>
+  <symbol id="ic-wilt" viewBox="0 0 24 24"><path d="M12 21v-9M12 12c-2.6-.6-4-2.4-4-5 3.4 0 5 1.6 5 4.2M12 12c2-1 3-2.8 2.4-5.2-3 .6-4 2.4-3.4 5"/><path d="M8 21h8"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M4 4v5h5M20 20v-5h-5M4.6 15a8 8 0 0 0 14.2 2.2M19.4 9a8 8 0 0 0-14.2-2.2"/></symbol>
+</svg>
+
+<div class="page">
+
+  <!-- ============ IDENTITY (로고 + 버티컬 탭 + 검색 요약) ============ -->
+  <header class="identity anim-settle" data-region="identity">
+    <div class="identity-blob anim-blob" aria-hidden="true" style="animation-delay:.3s"></div>
+
+    <div class="identity-top">
+      <div class="brand">
+        <svg class="brand-mark" aria-hidden="true"><use href="#ic-sprout"/></svg>
+        <span class="brand-word">떠나요트립</span>
+      </div>
+      <div class="search-summary">
+        <div class="search-chips">
+          <span class="chip">서울</span>
+          <span class="chip">9/12 – 9/14 (2박)</span>
+          <span class="chip">성인 2</span>
+        </div>
+        <button type="button" class="btn btn-outline">검색 수정</button>
+      </div>
+    </div>
+
+    <nav class="vtabs" role="tablist" aria-label="검색 카테고리">
+      <button type="button" class="vtab is-active" role="tab" aria-selected="true" data-vtab>
+        <svg class="icon vtab-icon"><use href="#ic-bed"/></svg>
+        <span class="vtab-label">숙소</span>
+      </button>
+      <button type="button" class="vtab" role="tab" aria-selected="false" data-vtab>
+        <svg class="icon vtab-icon"><use href="#ic-plane"/></svg>
+        <span class="vtab-label">항공</span>
+      </button>
+      <button type="button" class="vtab" role="tab" aria-selected="false" data-vtab>
+        <svg class="icon vtab-icon"><use href="#ic-combo"/></svg>
+        <span class="vtab-label">항공+숙소</span>
+      </button>
+      <button type="button" class="vtab" role="tab" aria-selected="false" data-vtab>
+        <svg class="icon vtab-icon"><use href="#ic-car"/></svg>
+        <span class="vtab-label">렌터카</span>
+      </button>
+      <span class="vtab-indicator" id="vtabIndicator" aria-hidden="true"></span>
+    </nav>
+  </header>
+
+  <div class="layout">
+
+    <!-- ============ FILTER ============ -->
+    <aside class="filter anim-fade" data-region="filter" style="animation-delay:.15s">
+      <div class="filter-card">
+        <span class="field-title">가격</span>
+        <div class="price-labels">
+          <span id="priceMinLabel">₩50,000</span>
+          <span id="priceMaxLabel">₩500,000+</span>
+        </div>
+        <div class="range-track">
+          <div class="track-bg"></div>
+          <div class="range-fill" id="rangeFill"></div>
+          <input type="range" id="priceMin" min="50000" max="500000" step="10000" value="50000" aria-label="최소 가격">
+          <input type="range" id="priceMax" min="50000" max="500000" step="10000" value="500000" aria-label="최대 가격">
+        </div>
+      </div>
+
+      <div class="filter-card">
+        <span class="field-title">등급</span>
+        <label class="check-row">
+          <input type="checkbox"><span class="check-box"><svg class="check-icon" viewBox="0 0 16 16"><path d="M3 8.5 6.2 12 13 4.5"/></svg></span>5성
+        </label>
+        <label class="check-row">
+          <input type="checkbox"><span class="check-box"><svg class="check-icon" viewBox="0 0 16 16"><path d="M3 8.5 6.2 12 13 4.5"/></svg></span>4성
+        </label>
+        <label class="check-row">
+          <input type="checkbox"><span class="check-box"><svg class="check-icon" viewBox="0 0 16 16"><path d="M3 8.5 6.2 12 13 4.5"/></svg></span>3성
+        </label>
+      </div>
+
+      <div class="filter-card">
+        <span class="field-title">편의</span>
+        <label class="check-row">
+          <input type="checkbox" checked><span class="check-box"><svg class="check-icon" viewBox="0 0 16 16"><path d="M3 8.5 6.2 12 13 4.5"/></svg></span>조식
+        </label>
+        <label class="check-row">
+          <input type="checkbox"><span class="check-box"><svg class="check-icon" viewBox="0 0 16 16"><path d="M3 8.5 6.2 12 13 4.5"/></svg></span>무료취소
+        </label>
+        <label class="check-row">
+          <input type="checkbox"><span class="check-box"><svg class="check-icon" viewBox="0 0 16 16"><path d="M3 8.5 6.2 12 13 4.5"/></svg></span>수영장
+        </label>
+        <label class="check-row">
+          <input type="checkbox"><span class="check-box"><svg class="check-icon" viewBox="0 0 16 16"><path d="M3 8.5 6.2 12 13 4.5"/></svg></span>조용한객실
+        </label>
+      </div>
+
+      <div class="filter-card">
+        <div class="switch-row">
+          <span style="font-size:var(--fs-base); font-weight:600;">오늘특가만 보기</span>
+          <label class="m-switch">
+            <input type="checkbox" id="dealOnly" aria-label="오늘특가만 보기">
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <!-- ============ RESULTS HEADER ============ -->
+      <div class="results-header anim-fade" data-region="results" style="animation-delay:.2s">
+        <h2 class="results-count">서울 숙소 <span class="num">240</span>곳</h2>
+        <div class="sort-field">
+          <select class="sort-select" id="sortSelect" aria-label="정렬 기준">
+            <option>추천순</option>
+            <option>낮은 가격순</option>
+            <option>평점순</option>
+            <option>할인율순</option>
+          </select>
+          <svg class="icon"><use href="#ic-chevron-down"/></svg>
+        </div>
+      </div>
+
+      <!-- ============ COLLECTION ============ -->
+      <div id="collectionSection">
+        <div class="collection-grid" data-region="collection">
+
+          <article class="item-card anim-grow" data-region="item-card" style="animation-delay:.35s">
+            <div class="item-thumb">
+              <svg class="icon thumb-icon"><use href="#ic-building"/></svg>
+              <span class="status-badge status--ok">예약가능</span>
+              <span class="discount-tag">20%</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">남산 그랜드 호텔</h3>
+              <p class="item-location">중구 회현동</p>
+              <div class="item-rating"><span class="star">★</span><span class="rating-value">4.6</span><span class="review-count">(2,481)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">조식</span><span class="amenity-chip">수영장</span></div>
+              <div class="price-row">
+                <span class="price-old">₩228,000</span>
+                <span class="price-new">₩182,000</span>
+              </div>
+              <button type="button" class="btn btn-primary item-cta">객실 보기</button>
+            </div>
+          </article>
+
+          <article class="item-card anim-grow" data-region="item-card" style="animation-delay:.42s">
+            <div class="item-thumb">
+              <svg class="icon thumb-icon"><use href="#ic-building"/></svg>
+              <span class="status-badge status--deal">오늘특가</span>
+              <span class="discount-tag">10%</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">한강뷰 프리미엄 스위트 5박 패키지</h3>
+              <p class="item-location">영등포구 여의도동</p>
+              <div class="item-rating"><span class="star">★</span><span class="rating-value">4.8</span><span class="review-count">(932)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">조식</span><span class="amenity-chip">조용한객실</span></div>
+              <div class="price-row">
+                <span class="price-old">₩2,600,000</span>
+                <span class="price-new">₩2,340,000</span>
+              </div>
+              <button type="button" class="btn btn-primary item-cta">객실 보기</button>
+            </div>
+          </article>
+
+          <article class="item-card anim-grow" data-region="item-card" style="animation-delay:.49s">
+            <div class="item-thumb">
+              <svg class="icon thumb-icon"><use href="#ic-building"/></svg>
+              <span class="status-badge status--soon">마감임박</span>
+              <span class="discount-tag">25%</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">서울역 앞 밤에도 불이 꺼지지 않는 24시간 캡슐 스테이 신관 리노베이션 완료</h3>
+              <p class="item-location">용산구</p>
+              <div class="item-rating"><span class="rating-missing">—</span><span class="review-count">(신규)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">무료취소</span><span class="amenity-chip">조용한객실</span></div>
+              <div class="price-row">
+                <span class="price-old">₩52,000</span>
+                <span class="price-new">₩39,000</span>
+              </div>
+              <button type="button" class="btn btn-primary item-cta">객실 보기</button>
+            </div>
+          </article>
+
+          <article class="item-card anim-grow" data-region="item-card" style="animation-delay:.56s">
+            <div class="item-thumb">
+              <svg class="icon thumb-icon"><use href="#ic-building"/></svg>
+              <span class="status-badge status--free">무료취소</span>
+              <span class="discount-tag">17%</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">북촌 한옥 스테이</h3>
+              <p class="item-location">종로구 가회동</p>
+              <div class="item-rating"><span class="star">★</span><span class="rating-value">4.9</span><span class="review-count">(1,127)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">조식</span><span class="amenity-chip">조용한객실</span></div>
+              <div class="price-row">
+                <span class="price-old">₩198,000</span>
+                <span class="price-new">₩165,000</span>
+              </div>
+              <button type="button" class="btn btn-primary item-cta">객실 보기</button>
+            </div>
+          </article>
+
+          <article class="item-card anim-grow" data-region="item-card" style="animation-delay:.63s">
+            <div class="item-thumb">
+              <svg class="icon thumb-icon"><use href="#ic-building"/></svg>
+              <span class="status-badge status--ok">예약가능</span>
+              <span class="discount-tag">17%</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">강남 비즈니스 호텔</h3>
+              <p class="item-location">강남구 역삼동</p>
+              <div class="item-rating"><span class="star">★</span><span class="rating-value">4.2</span><span class="review-count">(3,044)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">조식</span><span class="amenity-chip">무료취소</span></div>
+              <div class="price-row">
+                <span class="price-old">₩118,000</span>
+                <span class="price-new">₩98,000</span>
+              </div>
+              <button type="button" class="btn btn-primary item-cta">객실 보기</button>
+            </div>
+          </article>
+
+          <article class="item-card anim-grow" data-region="item-card" style="animation-delay:.70s">
+            <div class="item-thumb">
+              <svg class="icon thumb-icon"><use href="#ic-building"/></svg>
+              <span class="status-badge status--soon">마감임박</span>
+              <span class="discount-tag">16%</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">홍대 게스트하우스</h3>
+              <p class="item-location">마포구 서교동</p>
+              <div class="item-rating"><span class="star">★</span><span class="rating-value">4.0</span><span class="review-count">(688)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">무료취소</span><span class="amenity-chip">조용한객실</span></div>
+              <div class="price-row">
+                <span class="price-old">₩49,000</span>
+                <span class="price-new">₩41,000</span>
+              </div>
+              <button type="button" class="btn btn-primary item-cta">객실 보기</button>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- ============ PAGINATION / ACTION ============ -->
+        <div class="pagination" data-region="action">
+          <div class="page-nums" aria-label="페이지 네비게이션">
+            <button type="button" class="page-btn" aria-label="이전 페이지" disabled><svg class="icon"><use href="#ic-chevron-left"/></svg></button>
+            <button type="button" class="page-btn is-active" aria-current="page">1</button>
+            <button type="button" class="page-btn">2</button>
+            <button type="button" class="page-btn">3</button>
+            <span class="page-ellipsis">…</span>
+            <button type="button" class="page-btn">40</button>
+            <button type="button" class="page-btn" aria-label="다음 페이지"><svg class="icon"><use href="#ic-chevron-right"/></svg></button>
+          </div>
+          <button type="button" class="btn btn-outline" id="mapBtn"><svg class="icon"><use href="#ic-map"/></svg>지도로 보기</button>
+        </div>
+
+        <p class="demo-note">
+          <button type="button" class="link-btn" id="demoEmptyToggle">빈 상태 미리보기</button>
+        </p>
+      </div>
+
+      <!-- ============ EMPTY STATE ============ -->
+      <section class="empty-state" id="emptyState" data-region="empty" hidden>
+        <svg class="empty-mark" aria-hidden="true"><use href="#ic-wilt"/></svg>
+        <h3 class="empty-title">조건에 맞는 숙소가 없어요</h3>
+        <p class="empty-desc">가격 범위를 넓히거나 특가 필터를 꺼보세요.</p>
+        <button type="button" class="btn btn-primary" id="resetFilterBtn"><svg class="icon"><use href="#ic-refresh"/></svg>필터 초기화</button>
+        <p class="demo-note"><button type="button" class="link-btn" id="demoBackToggle">검색 결과로 돌아가기</button></p>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>STYLE 11 · 네이처 오가닉</footer>
+</div>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- 버티컬 탭 (콘텐츠는 숙소 고정, 시각 전환만 — JS 실패해도 버튼은 그대로 클릭 가능) ---- */
+  var vtabs = document.querySelectorAll('.vtab');
+  var indicator = document.getElementById('vtabIndicator');
+  function moveIndicator(tab){
+    if (!indicator || !tab) return;
+    indicator.style.setProperty('--tab-w', tab.offsetWidth + 'px');
+    indicator.style.width = tab.offsetWidth + 'px';
+    indicator.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
+  }
+  vtabs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      vtabs.forEach(function(b){ b.classList.remove('is-active'); b.setAttribute('aria-selected','false'); });
+      btn.classList.add('is-active'); btn.setAttribute('aria-selected','true');
+      moveIndicator(btn);
+    });
+  });
+  window.addEventListener('load', function(){ moveIndicator(document.querySelector('.vtab.is-active')); });
+  window.addEventListener('resize', function(){ moveIndicator(document.querySelector('.vtab.is-active')); });
+
+  /* ---- 가격 듀얼 슬라이더 ---- */
+  var priceMin = document.getElementById('priceMin');
+  var priceMax = document.getElementById('priceMax');
+  var rangeFill = document.getElementById('rangeFill');
+  var priceMinLabel = document.getElementById('priceMinLabel');
+  var priceMaxLabel = document.getElementById('priceMaxLabel');
+
+  function formatWon(v, isMax){
+    var s = '₩' + Number(v).toLocaleString('ko-KR');
+    if (isMax && Number(v) >= 500000) s += '+';
+    return s;
+  }
+  function updateRange(){
+    var lo = parseInt(priceMin.value, 10);
+    var hi = parseInt(priceMax.value, 10);
+    if (lo > hi){ var t = lo; lo = hi; hi = t; }
+    var min = parseInt(priceMin.min, 10), max = parseInt(priceMin.max, 10);
+    var pctLo = ((lo - min) / (max - min)) * 100;
+    var pctHi = ((hi - min) / (max - min)) * 100;
+    if (rangeFill){ rangeFill.style.left = pctLo + '%'; rangeFill.style.width = (pctHi - pctLo) + '%'; }
+    priceMinLabel.textContent = formatWon(priceMin.value, false);
+    priceMaxLabel.textContent = formatWon(priceMax.value, true);
+  }
+  if (priceMin && priceMax){
+    priceMin.addEventListener('input', updateRange);
+    priceMax.addEventListener('input', updateRange);
+    updateRange();
+  }
+
+  /* ---- 빈 상태 토글 데모 ---- */
+  var showEmptyBtn = document.getElementById('demoEmptyToggle');
+  var backBtn = document.getElementById('demoBackToggle');
+  var resetBtn = document.getElementById('resetFilterBtn');
+  var collectionSection = document.getElementById('collectionSection');
+  var emptySection = document.getElementById('emptyState');
+
+  function showEmpty(){
+    collectionSection.hidden = true;
+    emptySection.hidden = false;
+    emptySection.setAttribute('tabindex', '-1');
+    emptySection.focus();
+  }
+  function showResults(){
+    emptySection.hidden = true;
+    collectionSection.hidden = false;
+  }
+  if (showEmptyBtn) showEmptyBtn.addEventListener('click', showEmpty);
+  if (backBtn) backBtn.addEventListener('click', showResults);
+  if (resetBtn) resetBtn.addEventListener('click', showResults);
+
+  /* ---- 지도로 보기 (데모 — 결과 헤더로 스크롤) ---- */
+  var mapBtn = document.getElementById('mapBtn');
+  if (mapBtn) mapBtn.addEventListener('click', function(){
+    var target = document.querySelector('[data-region="results"]');
+    if (target) target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+  });
+})();
+</script>
+</body>
+</html>
