@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일자리연구소 · 지원서 작성</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#F4F5F7;
+    --surface:#FFFFFF;
+    --border:#DFE1E6;
+    --border-strong:#C1C7D0;
+    --navy:#0052CC;
+    --navy-hover:#0747A6;
+    --navy-active:#043584;
+    --link:#0065FF;
+    --text-strong:#172B4D;
+    --text-body:#42526E;
+    --text-muted:#6B778C;
+    --text-disabled:#97A0AF;
+    --subtle-bg:#FAFBFC;
+    --selected-bg:#DEEBFF;
+    --success:#00875A; --success-bg:#E3FCEF;
+    --progress:#0052CC; --progress-bg:#DEEBFF;
+    --warning:#FF8B00; --warning-bg:#FFFAE6;
+    --danger:#DE350B; --danger-bg:#FFEBE6;
+    --neutral:#42526E; --neutral-bg:#F4F5F7;
+    --radius-sm:3px;
+    --radius-md:4px;
+    --sidebar-w:240px;
+    --sidebar-w-collapsed:56px;
+    --topbar-h:56px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--canvas);
+    color:var(--text-body);
+    font-family:'Inter','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{ margin:0; color:var(--text-strong); font-weight:600; }
+  p{ margin:0; }
+  ul,ol{ margin:0; padding:0; list-style:none; }
+  button{ font-family:inherit; cursor:pointer; }
+  a{ color:var(--link); text-decoration:none; }
+  .num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+
+  .skip-link{
+    position:absolute; left:-999px; top:0;
+    background:var(--navy); color:#fff; padding:8px 12px; border-radius:var(--radius-sm); z-index:100;
+  }
+  .skip-link:focus{ left:8px; top:8px; }
+
+  :focus-visible{
+    outline:2px solid var(--navy);
+    outline-offset:1px;
+  }
+
+  /* ===== shell ===== */
+  .shell{
+    display:flex;
+    min-height:100vh;
+  }
+
+  /* ---- sidebar ---- */
+  .sidebar{
+    width:var(--sidebar-w);
+    flex:0 0 var(--sidebar-w);
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    transition:width .18s ease;
+  }
+  .sidebar.is-collapsed{ width:var(--sidebar-w-collapsed); flex-basis:var(--sidebar-w-collapsed); }
+  .sidebar-top{
+    height:var(--topbar-h);
+    display:flex; align-items:center; justify-content:flex-end;
+    padding:0 12px;
+    border-bottom:1px solid var(--border);
+    flex:0 0 auto;
+  }
+  .sidebar-toggle{
+    width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center;
+    background:none; border:1px solid transparent; border-radius:var(--radius-sm);
+    color:var(--text-muted);
+  }
+  .sidebar-toggle:hover{ background:var(--canvas); border-color:var(--border); color:var(--text-strong); }
+  .sidebar-toggle svg{ width:18px; height:18px; }
+
+  .side-nav{ padding:8px; display:flex; flex-direction:column; gap:2px; overflow:hidden; }
+  .side-item{
+    position:relative;
+    display:flex; align-items:center; gap:12px;
+    padding:9px 12px 9px 15px;
+    border-radius:var(--radius-sm);
+    color:var(--text-body);
+    font-size:14px; font-weight:500;
+    white-space:nowrap;
+  }
+  .side-item svg{ width:18px; height:18px; flex:0 0 18px; }
+  .side-item:hover{ background:var(--canvas); color:var(--text-strong); }
+  .side-item .side-label{ overflow:hidden; text-overflow:ellipsis; transition:opacity .15s ease; }
+  .side-item.is-active{
+    background:var(--selected-bg);
+    color:var(--navy-active);
+    font-weight:600;
+  }
+  .side-item.is-active::before{
+    content:"";
+    position:absolute; left:0; top:6px; bottom:6px; width:3px;
+    background:var(--navy);
+    border-radius:0 2px 2px 0;
+    animation:barSlide .18s ease-out .62s both;
+  }
+  .sidebar.is-collapsed .side-label,
+  .sidebar.is-collapsed .side-badge{ display:none; }
+  .sidebar.is-collapsed .side-item{ justify-content:center; padding-left:12px; }
+
+  .sidebar-foot{
+    margin-top:auto; padding:12px; border-top:1px solid var(--border);
+  }
+  .cand-chip{ display:flex; align-items:center; gap:10px; padding:6px; border-radius:var(--radius-sm); }
+  .cand-chip:hover{ background:var(--canvas); }
+  .avatar{
+    width:28px; height:28px; border-radius:50%;
+    background:var(--navy); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:600; flex:0 0 28px;
+  }
+  .cand-meta{ overflow:hidden; }
+  .cand-name{ font-size:13px; font-weight:600; color:var(--text-strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cand-role{ font-size:12px; color:var(--text-muted); white-space:nowrap; }
+  .sidebar.is-collapsed .cand-meta{ display:none; }
+
+  /* ---- main column ---- */
+  .main-col{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; }
+
+  .topbar{
+    height:var(--topbar-h);
+    flex:0 0 auto;
+    display:flex; align-items:center; gap:16px;
+    padding:0 24px;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    animation:fadeIn .01s linear;
+  }
+  .brand{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+  .brand-mark{
+    width:24px; height:24px; border-radius:var(--radius-sm);
+    background:var(--navy); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:600; letter-spacing:.5px;
+  }
+  .brand-name{ font-size:15px; font-weight:600; color:var(--text-strong); white-space:nowrap; }
+  .topbar-divider{ width:1px; height:20px; background:var(--border); flex:0 0 auto; }
+  .job-summary{ display:flex; align-items:center; gap:8px; min-width:0; flex:1 1 auto; }
+  .job-role{ font-size:14px; font-weight:600; color:var(--text-strong); white-space:nowrap; }
+  .job-sep{ color:var(--text-disabled); }
+  .job-company{ font-size:14px; color:var(--text-body); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .topbar-right{ margin-left:auto; flex:0 0 auto; }
+  .user-chip{ display:flex; align-items:center; gap:8px; }
+  .user-role{ font-size:12px; color:var(--text-muted); }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:11px; font-weight:600; letter-spacing:.5px; text-transform:uppercase;
+    padding:2px 8px; border-radius:var(--radius-sm);
+    border:1px solid transparent;
+  }
+  .badge--progress{ color:var(--progress); background:var(--progress-bg); }
+  .badge--success{ color:var(--success); background:var(--success-bg); }
+  .badge--warning{ color:#7A4100; background:var(--warning-bg); }
+  .badge--danger{ color:var(--danger); background:var(--danger-bg); }
+  .badge--neutral{ color:var(--neutral); background:var(--neutral-bg); }
+
+  .content{ flex:1 1 auto; padding:24px 32px 48px; max-width:1160px; }
+
+  .page-head{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    margin-bottom:20px;
+  }
+  .page-title{ font-size:24px; line-height:28px; }
+  .page-sub{ font-size:13px; color:var(--text-muted); margin-top:4px; }
+
+  /* ---- steps ---- */
+  .steps{
+    display:flex; align-items:center;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:16px 20px;
+    margin-bottom:16px;
+    box-shadow:0 1px 1px rgba(9,30,66,.08);
+    animation:fadeSlide .16s ease-out .04s both;
+  }
+  .step{ display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+  .step-dot{
+    width:26px; height:26px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:600;
+    background:var(--canvas); color:var(--text-disabled);
+    border:1px solid var(--border-strong);
+    flex:0 0 26px;
+  }
+  .step.is-done .step-dot{ background:var(--success); border-color:var(--success); color:#fff; }
+  .step.is-current .step-dot{ background:var(--navy); border-color:var(--navy); color:#fff; }
+  .step-label{ font-size:13px; font-weight:500; color:var(--text-muted); white-space:nowrap; }
+  .step.is-done .step-label{ color:var(--text-body); }
+  .step.is-current .step-label{ color:var(--text-strong); font-weight:600; }
+  .step-frac{
+    font-size:11px; font-weight:600; color:var(--navy);
+    background:var(--progress-bg); border-radius:var(--radius-sm);
+    padding:1px 6px; white-space:nowrap;
+  }
+  .step-connector{ flex:1 1 auto; height:1px; background:var(--border-strong); margin:0 12px; min-width:16px; }
+  .step.is-done ~ .step-connector{ background:var(--success); }
+
+  /* ---- banner ---- */
+  .banner{
+    display:flex; gap:10px; align-items:flex-start;
+    padding:12px 16px;
+    border-radius:var(--radius-md);
+    margin-bottom:20px;
+    animation:fadeSlide .16s ease-out .1s both;
+  }
+  .banner--warning{
+    background:var(--warning-bg);
+    border:1px solid #FFE380;
+    border-left:3px solid var(--warning);
+  }
+  .banner svg{ width:18px; height:18px; flex:0 0 18px; color:var(--warning); margin-top:1px; }
+  .banner p{ font-size:14px; font-weight:600; color:var(--text-strong); }
+
+  /* ---- layout grid ---- */
+  .layout-grid{
+    display:grid;
+    grid-template-columns:1fr 300px;
+    gap:20px;
+    align-items:start;
+  }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    box-shadow:0 1px 1px rgba(9,30,66,.08);
+  }
+
+  .form-panel{ padding:24px; }
+  .form-panel h2{ font-size:20px; line-height:24px; margin-bottom:4px; }
+  .form-panel .section-note{ font-size:13px; color:var(--text-muted); margin-bottom:20px; }
+
+  .form-row{ display:grid; gap:16px; margin-bottom:20px; }
+  .form-row.two-col{ grid-template-columns:1fr 1fr; }
+
+  .field{ display:flex; flex-direction:column; }
+  .field-label-row{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:6px; }
+  .field label{ font-size:13px; font-weight:600; color:var(--text-strong); }
+  .req{ color:var(--danger); margin-left:2px; }
+  .input-wrap{ position:relative; }
+  .input, textarea.input{
+    width:100%;
+    height:40px;
+    padding:0 12px;
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    background:var(--surface);
+    color:var(--text-strong);
+    font:inherit;
+    font-size:14px;
+  }
+  .input::placeholder{ color:var(--text-disabled); }
+  textarea.input{ height:auto; padding:10px 12px; line-height:1.6; resize:vertical; }
+  .input:hover{ border-color:var(--border-strong); }
+  .input:focus, .input.is-focus-demo{
+    outline:2px solid var(--navy);
+    outline-offset:1px;
+    border-color:var(--navy);
+  }
+
+  /* complete state */
+  .field.is-complete .input{ border-color:var(--success); padding-right:36px; background:var(--surface); }
+  .field.is-complete .input-wrap::after{
+    content:"";
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    width:16px; height:16px;
+    background:var(--success);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='M4 12l5 5L20 6'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='M4 12l5 5L20 6'/%3E%3C/svg%3E") center/contain no-repeat;
+    border-radius:50%;
+  }
+  .field.is-complete .field-msg.is-ok{ display:flex; }
+
+  /* error state */
+  .field.is-error .input{ border-color:var(--danger); }
+  .field-msg{ display:none; align-items:flex-start; gap:6px; font-size:13px; margin-top:6px; }
+  .field-msg svg{ width:14px; height:14px; flex:0 0 14px; margin-top:2px; }
+  .field-msg.is-error{ color:var(--danger); }
+  .field.is-error .field-msg.is-error{ display:flex; }
+  .field-msg.is-ok{ color:var(--success); }
+
+  .field-help{ font-size:12px; color:var(--text-muted); margin-top:6px; }
+
+  /* negotiable toggle -> disabled state (pure CSS, no JS needed) */
+  .negotiable-row{
+    display:flex; align-items:center; gap:8px; margin-bottom:8px;
+    font-size:13px; color:var(--text-body);
+  }
+  .negotiable-row input[type="checkbox"]{
+    width:16px; height:16px; margin:0; accent-color:var(--navy);
+  }
+  .field--salary:has(#salary-negotiable:checked) .input{
+    background:var(--subtle-bg);
+    border-color:var(--border);
+    color:var(--text-disabled);
+    cursor:not-allowed;
+  }
+  .field--salary:has(#salary-negotiable:checked) .input::placeholder{ color:var(--text-disabled); }
+  .field--salary:has(#salary-negotiable:checked) .field-msg.is-error{ display:none; }
+  .field--salary:has(#salary-negotiable:checked)::after{
+    content:"협의 후 결정 · 입력 비활성";
+    display:block; font-size:12px; color:var(--text-disabled); margin-top:6px;
+  }
+  .field--salary:not(:has(#salary-negotiable:checked)) .field-msg.is-error{ display:flex; }
+
+  /* dropzone (empty state) */
+  .dropzone{
+    display:flex; align-items:center; gap:14px;
+    padding:18px 16px;
+    border:1px dashed var(--border-strong);
+    border-radius:var(--radius-md);
+    background:var(--subtle-bg);
+  }
+  .dropzone-icon{
+    width:36px; height:36px; border-radius:var(--radius-sm);
+    background:var(--canvas); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; color:var(--text-muted); flex:0 0 36px;
+  }
+  .dropzone-icon svg{ width:18px; height:18px; }
+  .dropzone-text{ flex:1 1 auto; min-width:0; }
+  .dropzone-title{ font-size:13px; font-weight:600; color:var(--text-muted); }
+  .dropzone-sub{ font-size:12px; color:var(--text-disabled); margin-top:2px; }
+  .btn-secondary.btn-sm{ flex:0 0 auto; }
+
+  /* consent checkbox */
+  .consent{
+    display:flex; align-items:flex-start; gap:10px;
+    padding:14px; border-radius:var(--radius-md);
+  }
+  .consent.is-error{ background:var(--danger-bg); border:1px solid #F8C1B0; }
+  .consent input[type="checkbox"]{ width:18px; height:18px; margin-top:1px; accent-color:var(--danger); flex:0 0 18px; }
+  .consent-text{ font-size:13px; color:var(--text-strong); }
+  .consent-text strong{ font-weight:600; }
+  .consent .field-msg.is-error{ margin-top:6px; margin-left:0; }
+
+  /* ---- side column ---- */
+  .side-col{ display:flex; flex-direction:column; gap:16px; position:sticky; top:16px; }
+  .summary-card, .action-card{ padding:20px; animation:fadeSlide .18s ease-out .3s both; }
+  .summary-card h2{ font-size:16px; line-height:20px; margin-bottom:14px; }
+  .summary-list{ display:flex; flex-direction:column; gap:10px; }
+  .summary-row{ display:flex; justify-content:space-between; gap:12px; font-size:13px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+  .summary-row:last-child{ border-bottom:none; padding-bottom:0; }
+  .summary-key{ color:var(--text-muted); flex:0 0 auto; }
+  .summary-val{ color:var(--text-strong); font-weight:600; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .summary-val.deadline{ color:var(--danger); }
+
+  .action-card{ display:flex; flex-direction:column; gap:10px; }
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    height:40px; padding:0 16px;
+    border-radius:var(--radius-sm);
+    font-size:14px; font-weight:600;
+    border:1px solid transparent;
+    transition:background-color .15s ease, border-color .15s ease;
+    width:100%;
+  }
+  .btn-primary{ background:var(--navy); color:#fff; }
+  .btn-primary:hover{ background:var(--navy-hover); }
+  .btn-primary:active{ background:var(--navy-active); }
+  .btn-secondary{ background:var(--surface); color:var(--text-strong); border-color:var(--border); }
+  .btn-secondary:hover{ background:var(--subtle-bg); border-color:var(--border-strong); }
+  .saved-indicator{
+    display:flex; align-items:center; gap:6px; justify-content:center;
+    font-size:12px; color:var(--text-muted); margin-top:2px;
+  }
+  .saved-indicator svg{ width:14px; height:14px; color:var(--success); }
+
+  /* ---- footer ---- */
+  .site-footer{
+    padding:16px 32px 32px;
+    color:var(--text-disabled);
+    font-size:12px;
+    letter-spacing:.3px;
+  }
+
+  /* ---- animations ---- */
+  @keyframes fadeIn{ from{ opacity:1; } to{ opacity:1; } }
+  @keyframes fadeSlide{
+    from{ opacity:0; transform:translateY(4px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @keyframes barSlide{
+    from{ transform:scaleY(0); transform-origin:top; }
+    to{ transform:scaleY(1); transform-origin:top; }
+  }
+  .form-row, .field--salary, .field--intro, .field--resume, .field--consent{
+    animation:fadeSlide .16s ease-out both;
+  }
+  .form-row.two-col:nth-of-type(1){ animation-delay:.14s; }
+  .form-row.two-col:nth-of-type(2){ animation-delay:.18s; }
+  .field--salary{ animation-delay:.22s; }
+  .field--intro{ animation-delay:.26s; }
+  .field--resume{ animation-delay:.30s; }
+  .field--consent{ animation-delay:.34s; }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:.001ms !important;
+      animation-delay:0ms !important;
+      transition-duration:.001ms !important;
+      scroll-behavior:auto !important;
+    }
+  }
+
+  /* ---- responsive ---- */
+  @media (max-width:900px){
+    .sidebar{ width:56px; flex-basis:56px; }
+    .sidebar .side-label, .sidebar .cand-meta{ display:none; }
+    .side-item{ justify-content:center; padding-left:12px; }
+    .content{ padding:16px 16px 32px; }
+    .job-company{ max-width:120px; }
+    .layout-grid{ grid-template-columns:1fr; }
+    .side-col{ position:static; }
+    .form-row.two-col{ grid-template-columns:1fr; }
+    .topbar{ padding:0 12px; gap:10px; }
+    .brand-name{ display:none; }
+    .topbar-divider{ display:none; }
+    .user-role{ display:none; }
+  }
+  @media (max-width:520px){
+    .steps{ flex-wrap:wrap; row-gap:10px; }
+    .step-connector{ display:none; }
+    .step-label{ display:none; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#mainForm">본문 바로가기</a>
+
+<div class="shell">
+  <aside class="sidebar" data-region="nav" aria-label="주 메뉴" id="sidebar">
+    <div class="sidebar-top">
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="사이드바 접기·펼치기" aria-expanded="true" aria-controls="sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+    <nav class="side-nav">
+      <a class="side-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/></svg>
+        <span class="side-label">홈</span>
+      </a>
+      <a class="side-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <span class="side-label">채용공고</span>
+      </a>
+      <a class="side-item is-active" href="#" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
+        <span class="side-label">내 지원 현황</span>
+      </a>
+      <a class="side-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        <span class="side-label">이력서함</span>
+      </a>
+      <a class="side-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span class="side-label">알림</span>
+      </a>
+      <a class="side-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <span class="side-label">계정</span>
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="cand-chip">
+        <span class="avatar" aria-hidden="true">홍</span>
+        <span class="cand-meta">
+          <span class="cand-name">홍지우 님</span>
+          <span class="cand-role">지원자</span>
+        </span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-col">
+    <header class="topbar" data-region="identity">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">JL</span>
+        <span class="brand-name">일자리연구소</span>
+      </div>
+      <div class="topbar-divider" aria-hidden="true"></div>
+      <div class="job-summary">
+        <span class="job-role">프론트엔드 개발자</span>
+        <span class="job-sep">·</span>
+        <span class="job-company">(주)넥스트웨이브</span>
+        <span class="badge badge--progress">작성중</span>
+      </div>
+      <div class="topbar-right">
+        <div class="user-chip">
+          <span class="avatar" aria-hidden="true">홍</span>
+          <span class="user-role">지원자</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">입사 지원서 작성</h1>
+          <p class="page-sub">프론트엔드 개발자 · (주)넥스트웨이브 채용에 지원합니다.</p>
+        </div>
+      </div>
+
+      <ol class="steps" data-region="steps" aria-label="지원 절차 단계">
+        <li class="step is-done">
+          <span class="step-dot" aria-hidden="true">✓</span>
+          <span class="step-label">① 기본정보</span>
+        </li>
+        <li class="step-connector" aria-hidden="true"></li>
+        <li class="step is-current" aria-current="step">
+          <span class="step-dot num">2</span>
+          <span class="step-label">② 경력</span>
+          <span class="step-frac num">2/4</span>
+        </li>
+        <li class="step-connector" aria-hidden="true"></li>
+        <li class="step is-upcoming">
+          <span class="step-dot num">3</span>
+          <span class="step-label">③ 자기소개</span>
+        </li>
+        <li class="step-connector" aria-hidden="true"></li>
+        <li class="step is-upcoming">
+          <span class="step-dot num">4</span>
+          <span class="step-label">④ 확인</span>
+        </li>
+      </ol>
+
+      <div class="banner banner--warning" data-region="banner" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        <p>필수 항목 2개를 확인해 주세요.</p>
+      </div>
+
+      <div class="layout-grid">
+        <section class="form-panel card" data-region="form" id="mainForm" aria-label="지원서 입력 폼">
+          <h2>경력 및 지원 정보</h2>
+          <p class="section-note">단계 2/4 · 아래 항목을 입력한 뒤 다음 단계로 진행하세요.</p>
+
+          <div class="form-row two-col">
+            <div class="field is-complete">
+              <div class="field-label-row"><label for="f-name">이름<span class="req">*</span></label></div>
+              <div class="input-wrap">
+                <input class="input" type="text" id="f-name" value="홍지우" readonly>
+              </div>
+              <p class="field-msg is-ok">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12l5 5L20 6"/></svg>
+                확인 완료
+              </p>
+            </div>
+
+            <div class="field is-error">
+              <div class="field-label-row"><label for="f-email">이메일<span class="req">*</span></label></div>
+              <div class="input-wrap">
+                <input class="input" type="email" id="f-email" value="hong.jiwoo@" aria-invalid="true" aria-describedby="f-email-err">
+              </div>
+              <p class="field-msg is-error" id="f-email-err">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
+                이메일 형식이 올바르지 않아요
+              </p>
+            </div>
+          </div>
+
+          <div class="form-row two-col">
+            <div class="field">
+              <div class="field-label-row"><label for="f-phone">연락처<span class="req">*</span></label></div>
+              <div class="input-wrap">
+                <input class="input num" type="tel" id="f-phone" value="010-2481-0000">
+              </div>
+              <p class="field-help">채용 담당자가 확인 전화를 드릴 수 있어요.</p>
+            </div>
+
+            <div class="field is-complete">
+              <div class="field-label-row"><label for="f-exp">최종 경력<span class="req">*</span></label></div>
+              <div class="input-wrap">
+                <input class="input" type="text" id="f-exp" value="핀테크 스타트업 · 프론트엔드 3년 4개월" readonly>
+              </div>
+              <p class="field-msg is-ok">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12l5 5L20 6"/></svg>
+                확인 완료
+              </p>
+            </div>
+          </div>
+
+          <div class="field field--salary">
+            <div class="field-label-row"><label for="f-salary">희망 연봉<span class="req">*</span></label></div>
+            <label class="negotiable-row" for="salary-negotiable">
+              <input type="checkbox" id="salary-negotiable">
+              회사 내규에 따라 협의 후 결정
+            </label>
+            <div class="input-wrap">
+              <input class="input" type="text" id="f-salary" placeholder="예: 4,200 (단위: 만원)" value="" aria-invalid="true" aria-describedby="f-salary-err">
+            </div>
+            <p class="field-msg is-error" id="f-salary-err">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
+              필수 항목이에요
+            </p>
+          </div>
+
+          <div class="field field--intro">
+            <div class="field-label-row"><label for="f-intro">자기소개<span class="req">*</span></label></div>
+            <div class="input-wrap">
+              <textarea class="input is-focus-demo" id="f-intro" rows="6">사용자 経験을 코드로 옮기는 일을 좋아합니다. 지난 3년간 결제 플로우를 다시 설계하며 전환율을 개선했고, 디자인 시스템을 0부터 세워 팀 전체의 화면 생산 속도를 끌어올린 경험이 있습니다. 이 조직에서는…</textarea>
+            </div>
+            <p class="field-help">최대 1,000자까지 작성할 수 있어요. (현재 포커스 상태 예시)</p>
+          </div>
+
+          <div class="field field--resume" data-region="empty">
+            <div class="field-label-row"><label id="f-resume-label">이력서 첨부</label></div>
+            <div class="dropzone" role="group" aria-labelledby="f-resume-label">
+              <span class="dropzone-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+              </span>
+              <span class="dropzone-text">
+                <span class="dropzone-title">첨부된 파일 없음</span>
+                <span class="dropzone-sub">PDF·DOCX, 최대 10MB</span>
+              </span>
+              <button type="button" class="btn btn-secondary btn-sm" style="width:auto;">파일 선택</button>
+            </div>
+          </div>
+
+          <div class="field field--consent">
+            <div class="consent is-error">
+              <input type="checkbox" id="f-consent" aria-invalid="true" aria-describedby="f-consent-err">
+              <div>
+                <label for="f-consent" class="consent-text"><strong>개인정보 수집 동의</strong><span class="req">*</span> — 지원서 처리를 위해 필요합니다.</label>
+                <p class="field-msg is-error" id="f-consent-err">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
+                  동의가 필요해요
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="side-col">
+          <div class="summary-card card" data-region="summary">
+            <h2>요약</h2>
+            <div class="summary-list">
+              <div class="summary-row">
+                <span class="summary-key">지원 직무</span>
+                <span class="summary-val">프론트엔드 개발자</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-key">회사</span>
+                <span class="summary-val">(주)넥스트웨이브</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-key">마감</span>
+                <span class="summary-val deadline num">3일 남음</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-card card" data-region="action">
+            <button type="submit" class="btn btn-primary" form="mainForm">제출하기</button>
+            <button type="button" class="btn btn-secondary">임시 저장</button>
+            <p class="saved-indicator">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12l5 5L20 6"/></svg>
+              저장됨 · 방금 전
+            </p>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer">STYLE 23 · 엔터프라이즈 B2B</footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  var toggle = document.getElementById('sidebarToggle');
+  var sidebar = document.getElementById('sidebar');
+  if(!toggle || !sidebar) return;
+  toggle.addEventListener('click', function(){
+    var collapsed = sidebar.classList.toggle('is-collapsed');
+    toggle.setAttribute('aria-expanded', String(!collapsed));
+  });
+})();
+</script>
+</body>
+</html>

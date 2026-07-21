@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>건강나침반 · 강남구 내과 의사 찾기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{
+    --bg:#FBFCFD;
+    --surface:#FFFFFF;
+    --border:#E8EDF1;
+    --primary:#4A90D9;
+    --primary-hover:#3A7BC0;
+    --primary-soft:#E3F0FB;
+    --on-primary:#FFFFFF;
+    /* 텍스트/버튼면 전용 접근성 보정 톤 — 같은 스카이블루 계열, 명도만 낮춰 4.5:1+ 확보 */
+    --primary-text:#2E6BA6;
+    --primary-text-hover:#245685;
+    --primary-strong:#3576B5;
+    --primary-strong-hover:#2C68A0;
+    --secondary:#7FB069;
+    --secondary-soft:#ECF4E7;
+    --ink-normal:#3E5A2E;
+    --ink-info:#245685;
+    --ink-warning:#6B4E12;
+    --ink-danger:#7A2E2E;
+    --text-strong:#2E3A46;
+    --text-mid:#5A6B7A;
+    --text-weak:#8A9AA8;
+    --warm-bg:#FAF8F5;
+    --state-normal:#7FB069;
+    --state-normal-soft:#ECF4E7;
+    --state-warning:#E8B04B;
+    --state-warning-soft:#FBF1DE;
+    --state-danger:#E27D7D;
+    --state-danger-soft:#FBEAEA;
+    --state-info:#4A90D9;
+    --state-info-soft:#E3F0FB;
+    --r-card:20px;
+    --r-control:12px;
+    --r-pill:999px;
+    --sh-card: 0 2px 8px rgba(74,144,217,.06), 0 8px 24px rgba(46,58,70,.05);
+    --sh-card-hover: 0 4px 12px rgba(74,144,217,.09), 0 14px 34px rgba(46,58,70,.08);
+    --ease-soft: cubic-bezier(.25,.1,.25,1);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text-strong);
+    font-family:'Pretendard','Nunito Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:15px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .num, .num * { font-family:'Nunito Sans','Pretendard',sans-serif; font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  h1,h2,h3,h4{margin:0; letter-spacing:0.1px;}
+
+  .page{max-width:1280px; margin:0 auto; padding:24px 24px 64px;}
+
+  /* ---------- focus-visible ---------- */
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-visible{
+    outline:2px solid var(--primary);
+    outline-offset:2px;
+    box-shadow:0 0 0 6px var(--primary-soft);
+    border-radius:8px;
+  }
+
+  /* ================= identity / top bar ================= */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:24px;
+    flex-wrap:wrap;
+    padding:20px 4px;
+    opacity:0;
+    animation: fadeIn .4s var(--ease-soft) forwards;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{
+    width:40px; height:40px; border-radius:var(--r-pill);
+    background:var(--primary-soft);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--primary); flex-shrink:0;
+  }
+  .brand-word{font-family:'Nunito Sans',sans-serif; font-weight:800; font-size:20px; color:var(--text-strong);}
+  .brand-sub{font-size:12px; color:var(--text-mid); font-weight:600;}
+
+  .search-summary{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 16px; border-radius:var(--r-pill);
+    background:var(--primary-soft); color:var(--text-strong);
+    font-size:13px; font-weight:600; white-space:nowrap;
+    border:1px solid transparent;
+  }
+  .chip svg{width:14px; height:14px; stroke:var(--primary); flex-shrink:0;}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    height:40px; padding:0 20px; border-radius:var(--r-control);
+    font-size:14px; font-weight:700; cursor:pointer;
+    border:1px solid transparent;
+    transition:box-shadow .22s var(--ease-soft), transform .22s var(--ease-soft), background-color .22s var(--ease-soft);
+    min-height:44px;
+  }
+  .btn-ghost{
+    background:var(--surface); color:var(--text-mid); border-color:var(--border);
+  }
+  .btn-ghost:hover{ box-shadow:var(--sh-card-hover); transform:translateY(-2px); color:var(--text-strong); }
+  .btn-primary{
+    background:var(--primary-strong); color:var(--on-primary); position:relative; overflow:visible;
+    box-shadow:0 2px 8px rgba(74,144,217,.18);
+  }
+  .btn-primary:hover{ background:var(--primary-strong-hover); box-shadow:0 8px 20px rgba(74,144,217,.24); transform:translateY(-2px); }
+  .btn-primary::after{
+    content:""; position:absolute; inset:0; border-radius:inherit;
+    box-shadow:0 0 0 0 var(--primary-soft); opacity:0; pointer-events:none;
+  }
+  .btn-primary:active::after{ animation: haloPulse .28s ease-out; }
+  .btn-small{ height:36px; padding:0 14px; font-size:13px; min-height:36px; }
+  .btn-link{
+    background:none; border:none; color:var(--primary-text); font-weight:700; font-size:13px;
+    cursor:pointer; padding:8px 4px; text-decoration:none;
+  }
+  .btn-link:hover{ color:var(--primary-text-hover); text-decoration:underline; }
+
+  /* ================= nav tabs ================= */
+  .tabs{
+    display:flex; align-items:center; gap:4px; flex-wrap:wrap;
+    padding:6px; margin-bottom:20px;
+    background:var(--warm-bg); border-radius:var(--r-pill); width:fit-content;
+    max-width:100%;
+  }
+  .tabs a{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:9px 18px; border-radius:var(--r-pill);
+    font-size:13px; font-weight:700; color:var(--text-mid);
+    text-decoration:none; white-space:nowrap;
+    transition: background-color .2s var(--ease-soft), color .2s var(--ease-soft);
+  }
+  .tabs a.active{ background:var(--surface); color:var(--primary-text); box-shadow:var(--sh-card); }
+  .tabs a:not(.active):hover{ color:var(--text-strong); }
+  .crumb{font-size:12px; color:var(--text-mid); margin:-10px 0 20px 4px; display:flex; align-items:center; gap:6px;}
+  .crumb svg{width:12px; height:12px; stroke:var(--text-weak);}
+
+  /* ================= layout ================= */
+  .layout{ display:grid; grid-template-columns:260px 1fr; gap:24px; align-items:start; }
+
+  /* ---------------- filter (aside) ---------------- */
+  .filter-panel{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card);
+    padding:24px; box-shadow:var(--sh-card);
+    display:flex; flex-direction:column; gap:24px;
+    position:sticky; top:24px;
+  }
+  .filter-head{ display:flex; align-items:center; justify-content:space-between; }
+  .filter-head h2{ font-size:16px; font-weight:700; }
+  .filter-group{
+    opacity:0; transform:translateY(-6px);
+    animation: fadeSlideDown .3s var(--ease-soft) forwards;
+  }
+  .filter-group + .filter-group{ padding-top:20px; border-top:1px solid var(--border); }
+  .filter-label{
+    display:flex; align-items:center; gap:8px;
+    font-size:12px; font-weight:600; color:var(--text-mid); margin-bottom:12px;
+  }
+  .filter-label svg{width:16px; height:16px; stroke:var(--secondary);}
+
+  .chip-list{ display:flex; flex-wrap:wrap; gap:8px; }
+  .filter-chip{
+    padding:7px 14px; border-radius:var(--r-pill); font-size:13px; font-weight:600;
+    border:1px solid var(--border); background:var(--surface); color:var(--text-mid);
+    cursor:pointer; transition:background-color .2s var(--ease-soft), color .2s var(--ease-soft), border-color .2s var(--ease-soft);
+  }
+  .filter-chip:hover{ border-color:var(--primary-hover); color:var(--text-strong); }
+  .filter-chip[aria-pressed="true"]{
+    background:var(--primary-strong); border-color:var(--primary-strong); color:var(--on-primary);
+  }
+
+  .toggle-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .toggle-row span{ font-size:13px; font-weight:600; color:var(--text-strong); }
+  .switch{ position:relative; width:44px; height:26px; flex-shrink:0; }
+  .switch input{ position:absolute; opacity:0; width:44px; height:26px; margin:0; cursor:pointer; }
+  .switch .track{
+    position:absolute; inset:0; background:var(--secondary-soft); border-radius:var(--r-pill);
+    transition:background-color .3s var(--ease-soft);
+  }
+  .switch .thumb{
+    position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%;
+    background:var(--surface); box-shadow:0 1px 3px rgba(46,58,70,.2);
+    transition:transform .3s var(--ease-soft);
+  }
+  .switch input:checked + .track{ background:var(--primary); }
+  .switch input:checked + .track + .thumb{ transform:translateX(18px); }
+
+  .check-row{ display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-mid); padding:5px 0; }
+  .check-row input{ width:18px; height:18px; accent-color:var(--primary); flex-shrink:0; }
+
+  /* ================= results main ================= */
+  .results-main{ min-width:0; }
+  .results-header{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    margin-bottom:20px;
+  }
+  .results-count{ font-size:20px; font-weight:700; color:var(--text-strong); }
+  .results-count .num{ color:var(--primary-text); }
+  .sort-select{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:9px 14px; border-radius:var(--r-control);
+    border:1px solid var(--border); background:var(--surface);
+    font-size:13px; font-weight:600; color:var(--text-mid); cursor:pointer;
+  }
+  .sort-select svg{ width:14px; height:14px; stroke:var(--text-weak); }
+  .demo-toggle{ font-size:12px; }
+
+  /* ---------------- collection grid ---------------- */
+  .collection{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:24px;
+  }
+  .doctor-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card);
+    padding:28px; box-shadow:var(--sh-card);
+    display:flex; flex-direction:column; gap:16px;
+    opacity:0; transform:translateY(12px);
+    animation: cardIn .38s var(--ease-soft) forwards;
+    transition: box-shadow .22s var(--ease-soft), transform .22s var(--ease-soft);
+  }
+  .doctor-card:hover{ box-shadow:var(--sh-card-hover); transform:translateY(-2px); }
+
+  .card-top{ display:flex; align-items:flex-start; gap:14px; }
+  .avatar{
+    width:52px; height:52px; border-radius:50%; flex-shrink:0;
+    background:var(--secondary-soft); color:var(--ink-normal);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Nunito Sans',sans-serif; font-weight:800; font-size:18px;
+  }
+  .doctor-name{
+    font-size:16px; font-weight:700; color:var(--text-strong);
+    overflow-wrap:break-word; word-break:keep-all;
+    line-height:1.45;
+  }
+  .hospital{
+    display:flex; align-items:center; gap:6px;
+    font-size:13px; color:var(--text-mid); margin-top:4px;
+  }
+  .hospital svg{ width:14px; height:14px; stroke:var(--text-weak); flex-shrink:0; }
+
+  .rating-row{ display:flex; align-items:center; gap:8px; font-size:14px; }
+  .stars{ position:relative; display:inline-flex; line-height:1; flex-shrink:0; }
+  .stars .base, .stars .fill{
+    display:flex; gap:2px; color:var(--border); letter-spacing:2px;
+  }
+  .stars .fill{
+    position:absolute; inset:0; overflow:hidden; width:0; color:var(--state-warning);
+    transition:width .7s var(--ease-soft);
+  }
+  .stars svg{ width:15px; height:15px; }
+  .rating-value{ font-weight:700; color:var(--text-strong); }
+  .rating-missing{ color:var(--text-mid); font-weight:600; }
+  .review-count{ color:var(--text-mid); }
+
+  .next-slot{ display:flex; align-items:center; justify-content:space-between; font-size:13px; }
+  .next-slot .label{ color:var(--text-mid); }
+  .next-slot .value{ font-weight:700; color:var(--text-strong); }
+  .next-slot .value.missing{ color:var(--text-mid); font-weight:600; }
+
+  /* ---------- status badges (4 states, color + icon + text) ---------- */
+  .badge{
+    position:relative; display:inline-flex; align-items:center; gap:6px;
+    width:fit-content; padding:6px 14px; border-radius:var(--r-pill);
+    font-size:12px; font-weight:700;
+    opacity:0; transform:scale(.9);
+    animation: badgePop .32s var(--ease-soft) forwards;
+  }
+  .badge svg{ width:14px; height:14px; }
+  .badge.state-normal{ background:var(--state-normal-soft); color:var(--text-strong); }
+  .badge.state-normal svg{ stroke:var(--ink-normal); }
+  .badge.state-info{ background:var(--state-info-soft); color:var(--text-strong); }
+  .badge.state-info svg{ stroke:var(--ink-info); }
+  .badge.state-warning{ background:var(--state-warning-soft); color:var(--text-strong); }
+  .badge.state-warning svg{ stroke:var(--ink-warning); }
+  .badge.state-danger{ background:var(--state-danger-soft); color:var(--text-strong); }
+  .badge.state-danger svg{ stroke:var(--ink-danger); }
+
+  .badge-tip{
+    position:absolute; bottom:calc(100% + 8px); left:0; z-index:5;
+    width:220px; max-width:60vw;
+    background:var(--text-strong); color:#fff; font-weight:500;
+    font-size:12px; line-height:1.5; padding:10px 12px; border-radius:10px;
+    opacity:0; transform:translateY(6px); pointer-events:none;
+    transition:opacity .2s var(--ease-soft), transform .2s var(--ease-soft);
+  }
+  .badge:hover .badge-tip, .badge:focus-visible .badge-tip{ opacity:1; transform:translateY(0); }
+
+  .card-actions{ display:flex; align-items:center; gap:10px; margin-top:auto; }
+  .card-actions .btn{ flex:1; }
+
+  /* ---------------- pagination / global actions ---------------- */
+  .pagination-row{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    margin-top:32px;
+  }
+  .pagination{ display:flex; align-items:center; gap:4px; }
+  .pg-btn{
+    min-width:36px; height:36px; padding:0 10px; border-radius:var(--r-control);
+    border:1px solid var(--border); background:var(--surface); color:var(--text-mid);
+    font-size:13px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+    transition:box-shadow .22s var(--ease-soft), transform .22s var(--ease-soft), background-color .2s var(--ease-soft);
+  }
+  .pg-btn:hover{ box-shadow:var(--sh-card-hover); transform:translateY(-2px); }
+  .pg-btn[aria-current="page"]{ background:var(--primary-strong); border-color:var(--primary-strong); color:#fff; }
+  .pg-ellipsis{ color:var(--text-mid); padding:0 4px; }
+
+  /* ---------------- empty state ---------------- */
+  .empty-state{
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:14px;
+    padding:64px 24px; background:var(--warm-bg); border:1px dashed var(--border); border-radius:var(--r-card);
+  }
+  .empty-icon{
+    width:64px; height:64px; border-radius:50%; background:var(--primary-soft);
+    display:flex; align-items:center; justify-content:center; color:var(--primary);
+  }
+  .empty-title{ font-size:18px; font-weight:700; color:var(--text-strong); }
+  .empty-sub{ font-size:14px; color:var(--text-mid); max-width:340px; }
+  [hidden]{ display:none !important; }
+
+  /* ================= footer ================= */
+  .site-footer{
+    margin-top:48px; padding-top:20px; border-top:1px solid var(--border);
+    font-size:12px; color:var(--text-mid); text-align:center;
+  }
+
+  /* ================= keyframes ================= */
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  @keyframes fadeSlideDown{ from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes cardIn{ from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes badgePop{ 0%{opacity:0; transform:scale(.9);} 60%{opacity:1; transform:scale(1.06);} 100%{opacity:1; transform:scale(1);} }
+  @keyframes haloPulse{ 0%{ box-shadow:0 0 0 0 var(--primary-soft); opacity:.6; } 100%{ box-shadow:0 0 0 14px var(--primary-soft); opacity:0; } }
+
+  .filter-group:nth-child(1){ animation-delay:.20s; }
+  .filter-group:nth-child(2){ animation-delay:.26s; }
+  .filter-group:nth-child(3){ animation-delay:.32s; }
+  .filter-group:nth-child(4){ animation-delay:.38s; }
+  .filter-group:nth-child(5){ animation-delay:.44s; }
+
+  .doctor-card:nth-child(1){ animation-delay:.45s; } .doctor-card:nth-child(1) .badge{ animation-delay:1.30s; } .doctor-card:nth-child(1) .stars .fill{ transition-delay:.90s; }
+  .doctor-card:nth-child(2){ animation-delay:.53s; } .doctor-card:nth-child(2) .badge{ animation-delay:1.35s; } .doctor-card:nth-child(2) .stars .fill{ transition-delay:.95s; }
+  .doctor-card:nth-child(3){ animation-delay:.61s; } .doctor-card:nth-child(3) .badge{ animation-delay:1.40s; } .doctor-card:nth-child(3) .stars .fill{ transition-delay:1.00s; }
+  .doctor-card:nth-child(4){ animation-delay:.69s; } .doctor-card:nth-child(4) .badge{ animation-delay:1.45s; } .doctor-card:nth-child(4) .stars .fill{ transition-delay:1.05s; }
+  .doctor-card:nth-child(5){ animation-delay:.77s; } .doctor-card:nth-child(5) .badge{ animation-delay:1.50s; } .doctor-card:nth-child(5) .stars .fill{ transition-delay:1.10s; }
+  .doctor-card:nth-child(6){ animation-delay:.85s; } .doctor-card:nth-child(6) .badge{ animation-delay:1.55s; } .doctor-card:nth-child(6) .stars .fill{ transition-delay:1.15s; }
+
+  /* ================= responsive ================= */
+  @media (max-width:900px){
+    .page{ padding:16px 16px 48px; }
+    .layout{ grid-template-columns:1fr; }
+    .filter-panel{ position:static; }
+    .collection{ grid-template-columns:1fr; }
+    .card-actions{ flex-wrap:wrap; }
+  }
+  @media (min-width:901px) and (max-width:1180px){
+    .collection{ grid-template-columns:repeat(2, 1fr); }
+  }
+
+  /* ================= reduced motion ================= */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.001ms !important;
+      animation-delay:0s !important;
+      transition-duration:0.001ms !important;
+    }
+    .topbar, .filter-group, .doctor-card, .badge{ opacity:1 !important; transform:none !important; }
+    .stars .fill{ width:var(--final-width, 0) !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="topbar" data-region="identity">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="12 7 14 12 12 17 10 12"/></svg>
+      </span>
+      <span>
+        <span class="brand-word">건강나침반</span><br>
+        <span class="brand-sub">믿을 수 있는 병원을 천천히 찾아보세요</span>
+      </span>
+    </div>
+    <div class="search-summary">
+      <span class="chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        내과
+      </span>
+      <span class="chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        서울 강남구
+      </span>
+      <span class="chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        이번 주
+      </span>
+      <button class="btn btn-ghost btn-small" type="button">검색 수정</button>
+    </div>
+  </header>
+
+  <nav class="tabs" data-region="nav" aria-label="주요 메뉴">
+    <a href="#" class="active" aria-current="page">의사 찾기</a>
+    <a href="#">예약 내역</a>
+    <a href="#">건강 기록</a>
+    <a href="#">내 정보</a>
+  </nav>
+  <p class="crumb">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    건강나침반 홈 &nbsp;/&nbsp; 의사 찾기 &nbsp;/&nbsp; 서울 강남구 · 내과
+  </p>
+
+  <div class="layout">
+    <!-- ============ filter ============ -->
+    <aside class="filter-panel" data-region="filter" aria-label="검색 필터">
+      <div class="filter-head">
+        <h2>필터</h2>
+        <button class="btn-link" type="button" id="resetFiltersTop">초기화</button>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg>
+          진료과
+        </div>
+        <div class="chip-list">
+          <button class="filter-chip" type="button" aria-pressed="true">내과</button>
+          <button class="filter-chip" type="button" aria-pressed="false">이비인후과</button>
+          <button class="filter-chip" type="button" aria-pressed="false">정형외과</button>
+          <button class="filter-chip" type="button" aria-pressed="false">피부과</button>
+          <button class="filter-chip" type="button" aria-pressed="false">소아청소년과</button>
+          <button class="filter-chip" type="button" aria-pressed="false">가정의학과</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          거리
+        </div>
+        <div class="chip-list">
+          <button class="filter-chip" type="button" aria-pressed="false">1km 이내</button>
+          <button class="filter-chip" type="button" aria-pressed="true">3km 이내</button>
+          <button class="filter-chip" type="button" aria-pressed="false">5km 이내</button>
+          <button class="filter-chip" type="button" aria-pressed="false">10km 이내</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.6 6.8L12 16.9 5.8 20.4l1.6-6.8L2.2 9l6.9-.7Z"/></svg>
+          평점
+        </div>
+        <div class="chip-list">
+          <button class="filter-chip" type="button" aria-pressed="false">4.0 이상</button>
+          <button class="filter-chip" type="button" aria-pressed="true">4.5 이상</button>
+          <button class="filter-chip" type="button" aria-pressed="false">4.8 이상</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="toggle-row">
+          <span>오늘 진료 가능</span>
+          <label class="switch">
+            <input type="checkbox" checked aria-label="오늘 진료 가능만 보기">
+            <span class="track"></span>
+            <span class="thumb"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6Z"/><path d="M9 12l2 2 4-4"/></svg>
+          보험 적용
+        </div>
+        <label class="check-row"><input type="checkbox" checked> 국민건강보험</label>
+        <label class="check-row"><input type="checkbox"> 실손보험</label>
+        <label class="check-row"><input type="checkbox"> 산재보험</label>
+      </div>
+    </aside>
+
+    <!-- ============ results ============ -->
+    <main class="results-main">
+      <div class="results-header" data-region="results">
+        <h1 class="results-count">강남구 내과 의사 <span class="num" id="resultCount">86</span>명</h1>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <button class="btn-link demo-toggle" type="button" id="emptyDemoToggle">결과 0건 미리보기</button>
+          <span class="sort-select" role="button" tabindex="0">
+            가까운 순
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </span>
+        </div>
+      </div>
+
+      <section class="collection" data-region="collection" id="collection" aria-label="의사 검색 결과 목록">
+
+        <!-- 1. 김서연 — 오늘 가능 -->
+        <article class="doctor-card" data-region="item-card">
+          <div class="card-top">
+            <span class="avatar" aria-hidden="true">김</span>
+            <div>
+              <h3 class="doctor-name">김서연 (내과)</h3>
+              <p class="hospital">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V8l6-4 6 4v13M10 21v-5h4v5"/></svg>
+                강남365의원
+              </p>
+            </div>
+          </div>
+          <div class="rating-row num">
+            <span class="stars" style="--final-width:96%;" aria-hidden="true">
+              <span class="base">★★★★★</span>
+              <span class="fill" style="width:96%;">★★★★★</span>
+            </span>
+            <span class="rating-value">4.8</span>
+            <span class="review-count">(1,204)</span>
+          </div>
+          <div class="next-slot">
+            <span class="label">다음 예약</span>
+            <span class="value num">오늘 15:30</span>
+          </div>
+          <span class="badge state-normal" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>
+            오늘 가능
+            <span class="badge-tip" role="tooltip">지금 예약하면 오늘 진료를 받을 수 있어요.</span>
+          </span>
+          <div class="card-actions">
+            <button class="btn btn-primary">예약</button>
+            <button class="btn btn-ghost">상세보기</button>
+          </div>
+        </article>
+
+        <!-- 2. 이준호 — 오늘 가능 -->
+        <article class="doctor-card" data-region="item-card">
+          <div class="card-top">
+            <span class="avatar" aria-hidden="true">이</span>
+            <div>
+              <h3 class="doctor-name">이준호 (내과·소화기)</h3>
+              <p class="hospital">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V8l6-4 6 4v13M10 21v-5h4v5"/></svg>
+                연세위장내과
+              </p>
+            </div>
+          </div>
+          <div class="rating-row num">
+            <span class="stars" style="--final-width:98%;" aria-hidden="true">
+              <span class="base">★★★★★</span>
+              <span class="fill" style="width:98%;">★★★★★</span>
+            </span>
+            <span class="rating-value">4.9</span>
+            <span class="review-count">(2,881)</span>
+          </div>
+          <div class="next-slot">
+            <span class="label">다음 예약</span>
+            <span class="value num">오늘 17:00</span>
+          </div>
+          <span class="badge state-normal" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>
+            오늘 가능
+            <span class="badge-tip" role="tooltip">지금 예약하면 오늘 진료를 받을 수 있어요.</span>
+          </span>
+          <div class="card-actions">
+            <button class="btn btn-primary">예약</button>
+            <button class="btn btn-ghost">상세보기</button>
+          </div>
+        </article>
+
+        <!-- 3. 박지훈 — 아주 긴 이름 / 평점 결측 / 신규 등록 -->
+        <article class="doctor-card" data-region="item-card">
+          <div class="card-top">
+            <span class="avatar" aria-hidden="true">박</span>
+            <div>
+              <h3 class="doctor-name">박지훈 (내과·호흡기알레르기·수면클리닉 협진 및 만성기침 장기추적 전문)</h3>
+              <p class="hospital">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V8l6-4 6 4v13M10 21v-5h4v5"/></svg>
+                서울숨편한내과
+              </p>
+            </div>
+          </div>
+          <div class="rating-row num">
+            <span class="rating-missing">— (신규)</span>
+          </div>
+          <div class="next-slot">
+            <span class="label">다음 예약</span>
+            <span class="value num">목 10:00</span>
+          </div>
+          <span class="badge state-warning" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+            신규 등록
+            <span class="badge-tip" role="tooltip">최근 등록된 의료진이에요. 예약 시 우선 상담이 가능해요.</span>
+          </span>
+          <div class="card-actions">
+            <button class="btn btn-primary">예약</button>
+            <button class="btn btn-ghost">상세보기</button>
+          </div>
+        </article>
+
+        <!-- 4. 최민아 — 이번 주 -->
+        <article class="doctor-card" data-region="item-card">
+          <div class="card-top">
+            <span class="avatar" aria-hidden="true">최</span>
+            <div>
+              <h3 class="doctor-name">최민아 (내과)</h3>
+              <p class="hospital">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V8l6-4 6 4v13M10 21v-5h4v5"/></svg>
+                강남우리내과
+              </p>
+            </div>
+          </div>
+          <div class="rating-row num">
+            <span class="stars" style="--final-width:92%;" aria-hidden="true">
+              <span class="base">★★★★★</span>
+              <span class="fill" style="width:92%;">★★★★★</span>
+            </span>
+            <span class="rating-value">4.6</span>
+            <span class="review-count">(932)</span>
+          </div>
+          <div class="next-slot">
+            <span class="label">다음 예약</span>
+            <span class="value num">수 09:30</span>
+          </div>
+          <span class="badge state-info" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg>
+            이번 주
+            <span class="badge-tip" role="tooltip">이번 주 안에 예약 가능한 일정이 있어요.</span>
+          </span>
+          <div class="card-actions">
+            <button class="btn btn-primary">예약</button>
+            <button class="btn btn-ghost">상세보기</button>
+          </div>
+        </article>
+
+        <!-- 5. 정하늘 — 예약 마감 / 다음 예약 결측 -->
+        <article class="doctor-card" data-region="item-card">
+          <div class="card-top">
+            <span class="avatar" aria-hidden="true">정</span>
+            <div>
+              <h3 class="doctor-name">정하늘 (내과·내분비)</h3>
+              <p class="hospital">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V8l6-4 6 4v13M10 21v-5h4v5"/></svg>
+                참편한내과
+              </p>
+            </div>
+          </div>
+          <div class="rating-row num">
+            <span class="stars" style="--final-width:94%;" aria-hidden="true">
+              <span class="base">★★★★★</span>
+              <span class="fill" style="width:94%;">★★★★★</span>
+            </span>
+            <span class="rating-value">4.7</span>
+            <span class="review-count">(1,547)</span>
+          </div>
+          <div class="next-slot">
+            <span class="label">다음 예약</span>
+            <span class="value missing">—</span>
+          </div>
+          <span class="badge state-danger" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 21 20H3Z"/><path d="M12 9.5v4M12 16.5h.01"/></svg>
+            예약 마감
+            <span class="badge-tip" role="tooltip">지금은 예약이 가득 찼어요. 곧 새로운 시간대가 열릴 예정이에요.</span>
+          </span>
+          <div class="card-actions">
+            <button class="btn btn-primary" disabled style="opacity:.5; cursor:not-allowed;">예약</button>
+            <button class="btn btn-ghost">상세보기</button>
+          </div>
+        </article>
+
+        <!-- 6. 한지원 — 오늘 가능 / 짧은 표기 -->
+        <article class="doctor-card" data-region="item-card">
+          <div class="card-top">
+            <span class="avatar" aria-hidden="true">한</span>
+            <div>
+              <h3 class="doctor-name">한지원 (내과)</h3>
+              <p class="hospital">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V8l6-4 6 4v13M10 21v-5h4v5"/></svg>
+                튼튼가정의학과
+              </p>
+            </div>
+          </div>
+          <div class="rating-row num">
+            <span class="stars" style="--final-width:90%;" aria-hidden="true">
+              <span class="base">★★★★★</span>
+              <span class="fill" style="width:90%;">★★★★★</span>
+            </span>
+            <span class="rating-value">4.5</span>
+            <span class="review-count">(671)</span>
+          </div>
+          <div class="next-slot">
+            <span class="label">다음 예약</span>
+            <span class="value num">오늘 18:20</span>
+          </div>
+          <span class="badge state-normal" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>
+            오늘 가능
+            <span class="badge-tip" role="tooltip">지금 예약하면 오늘 진료를 받을 수 있어요.</span>
+          </span>
+          <div class="card-actions">
+            <button class="btn btn-primary">예약</button>
+            <button class="btn btn-ghost">상세보기</button>
+          </div>
+        </article>
+
+      </section>
+
+      <div class="empty-state" data-region="empty" id="emptyState" hidden>
+        <span class="empty-icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </span>
+        <p class="empty-title">조건에 맞는 의사가 없어요</p>
+        <p class="empty-sub">거리를 넓히거나 오늘 진료 필터를 꺼보세요.</p>
+        <button class="btn btn-primary" type="button" id="resetFiltersEmpty">필터 초기화</button>
+      </div>
+
+      <div class="pagination-row" data-region="action">
+        <nav class="pagination" aria-label="페이지 이동">
+          <button class="pg-btn" aria-label="이전 페이지">‹</button>
+          <button class="pg-btn" aria-current="page">1</button>
+          <button class="pg-btn">2</button>
+          <button class="pg-btn">3</button>
+          <span class="pg-ellipsis">…</span>
+          <button class="pg-btn">9</button>
+          <button class="pg-btn" aria-label="다음 페이지">›</button>
+        </nav>
+        <button class="btn btn-ghost" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-6-2V6l6 2m0 12l6-2m-6 2V8m6 10l6 2V8l-6-2m0 12V6m0 0L9 8"/></svg>
+          지도로 보기
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <footer class="site-footer">STYLE 24 · 헬스케어 웰니스</footer>
+</div>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 필터 칩 토글 (연출 전용 — 실패해도 화면은 완전함)
+  document.querySelectorAll('.filter-chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      chip.setAttribute('aria-pressed', chip.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    });
+  });
+
+  // 결과 수 카운트업 (reduced-motion 이면 즉시 최종값)
+  var countEl = document.getElementById('resultCount');
+  if (countEl){
+    var target = parseInt(countEl.textContent, 10) || 0;
+    if (reduce){
+      countEl.textContent = target;
+    } else {
+      var start = null, duration = 800;
+      function step(ts){
+        if (start === null) start = ts;
+        var p = Math.min((ts - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        countEl.textContent = Math.round(eased * target);
+        if (p < 1) requestAnimationFrame(step);
+        else countEl.textContent = target;
+      }
+      requestAnimationFrame(step);
+    }
+  }
+
+  // 빈 상태 데모 토글
+  var collection = document.getElementById('collection');
+  var emptyState = document.getElementById('emptyState');
+  var toggleBtn = document.getElementById('emptyDemoToggle');
+  var paginationRow = document.querySelector('.pagination-row');
+  if (toggleBtn && collection && emptyState){
+    toggleBtn.addEventListener('click', function(){
+      var showingEmpty = !emptyState.hasAttribute('hidden');
+      if (showingEmpty){
+        emptyState.setAttribute('hidden', '');
+        collection.removeAttribute('hidden');
+        if (paginationRow) paginationRow.style.display = '';
+        toggleBtn.textContent = '결과 0건 미리보기';
+      } else {
+        emptyState.removeAttribute('hidden');
+        collection.setAttribute('hidden', '');
+        if (paginationRow) paginationRow.style.display = 'none';
+        toggleBtn.textContent = '검색 결과로 돌아가기';
+      }
+    });
+  }
+  function resetFilters(){
+    document.querySelectorAll('.filter-chip').forEach(function(chip, i){
+      chip.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+    });
+    if (emptyState && !emptyState.hasAttribute('hidden')){
+      toggleBtn.click();
+    }
+  }
+  var r1 = document.getElementById('resetFiltersTop');
+  var r2 = document.getElementById('resetFiltersEmpty');
+  if (r1) r1.addEventListener('click', resetFilters);
+  if (r2) r2.addEventListener('click', resetFilters);
+})();
+</script>
+</body>
+</html>

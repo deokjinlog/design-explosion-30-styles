@@ -142,7 +142,9 @@ def lint(path, code):
         elif _kw(html, key):
             fails.append(f"{label} — {ARCHETYPE_NAME[code]}에 없어야 할 요소 (다른 원형에서 이식됨)")
 
-    # 필수 — 속성이 있으면 속성으로, 없으면 키워드 폴백
+    # 필수 — 속성 모드에선 부재도 FAIL(결정론), 키워드 폴백에선 WARN(퍼지)
+    #   금지 침입("대화형에 KPI")뿐 아니라 필수 부재("폼인데 피드라 우김")도 잡아야
+    #   게이트가 원형을 진짜 구분한다.
     for key in rule["required"]:
         label = REGION_LABEL.get(key, key)
         if attr_mode:
@@ -152,8 +154,10 @@ def lint(path, code):
         else:
             ok = _kw(html, key)
         if not ok:
-            hint = f' (data-region="{key}" 누락)' if attr_mode else ""
-            warns.append(f"{label} 없음 — {ARCHETYPE_NAME[code]}의 필수 영역{hint}")
+            if attr_mode:
+                fails.append(f"{label} 없음 — {ARCHETYPE_NAME[code]}의 필수 영역 (data-region=\"{key}\" 누락)")
+            else:
+                warns.append(f"{label} 없음 — {ARCHETYPE_NAME[code]}의 필수 영역")
 
     mode = "속성" if attr_mode else "키워드추측"
     tag = "FAIL" if fails else "PASS"

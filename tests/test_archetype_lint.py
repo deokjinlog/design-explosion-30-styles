@@ -77,3 +77,11 @@ def test_reads_archetype_from_spec_json(tmp_path):
     (tmp_path / "style-01-x.html").write_text(DASHBOARD, encoding="utf-8")
     rc, out = _run(tmp_path)
     assert rc == 1 and "대화형" in out
+
+
+def test_required_region_absence_fails_in_attribute_mode(tmp_path):
+    """속성 모드에선 필수 영역 부재도 FAIL — 폼(E)을 피드(F)라 우기면 잡혀야."""
+    f = tmp_path / "style-01-x.html"
+    f.write_text('<html><body><form data-region="form"><input></form></body></html>', encoding="utf-8")
+    rc, out = _run(f, "F")   # F 필수: feed·feed-item — 둘 다 없음
+    assert rc == 1 and ("feed" in out or "피드" in out)
