@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>배움터 — 3-4. useReducer로 복잡한 상태 다루기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-base:#0E0E11;
+    --bg-surface:#131317;
+    --bg-surface-raised:#17171C;
+    --bg-surface-hover:#1C1C22;
+    --canvas-bg:#0A0A0C;
+    --border:#232326;
+    --border-strong:#2E2E33;
+    --text-primary:#EDEDEF;
+    --text-secondary:#A0A0A8;
+    --text-tertiary:#6E6E76;
+    --accent:#8B8BF5;
+    --success:#4E9A76;
+    --warning:#C7A15A;
+    --danger:#C96A6A;
+    --radius-lg:10px;
+    --radius-md:8px;
+    --radius-sm:6px;
+    --shadow-pop:0 8px 24px rgba(0,0,0,.4);
+    --font-kr:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    --font-en:'Inter',var(--font-kr);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg-base);
+    color:var(--text-primary);
+    font-family:var(--font-kr);
+    font-size:14px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,p,ul,ol,li,figure{ margin:0; padding:0; list-style:none; }
+  button{ font-family:inherit; color:inherit; }
+  input{ font-family:inherit; }
+  svg.icon{ width:16px; height:16px; display:block; flex-shrink:0; }
+
+  .tnum{ font-family:var(--font-en); font-variant-numeric:tabular-nums; font-feature-settings:'tnum' 1; }
+  .visually-hidden-input{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  a,button,label,summary,[tabindex]{ outline:none; }
+  a:focus-visible,button:focus-visible,label:focus-visible,summary:focus-visible,
+  input:focus-visible,.tab-label:focus-within,.collapse-label:focus-within{
+    outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;
+  }
+
+  /* ---------- layout shell ---------- */
+  .page{ display:flex; flex-direction:column; min-height:100vh; }
+
+  .topnav{ border-bottom:1px solid var(--border); background:var(--bg-base); }
+  .topnav-inner{
+    max-width:1280px; margin:0 auto; padding:0 32px;
+    height:64px; display:flex; align-items:center; gap:24px;
+  }
+  .brand{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .brand-mark{ color:var(--accent); width:26px; height:26px; }
+  .brand-word{ font-size:16px; font-weight:600; letter-spacing:-0.01em; color:var(--text-primary); }
+
+  .breadcrumb{ display:flex; align-items:center; gap:8px; min-width:0; flex:1; overflow:hidden; }
+  .crumb{ font-size:14px; color:var(--text-tertiary); white-space:nowrap; text-overflow:ellipsis; overflow:hidden; }
+  .crumb.current{ color:var(--text-secondary); font-weight:500; }
+  .crumb-sep{ color:var(--text-tertiary); font-size:13px; }
+
+  .nav-progress{ flex-shrink:0; font-size:14px; color:var(--text-secondary); white-space:nowrap; }
+  .nav-progress .count-current{ color:var(--text-primary); font-weight:600; }
+
+  .main{ flex:1; }
+  .workspace{
+    max-width:1280px; margin:0 auto; padding:32px;
+    display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:32px; align-items:start;
+  }
+
+  /* ---------- player column ---------- */
+  .player-col{ display:flex; flex-direction:column; gap:24px; min-width:0; }
+
+  .player-panel{
+    border:1px solid var(--border); border-radius:var(--radius-lg);
+    background:var(--bg-surface); overflow:hidden;
+  }
+
+  .canvas{ position:relative; }
+  .video-frame{
+    position:relative; width:100%; aspect-ratio:16/9;
+    background:var(--canvas-bg);
+    display:flex; flex-direction:column; justify-content:space-between;
+  }
+
+  .title-overlay{
+    padding:20px 24px 12px;
+    background:rgba(10,10,12,.72);
+  }
+  .video-title{
+    font-size:clamp(18px,2.4vw,26px); line-height:1.3; font-weight:600;
+    letter-spacing:-0.01em; color:var(--text-primary);
+    overflow-wrap:break-word;
+  }
+
+  .caption-overlay{
+    align-self:center; margin-bottom:56px; max-width:80%;
+    padding:6px 14px; border-radius:var(--radius-sm);
+    background:rgba(10,10,12,.72);
+  }
+  .caption-text{ font-size:14px; color:var(--text-primary); text-align:center; }
+
+  .scrubber{ padding:0 24px 18px; display:flex; flex-direction:column; gap:8px; }
+  .scrubber-track{
+    position:relative; height:4px; border-radius:4px;
+    background:var(--border-strong); overflow:visible;
+  }
+  .scrubber-fill{
+    position:absolute; inset:0 auto 0 0; height:100%; border-radius:4px;
+    background:var(--accent); transform-origin:left; transform:scaleX(1);
+  }
+  .scrubber-handle{
+    position:absolute; top:50%; width:10px; height:10px; margin-left:-5px;
+    background:var(--accent); border-radius:var(--radius-sm); transform:translateY(-50%);
+  }
+  .time-readout{ font-size:13px; color:var(--text-secondary); display:flex; gap:6px; }
+  .time-current{ color:var(--text-primary); }
+  .time-sep{ color:var(--text-tertiary); }
+
+  /* ---------- toolbar ---------- */
+  .toolbar{
+    display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+    padding:14px 24px; border-top:1px solid var(--border);
+  }
+  .tb-group{ display:flex; align-items:center; gap:8px; }
+  .tb-group.tb-right{ margin-left:auto; }
+  .tb-group + .tb-group{ padding-left:20px; border-left:1px solid var(--border); }
+  .tb-group.tb-right{ border-left:1px solid var(--border); }
+
+  .tb-icon-btn{
+    display:flex; align-items:center; gap:6px;
+    background:transparent; border:1px solid transparent; border-radius:var(--radius-sm);
+    color:var(--text-secondary); padding:8px 10px; font-size:15px; cursor:pointer;
+    transition:background-color 120ms ease-out, color 120ms ease-out,
+               border-color 150ms ease-out, transform 80ms ease-out, filter 80ms ease-out;
+    position:relative;
+  }
+  .tb-icon-btn:hover{ background:var(--bg-surface-hover); color:var(--text-primary); }
+  .tb-icon-btn:active{ transform:scale(.96); filter:brightness(.96); }
+  .tb-icon-btn.primary{ color:var(--text-primary); border-color:var(--border); }
+  .tb-icon-btn .tb-text{ font-size:13px; }
+  .tb-icon-btn .tb-glyph{ font-size:16px; }
+
+  [data-tip]{ position:relative; }
+  [data-tip]::after{
+    content:attr(data-tip);
+    position:absolute; bottom:calc(100% + 6px); left:50%; transform:translate(-50%,-4px);
+    background:var(--bg-surface-raised); border:1px solid var(--border);
+    color:var(--text-primary); font-size:12px; white-space:nowrap;
+    padding:4px 8px; border-radius:var(--radius-sm);
+    box-shadow:var(--shadow-pop);
+    opacity:0; pointer-events:none; transition:opacity 120ms ease-out, transform 120ms ease-out;
+    z-index:30;
+  }
+  [data-tip]:hover::after,[data-tip]:focus-visible::after{ opacity:1; transform:translate(-50%,0); }
+
+  .tb-label-caps{
+    font-family:var(--font-en); font-size:12px; font-weight:500;
+    text-transform:uppercase; letter-spacing:0.04em; color:var(--text-tertiary);
+  }
+  .tb-value{ font-size:13px; color:var(--text-primary); }
+
+  .tb-dropdown{ position:relative; }
+  .tb-dropdown summary{
+    list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px;
+    padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm);
+    color:var(--text-secondary);
+    transition:border-color 150ms ease-out, background-color 120ms ease-out;
+  }
+  .tb-dropdown summary::-webkit-details-marker{ display:none; }
+  .tb-dropdown summary:hover{ background:var(--bg-surface-hover); }
+  .tb-dropdown[open] summary,.tb-dropdown summary:focus-visible{ border-color:var(--accent); }
+  .tb-dropdown .caret{ color:var(--text-tertiary); transition:transform 150ms ease-out; }
+  .tb-dropdown[open] .caret{ transform:rotate(180deg); }
+
+  .dropdown-menu{
+    position:absolute; top:calc(100% + 8px); left:0; min-width:110px; z-index:20;
+    background:var(--bg-surface-raised); border:1px solid var(--border);
+    border-radius:var(--radius-md); box-shadow:var(--shadow-pop); padding:6px;
+  }
+  .dropdown-menu li{
+    padding:6px 10px; border-radius:var(--radius-sm); font-size:13px; color:var(--text-secondary);
+  }
+  .dropdown-menu li.active{ color:var(--accent); background:var(--bg-surface-hover); }
+
+  .tb-pill{
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm);
+    transition:border-color 150ms ease-out, background-color 120ms ease-out;
+  }
+  .tb-pill:hover{ background:var(--bg-surface-hover); }
+  .tb-pill:has(.visually-hidden-input:focus-visible){ border-color:var(--accent); }
+  .tb-pill-state{ font-size:13px; }
+  .tb-pill:has(.visually-hidden-input:checked) .tb-pill-state{ color:var(--accent); }
+  .tb-pill:has(.visually-hidden-input:checked) .state-off{ display:none; }
+  .tb-pill:not(:has(.visually-hidden-input:checked)) .state-on{ display:none; }
+  .tb-pill:not(:has(.visually-hidden-input:checked)) .tb-pill-state{ color:var(--text-tertiary); }
+
+  .volume-slider{
+    -webkit-appearance:none; appearance:none; width:72px; height:4px;
+    background:var(--border-strong); border-radius:4px; outline:none; cursor:pointer;
+  }
+  .volume-slider::-webkit-slider-thumb{
+    -webkit-appearance:none; width:12px; height:12px; border-radius:var(--radius-sm);
+    background:var(--accent); cursor:pointer;
+  }
+  .volume-slider::-moz-range-thumb{
+    width:12px; height:12px; border-radius:var(--radius-sm); background:var(--accent);
+    border:none; cursor:pointer;
+  }
+  .volume-slider::-moz-range-track{ background:var(--border-strong); height:4px; border-radius:4px; }
+
+  /* ---------- action bar ---------- */
+  .action-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .action-primary-group{ display:flex; align-items:center; gap:12px; }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:6px;
+    height:38px; padding:0 18px; border-radius:var(--radius-md);
+    font-size:14px; font-weight:500; cursor:pointer; border:1px solid transparent;
+    transition:background-color 120ms ease-out, border-color 150ms ease-out,
+               transform 80ms ease-out, filter 80ms ease-out;
+  }
+  .btn:active{ transform:scale(.96); filter:brightness(.96); }
+  .btn-primary{ background:var(--accent); color:#101018; }
+  .btn-primary:hover{ background:#9b9bf7; }
+  .btn-secondary{ background:transparent; border-color:var(--border); color:var(--text-secondary); }
+  .btn-secondary:hover{ background:var(--bg-surface-hover); color:var(--text-primary); border-color:var(--border-strong); }
+  .btn-small{ height:34px; padding:0 14px; font-size:13px; }
+  .btn-arrow{ font-size:15px; }
+
+  .autoplay-toggle{ display:flex; align-items:center; gap:10px; cursor:pointer; }
+  .switch-label{ font-size:13px; color:var(--text-secondary); }
+  .switch-track{
+    position:relative; width:36px; height:20px; border-radius:var(--radius-sm);
+    background:var(--border-strong); border:1px solid var(--border);
+    transition:background-color 150ms ease-out;
+  }
+  .switch-thumb{
+    position:absolute; top:2px; left:2px; width:14px; height:14px;
+    border-radius:var(--radius-sm); background:var(--text-tertiary);
+    transition:transform 150ms ease-out, background-color 150ms ease-out;
+  }
+  .autoplay-toggle:has(.visually-hidden-input:checked) .switch-track{ background:rgba(139,139,245,.22); border-color:var(--accent); }
+  .autoplay-toggle:has(.visually-hidden-input:checked) .switch-thumb{ transform:translateX(16px); background:var(--accent); }
+  .autoplay-toggle:has(.visually-hidden-input:focus-visible) .switch-track{ outline:2px solid var(--accent); outline-offset:2px; }
+  .switch-state{ font-size:13px; min-width:34px; }
+  .autoplay-toggle:has(.visually-hidden-input:checked) .switch-state{ color:var(--accent); }
+  .autoplay-toggle:has(.visually-hidden-input:checked) .state-off{ display:none; }
+  .autoplay-toggle:not(:has(.visually-hidden-input:checked)) .state-on{ display:none; }
+  .autoplay-toggle:not(:has(.visually-hidden-input:checked)) .switch-state{ color:var(--text-tertiary); }
+
+  /* ---------- inspector ---------- */
+  .inspector{
+    border:1px solid var(--border); border-radius:var(--radius-lg);
+    background:var(--bg-surface); min-width:0; align-self:start;
+    transition:width 220ms ease-out;
+  }
+  .inspector-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:4px 8px 4px 20px; border-bottom:1px solid var(--border);
+  }
+  .tabs-row{ display:flex; gap:4px; }
+  .tab-label{
+    padding:14px 4px; margin-right:16px; font-size:14px; font-weight:500;
+    color:var(--text-secondary); border-bottom:2px solid transparent; cursor:pointer;
+    transition:color 150ms ease-out, border-color 150ms ease-out;
+  }
+  .inspector:has(#tab-cur:checked) .tab-label[for="tab-cur"],
+  .inspector:has(#tab-note:checked) .tab-label[for="tab-note"]{
+    color:var(--text-primary); border-bottom-color:var(--accent);
+  }
+  .collapse-label{
+    display:flex; align-items:center; justify-content:center;
+    width:28px; height:28px; border-radius:var(--radius-sm); color:var(--text-tertiary); cursor:pointer;
+    transition:background-color 120ms ease-out, color 120ms ease-out;
+  }
+  .collapse-label:hover{ background:var(--bg-surface-hover); color:var(--text-primary); }
+  .collapse-label svg{ transition:transform 220ms ease-out; }
+
+  .tab-panel[data-panel="notes"]{ display:none; }
+  .inspector:has(#tab-note:checked) [data-panel="notes"]{ display:block; }
+  .inspector:has(#tab-note:checked) [data-panel="curriculum"]{ display:none; }
+
+  .status-legend{
+    display:flex; flex-wrap:wrap; gap:14px;
+    padding:14px 20px; border-bottom:1px solid var(--border);
+  }
+  .legend-chip{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-tertiary); }
+  .legend-chip .icon{ width:12px; height:12px; }
+  .legend-chip:nth-child(1) .icon{ color:var(--success); }
+  .legend-chip:nth-child(2) .icon{ color:var(--accent); }
+  .legend-chip:nth-child(3) .icon{ color:var(--text-tertiary); }
+  .legend-chip:nth-child(4) .icon{ color:var(--warning); }
+
+  .lecture-list{ display:flex; flex-direction:column; }
+  .lecture-row{
+    display:grid; grid-template-columns:16px 1fr auto; grid-template-areas:"icon title title" ". time status";
+    column-gap:10px; row-gap:4px; align-items:start;
+    padding:14px 20px; border-bottom:1px solid var(--border);
+    position:relative;
+  }
+  .lecture-row:last-child{ border-bottom:none; }
+  .lecture-row::before{
+    content:''; position:absolute; left:0; top:0; bottom:0; width:0;
+    background:var(--accent); transition:width 120ms ease-out;
+  }
+  .lecture-row:hover{ background:var(--bg-surface-hover); }
+  .lecture-row:hover::before{ width:2px; }
+  .lecture-row.is-locked{ cursor:not-allowed; }
+  .lecture-row.is-locked:hover{ background:transparent; }
+  .lecture-row.is-locked:hover::before{ width:0; }
+  .lecture-row.is-locked .lecture-title{ color:var(--text-tertiary); }
+  .lecture-row.is-current{ background:var(--bg-surface-raised); }
+
+  .row-icon{ grid-area:icon; margin-top:3px; }
+  .lecture-row.is-done .row-icon{ color:var(--success); }
+  .lecture-row.is-playing .row-icon{ color:var(--accent); }
+  .lecture-row.is-locked .row-icon{ color:var(--text-tertiary); }
+
+  .lecture-title{
+    grid-area:title; font-size:14px; color:var(--text-primary);
+    overflow-wrap:break-word; line-height:1.4;
+  }
+  .lecture-time{ grid-area:time; font-size:13px; color:var(--text-secondary); }
+  .lecture-status{ grid-area:status; justify-self:end; font-size:12px; font-weight:500; }
+  .status-done{ color:var(--success); }
+  .status-playing{ color:var(--accent); }
+  .status-locked{ color:var(--text-tertiary); }
+
+  /* ---------- empty state (notes tab) ---------- */
+  .empty-state{
+    padding:40px 24px; display:flex; flex-direction:column; align-items:center;
+    text-align:center; gap:8px;
+  }
+  .empty-title{ font-size:15px; font-weight:600; color:var(--text-primary); }
+  .empty-sub{ font-size:13px; color:var(--text-secondary); max-width:220px; }
+  .empty-state .btn{ margin-top:12px; }
+
+  /* ---------- collapsed inspector state ---------- */
+  .inspector:has(#panel-collapse:checked){ width:64px; }
+  .inspector:has(#panel-collapse:checked) .tab-label,
+  .inspector:has(#panel-collapse:checked) .status-legend,
+  .inspector:has(#panel-collapse:checked) .tab-panel{ display:none; }
+  .inspector:has(#panel-collapse:checked) .collapse-label svg{ transform:rotate(180deg); }
+
+  /* ---------- footer ---------- */
+  .site-footer{
+    text-align:center; padding:32px; font-size:12px; color:var(--text-tertiary);
+    border-top:1px solid var(--border);
+  }
+
+  /* ---------- entrance choreography ---------- */
+  @media (prefers-reduced-motion:no-preference){
+    .page{ animation:pageFadeIn 220ms ease-out both; }
+    @keyframes pageFadeIn{ from{ opacity:0; } to{ opacity:1; } }
+
+    .crumb{ animation:textSharpen 160ms ease-out both; }
+    .crumb:nth-child(1){ animation-delay:100ms; }
+    .crumb-sep{ animation:textSharpen 160ms ease-out both; animation-delay:118ms; }
+    .crumb.current{ animation-delay:136ms; }
+    @keyframes textSharpen{ from{ color:var(--text-tertiary); } }
+
+    .toolbar .tb-group{ animation:groupRise 200ms ease-out both; }
+    .toolbar .tb-group:nth-child(1){ animation-delay:250ms; }
+    .toolbar .tb-group:nth-child(2){ animation-delay:340ms; }
+    .toolbar .tb-group:nth-child(3){ animation-delay:430ms; }
+    .toolbar .tb-group:nth-child(4){ animation-delay:520ms; }
+    .toolbar .tb-group:nth-child(5){ animation-delay:610ms; }
+    .toolbar .tb-group:nth-child(6){ animation-delay:700ms; }
+    @keyframes groupRise{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
+
+    .scrubber-fill{ animation:fillDraw 600ms ease-out 450ms both; }
+    @keyframes fillDraw{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+
+    .lecture-row{ animation:rowFadeIn 220ms ease-out both; }
+    .lecture-row:nth-child(1){ animation-delay:600ms; }
+    .lecture-row:nth-child(2){ animation-delay:624ms; }
+    .lecture-row:nth-child(3){ animation-delay:648ms; }
+    .lecture-row:nth-child(4){ animation-delay:672ms; }
+    .lecture-row:nth-child(5){ animation-delay:696ms; }
+    .lecture-row:nth-child(6){ animation-delay:720ms; }
+    @keyframes rowFadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{
+      animation-duration:0.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.01ms !important;
+    }
+    .page,.crumb,.crumb-sep,.crumb.current,.toolbar .tb-group,.scrubber-fill,.lecture-row{
+      opacity:1 !important; transform:none !important;
+    }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .topnav-inner{ padding:0 16px; height:auto; flex-wrap:wrap; padding-top:12px; padding-bottom:12px; gap:8px 16px; }
+    .breadcrumb{ order:3; width:100%; }
+    .workspace{ grid-template-columns:1fr; padding:16px; gap:24px; }
+    .inspector{ width:auto !important; }
+    .inspector:has(#panel-collapse:checked) .tab-label,
+    .inspector:has(#panel-collapse:checked) .status-legend,
+    .inspector:has(#panel-collapse:checked) .tab-panel{ display:revert; }
+    .collapse-label{ display:none; }
+    .toolbar{ gap:12px; }
+    .tb-group + .tb-group,.tb-group.tb-right{ padding-left:12px; }
+    .lecture-row{ grid-template-columns:16px 1fr auto; }
+    .action-bar{ flex-direction:column; align-items:stretch; }
+    .action-primary-group{ justify-content:stretch; }
+    .action-primary-group .btn{ flex:1; justify-content:center; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="icon-check" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-play" viewBox="0 0 16 16"><path d="M4 3l9 5-9 5V3z" fill="currentColor"/></symbol>
+    <symbol id="icon-lock" viewBox="0 0 16 16"><path d="M4.5 7V5.2a3.5 3.5 0 117 0V7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><rect x="3.2" y="7" width="9.6" height="7" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+    <symbol id="icon-new" viewBox="0 0 16 16"><path d="M8 2.5l1.2 3.4 3.4 1.2-3.4 1.2L8 11.7l-1.2-3.4-3.4-1.2 3.4-1.2L8 2.5z" fill="currentColor"/></symbol>
+    <symbol id="icon-expand" viewBox="0 0 16 16"><path d="M6 2H2v4M10 2h4v4M6 14H2v-4M10 14h4v-4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-volume" viewBox="0 0 16 16"><path d="M2 6h2.5L8 3v10L4.5 10H2V6z" fill="currentColor"/><path d="M10.5 5.5a3.5 3.5 0 010 5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></symbol>
+    <symbol id="icon-collapse" viewBox="0 0 16 16"><path d="M10 3L6 8l4 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="page">
+
+  <header class="topnav" data-region="nav">
+    <div class="topnav-inner">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 28 28" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="7" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 9l8 5-8 5V9z" fill="currentColor"/></svg>
+        <span class="brand-word">배움터</span>
+      </div>
+      <nav class="breadcrumb" aria-label="현재 위치">
+        <span class="crumb">프론트엔드 마스터</span>
+        <span class="crumb-sep" aria-hidden="true">›</span>
+        <span class="crumb current">3. 상태관리</span>
+      </nav>
+      <div class="nav-progress tnum"><span class="count-current">12</span><span> / 48강 완료</span></div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="workspace">
+
+      <section class="player-col">
+        <div class="player-panel">
+          <div class="canvas" data-region="canvas">
+            <div class="video-frame">
+              <div class="title-overlay">
+                <h1 class="video-title">3-4. useReducer로 복잡한 상태 다루기 — 언제 useState를 넘어서야 하는가</h1>
+              </div>
+              <div class="caption-overlay">
+                <p class="caption-text">"...이 지점에서 상태가 여러 갈래로 나뉘죠"</p>
+              </div>
+              <div class="scrubber">
+                <div class="scrubber-track">
+                  <div class="scrubber-fill" style="width:59.5%"></div>
+                  <div class="scrubber-handle" style="left:59.5%"></div>
+                </div>
+                <div class="time-readout tnum">
+                  <span class="time-current">12:34</span><span class="time-sep">/</span><span class="time-total">21:08</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="toolbar" data-region="toolbar">
+            <div class="tb-group tb-playback">
+              <button type="button" class="tb-icon-btn" aria-label="이전 강의" data-tip="이전 강의">⏮</button>
+              <button type="button" class="tb-icon-btn primary" aria-label="일시정지" data-tip="일시정지">
+                <span class="tb-glyph" aria-hidden="true">⏯</span><span class="tb-text">일시정지</span>
+              </button>
+              <button type="button" class="tb-icon-btn" aria-label="다음 강의" data-tip="다음 강의">⏭</button>
+            </div>
+
+            <div class="tb-group">
+              <details class="tb-dropdown">
+                <summary data-tip="재생 속도">
+                  <span class="tb-label-caps">속도</span>
+                  <span class="tb-value tnum">1.25x</span>
+                  <span class="caret" aria-hidden="true">▾</span>
+                </summary>
+                <ul class="dropdown-menu tnum">
+                  <li>0.5x</li><li>0.75x</li><li>1x</li><li class="active">1.25x</li><li>1.5x</li><li>2x</li>
+                </ul>
+              </details>
+            </div>
+
+            <div class="tb-group">
+              <label class="tb-pill">
+                <input type="checkbox" checked class="visually-hidden-input">
+                <span class="tb-label-caps">자막</span>
+                <span class="tb-pill-state">
+                  <span class="state-on">켜짐</span><span class="state-off">꺼짐</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="tb-group">
+              <details class="tb-dropdown">
+                <summary data-tip="화질 설정">
+                  <span class="tb-label-caps">화질</span>
+                  <span class="tb-value tnum">1080p</span>
+                  <span class="caret" aria-hidden="true">▾</span>
+                </summary>
+                <ul class="dropdown-menu tnum">
+                  <li>2160p</li><li>1440p</li><li class="active">1080p</li><li>720p</li><li>480p</li>
+                </ul>
+              </details>
+            </div>
+
+            <div class="tb-group">
+              <button type="button" class="tb-icon-btn" aria-label="볼륨" data-tip="볼륨">
+                <svg class="icon" aria-hidden="true"><use href="#icon-volume"></use></svg>
+                <span class="tb-text">볼륨</span>
+              </button>
+              <input type="range" class="volume-slider" min="0" max="100" value="70" aria-label="볼륨 조절">
+            </div>
+
+            <div class="tb-group tb-right">
+              <button type="button" class="tb-icon-btn" aria-label="전체화면" data-tip="전체화면">
+                <svg class="icon" aria-hidden="true"><use href="#icon-expand"></use></svg>
+                <span class="tb-text">전체화면</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-bar" data-region="action">
+          <div class="action-primary-group">
+            <button type="button" class="btn btn-primary">다음 강의<span class="btn-arrow" aria-hidden="true">›</span></button>
+            <button type="button" class="btn btn-secondary">노트 추가</button>
+          </div>
+          <label class="autoplay-toggle">
+            <input type="checkbox" checked class="visually-hidden-input">
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            <span class="switch-label">자동재생</span>
+            <span class="switch-state"><span class="state-on">켜짐</span><span class="state-off">꺼짐</span></span>
+          </label>
+        </div>
+      </section>
+
+      <aside class="inspector" data-region="inspector">
+        <input type="radio" name="inspector-tab" id="tab-cur" class="visually-hidden-input" checked>
+        <input type="radio" name="inspector-tab" id="tab-note" class="visually-hidden-input">
+        <input type="checkbox" id="panel-collapse" class="visually-hidden-input">
+
+        <div class="inspector-header">
+          <div class="tabs-row" role="tablist">
+            <label class="tab-label" for="tab-cur">커리큘럼</label>
+            <label class="tab-label" for="tab-note">노트</label>
+          </div>
+          <label class="collapse-label" for="panel-collapse" aria-label="패널 접기·펼치기" tabindex="0">
+            <svg class="icon" aria-hidden="true"><use href="#icon-collapse"></use></svg>
+          </label>
+        </div>
+
+        <div class="tab-panel" data-panel="curriculum">
+          <div class="status-legend">
+            <span class="legend-chip"><svg class="icon" aria-hidden="true"><use href="#icon-check"></use></svg>완료</span>
+            <span class="legend-chip"><svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg>재생 중</span>
+            <span class="legend-chip"><svg class="icon" aria-hidden="true"><use href="#icon-lock"></use></svg>잠김</span>
+            <span class="legend-chip"><svg class="icon" aria-hidden="true"><use href="#icon-new"></use></svg>새 강의</span>
+          </div>
+
+          <ol class="lecture-list">
+            <li class="lecture-row is-done">
+              <svg class="icon row-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
+              <span class="lecture-title">3-1. 상태관리가 필요한 순간</span>
+              <span class="lecture-time tnum">14:20</span>
+              <span class="lecture-status status-done">완료</span>
+            </li>
+            <li class="lecture-row is-done">
+              <svg class="icon row-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
+              <span class="lecture-title">3-2. useState 되짚기</span>
+              <span class="lecture-time tnum">09:55</span>
+              <span class="lecture-status status-done">완료</span>
+            </li>
+            <li class="lecture-row is-done">
+              <svg class="icon row-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
+              <span class="lecture-title">3-3. Context의 함정</span>
+              <span class="lecture-time tnum">18:02</span>
+              <span class="lecture-status status-done">완료</span>
+            </li>
+            <li class="lecture-row is-playing is-current">
+              <svg class="icon row-icon" aria-hidden="true"><use href="#icon-play"></use></svg>
+              <span class="lecture-title">3-4. useReducer로 복잡한 상태 다루기 — 언제 useState를 넘어서야 하는가</span>
+              <span class="lecture-time tnum">21:08</span>
+              <span class="lecture-status status-playing">재생 중</span>
+            </li>
+            <li class="lecture-row is-locked">
+              <svg class="icon row-icon" aria-hidden="true"><use href="#icon-lock"></use></svg>
+              <span class="lecture-title">3-5. 실습: 장바구니 리듀서</span>
+              <span class="lecture-time tnum">—</span>
+              <span class="lecture-status status-locked">잠김</span>
+            </li>
+            <li class="lecture-row is-locked">
+              <svg class="icon row-icon" aria-hidden="true"><use href="#icon-lock"></use></svg>
+              <span class="lecture-title">3-6. 정리와 퀴즈</span>
+              <span class="lecture-time tnum">06:40</span>
+              <span class="lecture-status status-locked">잠김</span>
+            </li>
+          </ol>
+        </div>
+
+        <div class="tab-panel" data-panel="notes">
+          <div class="empty-state" data-region="empty">
+            <p class="empty-title">아직 이 강의에 남긴 노트가 없어요</p>
+            <p class="empty-sub">재생 중 아무 때나 메모하면 타임코드와 함께 저장돼요.</p>
+            <button type="button" class="btn btn-primary btn-small">현재 지점에 노트 추가</button>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">STYLE 26 · 다크 프로 미니멀</footer>
+</div>
+
+</body>
+</html>

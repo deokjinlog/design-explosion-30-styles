@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>배움터 · 3-4. useReducer로 복잡한 상태 다루기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#FBFAFF;
+    --surface:#FFFFFF;
+    --ink:#17143A;
+    --muted:#7B7897;
+    --muted-text:#5B5775;
+    --violet:#7C5CFF;
+    --violet-deep:#5636C7;
+    --pink:#FF8FC0;
+    --pink-deep:#B23572;
+    --mint:#5EE6C8;
+    --mint-deep:#0E7C5F;
+    --border:rgba(23,20,58,.08);
+    --border-strong:rgba(23,20,58,.14);
+    --shadow-l1:0 10px 30px rgba(23,20,58,.06);
+    --shadow-l2:0 20px 40px rgba(124,92,255,.15);
+    --grad:linear-gradient(135deg, var(--violet), var(--pink));
+    --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:24px; --r-2xl:28px;
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px; --sp-16:64px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3,p,ul,li{ margin:0; padding:0; list-style:none; }
+  button{ font-family:inherit; cursor:pointer; }
+
+  /* ── L0 배경: 블러 파스텔 블롭 2개 ── */
+  .blob{ position:fixed; border-radius:50%; filter:blur(90px); z-index:0; pointer-events:none; opacity:.55; }
+  .blob-violet{ width:420px; height:420px; top:-120px; right:-100px; background:var(--violet); }
+  .blob-mint{ width:380px; height:380px; bottom:-140px; left:-120px; background:var(--mint); }
+
+  .app{ position:relative; z-index:1; max-width:1280px; margin:0 auto; padding:var(--sp-6) var(--sp-6) var(--sp-16); }
+
+  /* ── NAV ── */
+  .nav{
+    display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4);
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--r-2xl); box-shadow:var(--shadow-l1);
+    padding:var(--sp-4) var(--sp-6); margin-bottom:var(--sp-6);
+  }
+  .nav-left{ display:flex; align-items:center; gap:var(--sp-6); min-width:0; }
+  .brand{
+    font-size:20px; font-weight:800; letter-spacing:-0.02em; white-space:nowrap;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .crumb{ display:flex; align-items:center; gap:var(--sp-2); font-size:13px; color:var(--muted-text); min-width:0; }
+  .crumb .cur{ color:var(--ink); font-weight:600; }
+  .crumb-sep{ color:var(--muted); }
+
+  .nav-stat{ display:flex; flex-direction:column; align-items:flex-end; line-height:1; flex-shrink:0; }
+  .nav-stat .num{ font-size:44px; font-weight:800; letter-spacing:-0.03em; }
+  .nav-stat .num .of{ font-size:18px; font-weight:600; color:var(--muted-text); letter-spacing:-0.01em; }
+  .nav-stat .cap{ margin-top:var(--sp-1); font-size:11px; font-weight:600; color:var(--muted-text); letter-spacing:.02em; }
+
+  /* ── LAYOUT ── */
+  .layout{ display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:var(--sp-6); align-items:start; }
+
+  /* ── PLAYER CARD (L1 surface) ── */
+  .player-card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--r-2xl); box-shadow:var(--shadow-l1); overflow:hidden;
+  }
+
+  /* ── CANVAS (video, 주인공) ── */
+  .canvas{
+    position:relative; width:100%; aspect-ratio:16/9; background:
+      radial-gradient(circle at 22% 28%, rgba(124,92,255,.55), transparent 55%),
+      radial-gradient(circle at 78% 68%, rgba(255,143,192,.45), transparent 55%),
+      #14101F;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    color:#fff;
+  }
+  .canvas-top{ position:absolute; top:var(--sp-4); left:var(--sp-4); right:var(--sp-4); display:flex; justify-content:space-between; align-items:flex-start; gap:var(--sp-3); }
+  .live-chip{
+    display:inline-flex; align-items:center; gap:var(--sp-2);
+    background:rgba(255,255,255,.12); backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:999px; padding:6px 12px; font-size:12px; font-weight:700; color:#fff;
+  }
+  .pulse-dot{ position:relative; width:7px; height:7px; border-radius:50%; background:var(--mint); flex-shrink:0; }
+  .pulse-dot::after{
+    content:''; position:absolute; inset:-5px; border-radius:50%; background:var(--mint);
+    animation:breathe 2s ease-in-out infinite;
+  }
+  @keyframes breathe{ 0%{ transform:scale(.5); opacity:.55; } 70%{ transform:scale(1.9); opacity:0; } 100%{ opacity:0; } }
+
+  .canvas-overlay{ padding:var(--sp-6); background:linear-gradient(to top, rgba(10,8,20,.86), rgba(10,8,20,0)); }
+  .canvas-title{
+    font-size:20px; font-weight:700; line-height:1.4; letter-spacing:-0.01em;
+    max-width:720px; overflow-wrap:break-word; margin-bottom:var(--sp-2);
+  }
+  .canvas-caption{ font-size:13px; color:rgba(255,255,255,.78); margin-bottom:var(--sp-4); }
+
+  .scrub{ display:flex; align-items:center; gap:var(--sp-3); }
+  .scrub-track{ position:relative; flex:1; height:6px; border-radius:999px; background:rgba(255,255,255,.22); overflow:hidden; }
+  .scrub-fill{
+    position:absolute; inset:0 auto 0 0; width:59.5%; border-radius:999px; background:var(--grad);
+    animation:fillbar .7s cubic-bezier(.16,1,.3,1) .3s both;
+  }
+  @keyframes fillbar{ from{ width:0; } to{ width:59.5%; } }
+  .scrub-time{ font-size:12px; font-weight:600; color:rgba(255,255,255,.9); white-space:nowrap; }
+
+  /* ── TOOLBAR ── */
+  .toolbar{
+    display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4);
+    padding:var(--sp-3) var(--sp-6); border-top:1px solid var(--border); flex-wrap:wrap;
+  }
+  .tb-group{ display:flex; align-items:center; gap:var(--sp-2); }
+  .tb-btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    height:36px; padding:0 var(--sp-3); border:1px solid var(--border); border-radius:var(--r-md);
+    background:var(--surface); color:var(--ink); font-size:13px; font-weight:600;
+    transition:background .18s ease, box-shadow .18s ease, transform .18s ease, border-color .18s ease;
+  }
+  .tb-btn:hover, .tb-btn:focus-visible{
+    background:#F3F1FF; border-color:var(--border-strong); box-shadow:var(--shadow-l2); transform:translateY(-2px);
+    outline:none;
+  }
+  .tb-btn.primary-ctrl{
+    width:44px; height:44px; border-radius:50%; background:var(--ink); color:#fff; font-size:16px; border:none;
+  }
+  .tb-btn.primary-ctrl:hover, .tb-btn.primary-ctrl:focus-visible{ background:var(--violet-deep); transform:translateY(-2px) scale(1.03); }
+  .tb-btn.icon-only{ width:36px; padding:0; }
+  .tb-sep{ width:1px; height:20px; background:var(--border-strong); margin:0 var(--sp-1); }
+  .tb-label{ font-size:12px; color:var(--muted-text); font-weight:600; }
+  .tb-vol{ display:flex; align-items:center; gap:var(--sp-2); }
+  .tb-vol-track{ width:64px; height:4px; border-radius:999px; background:var(--border-strong); position:relative; }
+  .tb-vol-fill{ position:absolute; inset:0 auto 0 0; width:70%; background:var(--muted); border-radius:999px; }
+
+  /* ── ACTION ── */
+  .actions{
+    display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); flex-wrap:wrap;
+    padding:var(--sp-4) var(--sp-6); border-top:1px solid var(--border);
+  }
+  .actions-left{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 var(--sp-4);
+    border-radius:var(--r-md); font-size:14px; font-weight:700; border:1px solid transparent;
+    transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+  /* 그라디언트는 로고·스크럽바 같은 비텍스트 표면 전용 — 버튼 글자는 명도 대비 확보를 위해 단색 */
+  .btn-primary{ background:var(--violet-deep); color:#fff; box-shadow:0 8px 20px rgba(124,92,255,.28); }
+  .btn-primary:hover, .btn-primary:focus-visible{ background:#4A2CB8; transform:translateY(-3px); box-shadow:var(--shadow-l2); outline:none; }
+  .btn-secondary{ background:var(--surface); color:var(--ink); border-color:var(--border-strong); }
+  .btn-secondary:hover, .btn-secondary:focus-visible{ background:#F5F3FF; transform:translateY(-3px); box-shadow:var(--shadow-l2); outline:none; }
+
+  .autoplay{ display:flex; align-items:center; gap:var(--sp-2); font-size:13px; font-weight:600; color:var(--muted-text); }
+  .switch{ position:relative; display:inline-flex; align-items:center; }
+  .switch input{ position:absolute; opacity:0; width:36px; height:20px; margin:0; cursor:pointer; }
+  .switch .track{ width:36px; height:20px; border-radius:999px; background:var(--border-strong); transition:background .2s ease; }
+  .switch .thumb{ position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(23,20,58,.3); transition:transform .2s ease; }
+  .switch input:checked ~ .track{ background:var(--grad); }
+  .switch input:checked ~ .thumb{ transform:translateX(16px); }
+  .switch input:focus-visible ~ .track{ outline:2px solid var(--violet); outline-offset:2px; }
+  .autoplay .state-on{ display:none; color:var(--violet-deep); }
+  .autoplay .state-off{ display:inline; }
+  .switch input:checked ~ .track ~ .autoplay-label .state-on{ display:inline; }
+  .switch input:checked ~ .track ~ .autoplay-label .state-off{ display:none; }
+
+  /* ── INSPECTOR ── */
+  .inspector{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--r-2xl); box-shadow:var(--shadow-l1); overflow:hidden;
+    display:flex; flex-direction:column; min-height:520px;
+  }
+  .tabs{ display:flex; border-bottom:1px solid var(--border); }
+  .tabs input{ position:absolute; opacity:0; pointer-events:none; }
+  .tabs label{
+    flex:1; text-align:center; padding:var(--sp-4) var(--sp-2); font-size:14px; font-weight:700;
+    color:var(--muted-text); cursor:pointer; border-bottom:2px solid transparent;
+    transition:color .18s ease, border-color .18s ease;
+  }
+  #tab-curr:checked ~ .tabs label[for="tab-curr"],
+  #tab-note:checked ~ .tabs label[for="tab-note"]{ color:var(--violet-deep); border-color:var(--violet); }
+
+  .panel{ display:none; padding:var(--sp-2) 0; flex:1; overflow:auto; }
+  #tab-curr:checked ~ .panels .panel-curr{ display:block; }
+  #tab-note:checked ~ .panels .panel-note{ display:block; }
+
+  .chapter-label{
+    font-size:12px; font-weight:700; color:var(--muted-text); letter-spacing:.02em;
+    padding:var(--sp-4) var(--sp-6) var(--sp-2);
+  }
+
+  .lec-row{
+    display:grid; grid-template-columns:24px minmax(0,1fr) 52px; gap:var(--sp-3);
+    align-items:start; padding:var(--sp-3) var(--sp-6);
+    border-left:3px solid transparent;
+    transition:background .18s ease;
+    opacity:0; transform:translateY(10px);
+    animation:rowin .45s ease-out both;
+  }
+  .lec-row:hover{ background:#F5F3FF; }
+  .lec-row:hover .lec-idx{ color:var(--violet-deep); font-weight:800; }
+  .lec-row.is-current{ background:#F7F4FF; border-left-color:var(--violet); animation:rowin .45s ease-out both, poplive .4s ease-out .55s both; }
+
+  @keyframes rowin{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes poplive{ 0%{ transform:scale(1); } 55%{ transform:scale(1.012); } 100%{ transform:scale(1); } }
+
+  .lec-icon{ width:20px; height:20px; margin-top:2px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .lec-icon svg{ width:100%; height:100%; display:block; }
+
+  .lec-title{ min-width:0; }
+  .lec-idx{ font-size:13px; font-weight:600; color:var(--ink); line-height:1.45; overflow-wrap:break-word; transition:color .18s ease; }
+  .lec-time{ font-size:12px; color:var(--muted-text); text-align:right; padding-top:2px; white-space:nowrap; }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:5px; margin-top:6px;
+    padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700;
+  }
+  .badge-done{ background:rgba(94,230,200,.16); color:var(--mint-deep); }
+  .badge-live{ background:rgba(124,92,255,.14); color:var(--violet-deep); }
+  .badge-lock{ background:rgba(23,20,58,.06); color:var(--muted-text); }
+  .badge-new{ background:rgba(255,143,192,.16); color:var(--pink-deep); }
+
+  .next-chapter{
+    margin:var(--sp-4) var(--sp-6) var(--sp-2); padding:var(--sp-3) var(--sp-4);
+    border:1px dashed var(--border-strong); border-radius:var(--r-lg);
+    display:flex; align-items:center; justify-content:space-between; gap:var(--sp-2);
+  }
+  .next-chapter .nc-title{ font-size:13px; font-weight:600; color:var(--muted-text); }
+  .next-chapter .nc-time{ font-size:12px; color:var(--muted); margin-left:auto; margin-right:var(--sp-2); }
+
+  /* ── NOTES (empty state) ── */
+  .empty{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:var(--sp-12) var(--sp-6); gap:var(--sp-2); }
+  .empty-icon{ width:56px; height:56px; border-radius:var(--r-xl); background:#F5F3FF; display:flex; align-items:center; justify-content:center; margin-bottom:var(--sp-2); }
+  .empty-icon svg{ width:26px; height:26px; color:var(--violet); }
+  .empty-title{ font-size:15px; font-weight:700; color:var(--ink); }
+  .empty-desc{ font-size:13px; color:var(--muted-text); line-height:1.6; max-width:240px; }
+  .empty .btn-primary{ margin-top:var(--sp-4); }
+
+  /* ── FOOTER ── */
+  .footer{ margin-top:var(--sp-8); text-align:center; font-size:12px; color:var(--muted-text); letter-spacing:.02em; }
+
+  /* ── entrance stagger (header/canvas/toolbar) — 총 1.2초 이내 ── */
+  .fade-up{ opacity:1; transform:none; animation:fadeup .4s ease-out both; }
+  @keyframes fadeup{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:translateY(0); } }
+  .nav{ animation-delay:0s; }
+  .player-card .canvas{ animation:fadeup .4s ease-out .08s both; }
+  .inspector{ animation:fadeup .4s ease-out .1s both; }
+  .toolbar{ animation:fadeup .4s ease-out .14s both; }
+  .actions{ animation:fadeup .4s ease-out .18s both; }
+
+  .lec-row:nth-child(1){ animation-delay:.22s; }
+  .lec-row:nth-child(2){ animation-delay:.26s; }
+  .lec-row:nth-child(3){ animation-delay:.30s; }
+  .lec-row:nth-child(4){ animation-delay:.34s, .7s; }
+  .lec-row:nth-child(5){ animation-delay:.38s; }
+  .lec-row:nth-child(6){ animation-delay:.42s; }
+
+  /* ── 반응형 ── */
+  @media (max-width:900px){
+    .app{ padding:var(--sp-4); }
+    .layout{ grid-template-columns:1fr; }
+    .nav{ flex-wrap:wrap; }
+    .nav-stat{ align-items:flex-start; }
+    .lec-row{ grid-template-columns:20px minmax(0,1fr) auto; }
+    .toolbar{ justify-content:flex-start; }
+    .tb-vol{ display:none; }
+  }
+  @media (max-width:480px){
+    .nav-stat .num{ font-size:32px; }
+    .canvas-title{ font-size:16px; }
+    .actions{ flex-direction:column; align-items:flex-start; }
+  }
+
+  /* ── 접근성: 모션 축소 ── */
+  @media (prefers-reduced-motion: reduce){
+    .fade-up, .nav, .canvas, .toolbar, .actions, .inspector, .lec-row, .pulse-dot::after, .scrub-fill{
+      animation:none !important;
+    }
+    .fade-up, .lec-row{ opacity:1 !important; transform:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="blob blob-violet"></div>
+<div class="blob blob-mint"></div>
+
+<div class="app">
+
+  <header class="nav fade-up" data-region="nav">
+    <div class="nav-left">
+      <span class="brand">배움터</span>
+      <nav class="crumb" aria-label="현재 위치">
+        <span>프론트엔드 마스터</span>
+        <span class="crumb-sep">›</span>
+        <span class="cur">3. 상태관리</span>
+      </nav>
+    </div>
+    <div class="nav-stat">
+      <span class="num"><strong id="doneCount" data-target="12">12</strong><span class="of"> / 48강 완료</span></span>
+      <span class="cap">이번 코스 학습 현황</span>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <section class="player-col">
+      <div class="player-card">
+
+        <div class="canvas" data-region="canvas">
+          <div class="canvas-top">
+            <span class="live-chip"><span class="pulse-dot"></span>재생 중</span>
+          </div>
+          <div class="canvas-overlay">
+            <h1 class="canvas-title">3-4. useReducer로 복잡한 상태 다루기 — 언제 useState를 넘어서야 하는가</h1>
+            <p class="canvas-caption">"...이 지점에서 상태가 여러 갈래로 나뉘죠"</p>
+            <div class="scrub">
+              <div class="scrub-track"><div class="scrub-fill"></div></div>
+              <span class="scrub-time">12:34 / 21:08</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar" data-region="toolbar">
+          <div class="tb-group">
+            <button class="tb-btn icon-only" aria-label="이전 강의로">⏮</button>
+            <button class="tb-btn primary-ctrl" aria-label="일시정지">⏯</button>
+            <button class="tb-btn icon-only" aria-label="다음 구간으로">⏭</button>
+            <span class="tb-sep"></span>
+            <div class="tb-vol">
+              <span class="tb-label">볼륨</span>
+              <div class="tb-vol-track"><div class="tb-vol-fill"></div></div>
+            </div>
+          </div>
+          <div class="tb-group">
+            <button class="tb-btn">속도 1.25x ▾</button>
+            <button class="tb-btn">자막 켜짐</button>
+            <button class="tb-btn">화질 1080p</button>
+            <button class="tb-btn icon-only" aria-label="전체화면">⛶</button>
+          </div>
+        </div>
+
+        <div class="actions" data-region="action">
+          <div class="actions-left">
+            <button class="btn btn-primary">다음 강의</button>
+            <button class="btn btn-secondary">노트 추가</button>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="track"></span>
+            <span class="thumb"></span>
+          </label>
+          <span class="autoplay autoplay-label">자동재생 <span class="state-on">켜짐</span><span class="state-off">꺼짐</span></span>
+        </div>
+
+      </div>
+    </section>
+
+    <aside class="inspector" data-region="inspector">
+      <input type="radio" name="itab" id="tab-curr" checked>
+      <input type="radio" name="itab" id="tab-note">
+      <div class="tabs">
+        <label for="tab-curr">커리큘럼</label>
+        <label for="tab-note">노트</label>
+      </div>
+
+      <div class="panels">
+        <div class="panel panel-curr">
+          <p class="chapter-label">3장 · 상태관리</p>
+
+          <div class="lec-row">
+            <span class="lec-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#0E7C5F" stroke-width="1.6"/><path d="M6 10.3l2.6 2.6L14 7.6" stroke="#0E7C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <div class="lec-title">
+              <div class="lec-idx">3-1. 상태관리가 필요한 순간</div>
+              <span class="badge badge-done">완료</span>
+            </div>
+            <div class="lec-time">14:20</div>
+          </div>
+
+          <div class="lec-row">
+            <span class="lec-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#0E7C5F" stroke-width="1.6"/><path d="M6 10.3l2.6 2.6L14 7.6" stroke="#0E7C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <div class="lec-title">
+              <div class="lec-idx">3-2. useState 되짚기</div>
+              <span class="badge badge-done">완료</span>
+            </div>
+            <div class="lec-time">09:55</div>
+          </div>
+
+          <div class="lec-row">
+            <span class="lec-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#0E7C5F" stroke-width="1.6"/><path d="M6 10.3l2.6 2.6L14 7.6" stroke="#0E7C5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <div class="lec-title">
+              <div class="lec-idx">3-3. Context의 함정</div>
+              <span class="badge badge-done">완료</span>
+            </div>
+            <div class="lec-time">18:02</div>
+          </div>
+
+          <div class="lec-row is-current">
+            <span class="lec-icon" aria-hidden="true"><span class="pulse-dot"></span></span>
+            <div class="lec-title">
+              <div class="lec-idx">3-4. useReducer로 복잡한 상태 다루기 — 언제 useState를 넘어서야 하는가</div>
+              <span class="badge badge-live">재생 중</span>
+            </div>
+            <div class="lec-time">21:08</div>
+          </div>
+
+          <div class="lec-row">
+            <span class="lec-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none"><rect x="5" y="9" width="10" height="7.5" rx="1.6" stroke="#5B5775" stroke-width="1.6"/><path d="M7 9V6.6a3 3 0 016 0V9" stroke="#5B5775" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <div class="lec-title">
+              <div class="lec-idx">3-5. 실습: 장바구니 리듀서</div>
+              <span class="badge badge-lock">잠김</span>
+            </div>
+            <div class="lec-time">—</div>
+          </div>
+
+          <div class="lec-row">
+            <span class="lec-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none"><rect x="5" y="9" width="10" height="7.5" rx="1.6" stroke="#5B5775" stroke-width="1.6"/><path d="M7 9V6.6a3 3 0 016 0V9" stroke="#5B5775" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <div class="lec-title">
+              <div class="lec-idx">3-6. 정리와 퀴즈</div>
+              <span class="badge badge-lock">잠김</span>
+            </div>
+            <div class="lec-time">06:40</div>
+          </div>
+
+          <div class="next-chapter">
+            <span class="nc-title">4장 · 이벤트 처리와 최적화</span>
+            <span class="nc-time">—</span>
+            <span class="badge badge-new">새 강의</span>
+          </div>
+        </div>
+
+        <div class="panel panel-note">
+          <div class="empty" data-region="empty">
+            <div class="empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5A1.5 1.5 0 015.5 4h13A1.5 1.5 0 0120 5.5v9a1.5 1.5 0 01-1.5 1.5H9l-4 3.5V16H5.5A1.5 1.5 0 014 14.5v-9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <p class="empty-title">아직 이 강의에 남긴 노트가 없어요</p>
+            <p class="empty-desc">재생 중 아무 때나 메모하면 타임코드와 함께 저장돼요.</p>
+            <button class="btn btn-primary">현재 지점에 노트 추가</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <footer class="footer">STYLE 03 · 트렌디 SaaS</footer>
+</div>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var el = document.getElementById('doneCount');
+  if (!el || reduce) return;
+  var target = parseInt(el.getAttribute('data-target'), 10) || 0;
+  var start = null;
+  var duration = 800;
+  function step(ts){
+    if (start === null) start = ts;
+    var p = Math.min((ts - start) / duration, 1);
+    var eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(eased * target);
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(step);
+})();
+</script>
+
+</body>
+</html>
