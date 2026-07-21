@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>계정 설정 · Flowbase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#F4F5F7;
+    --surface:#FFFFFF;
+    --border:#DFE1E6;
+    --border-strong:#C1C7D0;
+    --primary:#0052CC;
+    --primary-hover:#0747A6;
+    --primary-active:#043584;
+    --link:#0065FF;
+    --text-strong:#172B4D;
+    --text-body:#42526E;
+    --text-muted:#6B778C;
+    --text-disabled:#97A0AF;
+    --row-hover:#FAFBFC;
+    --row-selected:#DEEBFF;
+    --success-fg:#00875A; --success-bg:#E3FCEF;
+    --progress-fg:#0052CC; --progress-bg:#DEEBFF;
+    --warning-fg:#FF8B00; --warning-bg:#FFFAE6;
+    --danger-fg:#DE350B; --danger-bg:#FFEBE6; --danger-hover:#BF2600;
+    --neutral-fg:#42526E; --neutral-bg:#F4F5F7;
+    --font-kr:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    --font-en:'Inter','Pretendard Variable','Pretendard',sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--canvas);
+    color:var(--text-body);
+    font-family:var(--font-kr);
+    font-size:14px;
+    line-height:1.5;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{margin:0;color:var(--text-strong);}
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;border:none;background:none;color:inherit;cursor:pointer;}
+  ul{list-style:none;margin:0;padding:0;}
+
+  :focus-visible{outline:2px solid var(--primary);outline-offset:1px;border-radius:2px;}
+
+  /* ---------- shell ---------- */
+  .topbar{
+    height:56px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    position:sticky;top:0;z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:8px;}
+  .brand-mark{
+    width:24px;height:24px;border-radius:3px;
+    background:var(--primary);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-en);font-weight:600;font-size:13px;flex-shrink:0;
+  }
+  .brand-name{font-family:var(--font-en);font-weight:600;font-size:14px;color:var(--text-strong);}
+  .brand-sep{color:var(--border-strong);font-size:13px;}
+  .brand-workspace{font-size:13px;color:var(--text-muted);}
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .topbar-crumb{font-size:13px;color:var(--text-muted);}
+  .user-chip{
+    width:28px;height:28px;border-radius:50%;
+    background:var(--row-selected);color:var(--primary);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-en);font-weight:600;font-size:12px;
+  }
+
+  .app-body{display:flex;align-items:flex-start;min-height:calc(100vh - 56px);}
+
+  /* ---------- sidebar / nav ---------- */
+  .sidebar{
+    width:240px;flex-shrink:0;
+    background:var(--surface);
+    border-right:1px solid var(--border-strong);
+    padding:16px 0;
+    position:sticky;top:56px;
+    height:calc(100vh - 56px);
+    display:flex;flex-direction:column;
+    transition:width .18s ease;
+  }
+  .sidebar.collapsed{width:56px;}
+  .nav-label-group{
+    padding:0 16px;margin-bottom:8px;
+    font-family:var(--font-en);
+    font-size:11px;line-height:16px;font-weight:600;
+    letter-spacing:.5px;text-transform:uppercase;
+    color:var(--text-disabled);
+    white-space:nowrap;overflow:hidden;
+  }
+  .sidebar.collapsed .nav-label-group{opacity:0;}
+  .nav-list{flex:1;}
+  .nav-item{
+    position:relative;
+    display:flex;align-items:center;gap:12px;
+    height:36px;padding:0 16px;margin:0 8px;border-radius:3px;
+    font-size:14px;font-weight:500;color:var(--text-body);
+    white-space:nowrap;overflow:hidden;
+  }
+  .nav-item:hover{background:var(--neutral-bg);}
+  .nav-item.active{
+    background:var(--row-selected);
+    color:var(--primary);
+  }
+  .nav-item.active::before{
+    content:"";position:absolute;left:-8px;top:6px;bottom:6px;width:3px;
+    border-radius:0 2px 2px 0;
+    background:var(--primary);
+    animation:barGrow .18s ease-out .5s backwards;
+  }
+  .nav-item svg{width:16px;height:16px;flex-shrink:0;}
+  .nav-item span.label{overflow:hidden;text-overflow:ellipsis;}
+  .sidebar.collapsed .nav-item span.label{opacity:0;width:0;}
+  .sidebar-foot{padding:8px 16px 0;border-top:1px solid var(--border);margin-top:8px;}
+  .collapse-btn{
+    display:flex;align-items:center;gap:8px;height:32px;padding:0 8px;
+    border-radius:3px;color:var(--text-muted);font-size:12px;width:100%;
+  }
+  .collapse-btn:hover{background:var(--neutral-bg);color:var(--text-body);}
+  .collapse-btn svg{width:14px;height:14px;flex-shrink:0;transition:transform .18s ease;}
+  .sidebar.collapsed .collapse-btn svg{transform:rotate(180deg);}
+  .sidebar.collapsed .collapse-btn .label{opacity:0;width:0;}
+
+  /* ---------- main ---------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:calc(100vh - 56px);}
+  .content-container{max-width:840px;width:100%;margin:0 auto;padding:32px 32px 40px;flex:1;}
+
+  .page-header{margin-bottom:24px;}
+  .page-header h1{font-size:24px;line-height:28px;font-weight:600;}
+  .page-header p{margin:4px 0 0;font-size:14px;color:var(--text-muted);}
+
+  /* ---------- profile ---------- */
+  .profile-card{
+    display:flex;align-items:center;gap:16px;
+    background:var(--surface);
+    border:1px solid var(--border);border-radius:4px;
+    box-shadow:0 1px 1px rgba(9,30,66,.08);
+    padding:20px 24px;margin-bottom:24px;
+    opacity:1;animation:fadeUp .18s ease-out .08s backwards;
+  }
+  .avatar-lg{
+    width:56px;height:56px;border-radius:50%;flex-shrink:0;
+    background:var(--row-selected);color:var(--primary);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-en);font-weight:600;font-size:22px;
+  }
+  .profile-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
+  .profile-name{font-size:20px;line-height:24px;font-weight:600;}
+  .profile-card .btn{flex-shrink:0;}
+
+  /* ---------- badges ---------- */
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    height:22px;padding:0 8px;border-radius:3px;
+    font-size:12px;font-weight:600;color:var(--text-strong);
+    white-space:nowrap;
+  }
+  .badge .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .badge-success{background:var(--success-bg);}
+  .badge-success .dot{background:var(--success-fg);}
+  .badge-neutral{background:var(--neutral-bg);}
+  .badge-neutral .dot{background:var(--text-disabled);}
+  .badge-warning{background:var(--warning-bg);}
+  .badge-warning .dot{background:var(--warning-fg);}
+
+  /* ---------- settings groups / rows ---------- */
+  .settings-group{
+    background:var(--surface);
+    border:1px solid var(--border);border-radius:4px;
+    box-shadow:0 1px 1px rgba(9,30,66,.08);
+    margin-bottom:24px;overflow:hidden;
+    opacity:1;animation:fadeUp .18s ease-out backwards;
+  }
+  .group-header{
+    padding:10px 16px;
+    background:var(--row-hover);
+    border-bottom:1px solid var(--border);
+    font-family:var(--font-en);
+    font-size:11px;line-height:16px;font-weight:600;
+    letter-spacing:.5px;text-transform:uppercase;
+    color:var(--text-muted);
+  }
+
+  .settings-row{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+    padding:12px 16px;border-bottom:1px solid var(--border);
+    min-height:36px;
+    opacity:1;animation:fadeUp .18s ease-out backwards;
+  }
+  .settings-row:last-child{border-bottom:none;}
+  .settings-row:hover{background:var(--row-hover);}
+
+  .row-main{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
+  .row-label{font-size:14px;line-height:20px;font-weight:500;color:var(--text-strong);}
+  .row-value{font-size:13px;line-height:18px;color:var(--text-muted);}
+  .row-desc{font-size:13px;line-height:18px;color:var(--text-muted);max-width:48ch;}
+
+  .row-control{display:flex;align-items:center;gap:10px;flex-shrink:0;padding-top:1px;}
+
+  .link-action{
+    font-size:13px;font-weight:500;color:var(--link);
+    padding:6px 4px;border-radius:3px;
+  }
+  .link-action:hover{text-decoration:underline;background:var(--row-hover);}
+  .link-action.disabled{
+    color:var(--text-disabled);cursor:not-allowed;pointer-events:none;
+    text-decoration:none;
+  }
+
+  .value-missing{
+    font-size:13px;color:var(--text-disabled);font-style:normal;
+    border-bottom:1px dashed var(--text-disabled);padding-bottom:1px;
+  }
+
+  .select-control{
+    display:inline-flex;align-items:center;gap:6px;
+    height:32px;padding:0 10px;border-radius:3px;
+    border:1px solid var(--border);background:var(--surface);
+    font-size:13px;color:var(--text-strong);font-weight:500;
+  }
+  .select-control:hover{border-color:var(--border-strong);background:var(--row-hover);}
+  .select-control .chev{color:var(--text-muted);font-size:11px;}
+
+  /* ---------- toggle ---------- */
+  .toggle{
+    position:relative;width:36px;height:20px;border-radius:3px;flex-shrink:0;
+    background:var(--border-strong);
+  }
+  .toggle::after{
+    content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;
+    border-radius:2px;background:#fff;
+    box-shadow:0 1px 1px rgba(9,30,66,.3);
+    transition:transform .15s ease;
+  }
+  .toggle.on{background:var(--primary);}
+  .toggle.on::after{transform:translateX(16px);}
+  .toggle:hover{background:var(--text-disabled);}
+  .toggle.on:hover{background:var(--primary-hover);}
+  .toggle[disabled]{opacity:.55;cursor:not-allowed;}
+
+  /* ---------- danger zone ---------- */
+  .settings-group.danger{border-color:var(--danger-fg);}
+  .danger .group-header{
+    background:var(--danger-bg);color:var(--danger-fg);border-bottom-color:#FFBDAD;
+  }
+  .danger .row-label{color:var(--danger-fg);}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    height:36px;padding:0 14px;border-radius:3px;
+    font-size:14px;font-weight:500;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    border:1px solid transparent;
+    transition:background .15s ease,border-color .15s ease,color .15s ease;
+    white-space:nowrap;
+  }
+  .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .btn-primary:hover{background:var(--primary-hover);border-color:var(--primary-hover);}
+  .btn-primary:active{background:var(--primary-active);border-color:var(--primary-active);}
+  .btn-secondary{background:var(--surface);color:var(--text-strong);border-color:var(--border);}
+  .btn-secondary:hover{border-color:var(--border-strong);background:var(--row-hover);}
+  .btn-danger{background:var(--danger-fg);color:#fff;border-color:var(--danger-fg);}
+  .btn-danger:hover{background:var(--danger-hover);border-color:var(--danger-hover);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  /* ---------- action bar ---------- */
+  .action-bar{
+    position:sticky;bottom:0;
+    background:var(--surface);
+    border-top:1px solid var(--border-strong);
+    padding:12px 32px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    flex-wrap:wrap;
+  }
+  .save-status{
+    display:flex;align-items:center;gap:8px;
+    font-size:13px;color:var(--text-muted);
+  }
+  .save-status .dot{width:6px;height:6px;border-radius:50%;background:var(--success-fg);flex-shrink:0;}
+
+  /* ---------- entrance stagger ---------- */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes barGrow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+
+  .settings-group:nth-of-type(1){animation-delay:.14s;}
+  .settings-group:nth-of-type(2){animation-delay:.18s;}
+  .settings-group:nth-of-type(3){animation-delay:.22s;}
+  .settings-group:nth-of-type(4){animation-delay:.26s;}
+
+  .g-account .settings-row:nth-child(2){animation-delay:.18s;}
+  .g-account .settings-row:nth-child(3){animation-delay:.20s;}
+  .g-account .settings-row:nth-child(4){animation-delay:.22s;}
+  .g-notify .settings-row:nth-child(2){animation-delay:.22s;}
+  .g-notify .settings-row:nth-child(3){animation-delay:.24s;}
+  .g-notify .settings-row:nth-child(4){animation-delay:.26s;}
+  .g-security .settings-row:nth-child(2){animation-delay:.26s;}
+  .g-security .settings-row:nth-child(3){animation-delay:.28s;}
+  .g-security .settings-row:nth-child(4){animation-delay:.30s;}
+  .g-danger .settings-row{animation-delay:.30s;}
+
+  footer{
+    text-align:center;padding:24px 16px 32px;
+    font-size:12px;color:var(--text-disabled);
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .app-body{flex-direction:column;}
+    .sidebar{
+      position:static;width:100%!important;height:auto;
+      border-right:none;border-bottom:1px solid var(--border-strong);
+      padding:8px 0;
+    }
+    .sidebar .nav-list{display:flex;overflow-x:auto;gap:4px;padding:0 8px;}
+    .nav-item{margin:0;flex-shrink:0;}
+    .nav-item.active::before{left:0;right:0;left:auto;top:auto;bottom:-8px;height:3px;width:100%;border-radius:2px 2px 0 0;}
+    .nav-label-group,.sidebar-foot{display:none;}
+    .content-container{padding:20px 16px 32px;}
+    .profile-card{flex-wrap:wrap;}
+    .action-bar{padding:12px 16px;}
+  }
+  @media (max-width:560px){
+    .settings-row{flex-direction:column;align-items:flex-start;gap:8px;}
+    .row-control{width:100%;justify-content:flex-start;}
+    .page-header h1{font-size:20px;line-height:24px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{
+      animation:none!important;
+      transition:none!important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar" data-region="identity">
+  <div class="brand">
+    <span class="brand-mark">F</span>
+    <span class="brand-name">Flowbase</span>
+    <span class="brand-sep">/</span>
+    <span class="brand-workspace">이든물류 워크스페이스</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-crumb">설정</span>
+    <span class="user-chip" aria-hidden="true">ㅈ</span>
+  </div>
+</header>
+
+<div class="app-body">
+  <aside class="sidebar" data-region="nav" id="sidebar">
+    <div class="nav-label-group">설정</div>
+    <ul class="nav-list">
+      <li><a href="#" class="nav-item active" aria-current="page" title="프로필">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5.5" r="2.75"/><path d="M2.5 13.5c0-2.8 2.46-4.5 5.5-4.5s5.5 1.7 5.5 4.5"/></svg>
+        <span class="label">프로필</span>
+      </a></li>
+      <li><a href="#" class="nav-item" title="알림">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2.5c-2 0-3.2 1.6-3.2 3.6v2.1L3.5 10.4h9l-1.3-2.2V6.1C11.2 4.1 10 2.5 8 2.5z"/><path d="M6.6 12.3a1.4 1.4 0 002.8 0"/></svg>
+        <span class="label">알림</span>
+      </a></li>
+      <li><a href="#" class="nav-item" title="보안">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2 3 3.8v3.7c0 3 2.1 5.2 5 6 2.9-.8 5-3 5-6V3.8L8 2z"/></svg>
+        <span class="label">보안</span>
+      </a></li>
+      <li><a href="#" class="nav-item" title="결제">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="8.5" rx="1"/><path d="M2 6.8h12"/></svg>
+        <span class="label">결제</span>
+      </a></li>
+      <li><a href="#" class="nav-item" title="연동">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.3 9.7 9.7 6.3"/><path d="M6.9 4.2 8 3.1a2.3 2.3 0 013.3 3.2L10.2 7.4"/><path d="M9.1 11.8 8 12.9a2.3 2.3 0 01-3.3-3.2l1.1-1.1"/></svg>
+        <span class="label">연동</span>
+      </a></li>
+      <li><a href="#" class="nav-item" title="고급">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/><circle cx="6" cy="4.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="11" cy="8" r="1.1" fill="currentColor" stroke="none"/><circle cx="5" cy="11.5" r="1.1" fill="currentColor" stroke="none"/></svg>
+        <span class="label">고급</span>
+      </a></li>
+    </ul>
+    <div class="sidebar-foot">
+      <button class="collapse-btn" id="collapseBtn" aria-label="사이드바 접기/펴기">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3 5 8l5 5"/></svg>
+        <span class="label">접기</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="content-container">
+      <div class="page-header">
+        <h1>설정</h1>
+        <p>계정 정보와 알림, 보안 설정을 관리하세요.</p>
+      </div>
+
+      <section class="profile-card" data-region="profile">
+        <div class="avatar-lg" aria-hidden="true">ㅈ</div>
+        <div class="profile-info">
+          <h2 class="profile-name">정하람</h2>
+          <span class="badge badge-neutral"><span class="dot"></span>일반 회원</span>
+        </div>
+        <button class="btn btn-secondary">사진 변경</button>
+      </section>
+
+      <section data-region="settings-list">
+
+        <div class="settings-group g-account">
+          <div class="group-header">계정</div>
+          <div class="settings-row">
+            <div class="row-main">
+              <span class="row-label">이름</span>
+              <span class="row-value">정하람</span>
+            </div>
+            <div class="row-control">
+              <a href="#" class="link-action">편집</a>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="row-main">
+              <span class="row-label">이메일</span>
+              <span class="row-value">haram@example.com</span>
+            </div>
+            <div class="row-control">
+              <span class="badge badge-success"><span class="dot"></span>인증됨</span>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="row-main">
+              <span class="row-label">언어</span>
+            </div>
+            <div class="row-control">
+              <button class="select-control">한국어 <span class="chev">▾</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group g-notify">
+          <div class="group-header">알림</div>
+          <div class="settings-row">
+            <div class="row-main">
+              <span class="row-label">이메일 알림</span>
+            </div>
+            <div class="row-control">
+              <span class="badge badge-success"><span class="dot"></span>켜짐</span>
+              <button class="toggle on" role="switch" aria-checked="true" aria-label="이메일 알림"></button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="row-main">
+              <span class="row-label">마케팅 수신</span>
+            </div>
+            <div class="row-control">
+              <span class="badge badge-neutral"><span class="dot"></span>꺼짐</span>
+              <button class="toggle" role="switch" aria-checked="false" aria-label="마케팅 수신"></button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="row-main">
+              <span class="row-label">방해 금지 시간</span>
+            </div>
+            <div class="row-control">
+              <span class="value-missing">설정 안 됨</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group g-security">
+          <div class="group-header">보안</div>
+          <div class="settings-row">
+            <div class="row-main">
+              <span class="row-label">2단계 인증</span>
+              <span class="row-desc">로그인 시 추가 인증을 요구해요</span>
+            </div>
+            <div class="row-control">
+              <span class="badge badge-neutral"><span class="dot"></span>사용 안 함</span>
+              <button class="toggle" role="switch" aria-checked="false" aria-label="2단계 인증"></button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="row-main">
+              <span class="row-label">비밀번호</span>
+              <span class="row-value">마지막 변경 3개월 전</span>
+            </div>
+            <div class="row-control">
+              <a href="#" class="link-action">변경</a>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="row-main">
+              <span class="row-label">로그인 기기</span>
+              <span class="row-value">기기 3대</span>
+            </div>
+            <div class="row-control">
+              <span class="badge badge-warning"><span class="dot"></span>확인 중</span>
+              <a href="#" class="link-action disabled" aria-disabled="true" tabindex="-1">관리</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group danger g-danger">
+          <div class="group-header">위험 구역</div>
+          <div class="settings-row">
+            <div class="row-main">
+              <span class="row-label">계정 삭제</span>
+              <span class="row-desc">삭제하면 모든 데이터가 사라지고 되돌릴 수 없어요.</span>
+            </div>
+            <div class="row-control">
+              <button class="btn btn-danger">계정 삭제</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+
+    <div class="action-bar" data-region="action">
+      <div class="save-status">
+        <span class="dot" aria-hidden="true"></span>
+        모든 변경사항 저장됨 · 방금 전
+      </div>
+      <button class="btn btn-primary">변경사항 저장</button>
+    </div>
+  </main>
+</div>
+
+<footer>STYLE 23 · 엔터프라이즈 B2B</footer>
+
+<script>
+  (function(){
+    var btn = document.getElementById('collapseBtn');
+    var sidebar = document.getElementById('sidebar');
+    if(!btn || !sidebar) return;
+    btn.addEventListener('click', function(){
+      sidebar.classList.toggle('collapsed');
+      var collapsed = sidebar.classList.contains('collapsed');
+      btn.querySelector('.label').textContent = collapsed ? '펴기' : '접기';
+      btn.setAttribute('aria-label', collapsed ? '사이드바 펴기' : '사이드바 접기');
+    });
+  })();
+</script>
+
+</body>
+</html>
