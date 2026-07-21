@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>떠나요트립 · 서울 숙소 검색</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    /* ---- M3 tonal palette (그대로 반영) ---- */
+    --md-primary:#6750A4;
+    --md-on-primary:#FFFFFF;
+    --md-primary-container:#EADDFF;
+    --md-on-primary-container:#21005D;
+
+    --md-secondary:#625B71;
+    /* secondary-container/on-secondary-container: 공식 M3 baseline이 이 secondary hex의
+       표준 짝(companion) 토큰이다 — 임의 색 아님, 톤 팔레트 확장 */
+    --md-secondary-container:#E8DEF8;
+    --md-on-secondary-container:#1E192B;
+
+    --md-error:#B3261E;
+    --md-on-error-container:#410E0B;
+    --md-error-container-tint: rgba(179,38,30,.12);
+
+    --md-success:#386A20;
+    --md-success-container-tint: rgba(56,106,32,.12);
+
+    --md-surface:#FEF7FF;
+    --md-surface-container-low:#F7F2FA;
+    --md-surface-container:#F3EDF7;
+    --md-surface-container-high:#ECE6F0;
+
+    --md-on-surface:#1D1B20;
+    --md-on-surface-variant:#49454F;
+    --md-outline:#79747E;
+    --md-outline-variant: rgba(121,116,126,.32);
+
+    /* ---- elevation (dp) ---- */
+    --dp1: 0 1px 2px rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+    --dp2: 0 1px 2px rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
+    --dp4: 0 2px 3px rgba(0,0,0,.30), 0 6px 10px 4px rgba(0,0,0,.15);
+    --dp8: 0 4px 4px rgba(0,0,0,.30), 0 8px 12px 6px rgba(0,0,0,.15);
+
+    /* ---- shape ---- */
+    --r-card:12px;
+    --r-btn:8px;
+    --r-pill:999px;
+    --r-fab:16px;
+    --r-dialog:28px;
+
+    /* ---- motion ---- */
+    --ease-standard: cubic-bezier(.2,0,0,1);
+    --ease-emphasized: cubic-bezier(.05,.7,.1,1);
+
+    /* ---- type scale ---- */
+    --display-small: 700 36px/44px;
+    --headline-medium: 700 28px/36px;
+    --title-large: 700 22px/28px;
+    --title-medium: 500 16px/24px;
+    --body-large: 400 16px/24px;
+    --body-medium: 400 14px/20px;
+    --label-large: 500 14px/20px;
+    --label-medium: 500 12px/16px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0;
+    background: var(--md-surface);
+    color: var(--md-on-surface);
+    font-family:'Roboto','Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    letter-spacing:.15px;
+  }
+  h1,h2,h3,p,ul,li{ margin:0; padding:0; list-style:none; }
+  button, input, select{ font:inherit; color:inherit; }
+  a{ color:inherit; }
+  svg.icon{ width:20px; height:20px; stroke:currentColor; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+  /* ================= state-layer + ripple (머티리얼의 실체) ================= */
+  .m-surface{ position:relative; isolation:isolate; overflow:hidden; }
+  .m-surface::before{
+    content:""; position:absolute; inset:0; z-index:0;
+    background: currentColor; opacity:0; pointer-events:none;
+    transition: opacity 150ms var(--ease-standard);
+  }
+  .m-surface:hover::before{ opacity:.08; }
+  .m-surface:focus-visible::before{ opacity:.12; }
+  .m-surface:active::before{ opacity:.12; }
+  .m-surface > *{ position:relative; z-index:1; }
+  .ripple{
+    position:absolute; z-index:0; border-radius:50%;
+    background: currentColor; opacity:.12; pointer-events:none;
+    transform: scale(0); animation: rippleOut 400ms var(--ease-standard) forwards;
+  }
+  @keyframes rippleOut{ to{ transform:scale(1); opacity:0; } }
+
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible{
+    outline: 3px solid var(--md-primary); outline-offset:2px; border-radius:4px;
+  }
+
+  /* ================= buttons ================= */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    min-height:40px; padding:0 24px;
+    border-radius: var(--r-btn); border:1px solid transparent;
+    font: var(--label-large); letter-spacing:.1px;
+    cursor:pointer; color: var(--md-on-surface);
+    box-shadow: var(--dp1);
+    transition: box-shadow 150ms var(--ease-standard), transform 150ms var(--ease-standard);
+  }
+  .btn:active{ transform: scale(.98); }
+  .btn-filled{ background: var(--md-primary); color: var(--md-on-primary); }
+  .btn-filled:hover{ box-shadow: var(--dp2); }
+  .btn-outlined{ background: transparent; border-color: var(--md-outline); box-shadow:none; color: var(--md-primary); }
+  .btn-outlined:hover{ box-shadow:none; }
+  .btn-text{ background:transparent; box-shadow:none; padding:0 12px; color: var(--md-primary); min-height:40px; }
+  .btn-text:hover{ box-shadow:none; }
+  .btn:disabled{ background: var(--md-outline-variant); color: var(--md-on-surface-variant); box-shadow:none; cursor:not-allowed; opacity:.5; }
+  .btn svg.icon{ width:18px; height:18px; }
+
+  /* ================= chips ================= */
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    height:32px; padding:0 12px;
+    border-radius: var(--r-pill);
+    background: var(--md-surface-container-high);
+    border:1px solid var(--md-outline-variant);
+    font: var(--label-large); color: var(--md-on-surface-variant);
+  }
+  .badge{
+    display:inline-flex; align-items:center; gap:4px;
+    height:24px; padding:0 8px;
+    border-radius: var(--r-pill);
+    font: var(--label-medium); font-weight:700;
+  }
+  .badge svg.icon{ width:12px; height:12px; stroke-width:2.6; }
+  .badge--ok{ background: var(--md-success-container-tint); color: var(--md-success); }
+  .badge--soon{ background: var(--md-error-container-tint); color: var(--md-on-error-container); }
+  .badge--free{ background: var(--md-primary-container); color: var(--md-on-primary-container); }
+  .badge--deal{ background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+  .badge--discount{ background: var(--md-primary); color: var(--md-on-primary); font-weight:700; }
+
+  /* ================= layout shells ================= */
+  .page{ max-width:1280px; margin:0 auto; padding:24px 24px 96px; }
+  .layout{ display:grid; grid-template-columns:280px 1fr; gap:24px; align-items:start; }
+
+  .card{
+    background: var(--md-surface-container);
+    border-radius: var(--r-card);
+    box-shadow: var(--dp1);
+    padding:20px;
+    transition: box-shadow 150ms var(--ease-standard);
+  }
+
+  /* entrance stagger — 완성 상태를 HTML에 이미 담고, 애니메이션은 연출만 담당 */
+  .enter{
+    opacity:0; transform: translateY(8px);
+    animation: enterUp 220ms var(--ease-standard) forwards;
+    animation-delay: var(--d, 0s);
+  }
+  @keyframes enterUp{ to{ opacity:1; transform:none; } }
+
+  /* ================= IDENTITY ================= */
+  header.appbar{
+    background: var(--md-surface-container-low);
+    border-radius: var(--r-card);
+    box-shadow: var(--dp2);
+    margin-bottom:16px;
+    overflow:hidden;
+    opacity:0; transform: translateY(-16px);
+    animation: appbarDrop 240ms var(--ease-standard) forwards;
+  }
+  @keyframes appbarDrop{ to{ opacity:1; transform:none; } }
+
+  .appbar-top{ display:flex; align-items:center; gap:12px; padding:16px 20px 8px; }
+  .brand-mark{
+    width:40px; height:40px; border-radius: var(--r-btn);
+    background: var(--md-primary); color: var(--md-on-primary);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .brand-word{ font: var(--title-large); letter-spacing:0; }
+  .brand-sub{ font: var(--body-medium); color: var(--md-on-surface-variant); }
+
+  .tabs{ position:relative; display:flex; padding:0 12px; border-bottom:1px solid var(--md-outline-variant); }
+  .tab{
+    flex:1; min-height:64px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    background:transparent; border:none; cursor:pointer;
+    color: var(--md-on-surface-variant);
+    font: var(--label-large);
+  }
+  .tab.is-active{ color: var(--md-primary); }
+  .tab-icon{ width:24px; height:24px; display:flex; }
+  .tab-indicator{
+    position:absolute; bottom:-1px; height:3px; border-radius:3px 3px 0 0;
+    background: var(--md-primary);
+    transition: transform 250ms var(--ease-emphasized), width 250ms var(--ease-emphasized);
+  }
+
+  .search-summary{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    padding:12px 20px;
+  }
+  .search-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+
+  /* ================= FILTER ================= */
+  aside.filter{ display:flex; flex-direction:column; gap:16px; }
+  .field-title{ font: var(--title-medium); margin-bottom:12px; display:block; }
+
+  .price-labels{ display:flex; justify-content:space-between; font: var(--label-large); margin-bottom:8px; }
+  .range-track{ position:relative; height:32px; }
+  .range-track .track-bg{ position:absolute; top:14px; left:0; right:0; height:4px; border-radius:2px; background: var(--md-outline-variant); }
+  .range-track .range-fill{ position:absolute; top:14px; height:4px; border-radius:2px; background: var(--md-primary); }
+  .range-track input[type="range"]{
+    position:absolute; top:0; left:0; width:100%; height:32px;
+    -webkit-appearance:none; appearance:none; background:transparent; margin:0; pointer-events:none;
+  }
+  .range-track input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; pointer-events:all;
+    width:20px; height:20px; border-radius:50%;
+    background: var(--md-primary); border:3px solid var(--md-surface-container);
+    box-shadow: var(--dp1); cursor:pointer; margin-top:0;
+  }
+  .range-track input[type="range"]::-moz-range-thumb{
+    pointer-events:all; width:20px; height:20px; border-radius:50%;
+    background: var(--md-primary); border:3px solid var(--md-surface-container); box-shadow: var(--dp1); cursor:pointer;
+  }
+  .range-track input[type="range"]::-webkit-slider-runnable-track{ background:transparent; height:32px; }
+
+  .check-row{
+    display:flex; align-items:center; gap:12px; min-height:48px; cursor:pointer;
+    font: var(--body-large); color: var(--md-on-surface); border-radius:8px; padding:0 4px;
+  }
+  .m-check{
+    position:relative; width:18px; height:18px; border-radius:2px;
+    border:2px solid var(--md-outline); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    transition: background-color 150ms var(--ease-standard), border-color 150ms var(--ease-standard);
+  }
+  .m-check svg{ width:12px; height:12px; stroke:var(--md-on-primary); stroke-width:3; opacity:0; transition:opacity 100ms; }
+  .check-row input{ position:absolute; opacity:0; width:1px; height:1px; }
+  .check-row input:checked + .m-check{ background: var(--md-primary); border-color: var(--md-primary); }
+  .check-row input:checked + .m-check svg{ opacity:1; }
+  .check-row input:focus-visible + .m-check{ outline:3px solid var(--md-primary); outline-offset:2px; }
+
+  .switch-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:48px; }
+  .m-switch{ position:relative; width:52px; height:32px; flex-shrink:0; border-radius: var(--r-pill); }
+  .m-switch input{ position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer; }
+  .switch-track{
+    position:absolute; inset:0; border-radius: var(--r-pill);
+    background: var(--md-surface-container-high); border:2px solid var(--md-outline);
+    transition: background-color 200ms var(--ease-standard), border-color 200ms var(--ease-standard);
+  }
+  .switch-thumb{
+    position:absolute; top:6px; left:6px; width:16px; height:16px; border-radius:50%;
+    background: var(--md-outline);
+    transition: transform 200ms var(--ease-standard), width 200ms var(--ease-standard), height 200ms var(--ease-standard), top 200ms var(--ease-standard), left 200ms var(--ease-standard), background-color 200ms var(--ease-standard);
+  }
+  .m-switch input:checked + .switch-track{ background: var(--md-primary); border-color: var(--md-primary); }
+  .m-switch input:checked + .switch-track + .switch-thumb{
+    transform: translateX(20px); width:24px; height:24px; top:2px; left:4px; background: var(--md-on-primary);
+  }
+  .m-switch input:focus-visible + .switch-track{ outline:3px solid var(--md-primary); outline-offset:2px; }
+
+  /* ================= RESULTS HEADER ================= */
+  .results-header{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
+    margin-bottom:16px;
+  }
+  .results-count{ font: var(--headline-medium); letter-spacing:-.02em; }
+  .results-count .num{ color: var(--md-primary); }
+  .sort-field{ position:relative; }
+  .sort-select{
+    appearance:none; -webkit-appearance:none;
+    min-height:48px; padding:0 40px 0 16px;
+    border-radius: var(--r-btn); border:1px solid var(--md-outline);
+    background: var(--md-surface); font: var(--label-large); cursor:pointer;
+  }
+  .sort-field svg.icon{ position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color: var(--md-on-surface-variant); }
+
+  /* ================= COLLECTION ================= */
+  .collection-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:20px; }
+
+  .item-card{ padding:0; overflow:hidden; display:flex; flex-direction:column; cursor:pointer; }
+  .item-card:hover, .item-card:focus-within{ box-shadow: var(--dp2); }
+  .item-thumb{
+    position:relative; height:140px; display:flex; align-items:center; justify-content:center;
+    background: var(--md-surface-container-high); color: var(--md-outline);
+  }
+  .item-thumb svg{ width:44px; height:44px; }
+  .item-thumb .badge{ position:absolute; top:12px; left:12px; }
+
+  .item-body{ padding:20px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .item-name{
+    font: var(--title-medium); line-height:1.35;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    min-height: calc(16px * 1.35 * 2);
+  }
+  .item-location{ font: var(--body-medium); color: var(--md-on-surface-variant); }
+
+  .item-rating{ display:flex; align-items:baseline; gap:8px; font: var(--body-medium); }
+  .item-rating .star{ color: var(--md-primary); font-size:15px; }
+  .item-rating .rating-value{ font-weight:700; color: var(--md-on-surface); }
+  .item-rating .rating-empty{ font-weight:700; color: var(--md-on-surface-variant); }
+  .item-rating .review-count{ color: var(--md-on-surface-variant); }
+
+  .amenity-list{ display:flex; flex-wrap:wrap; gap:8px; }
+  .amenity-chip{
+    height:24px; padding:0 8px; border-radius: var(--r-pill);
+    background: var(--md-surface-container-high); border:1px solid var(--md-outline-variant);
+    font: var(--label-medium); color: var(--md-on-surface-variant); display:inline-flex; align-items:center;
+  }
+
+  .item-price-row{ margin-top:auto; padding-top:6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  .price-block{ display:flex; flex-direction:column; }
+  .price-old{ font: var(--body-medium); color: var(--md-on-surface-variant); text-decoration:line-through; }
+  .price-new{ font: var(--title-large); letter-spacing:-.01em; }
+
+  .item-cta{ width:100%; margin-top:14px; justify-content:space-between; }
+  .item-cta svg.icon{ transition: transform 150ms var(--ease-standard); }
+  .item-cta:hover svg.icon{ transform: translateX(4px); }
+
+  /* ================= PAGINATION ================= */
+  .pagination{ margin-top:28px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+  .page-nums{ display:flex; align-items:center; gap:4px; }
+  .page-btn{
+    min-width:48px; min-height:48px; padding:0 8px;
+    border-radius: var(--r-pill); border:none; background:transparent;
+    color: var(--md-on-surface-variant); font: var(--label-large); cursor:pointer;
+  }
+  .page-btn.is-active{ background: var(--md-primary); color: var(--md-on-primary); }
+  .page-ellipsis{ color: var(--md-on-surface-variant); padding:0 4px; min-width:24px; text-align:center; }
+
+  .demo-note{ margin-top:12px; text-align:center; font: var(--label-medium); color: var(--md-on-surface-variant); }
+  .demo-link{ background:none; border:none; text-decoration:underline; cursor:pointer; color: var(--md-on-surface-variant); font:inherit; padding:4px 8px; min-height:32px; }
+  .demo-link:hover{ color: var(--md-primary); }
+
+  /* ================= EMPTY STATE ================= */
+  .empty-state{
+    text-align:center; padding:64px 24px;
+    display:flex; flex-direction:column; align-items:center; gap:16px;
+  }
+  .empty-icon-wrap{
+    width:72px; height:72px; border-radius:50%;
+    background: var(--md-primary-container); color: var(--md-on-primary-container);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .empty-icon-wrap svg{ width:34px; height:34px; }
+  .empty-title{ font: var(--headline-medium); }
+  .empty-desc{ font: var(--body-large); color: var(--md-on-surface-variant); max-width:360px; }
+  .empty-actions{ display:flex; gap:12px; margin-top:8px; flex-wrap:wrap; justify-content:center; }
+
+  /* ================= FAB — 시그니처 ================= */
+  .fab{
+    position:fixed; right:24px; bottom:24px; z-index:20;
+    width:56px; height:56px; border-radius: var(--r-fab);
+    background: var(--md-primary); color: var(--md-on-primary);
+    border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: var(--dp4);
+    transition: box-shadow 200ms var(--ease-standard), transform 200ms var(--ease-standard);
+    opacity:0; transform: scale(.6);
+    animation: fabPop 250ms var(--ease-emphasized) forwards;
+    animation-delay: .9s;
+  }
+  @keyframes fabPop{ to{ opacity:1; transform:scale(1); } }
+  .fab:hover{ box-shadow: var(--dp8); transform: scale(1.03); }
+  .fab:active{ transform: scale(.97); }
+  .fab svg{ width:26px; height:26px; }
+
+  footer{
+    margin-top:48px; text-align:center;
+    font: var(--label-medium); font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color: var(--md-on-surface-variant);
+  }
+
+  /* ================= responsive ================= */
+  @media (max-width:900px){
+    .layout{ grid-template-columns:1fr; }
+    .collection-grid{ grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); }
+    .tab-icon{ display:none; }
+    .tab{ min-height:48px; }
+  }
+  @media (max-width:640px){
+    .page{ padding:16px 16px 96px; }
+    .appbar-top{ padding:12px 16px 8px; }
+    .search-summary{ padding:12px 16px; flex-direction:column; align-items:flex-start; }
+    .collection-grid{ grid-template-columns:1fr; }
+    .card{ padding:16px; }
+    .results-count{ font-size:22px; line-height:28px; }
+    .fab{ right:16px; bottom:16px; }
+  }
+
+  /* ================= reduced motion ================= */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:.01ms !important;
+      animation-delay:0s !important;
+      transition-duration:.01ms !important;
+      scroll-behavior:auto !important;
+    }
+    .item-card:hover, .fab:hover{ transform:none !important; }
+    .fab{ transform:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- reusable icon defs -->
+<svg style="position:absolute; width:0; height:0; overflow:hidden;" aria-hidden="true">
+  <symbol id="ic-plane" viewBox="0 0 24 24"><path d="M2 12 L22 4 L14 12 L22 20 Z"/></symbol>
+  <symbol id="ic-bed" viewBox="0 0 24 24">
+    <rect x="3" y="9" width="18" height="9" rx="2"/>
+    <rect x="5.5" y="11" width="5" height="3" rx="1"/>
+    <line x1="3" y1="14" x2="21" y2="14"/>
+    <line x1="4" y1="18" x2="4" y2="20.5"/>
+    <line x1="20" y1="18" x2="20" y2="20.5"/>
+  </symbol>
+  <symbol id="ic-combo" viewBox="0 0 24 24">
+    <rect x="3" y="3" width="12" height="12" rx="3"/>
+    <rect x="9" y="9" width="12" height="12" rx="3"/>
+  </symbol>
+  <symbol id="ic-car" viewBox="0 0 24 24">
+    <rect x="2" y="13" width="20" height="6" rx="2"/>
+    <rect x="6" y="9" width="12" height="5" rx="2"/>
+    <circle cx="7" cy="19" r="1.6" stroke="none" fill="currentColor"/>
+    <circle cx="17" cy="19" r="1.6" stroke="none" fill="currentColor"/>
+  </symbol>
+  <symbol id="ic-building" viewBox="0 0 24 24">
+    <rect x="4" y="3" width="16" height="18" rx="1.5"/>
+    <rect x="7" y="6.5" width="3" height="3"/>
+    <rect x="14" y="6.5" width="3" height="3"/>
+    <rect x="7" y="11.5" width="3" height="3"/>
+    <rect x="14" y="11.5" width="3" height="3"/>
+    <rect x="9.5" y="16.5" width="5" height="4.5"/>
+  </symbol>
+  <symbol id="ic-map" viewBox="0 0 24 24">
+    <path d="M9 3 3 5.5v15L9 18l6 3 6-2.5v-15L15 6 9 3z"/>
+    <line x1="9" y1="3" x2="9" y2="18"/>
+    <line x1="15" y1="6" x2="15" y2="21"/>
+  </symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24">
+    <path d="M20 12a8 8 0 1 1-2.34-5.66"/>
+    <path d="M20 4v5h-5"/>
+  </symbol>
+  <symbol id="ic-search-off" viewBox="0 0 24 24">
+    <circle cx="10" cy="10" r="6.5"/>
+    <line x1="14.8" y1="14.8" x2="20" y2="20"/>
+    <line x1="6.3" y1="6.3" x2="13.7" y2="13.7"/>
+  </symbol>
+  <symbol id="ic-arrow-right" viewBox="0 0 24 24">
+    <line x1="4" y1="12" x2="20" y2="12"/>
+    <path d="M14 6l6 6-6 6"/>
+  </symbol>
+  <symbol id="ic-tag" viewBox="0 0 24 24">
+    <path d="M3 3h8l10 10-8 8L3 11z"/>
+    <circle cx="8" cy="8" r="1.4" stroke="none" fill="currentColor"/>
+  </symbol>
+  <symbol id="ic-check-circle" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M8 12.5l2.5 2.5L16 9"/>
+  </symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M12 7v5l3.5 2"/>
+  </symbol>
+  <symbol id="ic-shield-check" viewBox="0 0 24 24">
+    <path d="M12 3l7 3v6c0 5-3 7.5-7 9-4-1.5-7-4-7-9V6l7-3z"/>
+    <path d="M9 12.2l2 2 4-4.4"/>
+  </symbol>
+  <symbol id="ic-bolt" viewBox="0 0 24 24">
+    <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/>
+  </symbol>
+  <symbol id="ic-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="ic-chevron-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="ic-chevron-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+</svg>
+
+<div class="page">
+
+  <!-- ============ IDENTITY ============ -->
+  <header class="appbar" data-region="identity">
+    <div class="appbar-top">
+      <div class="brand-mark"><svg class="icon" style="stroke:none; fill:currentColor;"><use href="#ic-plane"/></svg></div>
+      <div>
+        <div class="brand-word">떠나요트립</div>
+        <div class="brand-sub">국내 최다 특가 비교</div>
+      </div>
+    </div>
+
+    <nav class="tabs" role="tablist" aria-label="검색 카테고리">
+      <button type="button" class="tab is-active m-surface" data-tab="0" role="tab" aria-selected="true" style="--d:.10s" data-enter>
+        <span class="tab-icon"><svg class="icon"><use href="#ic-bed"/></svg></span>
+        <span>숙소</span>
+      </button>
+      <button type="button" class="tab m-surface" data-tab="1" role="tab" aria-selected="false" style="--d:.14s" data-enter>
+        <span class="tab-icon"><svg class="icon"><use href="#ic-plane"/></svg></span>
+        <span>항공</span>
+      </button>
+      <button type="button" class="tab m-surface" data-tab="2" role="tab" aria-selected="false" style="--d:.18s" data-enter>
+        <span class="tab-icon"><svg class="icon"><use href="#ic-combo"/></svg></span>
+        <span>항공+숙소</span>
+      </button>
+      <button type="button" class="tab m-surface" data-tab="3" role="tab" aria-selected="false" style="--d:.22s" data-enter>
+        <span class="tab-icon"><svg class="icon"><use href="#ic-car"/></svg></span>
+        <span>렌터카</span>
+      </button>
+      <span class="tab-indicator" id="tabIndicator"></span>
+    </nav>
+
+    <div class="search-summary">
+      <div class="search-chips">
+        <span class="chip">서울</span>
+        <span class="chip">9/12 – 9/14 (2박)</span>
+        <span class="chip">성인 2</span>
+      </div>
+      <button type="button" class="btn btn-outlined m-surface">검색 수정</button>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ============ FILTER ============ -->
+    <aside class="filter" data-region="filter">
+      <div class="card">
+        <span class="field-title">가격</span>
+        <div class="price-labels">
+          <span id="priceMinLabel">₩50,000</span>
+          <span id="priceMaxLabel">₩500,000+</span>
+        </div>
+        <div class="range-track">
+          <div class="track-bg"></div>
+          <div class="range-fill" id="rangeFill"></div>
+          <input type="range" id="priceMin" min="50000" max="500000" step="10000" value="50000" aria-label="최소 가격">
+          <input type="range" id="priceMax" min="50000" max="500000" step="10000" value="500000" aria-label="최대 가격">
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="field-title">등급</span>
+        <label class="check-row m-surface">
+          <input type="checkbox"><span class="m-check"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></span>5성
+        </label>
+        <label class="check-row m-surface">
+          <input type="checkbox"><span class="m-check"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></span>4성
+        </label>
+        <label class="check-row m-surface">
+          <input type="checkbox"><span class="m-check"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></span>3성
+        </label>
+      </div>
+
+      <div class="card">
+        <span class="field-title">편의</span>
+        <label class="check-row m-surface">
+          <input type="checkbox" checked><span class="m-check"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></span>조식
+        </label>
+        <label class="check-row m-surface">
+          <input type="checkbox"><span class="m-check"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></span>무료취소
+        </label>
+        <label class="check-row m-surface">
+          <input type="checkbox"><span class="m-check"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></span>수영장
+        </label>
+        <label class="check-row m-surface">
+          <input type="checkbox"><span class="m-check"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></span>조용한객실
+        </label>
+      </div>
+
+      <div class="card">
+        <div class="switch-row">
+          <span style="font:var(--body-large)">오늘특가만 보기</span>
+          <label class="m-switch m-surface">
+            <input type="checkbox" id="dealOnly">
+            <span class="switch-track"></span>
+            <span class="switch-thumb"></span>
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <!-- ============ RESULTS HEADER ============ -->
+      <div class="results-header" data-region="results">
+        <h2 class="results-count">서울 숙소 <span class="num">240</span>곳</h2>
+        <div class="sort-field">
+          <select class="sort-select" id="sortSelect" aria-label="정렬 기준">
+            <option>추천순</option>
+            <option>낮은 가격순</option>
+            <option>평점순</option>
+            <option>할인율순</option>
+          </select>
+          <svg class="icon"><use href="#ic-chevron-down"/></svg>
+        </div>
+      </div>
+
+      <!-- ============ COLLECTION ============ -->
+      <div id="collectionSection">
+        <div class="collection-grid" data-region="collection">
+
+          <article class="card item-card m-surface" data-region="item-card" data-enter style="--d:.60s">
+            <div class="item-thumb">
+              <svg><use href="#ic-building"/></svg>
+              <span class="badge badge--ok"><svg class="icon"><use href="#ic-check-circle"/></svg>예약가능</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">남산 그랜드 호텔</h3>
+              <p class="item-location">중구 회현동</p>
+              <div class="item-rating"><span class="star">★</span><span class="rating-value">4.6</span><span class="review-count">(2,481)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">조식</span><span class="amenity-chip">수영장</span></div>
+              <div class="item-price-row">
+                <div class="price-block">
+                  <span class="price-old">₩228,000</span>
+                  <span class="price-new">₩182,000</span>
+                </div>
+                <span class="badge badge--discount"><svg class="icon"><use href="#ic-tag"/></svg>20%</span>
+              </div>
+              <button type="button" class="btn btn-filled item-cta m-surface">객실 보기 <svg class="icon"><use href="#ic-arrow-right"/></svg></button>
+            </div>
+          </article>
+
+          <article class="card item-card m-surface" data-region="item-card" data-enter style="--d:.63s">
+            <div class="item-thumb">
+              <svg><use href="#ic-building"/></svg>
+              <span class="badge badge--deal"><svg class="icon"><use href="#ic-bolt"/></svg>오늘특가</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">한강뷰 프리미엄 스위트 5박 패키지</h3>
+              <p class="item-location">영등포구 여의도동</p>
+              <div class="item-rating"><span class="star">★</span><span class="rating-value">4.8</span><span class="review-count">(932)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">조식</span><span class="amenity-chip">조용한객실</span></div>
+              <div class="item-price-row">
+                <div class="price-block">
+                  <span class="price-old">₩2,600,000</span>
+                  <span class="price-new">₩2,340,000</span>
+                </div>
+                <span class="badge badge--discount"><svg class="icon"><use href="#ic-tag"/></svg>10%</span>
+              </div>
+              <button type="button" class="btn btn-filled item-cta m-surface">객실 보기 <svg class="icon"><use href="#ic-arrow-right"/></svg></button>
+            </div>
+          </article>
+
+          <article class="card item-card m-surface" data-region="item-card" data-enter style="--d:.66s">
+            <div class="item-thumb">
+              <svg><use href="#ic-building"/></svg>
+              <span class="badge badge--soon"><svg class="icon"><use href="#ic-clock"/></svg>마감임박</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">서울역 앞 밤에도 불이 꺼지지 않는 24시간 캡슐 스테이 신관 리노베이션 완료</h3>
+              <p class="item-location">용산구</p>
+              <div class="item-rating"><span class="rating-empty">—</span><span class="review-count">(신규)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">무료취소</span><span class="amenity-chip">조용한객실</span></div>
+              <div class="item-price-row">
+                <div class="price-block">
+                  <span class="price-old">₩52,000</span>
+                  <span class="price-new">₩39,000</span>
+                </div>
+                <span class="badge badge--discount"><svg class="icon"><use href="#ic-tag"/></svg>25%</span>
+              </div>
+              <button type="button" class="btn btn-filled item-cta m-surface">객실 보기 <svg class="icon"><use href="#ic-arrow-right"/></svg></button>
+            </div>
+          </article>
+
+          <article class="card item-card m-surface" data-region="item-card" data-enter style="--d:.69s">
+            <div class="item-thumb">
+              <svg><use href="#ic-building"/></svg>
+              <span class="badge badge--free"><svg class="icon"><use href="#ic-shield-check"/></svg>무료취소</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">북촌 한옥 스테이</h3>
+              <p class="item-location">종로구 가회동</p>
+              <div class="item-rating"><span class="star">★</span><span class="rating-value">4.9</span><span class="review-count">(1,127)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">조식</span><span class="amenity-chip">조용한객실</span></div>
+              <div class="item-price-row">
+                <div class="price-block">
+                  <span class="price-old">₩198,000</span>
+                  <span class="price-new">₩165,000</span>
+                </div>
+                <span class="badge badge--discount"><svg class="icon"><use href="#ic-tag"/></svg>17%</span>
+              </div>
+              <button type="button" class="btn btn-filled item-cta m-surface">객실 보기 <svg class="icon"><use href="#ic-arrow-right"/></svg></button>
+            </div>
+          </article>
+
+          <article class="card item-card m-surface" data-region="item-card" data-enter style="--d:.72s">
+            <div class="item-thumb">
+              <svg><use href="#ic-building"/></svg>
+              <span class="badge badge--ok"><svg class="icon"><use href="#ic-check-circle"/></svg>예약가능</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">강남 비즈니스 호텔</h3>
+              <p class="item-location">강남구 역삼동</p>
+              <div class="item-rating"><span class="star">★</span><span class="rating-value">4.2</span><span class="review-count">(3,044)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">조식</span><span class="amenity-chip">무료취소</span></div>
+              <div class="item-price-row">
+                <div class="price-block">
+                  <span class="price-old">₩118,000</span>
+                  <span class="price-new">₩98,000</span>
+                </div>
+                <span class="badge badge--discount"><svg class="icon"><use href="#ic-tag"/></svg>17%</span>
+              </div>
+              <button type="button" class="btn btn-filled item-cta m-surface">객실 보기 <svg class="icon"><use href="#ic-arrow-right"/></svg></button>
+            </div>
+          </article>
+
+          <article class="card item-card m-surface" data-region="item-card" data-enter style="--d:.75s">
+            <div class="item-thumb">
+              <svg><use href="#ic-building"/></svg>
+              <span class="badge badge--soon"><svg class="icon"><use href="#ic-clock"/></svg>마감임박</span>
+            </div>
+            <div class="item-body">
+              <h3 class="item-name">홍대 게스트하우스</h3>
+              <p class="item-location">마포구 서교동</p>
+              <div class="item-rating"><span class="star">★</span><span class="rating-value">4.0</span><span class="review-count">(688)</span></div>
+              <div class="amenity-list"><span class="amenity-chip">무료취소</span><span class="amenity-chip">조용한객실</span></div>
+              <div class="item-price-row">
+                <div class="price-block">
+                  <span class="price-old">₩49,000</span>
+                  <span class="price-new">₩41,000</span>
+                </div>
+                <span class="badge badge--discount"><svg class="icon"><use href="#ic-tag"/></svg>16%</span>
+              </div>
+              <button type="button" class="btn btn-filled item-cta m-surface">객실 보기 <svg class="icon"><use href="#ic-arrow-right"/></svg></button>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- ============ PAGINATION ============ -->
+        <div class="pagination" data-region="action">
+          <div class="page-nums" aria-label="페이지 네비게이션">
+            <button type="button" class="page-btn m-surface" aria-label="이전 페이지"><svg class="icon"><use href="#ic-chevron-left"/></svg></button>
+            <button type="button" class="page-btn is-active m-surface" aria-current="page">1</button>
+            <button type="button" class="page-btn m-surface">2</button>
+            <button type="button" class="page-btn m-surface">3</button>
+            <span class="page-ellipsis">…</span>
+            <button type="button" class="page-btn m-surface">40</button>
+            <button type="button" class="page-btn m-surface" aria-label="다음 페이지"><svg class="icon"><use href="#ic-chevron-right"/></svg></button>
+          </div>
+          <button type="button" class="btn btn-outlined m-surface"><svg class="icon"><use href="#ic-map"/></svg>지도로 보기</button>
+        </div>
+
+        <p class="demo-note">
+          <button type="button" class="demo-link m-surface" id="demo-empty-toggle">빈 상태 미리보기</button>
+        </p>
+      </div>
+
+      <!-- ============ EMPTY STATE ============ -->
+      <section class="card empty-state" id="emptyState" data-region="empty" hidden>
+        <div class="empty-icon-wrap"><svg><use href="#ic-search-off"/></svg></div>
+        <h3 class="empty-title">조건에 맞는 숙소가 없어요</h3>
+        <p class="empty-desc">가격 범위를 넓히거나 특가 필터를 꺼보세요.</p>
+        <div class="empty-actions">
+          <button type="button" class="btn btn-filled m-surface" id="resetFilterBtn"><svg class="icon"><use href="#ic-refresh"/></svg>필터 초기화</button>
+          <button type="button" class="btn btn-text m-surface" id="demo-back-toggle">검색 결과로 돌아가기</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>STYLE 16 · 머티리얼</footer>
+</div>
+
+<!-- FAB — 우하단 고정, 주요 액션(지도로 보기) -->
+<button type="button" class="fab m-surface" id="mapFab" aria-label="지도로 보기">
+  <svg><use href="#ic-map"/></svg>
+</button>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- ripple (state-layer는 CSS만으로 이미 동작; 리플은 JS 연출 전용) ---- */
+  function spawnRipple(el, evt){
+    if (reduceMotion) return;
+    var rect = el.getBoundingClientRect();
+    var x, y;
+    if (evt && evt.clientX !== undefined && !(evt.clientX === 0 && evt.clientY === 0 && evt.detail === 0)){
+      x = evt.clientX - rect.left; y = evt.clientY - rect.top;
+    } else {
+      x = rect.width / 2; y = rect.height / 2;
+    }
+    var size = Math.max(rect.width, rect.height) * 1.6;
+    var span = document.createElement('span');
+    span.className = 'ripple';
+    span.style.width = span.style.height = size + 'px';
+    span.style.left = (x - size / 2) + 'px';
+    span.style.top = (y - size / 2) + 'px';
+    el.appendChild(span);
+    window.setTimeout(function(){ span.remove(); }, 420);
+  }
+  document.querySelectorAll('.m-surface').forEach(function(el){
+    el.addEventListener('pointerdown', function(evt){ spawnRipple(el, evt); });
+  });
+
+  /* ---- 탭 인디케이터 슬라이드 (콘텐츠는 숙소 고정, 시각 전환만) ---- */
+  var tabs = document.querySelectorAll('.tab');
+  var indicator = document.getElementById('tabIndicator');
+  function moveIndicator(tab){
+    if (!indicator) return;
+    indicator.style.width = tab.offsetWidth + 'px';
+    indicator.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
+  }
+  tabs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabs.forEach(function(b){ b.classList.remove('is-active'); b.setAttribute('aria-selected','false'); });
+      btn.classList.add('is-active'); btn.setAttribute('aria-selected','true');
+      moveIndicator(btn);
+    });
+  });
+  window.addEventListener('load', function(){ moveIndicator(document.querySelector('.tab.is-active')); });
+  window.addEventListener('resize', function(){ moveIndicator(document.querySelector('.tab.is-active')); });
+
+  /* ---- 가격 듀얼 슬라이더 ---- */
+  var priceMin = document.getElementById('priceMin');
+  var priceMax = document.getElementById('priceMax');
+  var rangeFill = document.getElementById('rangeFill');
+  var priceMinLabel = document.getElementById('priceMinLabel');
+  var priceMaxLabel = document.getElementById('priceMaxLabel');
+
+  function formatWon(v, isMax){
+    var s = '₩' + Number(v).toLocaleString('ko-KR');
+    if (isMax && Number(v) >= 500000) s += '+';
+    return s;
+  }
+  function updateRange(){
+    var lo = parseInt(priceMin.value, 10);
+    var hi = parseInt(priceMax.value, 10);
+    if (lo > hi){ var t = lo; lo = hi; hi = t; }
+    var min = parseInt(priceMin.min, 10), max = parseInt(priceMin.max, 10);
+    var pctLo = ((lo - min) / (max - min)) * 100;
+    var pctHi = ((hi - min) / (max - min)) * 100;
+    if (rangeFill){ rangeFill.style.left = pctLo + '%'; rangeFill.style.width = (pctHi - pctLo) + '%'; }
+    priceMinLabel.textContent = formatWon(priceMin.value, false);
+    priceMaxLabel.textContent = formatWon(priceMax.value, true);
+  }
+  if (priceMin && priceMax){
+    priceMin.addEventListener('input', updateRange);
+    priceMax.addEventListener('input', updateRange);
+    updateRange();
+  }
+
+  /* ---- 빈 상태 토글 데모 ---- */
+  var showEmptyBtn = document.getElementById('demo-empty-toggle');
+  var backBtn = document.getElementById('demo-back-toggle');
+  var resetBtn = document.getElementById('resetFilterBtn');
+  var collectionSection = document.getElementById('collectionSection');
+  var emptySection = document.getElementById('emptyState');
+
+  function showEmpty(){
+    collectionSection.hidden = true;
+    emptySection.hidden = false;
+    emptySection.setAttribute('tabindex', '-1');
+    emptySection.focus();
+  }
+  function showResults(){
+    emptySection.hidden = true;
+    collectionSection.hidden = false;
+  }
+  if (showEmptyBtn) showEmptyBtn.addEventListener('click', showEmpty);
+  if (backBtn) backBtn.addEventListener('click', showResults);
+  if (resetBtn) resetBtn.addEventListener('click', showResults);
+
+  /* ---- FAB: 지도로 보기 (데모 — 결과 헤더로 스크롤) ---- */
+  var fab = document.getElementById('mapFab');
+  if (fab) fab.addEventListener('click', function(){
+    var target = document.querySelector('[data-region="results"]');
+    if (target) target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+  });
+})();
+</script>
+</body>
+</html>
