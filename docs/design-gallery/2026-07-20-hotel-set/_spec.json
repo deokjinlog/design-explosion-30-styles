@@ -1,0 +1,10 @@
+{
+  "archetype": "D",
+  "domain": "호텔 예약",
+  "note": "화면 세트 — domains.md Travel>Hotel 흐름 D→E→A 를 3화면으로 전개. 스타일 고정(03 트렌디 SaaS)",
+  "screens": {
+    "screen-1-search": "D",
+    "screen-2-booking": "E",
+    "screen-3-mybookings": "K"
+  }
+}

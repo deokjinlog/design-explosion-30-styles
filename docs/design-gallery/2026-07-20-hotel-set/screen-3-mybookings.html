@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내 예약 · 여기묵자</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#FBFAFF;
+    --violet:#7C5CFF;
+    --pink:#FF8FC0;
+    --mint:#5EE6C8;
+    --ink:#17143A;
+    --muted:#7B7897;        /* 장식용 보조색 (배지/보더 등, 텍스트 4.5:1 미보장) */
+    --muted-text:#615D82;   /* 본문/캡션용 보조 텍스트 — 배경 대비 5.9:1 */
+    --border:#EAE7F6;
+    --surface:#FFFFFF;
+
+    --success-bg:#E3FBF3; --success-fg:#137A56;
+    --warning-bg:#FFF3DE; --warning-fg:#9A5B00;
+    --neutral-bg:#EDEBFB; --neutral-fg:#4B4570;
+    --danger-bg:#FDE8ED;  --danger-fg:#C81E45;
+
+    --radius-lg:28px; --radius-md:16px; --radius-sm:10px;
+    --shadow-l1:0 10px 30px rgba(23,20,58,.06);
+    --shadow-l2:0 20px 40px rgba(124,92,255,.15);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* ── L0 배경 블롭 ── */
+  .blob{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;}
+  .blob-violet{top:-140px;right:-120px;width:420px;height:420px;background:var(--violet);opacity:.32;}
+  .blob-mint{bottom:-160px;left:-140px;width:380px;height:380px;background:var(--mint);opacity:.28;}
+
+  /* ── 공통 유틸 ── */
+  .tabnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+  button{font-family:inherit;}
+  a{color:inherit;}
+
+  /* ── 상단바 ── */
+  .topbar{position:relative;z-index:1;border-bottom:1px solid var(--border);}
+  .topbar-inner{
+    max-width:1200px;margin:0 auto;padding:16px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .logo{
+    font-size:24px;font-weight:800;letter-spacing:-0.02em;
+    background:linear-gradient(90deg,var(--violet),var(--pink));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .topbar-right{display:flex;align-items:center;gap:16px;}
+  .live-chip{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12px;font-weight:600;color:var(--muted-text);
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:999px;padding:6px 12px;
+    box-shadow:var(--shadow-l1);
+  }
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);flex-shrink:0;}
+  .dot-pulse{animation:breathe 2s ease-in-out infinite;}
+  @keyframes breathe{
+    0%,100%{opacity:1;transform:scale(1);}
+    50%{opacity:.45;transform:scale(.8);}
+  }
+  .user-avatar{
+    width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--violet),var(--pink));
+    color:#fff;font-weight:800;font-size:14px;
+  }
+
+  /* ── 레이아웃 ── */
+  .layout{
+    position:relative;z-index:1;
+    max-width:1200px;margin:0 auto;padding:32px 24px 64px;
+    display:grid;grid-template-columns:232px 1fr;gap:32px;align-items:start;
+  }
+  .sidebar{position:sticky;top:32px;}
+  .nav-list{display:flex;flex-direction:column;gap:4px;}
+  .nav-item{
+    all:unset;box-sizing:border-box;
+    display:flex;align-items:center;
+    padding:10px 16px;border-radius:var(--radius-sm);
+    font-size:14px;font-weight:600;color:var(--muted-text);
+    cursor:pointer;transition:background .2s ease,color .2s ease;
+  }
+  .nav-item:hover{background:#F1EDFF;color:var(--ink);}
+  .nav-item:focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+  .nav-item.is-active{
+    background:var(--surface);color:var(--violet);
+    box-shadow:var(--shadow-l1);font-weight:700;
+  }
+
+  .main{display:flex;flex-direction:column;gap:24px;min-width:0;}
+
+  /* 로드 스태거 연출 */
+  .reveal{opacity:0;transform:translateY(12px);transition:opacity .4s ease,transform .4s ease;}
+  body.loaded .reveal{opacity:1;transform:translateY(0);}
+
+  /* ── 프로필 헤더 ── */
+  .profile-card{
+    background:var(--surface);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-l1);padding:24px 32px;
+    display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  }
+  .profile-avatar{
+    width:56px;height:56px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--violet),var(--pink));
+    color:#fff;font-weight:800;font-size:20px;
+  }
+  .profile-info{display:flex;flex-direction:column;gap:6px;flex:1;min-width:160px;}
+  .profile-name{font-size:20px;font-weight:800;letter-spacing:-0.02em;}
+  .role-badge{
+    align-self:flex-start;font-size:12px;font-weight:600;color:var(--muted-text);
+    background:var(--neutral-bg);border-radius:999px;padding:3px 10px;
+  }
+  .profile-stat{
+    display:flex;align-items:baseline;gap:4px;flex-shrink:0;
+    padding-left:20px;border-left:1px solid var(--border);
+  }
+  .stat-label{font-size:14px;font-weight:600;color:var(--muted-text);}
+  .stat-value{font-size:24px;font-weight:800;letter-spacing:-0.02em;}
+  .stat-suffix{font-size:14px;font-weight:600;color:var(--muted-text);}
+
+  /* ── 페이지 액션 ── */
+  .page-actions{display:flex;gap:12px;flex-wrap:wrap;}
+  .btn{
+    height:40px;padding:0 20px;border-radius:var(--radius-sm);
+    font-size:14px;font-weight:700;cursor:pointer;border:1px solid transparent;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    transition:transform .2s ease,box-shadow .2s ease,background .2s ease,color .2s ease;
+  }
+  .btn:focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+  .btn-primary{
+    background:linear-gradient(90deg,var(--violet),var(--pink));color:#fff;
+    box-shadow:var(--shadow-l1);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-l2);}
+  .btn-secondary{
+    background:var(--surface);color:var(--ink);border-color:var(--border);
+    box-shadow:var(--shadow-l1);
+  }
+  .btn-secondary:hover{transform:translateY(-2px);box-shadow:var(--shadow-l2);border-color:var(--violet);}
+  .btn-secondary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+  .btn-danger-ghost{
+    background:transparent;color:var(--danger-fg);border-color:var(--danger-bg);
+    height:36px;padding:0 16px;font-size:13px;
+  }
+  .btn-danger-ghost:hover{background:var(--danger-bg);}
+
+  /* ── 설정 목록 (settings-list) ── */
+  .settings-panel{display:flex;flex-direction:column;gap:24px;}
+  .group{
+    background:var(--surface);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-l1);overflow:hidden;
+  }
+  .group-title{
+    margin:0;padding:20px 24px 12px;font-size:16px;font-weight:700;letter-spacing:-0.01em;
+  }
+  .danger-title{color:var(--danger-fg);}
+
+  .row{
+    display:flex;align-items:center;gap:16px;padding:16px 24px;
+    border-top:1px solid var(--border);
+    transition:background .2s ease;
+  }
+  .group-title + .row{border-top:none;}
+  .row:hover{background:#F8F6FF;}
+  .row-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
+  .row-label{
+    font-size:16px;font-weight:700;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    word-break:keep-all;
+  }
+  .row:hover .row-label{color:var(--violet);}
+  .row-label .room{font-weight:600;color:var(--muted-text);}
+  .row-desc{font-size:13px;color:var(--muted-text);line-height:1.5;max-width:52ch;}
+  .row-value{
+    font-size:16px;font-weight:800;flex-shrink:0;white-space:nowrap;
+  }
+  .row-control{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;
+  }
+  .badge .bdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .badge-confirmed{background:var(--success-bg);color:var(--success-fg);}
+  .badge-confirmed .bdot{background:var(--success-fg);}
+  .badge-pending{background:var(--warning-bg);color:var(--warning-fg);}
+  .badge-pending .bdot{background:var(--warning-fg);animation:breathe 2s ease-in-out infinite;}
+  .badge-done{background:var(--neutral-bg);color:var(--neutral-fg);}
+  .badge-done .bdot{background:var(--neutral-fg);}
+  .badge-cancelled{background:var(--danger-bg);color:var(--danger-fg);}
+  .badge-cancelled .bdot{background:var(--danger-fg);}
+  .badge-preview{opacity:.85;}
+
+  /* 토글 스위치 */
+  .toggle{
+    all:unset;box-sizing:border-box;
+    width:44px;height:24px;border-radius:999px;background:var(--border);
+    position:relative;cursor:pointer;transition:background .2s ease;flex-shrink:0;
+  }
+  .toggle::after{
+    content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;
+    border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(23,20,58,.25);
+    transition:transform .2s ease;
+  }
+  .toggle.on{background:linear-gradient(90deg,var(--violet),var(--pink));}
+  .toggle.on::after{transform:translateX(20px);}
+  .toggle:focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+
+  .missing-control{display:flex;align-items:center;gap:8px;}
+  .dash{font-size:16px;font-weight:800;color:var(--muted-text);}
+  .missing-note{font-size:12px;color:var(--muted-text);}
+  .row-missing{background:#FCFBFF;}
+  .row-missing .row-label{color:var(--muted-text);}
+
+  .row-danger{flex-wrap:wrap;}
+  .danger-label{color:var(--danger-fg);}
+  .danger-desc{color:var(--danger-fg);opacity:.85;}
+
+  .preview-hint{
+    margin:0;padding:0 24px 16px;font-size:12px;color:var(--muted-text);
+  }
+
+  .save-status{
+    display:flex;align-items:center;gap:8px;
+    padding:14px 24px;font-size:13px;color:var(--muted-text);
+  }
+
+  /* ── 빈 상태 ── */
+  .empty-panel{
+    background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-l1);
+    padding:64px 32px;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+  }
+  .empty-panel[hidden]{display:none;}
+  .empty-icon{
+    width:56px;height:56px;border-radius:50%;background:var(--neutral-bg);
+    display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:8px;
+  }
+  .empty-title{margin:0;font-size:16px;font-weight:700;}
+  .empty-desc{margin:0 0 8px;font-size:13px;color:var(--muted-text);max-width:40ch;}
+
+  /* ── 푸터 ── */
+  .footer{
+    position:relative;z-index:1;text-align:center;
+    padding:24px;font-size:12px;color:var(--muted-text);
+    border-top:1px solid var(--border);
+  }
+
+  /* ── 반응형 900px ── */
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr;padding:24px 16px 48px;gap:20px;}
+    .sidebar{position:static;order:-1;}
+    .nav-list{flex-direction:row;flex-wrap:wrap;gap:8px;}
+    .nav-item{padding:8px 14px;}
+    .profile-card{padding:20px;}
+    .profile-stat{border-left:none;padding-left:0;order:3;flex-basis:100%;}
+    .row{flex-wrap:wrap;}
+    .row-value{order:2;}
+    .row-control{order:3;width:100%;justify-content:flex-end;}
+    .topbar-inner{padding:12px 16px;}
+    .live-chip span:not(.dot){display:none;}
+  }
+  @media (max-width:480px){
+    .live-chip{display:none;}
+  }
+
+  /* ── 접근성: 모션 축소 ── */
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+    .reveal{opacity:1;transform:none;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="blob blob-violet" aria-hidden="true"></div>
+  <div class="blob blob-mint" aria-hidden="true"></div>
+
+  <header class="topbar" data-region="identity">
+    <div class="topbar-inner">
+      <div class="logo">여기묵자</div>
+      <div class="topbar-right">
+        <span class="live-chip"><span class="dot dot-pulse" aria-hidden="true"></span><span>실시간 동기화</span></span>
+        <div class="user-avatar" title="정하람 · 일반 회원">ㅇ</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" data-region="nav">
+      <nav class="nav-list" aria-label="계정 메뉴">
+        <button class="nav-item is-active" type="button" data-target="bookings">내 예약</button>
+        <button class="nav-item" type="button" data-target="wishlist">찜한 숙소</button>
+        <button class="nav-item" type="button" data-target="payment">결제 수단</button>
+        <button class="nav-item" type="button" data-target="notify">알림</button>
+        <button class="nav-item" type="button" data-target="account">계정</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+
+      <section class="profile-card reveal" data-region="profile" id="profileCard" style="transition-delay:80ms">
+        <div class="profile-avatar" aria-hidden="true">ㅇ</div>
+        <div class="profile-info">
+          <div class="profile-name">정하람</div>
+          <span class="role-badge">일반 회원</span>
+        </div>
+        <div class="profile-stat">
+          <span class="stat-label">예약</span>
+          <span class="stat-value tabnum" id="bookingCount" data-target-value="3">3</span>
+          <span class="stat-suffix">건</span>
+        </div>
+      </section>
+
+      <div class="page-actions reveal" data-region="action" style="transition-delay:140ms">
+        <button class="btn btn-primary" type="button">새 숙소 예약하기</button>
+        <button class="btn btn-secondary" type="button">예약 내역 내보내기</button>
+      </div>
+
+      <section class="settings-panel" data-region="settings-list" id="panel-settings">
+
+        <div class="group reveal reveal-row" style="transition-delay:200ms">
+          <h2 class="group-title">예약 목록</h2>
+
+          <div class="row" data-status="confirmed">
+            <div class="row-main">
+              <div class="row-label">남산 그랜드 호텔 · <span class="room">디럭스 더블</span></div>
+              <div class="row-desc">9/12–9/14 (2박)</div>
+            </div>
+            <div class="row-value tabnum">₩400,000</div>
+            <div class="row-control">
+              <span class="badge badge-confirmed"><span class="bdot" aria-hidden="true"></span>예약 확정</span>
+            </div>
+          </div>
+
+          <div class="row" data-status="pending">
+            <div class="row-main">
+              <div class="row-label">북촌 한옥 스테이 · <span class="room">온돌룸</span></div>
+              <div class="row-desc">10/03–10/04 (1박)</div>
+            </div>
+            <div class="row-value tabnum">₩165,000</div>
+            <div class="row-control">
+              <span class="badge badge-pending"><span class="bdot" aria-hidden="true"></span>결제 대기</span>
+            </div>
+          </div>
+
+          <div class="row" data-status="done">
+            <div class="row-main">
+              <div class="row-label">홍대 게스트하우스 · <span class="room">도미토리</span></div>
+              <div class="row-desc">8/21–8/22 (1박)</div>
+            </div>
+            <div class="row-value tabnum">₩41,000</div>
+            <div class="row-control">
+              <span class="badge badge-done"><span class="bdot" aria-hidden="true"></span>이용 완료</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group reveal reveal-row" id="notifyGroup" style="transition-delay:260ms">
+          <h2 class="group-title">알림 설정</h2>
+
+          <div class="row">
+            <div class="row-main">
+              <div class="row-label">예약 알림</div>
+              <div class="row-desc">예약 확정·변경 시 알려드려요.</div>
+            </div>
+            <div class="row-control">
+              <button class="toggle on" type="button" role="switch" aria-checked="true" aria-label="예약 알림"></button>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="row-main">
+              <div class="row-label">특가 알림</div>
+              <div class="row-desc">관심 지역의 특가가 떴을 때 놓치지 않도록 알려드려요. 하루 최대 1회까지만 보내드려요.</div>
+            </div>
+            <div class="row-control">
+              <button class="toggle off" type="button" role="switch" aria-checked="false" aria-label="특가 알림"></button>
+            </div>
+          </div>
+
+          <div class="row row-missing">
+            <div class="row-main">
+              <div class="row-label">체크인 리마인더</div>
+              <div class="row-desc">체크인 하루 전 알려드려요.</div>
+            </div>
+            <div class="row-control missing-control">
+              <span class="dash" aria-hidden="true">—</span>
+              <span class="missing-note">설정되지 않음</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group danger-zone reveal reveal-row" style="transition-delay:320ms">
+          <h2 class="group-title danger-title">위험 구역</h2>
+          <div class="row row-danger">
+            <div class="row-main">
+              <div class="row-label danger-label">예약 취소</div>
+              <div class="row-desc danger-desc">취소 수수료가 발생할 수 있어요.</div>
+            </div>
+            <div class="row-control">
+              <span class="badge badge-cancelled badge-preview"><span class="bdot" aria-hidden="true"></span>취소됨</span>
+              <button class="btn btn-danger-ghost" type="button" id="cancelBtn">취소하기</button>
+            </div>
+          </div>
+          <p class="preview-hint">취소를 진행하면 상태가 위 배지처럼 "취소됨"으로 바뀌어요.</p>
+        </div>
+
+        <div class="save-status reveal" style="transition-delay:380ms">
+          <span class="dot dot-pulse" aria-hidden="true"></span>
+          <span>모든 변경사항 저장됨 · 방금 전</span>
+        </div>
+      </section>
+
+      <section class="empty-panel" data-region="empty" id="panelEmpty" hidden>
+        <div class="empty-icon" aria-hidden="true" id="emptyIcon">♡</div>
+        <h3 class="empty-title" id="emptyTitle">아직 찜한 숙소가 없어요</h3>
+        <p class="empty-desc" id="emptyDesc">마음에 드는 숙소를 하트로 저장해보세요.</p>
+        <button class="btn btn-secondary" type="button" id="emptyCta">숙소 둘러보기</button>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">STYLE 03 · 트렌디 SaaS</footer>
+
+  <script>
+  (function(){
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // 로드 스태거 연출
+    if (reduced) {
+      document.body.classList.add('loaded');
+    } else {
+      requestAnimationFrame(function(){
+        setTimeout(function(){ document.body.classList.add('loaded'); }, 60);
+      });
+    }
+
+    // 카운트업 — 예약 건수
+    var counter = document.getElementById('bookingCount');
+    if (counter) {
+      var target = parseInt(counter.getAttribute('data-target-value'), 10) || 0;
+      if (reduced) {
+        counter.textContent = target; // 이미 최종값 — 그대로 둔다
+      } else {
+        counter.textContent = 0; // JS 정상 동작 시에만 0에서 시작 (실패 시 HTML의 최종값 유지)
+        var start = null, dur = 600;
+        function step(ts){
+          if (start === null) start = ts;
+          var p = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          counter.textContent = Math.round(eased * target);
+          if (p < 1) requestAnimationFrame(step);
+          else counter.textContent = target;
+        }
+        requestAnimationFrame(step);
+      }
+    }
+
+    // 토글 스위치
+    document.querySelectorAll('.toggle').forEach(function(t){
+      t.addEventListener('click', function(){
+        var isOn = t.classList.toggle('on');
+        t.classList.toggle('off', !isOn);
+        t.setAttribute('aria-checked', isOn ? 'true' : 'false');
+      });
+    });
+
+    // 좌측 내비 — 패널 전환
+    var panelSettings = document.getElementById('panel-settings');
+    var panelEmpty = document.getElementById('panelEmpty');
+    var notifyGroup = document.getElementById('notifyGroup');
+    var profileCard = document.getElementById('profileCard');
+    var navItems = document.querySelectorAll('.nav-item');
+    var emptyIcon = document.getElementById('emptyIcon');
+    var emptyTitle = document.getElementById('emptyTitle');
+    var emptyDesc = document.getElementById('emptyDesc');
+    var emptyCta = document.getElementById('emptyCta');
+
+    var EMPTY_COPY = {
+      wishlist: { icon:'♡', title:'아직 찜한 숙소가 없어요', desc:'마음에 드는 숙소를 하트로 저장해보세요.', cta:'숙소 둘러보기' },
+      payment:  { icon:'💳', title:'등록된 결제 수단이 없어요', desc:'예약 시 빠른 결제를 위해 카드를 등록해보세요.', cta:'카드 등록하기' }
+    };
+
+    function flash(el){
+      if (!el) return;
+      el.style.transition = 'background .3s ease';
+      el.style.background = '#F1EDFF';
+      setTimeout(function(){ el.style.background = ''; }, 700);
+    }
+
+    navItems.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        navItems.forEach(function(b){ b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        var target = btn.getAttribute('data-target');
+
+        if (target === 'wishlist' || target === 'payment') {
+          panelSettings.hidden = true;
+          panelEmpty.hidden = false;
+          var c = EMPTY_COPY[target];
+          emptyIcon.textContent = c.icon;
+          emptyTitle.textContent = c.title;
+          emptyDesc.textContent = c.desc;
+          emptyCta.textContent = c.cta;
+        } else {
+          panelEmpty.hidden = true;
+          panelSettings.hidden = false;
+          if (target === 'notify') {
+            notifyGroup.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block:'center' });
+            flash(notifyGroup);
+          } else if (target === 'account') {
+            profileCard.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block:'center' });
+            flash(profileCard);
+          } else {
+            window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+          }
+        }
+      });
+    });
+
+    // 빈 상태 CTA → 예약 목록으로 복귀 (데모)
+    emptyCta && emptyCta.addEventListener('click', function(){
+      navItems.forEach(function(b){ b.classList.remove('is-active'); });
+      navItems[0].classList.add('is-active');
+      panelEmpty.hidden = true;
+      panelSettings.hidden = false;
+      window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+    });
+
+    // 예약 취소 — 데모 반응 (실제 데이터는 바꾸지 않음)
+    var cancelBtn = document.getElementById('cancelBtn');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', function(){
+        var original = cancelBtn.textContent;
+        cancelBtn.textContent = '취소 접수됨';
+        cancelBtn.disabled = true;
+        setTimeout(function(){
+          cancelBtn.textContent = original;
+          cancelBtn.disabled = false;
+        }, 2000);
+      });
+    }
+  })();
+  </script>
+
+</body>
+</html>

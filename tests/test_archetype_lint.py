@@ -85,3 +85,22 @@ def test_required_region_absence_fails_in_attribute_mode(tmp_path):
     f.write_text('<html><body><form data-region="form"><input></form></body></html>', encoding="utf-8")
     rc, out = _run(f, "F")   # F 필수: feed·feed-item — 둘 다 없음
     assert rc == 1 and ("feed" in out or "피드" in out)
+
+
+def test_screen_set_applies_per_screen_archetype(tmp_path):
+    """화면 세트: 같은 폴더라도 파일마다 다른 원형으로 검사한다."""
+    (tmp_path / "_spec.json").write_text(json.dumps({
+        "archetype": "D",
+        "screens": {"screen-1-search": "D", "screen-2-booking": "E"}
+    }), encoding="utf-8")
+    (tmp_path / "screen-1-search.html").write_text(
+        '<html><body><div data-region="collection"></div><div data-region="item-card"></div>'
+        '<div data-region="filter"></div></body></html>', encoding="utf-8")
+    # 예약폼(E)인데 KPI를 박음 → 잡혀야
+    (tmp_path / "screen-2-booking.html").write_text(
+        '<html><body><div data-region="kpi"></div></body></html>', encoding="utf-8")
+    r = subprocess.run([sys.executable, str(SCRIPT), str(tmp_path)], capture_output=True, text=True)
+    assert r.returncode == 1
+    assert "컬렉션형" in r.stdout and "폼·입력형" in r.stdout   # 두 원형이 각각 적용됨
+    assert "screen-1-search.html  (원형 D" in r.stdout
+    assert "screen-2-booking.html  (원형 E" in r.stdout

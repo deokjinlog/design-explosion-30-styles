@@ -214,7 +214,7 @@ def lint(path, override=None):
     name = STYLE_NAME.get(nn, "?")
     if nn not in RULES:
         print(f"[SKIP] {os.path.basename(path)} — 스타일 번호 인식 실패 (--style NN 지정)")
-        return 0
+        return None  # 검사 안 함. 위반 0건과 반드시 구분해야 게이트가 정직해진다
     html = rd(path)
     fails = [desc for lvl, desc, fn in RULES[nn] if fn(html)]
     warns = [desc for lvl, desc, fn in UNIVERSAL if fn(html)]
@@ -250,8 +250,16 @@ def main(argv):
     if not targets:
         print("검사할 style-*.html 없음")
         return 0
-    total = sum(lint(t, override) for t in targets)
-    print(f"\n총 위반: {total}건 " + ("→ 수정 후 재린트" if total else "→ 통과 ✅"))
+    results = [lint(t, override) for t in targets]
+    skipped = sum(1 for r in results if r is None)
+    checked = len(results) - skipped
+    total = sum(r for r in results if r is not None)
+    if skipped:
+        print(f"\n⚠️  스킵 {skipped}건 — 스타일 번호를 못 읽었습니다 (--style NN 으로 지정)")
+    if checked == 0:
+        print("검사 0건 → ❌ 게이트 무효. '통과' 로 세지 마세요.")
+        return 1
+    print(f"\n검사 {checked}건 · 총 위반: {total}건 " + ("→ 수정 후 재린트" if total else "→ 통과 ✅"))
     return 1 if total else 0
 
 

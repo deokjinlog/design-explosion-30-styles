@@ -20,7 +20,12 @@ style-lint 는 30/30 PASS 를 냈다. 스타일 규칙은 다 지켰지만 **질
   python3 archetype-lint.py <디렉토리> --archetype B
   python3 archetype-lint.py <파일.html> --archetype C
 
-_spec.json:  {"archetype": "B", "domain": "연서", "note": "대화형(주)+읽기형(보조)"}
+_spec.json (단일 화면):  {"archetype": "B", "domain": "연서", "note": "대화형(주)+읽기형(보조)"}
+
+_spec.json (화면 세트 — 화면마다 원형이 다름):
+  {"archetype": "D", "domain": "호텔 예약",
+   "screens": {"screen-1-search": "D", "screen-2-booking": "E", "screen-3-mybookings": "K"}}
+  → screens 키가 파일명에 포함되면 그 원형으로 검사. 없으면 archetype 기본값.
 
 한계: 키워드 모드는 오탐이 가능하다. FAIL 은 실제 위반인지 확인 후 수정한다.
 종료코드: FAIL 있으면 1, 없으면 0.
@@ -115,15 +120,36 @@ def regions_of(html):
     return set(re.findall(r'data-region\s*=\s*["\']([^"\']+)["\']', html, re.I))
 
 
-def load_archetype(path):
+def load_spec(path):
+    """_spec.json 로드. 단일 화면이면 {"archetype":"D"}, 화면 세트면 screens 맵도 함께.
+
+    화면 세트 예:
+      {"archetype": "D", "domain": "호텔 예약",
+       "screens": {"screen-1-search": "D", "screen-2-booking": "E", "screen-3-mybookings": "K"}}
+    screens 키는 파일명에 포함되면 매칭된다 (부분 일치, 긴 키 우선).
+    """
     d = path if os.path.isdir(path) else os.path.dirname(path)
     p = os.path.join(d, "_spec.json")
     if not os.path.exists(p):
-        return None
+        return {}
     try:
-        return json.load(open(p, encoding="utf-8")).get("archetype")
+        return json.load(open(p, encoding="utf-8"))
     except (ValueError, OSError):
-        return None
+        return {}
+
+
+def archetype_for(filepath, spec, override=None):
+    """이 파일에 적용할 원형. override > screens 매칭 > 폴더 기본값."""
+    if override:
+        return override
+    name = os.path.basename(str(filepath))
+    screens = spec.get("screens") or {}
+    # 긴 키부터 매칭 (screen-1 보다 screen-10 우선)
+    for key in sorted(screens, key=len, reverse=True):
+        if key in name:
+            return str(screens[key]).upper()
+    a = spec.get("archetype")
+    return str(a).upper() if a else None
 
 
 def lint(path, code):
@@ -180,12 +206,7 @@ def main(argv):
     if not args:
         print(__doc__)
         return 0
-    target = args[0]
-    code = code or load_archetype(target)
-    if code not in RULES:
-        print(f"[SKIP] 원형을 알 수 없음 — {target} 폴더에 _spec.json 을 두거나 --archetype A~K 를 지정하세요.")
-        print("       " + " · ".join(f"{k}={v}" for k, v in ARCHETYPE_NAME.items()))
-        return 0
+    spec = load_spec(args[0])
     targets = []
     for a in args:
         if os.path.isdir(a):
@@ -196,9 +217,21 @@ def main(argv):
     if not targets:
         print("검사할 *.html 없음")
         return 0
+    # 화면 세트면 파일마다 원형이 다를 수 있다
+    resolved = [(t, archetype_for(t, spec, code)) for t in targets]
+    unknown = [t for t, c in resolved if c not in RULES]
+    if unknown and len(unknown) == len(resolved):
+        print(f"[SKIP] 원형을 알 수 없음 — 폴더에 _spec.json 을 두거나 --archetype A~K 를 지정하세요.")
+        print("       " + " · ".join(f"{k}={v}" for k, v in ARCHETYPE_NAME.items()))
+        return 0
+    if spec.get("screens"):
+        print(f"ℹ️ 화면 세트 모드 — 화면마다 원형을 따로 검사합니다 ({len(spec['screens'])}개 정의)\n")
     total, legacy = 0, 0
-    for t in targets:
-        n, attr = lint(t, code)
+    for t, c in resolved:
+        if c not in RULES:
+            print(f"[SKIP] {os.path.basename(t)} — 원형 미지정")
+            continue
+        n, attr = lint(t, c)
         total += n
         legacy += 0 if attr else 1
     if legacy:
