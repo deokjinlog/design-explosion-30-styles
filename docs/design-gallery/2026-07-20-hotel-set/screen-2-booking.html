@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예약 · 여기묵자</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#FBFAFF;
+    --violet:#7C5CFF;
+    --pink:#FF8FC0;
+    --mint:#5EE6C8;
+    --ink:#17143A;
+    --muted:#7B7897;        /* 장식용 보조색 (배지/보더 등, 텍스트 4.5:1 미보장) */
+    --muted-text:#615D82;   /* 본문/캡션용 보조 텍스트 — 배경 대비 5.9:1 */
+    --border:#EAE7F6;
+    --surface:#FFFFFF;
+
+    --success-bg:#E3FBF3; --success-fg:#137A56;
+    --warning-bg:#FFF3DE; --warning-fg:#9A5B00;
+    --neutral-bg:#EDEBFB; --neutral-fg:#4B4570;
+    --danger-bg:#FDE8ED;  --danger-fg:#C81E45;
+    --info-bg:#EFEAFF;    --info-fg:#5B3DDB;
+
+    --radius-lg:28px; --radius-md:16px; --radius-sm:10px;
+    --shadow-l1:0 10px 30px rgba(23,20,58,.06);
+    --shadow-l2:0 20px 40px rgba(124,92,255,.15);
+    --ring:0 0 0 4px rgba(124,92,255,.16);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* ── L0 배경 블롭 ── */
+  .blob{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;}
+  .blob-violet{top:-140px;right:-120px;width:420px;height:420px;background:var(--violet);opacity:.32;}
+  .blob-mint{bottom:-160px;left:-140px;width:380px;height:380px;background:var(--mint);opacity:.28;}
+
+  /* ── 공통 유틸 ── */
+  .tabnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+  button{font-family:inherit;}
+  a{color:inherit;}
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+
+  /* ── 로드 스태거 연출 ── */
+  .reveal{opacity:0;transform:translateY(12px);transition:opacity .4s ease,transform .4s ease;}
+  body.loaded .reveal{opacity:1;transform:translateY(0);}
+
+  @keyframes breathe{
+    0%,100%{opacity:1;transform:scale(1);}
+    50%{opacity:.45;transform:scale(.8);}
+  }
+  .dot-pulse{animation:breathe 2s ease-in-out infinite;}
+
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-6px);}
+    40%{transform:translateX(5px);}
+    60%{transform:translateX(-4px);}
+    80%{transform:translateX(3px);}
+  }
+  .shake-once{animation:shake .28s ease;}
+
+  /* ── 상단바 (identity) ── */
+  .topbar{position:relative;z-index:2;border-bottom:1px solid var(--border);background:rgba(251,250,255,.8);}
+  .topbar-inner{
+    max-width:1200px;margin:0 auto;padding:16px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .logo{
+    font-size:24px;font-weight:800;letter-spacing:-0.02em;
+    background:linear-gradient(90deg,var(--violet),var(--pink));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    flex-shrink:0;
+  }
+  .topbar-right{display:flex;align-items:center;gap:16px;flex-shrink:0;}
+  .live-chip{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12px;font-weight:600;color:var(--muted-text);
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:999px;padding:6px 12px;
+    box-shadow:var(--shadow-l1);
+  }
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);flex-shrink:0;}
+  .user-avatar{
+    width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--violet),var(--pink));
+    color:#fff;font-weight:800;font-size:14px;flex-shrink:0;
+  }
+
+  /* ── 브레드크럼 바 ── */
+  .breadcrumb-bar{
+    max-width:1200px;margin:0 auto;padding:14px 24px;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  .crumbs{display:flex;align-items:center;gap:8px;list-style:none;margin:0;padding:0;flex-wrap:wrap;}
+  .crumbs li{display:flex;align-items:center;gap:8px;}
+  .crumb-link{
+    all:unset;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted-text);
+    transition:color .2s ease;
+  }
+  .crumb-link:hover{color:var(--violet);}
+  .crumb-link:focus-visible{outline:2px solid var(--violet);outline-offset:2px;border-radius:4px;}
+  .crumb-sep{color:var(--muted-text);font-size:12px;opacity:.6;}
+  .crumb-current{font-size:13px;font-weight:800;color:var(--ink);}
+
+  /* ── 레이아웃 ── */
+  .layout{
+    position:relative;z-index:1;
+    max-width:1200px;margin:0 auto;padding:8px 24px 0;
+    display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start;
+  }
+  .main{display:flex;flex-direction:column;gap:20px;min-width:0;}
+
+  /* ── 단계 표시 (steps) ── */
+  .steps-card{
+    background:var(--surface);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-l1);padding:22px 28px;
+  }
+  .steps-row{display:flex;align-items:flex-start;gap:0;}
+  .step{display:flex;flex-direction:column;align-items:center;gap:8px;flex:0 0 auto;width:104px;}
+  .step-circle{
+    width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:800;flex-shrink:0;
+    border:2px solid var(--border);color:var(--muted-text);background:var(--surface);
+    transition:background .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease;
+  }
+  .step-circle svg{width:16px;height:16px;}
+  .step.is-done .step-circle{
+    background:linear-gradient(135deg,var(--violet),var(--pink));
+    border-color:transparent;color:#fff;
+  }
+  .step.is-current .step-circle{
+    border-color:var(--violet);color:var(--violet);background:#fff;
+    box-shadow:var(--ring);
+  }
+  .step-label{font-size:13px;font-weight:700;color:var(--muted-text);white-space:nowrap;}
+  .step.is-done .step-label,.step.is-current .step-label{color:var(--ink);}
+  .step-sub{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11px;font-weight:800;color:var(--violet);
+    background:var(--info-bg);border-radius:999px;padding:2px 10px;
+  }
+  .step-connector{
+    flex:1;height:2px;background:var(--border);margin-top:17px;border-radius:2px;
+    position:relative;top:0;min-width:24px;
+  }
+  .step-connector.is-filled{background:linear-gradient(90deg,var(--violet),var(--pink));}
+
+  /* ── 에러 요약 배너 ── */
+  .error-banner{
+    display:flex;align-items:flex-start;gap:12px;
+    background:var(--danger-bg);color:var(--danger-fg);
+    border-radius:var(--radius-md);padding:14px 18px;
+    font-size:13px;font-weight:700;
+  }
+  .error-banner svg{width:18px;height:18px;flex-shrink:0;margin-top:1px;}
+
+  /* ── 폼 카드 ── */
+  .form-card{
+    background:var(--surface);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-l1);padding:28px;
+    display:flex;flex-direction:column;gap:24px;
+  }
+  .form-section-title{margin:0;font-size:18px;font-weight:800;letter-spacing:-0.01em;}
+  .form-section-desc{margin:2px 0 0;font-size:13px;color:var(--muted-text);font-weight:500;}
+
+  .field-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:20px 24px;
+  }
+  .field{display:flex;flex-direction:column;gap:6px;min-width:0;}
+  .field-full{grid-column:1 / -1;}
+
+  .field-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .field-label{
+    display:flex;align-items:center;gap:4px;
+    font-size:13px;font-weight:700;color:var(--ink);
+  }
+  .req-mark{color:var(--danger-fg);}
+
+  .state-flag{
+    font-size:10px;font-weight:800;letter-spacing:.02em;
+    border-radius:999px;padding:3px 9px;white-space:nowrap;
+  }
+  .state-flag--done{background:var(--success-bg);color:var(--success-fg);}
+  .state-flag--error{background:var(--danger-bg);color:var(--danger-fg);}
+  .state-flag--focus{background:var(--info-bg);color:var(--violet);}
+  .state-flag--disabled{background:var(--neutral-bg);color:var(--neutral-fg);}
+  .state-flag--default{background:var(--bg);color:var(--muted-text);border:1px solid var(--border);}
+
+  .input-wrap{position:relative;display:flex;align-items:center;}
+  .input-wrap input,.input-wrap select{
+    width:100%;height:44px;padding:0 40px 0 16px;
+    border-radius:var(--radius-md);border:1.5px solid var(--border);
+    background:var(--surface);color:var(--ink);
+    font-family:inherit;font-size:14px;font-weight:600;
+    transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;
+  }
+  .input-wrap select{
+    -webkit-appearance:none;appearance:none;padding-right:40px;cursor:pointer;font-weight:700;
+  }
+  .input-wrap .caret{position:absolute;right:16px;pointer-events:none;color:var(--muted-text);font-size:12px;}
+  .input-wrap input::placeholder{color:#B3AFCB;font-weight:500;}
+  .input-wrap input:focus-visible,.input-wrap select:focus-visible{
+    outline:none;border-color:var(--violet);box-shadow:var(--ring);
+  }
+  .input-wrap .state-icon{position:absolute;right:14px;width:18px;height:18px;pointer-events:none;}
+
+  /* 완료 */
+  .field.is-done .input-wrap input{border-color:var(--success-fg);background:#F5FFFB;}
+  .field.is-done .state-icon{color:var(--success-fg);}
+
+  /* 에러 */
+  .field.is-error .input-wrap input{border-color:var(--danger-fg);background:#FFFAFB;}
+  .field.is-error .input-wrap input:focus-visible{box-shadow:0 0 0 4px rgba(200,30,69,.14);}
+  .field.is-error .state-icon{color:var(--danger-fg);}
+
+  /* 포커스 시연 (실제 autofocus + 항시 시각 고정) */
+  .field.is-focus-demo .input-wrap input{border-color:var(--violet);box-shadow:var(--ring);}
+
+  /* 비활성 */
+  .fake-input{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    height:44px;padding:0 16px;border-radius:var(--radius-md);
+    border:1.5px dashed var(--border);background:var(--neutral-bg);
+    color:var(--muted-text);font-size:13px;font-weight:600;cursor:not-allowed;
+  }
+  .fake-input svg{width:16px;height:16px;flex-shrink:0;opacity:.8;}
+
+  .field-help{font-size:12px;color:var(--muted-text);font-weight:500;}
+  .field-msg{
+    display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;
+  }
+  .field-msg svg{width:14px;height:14px;flex-shrink:0;}
+  .field-msg.is-error{color:var(--danger-fg);}
+  .field-msg.is-done{color:var(--success-fg);}
+
+  textarea{
+    width:100%;min-height:104px;padding:14px 16px;resize:vertical;
+    border-radius:var(--radius-md);border:1.5px solid var(--border);
+    background:var(--surface);color:var(--ink);
+    font-family:inherit;font-size:14px;font-weight:500;line-height:1.6;
+    transition:border-color .2s ease,box-shadow .2s ease;
+  }
+  textarea:focus-visible{outline:none;border-color:var(--violet);box-shadow:var(--ring);}
+
+  /* 약관 체크박스 */
+  .terms-row{
+    display:flex;align-items:flex-start;gap:12px;
+    padding:14px 16px;border-radius:var(--radius-md);
+    border:1.5px solid var(--border);cursor:pointer;
+    transition:background .2s ease,border-color .2s ease;
+  }
+  .terms-row:hover{background:#F8F6FF;border-color:var(--violet);}
+  .terms-row input{
+    width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:var(--violet);cursor:pointer;
+  }
+  .terms-row input:focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+  .terms-text{font-size:13px;font-weight:600;color:var(--ink);line-height:1.5;}
+  .terms-row.is-invalid{border-color:var(--danger-fg);background:#FFFAFB;}
+  .terms-required{color:var(--danger-fg);font-weight:800;}
+
+  /* ── 요약 패널 ── */
+  .summary-card{
+    position:sticky;top:24px;
+    background:var(--surface);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-l1);padding:24px;
+    display:flex;flex-direction:column;gap:18px;
+  }
+  .summary-eyebrow{
+    font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--muted-text);
+    text-transform:uppercase;
+  }
+  .summary-hotel{margin:0;font-size:18px;font-weight:800;letter-spacing:-0.01em;line-height:1.35;}
+  .summary-loc{font-size:12px;color:var(--muted-text);font-weight:600;}
+
+  .summary-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--neutral-bg);color:var(--neutral-fg);
+    border-radius:999px;padding:7px 14px;
+    font-size:12px;font-weight:700;white-space:nowrap;
+  }
+
+  .summary-divider{border:none;border-top:1px solid var(--border);margin:0;}
+
+  .summary-rows{display:flex;flex-direction:column;gap:10px;}
+  .summary-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;}
+  .summary-row .label{color:var(--muted-text);font-weight:600;}
+  .summary-row .value{color:var(--ink);font-weight:700;}
+
+  .summary-total-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding-top:4px;
+  }
+  .summary-total-label{font-size:14px;font-weight:800;color:var(--ink);}
+  .summary-total-value{font-size:28px;font-weight:800;letter-spacing:-0.03em;color:var(--ink);}
+
+  .action-group{display:flex;flex-direction:column;gap:10px;}
+
+  /* ── 버튼 ── */
+  .btn{
+    height:44px;padding:0 20px;border-radius:var(--radius-sm);
+    font-size:14px;font-weight:700;cursor:pointer;border:1px solid transparent;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    transition:transform .2s ease,box-shadow .2s ease,background .2s ease,color .2s ease,border-color .2s ease;
+  }
+  .btn:focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+  .btn-primary{
+    background:linear-gradient(90deg,var(--violet),var(--pink));color:#fff;
+    box-shadow:0 10px 24px rgba(124,92,255,.28);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-l2);}
+  .btn-secondary{
+    background:var(--surface);color:var(--ink);border-color:var(--border);
+  }
+  .btn-secondary:hover{transform:translateY(-2px);box-shadow:var(--shadow-l1);border-color:var(--violet);color:var(--violet);}
+
+  /* ── 푸터 ── */
+  .footer{
+    position:relative;z-index:1;text-align:center;
+    padding:24px;font-size:12px;color:var(--muted-text);
+    border-top:1px solid var(--border);margin-top:24px;
+  }
+
+  /* ── 반응형 900px ── */
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr;padding:8px 16px 0;gap:16px;}
+    .summary-card{position:static;}
+    .field-grid{grid-template-columns:1fr;}
+    .topbar-inner{padding:12px 16px;}
+    .breadcrumb-bar{padding:10px 16px;}
+    .live-chip span:not(.dot){display:none;}
+    .step{width:auto;flex:1;}
+    .step-label{display:none;}
+    .steps-card{padding:18px 16px;}
+    .form-card{padding:20px;}
+  }
+  @media (max-width:560px){
+    .live-chip{display:none;}
+    .crumb-link span{display:none;}
+  }
+
+  /* ── 접근성: 모션 축소 ── */
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+    .reveal{opacity:1;transform:none;}
+    .shake-once{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="blob blob-violet" aria-hidden="true"></div>
+  <div class="blob blob-mint" aria-hidden="true"></div>
+
+  <header data-region="identity">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="logo">여기묵자</div>
+        <div class="topbar-right">
+          <span class="live-chip"><span class="dot dot-pulse" aria-hidden="true"></span><span>실시간 요금 갱신</span></span>
+          <div class="user-avatar" title="정하람 · 일반 회원">ㅇ</div>
+        </div>
+      </div>
+    </div>
+    <nav class="breadcrumb-bar" aria-label="이동 경로">
+      <ol class="crumbs">
+        <li><button class="crumb-link" type="button"><span>검색 결과</span></button></li>
+        <li><span class="crumb-sep" aria-hidden="true">›</span></li>
+        <li><button class="crumb-link" type="button"><span>남산 그랜드 호텔</span></button></li>
+        <li><span class="crumb-sep" aria-hidden="true">›</span></li>
+        <li><span class="crumb-current" aria-current="page">예약</span></li>
+      </ol>
+    </nav>
+  </header>
+
+  <div class="layout">
+
+    <main class="main">
+
+      <section class="steps-card reveal" data-region="steps" aria-label="예약 단계" style="transition-delay:60ms">
+        <div class="steps-row">
+          <div class="step is-done">
+            <div class="step-circle" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <span class="step-label">① 객실</span>
+          </div>
+          <div class="step-connector is-filled" aria-hidden="true"></div>
+          <div class="step is-current" aria-current="step">
+            <div class="step-circle">2</div>
+            <span class="step-label">② 투숙객</span>
+            <span class="step-sub tabnum">2/3 단계</span>
+          </div>
+          <div class="step-connector" aria-hidden="true"></div>
+          <div class="step">
+            <div class="step-circle">3</div>
+            <span class="step-label">③ 결제</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="error-banner reveal" data-region="banner" role="alert" style="transition-delay:90ms">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
+        <span>필수 항목 1개를 확인해 주세요.</span>
+      </div>
+
+      <form class="form-card reveal" data-region="form" novalidate style="transition-delay:120ms">
+        <div>
+          <h2 class="form-section-title">투숙객 정보</h2>
+          <p class="form-section-desc">예약자 확인과 안내에 사용됩니다. 필드 5가지 상태(기본·포커스·에러·비활성·완료)를 확인해 보세요.</p>
+        </div>
+
+        <div class="field-grid">
+
+          <div class="field is-done">
+            <div class="field-label-row">
+              <label class="field-label" for="fldName"><span class="req-mark">*</span>대표 투숙객 이름</label>
+              <span class="state-flag state-flag--done">완료</span>
+            </div>
+            <div class="input-wrap">
+              <input type="text" id="fldName" value="정하람" readonly>
+              <svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <span class="field-msg is-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>예약자명이 확인됐어요.</span>
+          </div>
+
+          <div class="field is-error">
+            <div class="field-label-row">
+              <label class="field-label" for="fldEmail"><span class="req-mark">*</span>이메일</label>
+              <span class="state-flag state-flag--error">에러</span>
+            </div>
+            <div class="input-wrap">
+              <input type="email" id="fldEmail" value="haram@" aria-invalid="true" aria-describedby="fldEmailMsg">
+              <svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
+            </div>
+            <span class="field-msg is-error" id="fldEmailMsg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>이메일 형식을 확인해 주세요</span>
+          </div>
+
+          <div class="field is-focus-demo">
+            <div class="field-label-row">
+              <label class="field-label" for="fldPhone"><span class="req-mark">*</span>연락처</label>
+              <span class="state-flag state-flag--focus">포커스</span>
+            </div>
+            <div class="input-wrap">
+              <input type="tel" id="fldPhone" value="010-2481-0000" autofocus>
+            </div>
+            <span class="field-help">체크인 안내 문자를 이 번호로 보내드려요.</span>
+          </div>
+
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="fldBreakfast">조식 추가</label>
+              <span class="state-flag state-flag--default">기본</span>
+            </div>
+            <div class="input-wrap">
+              <select id="fldBreakfast">
+                <option value="0">선택 안 함</option>
+                <option value="36000" selected>2인 (+₩36,000)</option>
+              </select>
+              <span class="caret" aria-hidden="true">▾</span>
+            </div>
+            <span class="field-help">조식은 체크아웃 전 언제든 변경할 수 있어요.</span>
+          </div>
+
+          <div class="field field-full">
+            <div class="field-label-row">
+              <label class="field-label" for="fldRequest">요청사항</label>
+            </div>
+            <textarea id="fldRequest">늦은 체크인 예정입니다. 22시 이후 도착할 것 같은데 가능할까요? 가능하면 고층 금연실로 부탁드립니다.</textarea>
+            <span class="field-help">호텔 사정에 따라 반영이 어려울 수 있어요.</span>
+          </div>
+
+          <div class="field field-full">
+            <div class="field-label-row">
+              <label class="field-label">결제 수단</label>
+              <span class="state-flag state-flag--disabled">비활성</span>
+            </div>
+            <div class="fake-input" aria-disabled="true">
+              <span>결제 수단은 다음 단계에서 선택해요</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <span class="field-help">비활성 — 3단계에서 입력합니다.</span>
+          </div>
+
+          <div class="field field-full">
+            <label class="terms-row is-invalid" for="fldTerms">
+              <input type="checkbox" id="fldTerms">
+              <span class="terms-text">이용약관 및 개인정보 처리방침에 동의합니다 <span class="terms-required">(필수)</span></span>
+            </label>
+          </div>
+
+        </div>
+      </form>
+
+    </main>
+
+    <aside class="summary-card reveal" data-region="summary" aria-label="예약 요약" style="transition-delay:160ms">
+      <div>
+        <div class="summary-eyebrow">예약 요약</div>
+        <h3 class="summary-hotel">남산 그랜드 호텔</h3>
+        <div class="summary-loc">중구 회현동</div>
+      </div>
+
+      <div class="summary-chips">
+        <span class="chip">9/12–9/14 (2박)</span>
+        <span class="chip">성인 2</span>
+        <span class="chip">디럭스 더블</span>
+      </div>
+
+      <hr class="summary-divider">
+
+      <div class="summary-rows">
+        <div class="summary-row">
+          <span class="label">객실 소계 (2박)</span>
+          <span class="value tabnum">₩364,000</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">조식 (2인)</span>
+          <span class="value tabnum">+₩36,000</span>
+        </div>
+      </div>
+
+      <hr class="summary-divider">
+
+      <div class="summary-total-row">
+        <span class="summary-total-label">총 결제 금액</span>
+        <span class="summary-total-value tabnum" id="totalAmount" data-target-value="400000">₩400,000</span>
+      </div>
+
+      <div class="action-group" data-region="action">
+        <button class="btn btn-primary" type="button" id="goToPaymentBtn">결제로 이동</button>
+        <button class="btn btn-secondary" type="button" id="backToRoomBtn">객실 다시 고르기</button>
+      </div>
+    </aside>
+
+  </div>
+
+  <footer class="footer">STYLE 03 · 트렌디 SaaS</footer>
+
+  <script>
+  (function(){
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // 로드 스태거 연출 — 헤더는 먼저 자리잡고, 카드가 뒤이어 떠오른다
+    if (reduced) {
+      document.body.classList.add('loaded');
+    } else {
+      requestAnimationFrame(function(){
+        setTimeout(function(){ document.body.classList.add('loaded'); }, 60);
+      });
+    }
+
+    // 살아있는 숫자 — 총 결제 금액 카운트업 (JS 실패해도 HTML엔 최종값 대체 표시)
+    var totalEl = document.getElementById('totalAmount');
+    if (totalEl) {
+      var target = parseInt(totalEl.getAttribute('data-target-value'), 10) || 0;
+      function won(n){ return '₩' + n.toLocaleString('ko-KR'); }
+      if (reduced) {
+        totalEl.textContent = won(target);
+      } else {
+        totalEl.textContent = won(0);
+        var start = null, dur = 800;
+        function step(ts){
+          if (start === null) start = ts;
+          var p = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          totalEl.textContent = won(Math.round(eased * target));
+          if (p < 1) requestAnimationFrame(step);
+          else totalEl.textContent = won(target);
+        }
+        requestAnimationFrame(step);
+      }
+    }
+
+    // 결제로 이동 — 약관 미체크 시 체크박스로 시선 유도 (연출 전용, 폼 상태는 이미 HTML에 고정)
+    var termsRow = document.querySelector('.terms-row');
+    var termsInput = document.getElementById('fldTerms');
+    var payBtn = document.getElementById('goToPaymentBtn');
+    if (payBtn && termsRow && termsInput) {
+      payBtn.addEventListener('click', function(){
+        if (!termsInput.checked) {
+          termsRow.classList.add('is-invalid');
+          if (!reduced) {
+            termsRow.classList.remove('shake-once');
+            void termsRow.offsetWidth;
+            termsRow.classList.add('shake-once');
+          }
+          termsInput.focus();
+        }
+      });
+      termsInput.addEventListener('change', function(){
+        if (termsInput.checked) termsRow.classList.remove('is-invalid');
+        else termsRow.classList.add('is-invalid');
+      });
+    }
+
+    // 객실 다시 고르기 — 데모 피드백
+    var backBtn = document.getElementById('backToRoomBtn');
+    if (backBtn) {
+      backBtn.addEventListener('click', function(){
+        var original = backBtn.textContent;
+        backBtn.textContent = '이동 중…';
+        backBtn.disabled = true;
+        setTimeout(function(){
+          backBtn.textContent = original;
+          backBtn.disabled = false;
+        }, 1000);
+      });
+    }
+  })();
+  </script>
+
+</body>
+</html>
