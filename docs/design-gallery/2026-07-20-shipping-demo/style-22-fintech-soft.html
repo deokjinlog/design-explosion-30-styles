@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>배송생활 · 내 배송함</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --surface-soft:#F7F8FA;
+    --surface-hover:#F1F3F5;
+    --card:#FFFFFF;
+    --blue:#3182F6;
+    --blue-press:#1B64DA;
+    --blue-wash:#EAF2FE;
+    --mint:#00C6AE;
+    --mint-wash:#E5FAF6;
+    --text-strong:#191F28;
+    --text-mid:#4E5968;
+    --text-weak:#8B95A1;
+    --border:#E5E8EB;
+    --warning:#FF9500;
+    --warning-wash:#FFF4E5;
+    --danger:#F04452;
+    --danger-wash:#FEECEE;
+    --shadow-sm:0 2px 8px rgba(23,31,40,.04);
+    --shadow-md:0 8px 24px rgba(23,31,40,.06);
+    --shadow-hover:0 12px 32px rgba(23,31,40,.10);
+    --r-card:20px;
+    --r-ctrl:14px;
+    --r-pill:999px;
+    --r-chip:12px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text-mid);
+    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,p,ul,ol{ margin:0; padding:0; }
+  ul{ list-style:none; }
+  button{ font-family:inherit; cursor:pointer; }
+  .num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+
+  :focus-visible{
+    outline:2px solid var(--blue);
+    outline-offset:2px;
+    border-radius:4px;
+  }
+
+  .skip-link{
+    position:absolute; left:-999px; top:0;
+    background:var(--blue); color:#fff; padding:10px 16px; border-radius:var(--r-ctrl); z-index:100;
+    font-weight:700;
+  }
+  .skip-link:focus-visible{ left:16px; top:16px; }
+
+  /* ===== identity / header ===== */
+  header.topbar{
+    background:var(--bg);
+    border-bottom:1px solid var(--border);
+    animation:barDown .2s ease-out both;
+  }
+  .topbar-inner{
+    max-width:880px; margin:0 auto;
+    display:flex; align-items:center; gap:16px;
+    padding:16px 24px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+  .brand-mark{
+    width:32px; height:32px; border-radius:var(--r-chip);
+    background:var(--blue); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:15px; flex:0 0 auto;
+  }
+  .brand-word{ font-weight:800; font-size:16px; color:var(--text-strong); letter-spacing:-.01em; }
+
+  nav.toptabs{ display:flex; align-items:center; gap:4px; margin-left:8px; }
+  .toptabs a{
+    display:inline-block; padding:8px 14px; border-radius:var(--r-pill);
+    font-size:14px; font-weight:600; color:var(--text-weak); text-decoration:none;
+    white-space:nowrap;
+  }
+  .toptabs a:hover{ background:var(--surface-hover); color:var(--text-mid); }
+  .toptabs a.is-active{ background:var(--blue-wash); color:var(--blue); }
+
+  .topbar-spacer{ flex:1 1 auto; }
+  .avatar{
+    width:36px; height:36px; border-radius:50%;
+    background:var(--mint-wash); color:#00806f;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:14px; flex:0 0 auto;
+    border:1px solid rgba(0,0,0,.02);
+  }
+
+  /* ===== layout ===== */
+  main{ max-width:880px; margin:0 auto; padding:24px 24px 64px; display:flex; flex-direction:column; gap:24px; }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    box-shadow:var(--shadow-sm);
+    padding:32px;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-hover); }
+
+  .stagger{ opacity:0; transform:translateY(16px); animation:cardUp .32s cubic-bezier(.22,.8,.32,1.2) forwards; }
+  .stagger:nth-of-type(1){ animation-delay:.10s; }
+  .stagger:nth-of-type(2){ animation-delay:.16s; }
+  .stagger:nth-of-type(3){ animation-delay:.22s; }
+  .stagger:nth-of-type(4){ animation-delay:.28s; }
+  .stagger:nth-of-type(5){ animation-delay:.34s; }
+
+  .card-title{ font-size:17px; line-height:24px; font-weight:700; color:var(--text-strong); }
+  .card-sub{ font-size:13px; line-height:18px; font-weight:500; color:var(--text-weak); margin-top:4px; }
+  .card-head{ margin-bottom:24px; }
+
+  /* ===== form ===== */
+  .field-group{ display:flex; flex-direction:column; gap:12px; }
+  .field-label{ font-size:13px; line-height:18px; font-weight:600; color:var(--text-mid); display:block; margin-bottom:8px; }
+  .field-row{ position:relative; }
+  .field-input{
+    width:100%; height:52px;
+    border:1px solid var(--border); border-radius:var(--r-ctrl);
+    background:var(--bg);
+    padding:0 44px 0 16px;
+    font-size:16px; font-weight:600; color:var(--text-strong);
+    font-family:inherit;
+  }
+  .field-input::placeholder{ color:var(--text-weak); font-weight:500; }
+  .field-input:focus-visible{ outline:2px solid var(--blue); outline-offset:1px; border-color:var(--blue); }
+  .field-icon{
+    position:absolute; right:16px; top:50%; transform:translateY(-50%);
+    width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+  }
+  .field-row.is-success .field-input{ border-color:var(--mint); background:var(--mint-wash); }
+  .field-row.is-success .field-icon{ color:var(--mint); }
+  .field-row.is-error .field-input{ border-color:var(--danger); background:var(--danger-wash); }
+  .field-row.is-error .field-icon{ color:var(--danger); }
+  .field-error-msg{
+    display:flex; align-items:center; gap:6px;
+    font-size:13px; line-height:18px; font-weight:600; color:var(--danger);
+    margin-top:8px;
+  }
+  .field-help{ font-size:13px; line-height:18px; font-weight:500; color:var(--text-weak); margin-top:8px; }
+
+  .banner-error{
+    display:flex; align-items:center; gap:10px;
+    background:var(--danger-wash); color:#B3283A;
+    border-radius:var(--r-ctrl);
+    padding:12px 16px; margin-bottom:24px;
+    font-size:14px; font-weight:700;
+  }
+  .banner-error svg{ flex:0 0 auto; }
+
+  .field-2col{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px; }
+
+  select.field-input{
+    appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'><path d='M5 8l5 5 5-5' stroke='%234E5968' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat; background-position:right 14px center;
+    padding-right:40px;
+  }
+
+  .field-input:disabled{
+    background:var(--surface-soft); color:var(--text-weak);
+    cursor:not-allowed; border-color:var(--border);
+  }
+  .field-input:disabled::placeholder{ color:var(--text-weak); }
+
+  .form-actions{ display:flex; gap:12px; margin-top:28px; }
+  .btn{
+    height:52px; border-radius:var(--r-ctrl); border:none;
+    font-size:16px; font-weight:800; font-family:inherit;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition:transform .12s ease, background-color .12s ease;
+  }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{ background:var(--blue); color:#fff; flex:1 1 auto; }
+  .btn-primary:hover{ background:var(--blue-press); }
+  .btn-primary:active{ background:var(--blue-press); }
+  .btn-secondary{ background:var(--surface-soft); color:var(--text-strong); flex:0 0 auto; padding:0 20px; }
+  .btn-secondary:hover{ background:var(--surface-hover); }
+  .btn-ghost{ background:var(--blue-wash); color:var(--blue); padding:0 20px; }
+  .btn-ghost:hover{ background:#dcebfe; }
+
+  /* ===== summary ===== */
+  .summary-top{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
+  .pill-courier{
+    background:var(--mint-wash); color:#00806f;
+    border-radius:var(--r-pill); padding:6px 14px;
+    font-size:13px; font-weight:700;
+  }
+  .summary-tracking{ font-size:15px; font-weight:700; color:var(--text-strong); }
+  .summary-grid{ display:grid; grid-template-columns:1fr 1.3fr 1fr; gap:24px; }
+  .summary-item .card-sub{ margin:0 0 8px; }
+  .summary-value{ font-size:16px; font-weight:700; color:var(--text-strong); line-height:1.4; }
+  .summary-hero .summary-value{
+    font-size:40px; line-height:48px; font-weight:800; color:var(--blue);
+    letter-spacing:-.02em;
+  }
+  .summary-hero{ border-left:1px solid var(--border); border-right:1px solid var(--border); padding:0 24px; }
+
+  /* ===== steps / timeline ===== */
+  .steps-list{ display:flex; flex-direction:column; }
+  .step{ position:relative; display:flex; gap:16px; padding-bottom:28px; opacity:0; transform:translateY(12px); animation:cardUp .32s ease forwards; }
+  .step:last-child{ padding-bottom:0; }
+  .step:nth-child(1){ animation-delay:.40s; }
+  .step:nth-child(2){ animation-delay:.42s; }
+  .step:nth-child(3){ animation-delay:.44s; }
+  .step:nth-child(4){ animation-delay:.46s; }
+  .step:nth-child(5){ animation-delay:.48s; }
+
+  .step-rail{ display:flex; flex-direction:column; align-items:center; flex:0 0 auto; }
+  .step-dot{
+    width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    flex:0 0 auto; color:#fff; font-size:14px;
+    border:2px solid transparent;
+  }
+  .step-line{ width:2px; flex:1 1 auto; background:var(--border); margin:4px 0; min-height:20px; }
+  .step:last-child .step-line{ display:none; }
+
+  .step.is-done .step-dot{ background:var(--mint); }
+  .step.is-delay .step-dot{ background:var(--danger); }
+  .step.is-current .step-dot{
+    background:var(--blue); box-shadow:0 0 0 4px var(--blue-wash);
+    transform:scale(1.12);
+  }
+  .step.is-wait .step-dot{ background:var(--bg); border-color:var(--border); color:var(--text-weak); }
+
+  .step-body{ flex:1 1 auto; padding-top:2px; min-width:0; }
+  .step-top{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:4px; }
+  .step-time{ font-size:15px; font-weight:700; color:var(--text-strong); }
+  .step.is-wait .step-time{ color:var(--text-weak); font-weight:600; }
+  .step-loc{ font-size:13px; font-weight:600; color:var(--text-weak); }
+  .step-badge{
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:12px; font-weight:700; border-radius:var(--r-pill);
+    padding:3px 10px; margin-left:auto;
+  }
+  .step.is-done .step-badge{ background:var(--mint-wash); color:#00806f; }
+  .step.is-delay .step-badge{ background:var(--danger-wash); color:#B3283A; }
+  .step.is-current .step-badge{ background:var(--blue-wash); color:var(--blue); }
+  .step.is-wait .step-badge{ background:var(--surface-soft); color:var(--text-weak); }
+
+  .step-desc{ font-size:14px; font-weight:500; color:var(--text-mid); line-height:1.6; }
+  .step.is-wait .step-desc{ color:var(--text-weak); }
+  .step.is-current .step-desc{ color:var(--text-strong); font-weight:600; }
+
+  .step-callout{
+    margin-top:10px; padding:12px 16px; border-radius:var(--r-chip);
+    background:var(--danger-wash); border:1px solid #f7c9ce;
+    color:#8f2331; font-size:14px; font-weight:500; line-height:1.6;
+  }
+
+  /* ===== action bar ===== */
+  .action-bar{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .action-left{ display:flex; align-items:center; gap:14px; }
+  .action-title{ font-size:15px; font-weight:700; color:var(--text-strong); }
+  .action-sub{ font-size:13px; font-weight:500; color:var(--text-weak); margin-top:2px; }
+
+  .toggle{ position:relative; display:inline-flex; align-items:center; }
+  .toggle input{ position:absolute; opacity:0; width:52px; height:30px; margin:0; cursor:pointer; }
+  .toggle-track{
+    width:52px; height:30px; border-radius:var(--r-pill); background:var(--border);
+    transition:background-color .22s ease; position:relative; flex:0 0 auto;
+  }
+  .toggle-thumb{
+    position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%;
+    background:#fff; box-shadow:0 1px 3px rgba(23,31,40,.2);
+    transition:transform .22s cubic-bezier(.34,1.56,.64,1);
+  }
+  .toggle input:checked + .toggle-track{ background:var(--blue); }
+  .toggle input:checked + .toggle-track .toggle-thumb{ transform:translateX(22px); }
+  .toggle input:focus-visible + .toggle-track{ outline:2px solid var(--blue); outline-offset:2px; }
+
+  /* ===== recent list ===== */
+  .bottom-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .recent-list{ display:flex; flex-direction:column; gap:8px; }
+  .recent-item{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px 16px; border-radius:var(--r-ctrl); background:var(--surface-soft);
+    border:1px solid transparent;
+    font-size:14px; text-align:left; width:100%;
+    transition:background-color .15s ease, color .15s ease;
+  }
+  .recent-item:hover{ background:var(--surface-hover); }
+  .recent-item .rt-num{ font-weight:700; color:var(--text-strong); }
+  .recent-item .rt-status{ font-weight:600; color:var(--text-weak); flex:0 0 auto; }
+  .recent-item.is-selected{ background:var(--blue-wash); border-color:#cfe2fd; }
+  .recent-item.is-selected .rt-num,
+  .recent-item.is-selected .rt-status{ color:var(--blue); }
+  .recent-item .rt-check{
+    width:16px; height:16px; flex:0 0 auto; opacity:0; transform:scale(.6);
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .recent-item.is-selected .rt-check{ opacity:1; transform:scale(1); }
+
+  /* ===== empty state ===== */
+  .empty-box{ display:flex; flex-direction:column; align-items:flex-start; gap:16px; height:100%; }
+  .empty-icon{
+    width:48px; height:48px; border-radius:var(--r-chip);
+    background:var(--surface-soft); display:flex; align-items:center; justify-content:center;
+    color:var(--text-weak);
+  }
+  .empty-title{ font-size:17px; line-height:24px; font-weight:700; color:var(--text-strong); }
+  .empty-desc{ font-size:14px; line-height:1.6; font-weight:500; color:var(--text-mid); }
+
+  footer{
+    max-width:880px; margin:0 auto; padding:0 24px 40px;
+    font-size:12px; font-weight:600; color:var(--text-weak); letter-spacing:.02em;
+  }
+
+  @keyframes barDown{ from{ opacity:0; transform:translateY(-8px);} to{ opacity:1; transform:translateY(0);} }
+  @keyframes cardUp{ from{ opacity:0; transform:translateY(16px);} to{ opacity:1; transform:translateY(0);} }
+
+  @media (max-width:900px){
+    .summary-grid{ grid-template-columns:1fr; gap:16px; }
+    .summary-hero{ border-left:none; border-right:none; border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:16px 0; }
+    .bottom-grid{ grid-template-columns:1fr; }
+    .field-2col{ grid-template-columns:1fr; }
+    .card{ padding:24px 20px; }
+    .toptabs a:not(.is-active){ display:none; }
+  }
+
+  @media (max-width:520px){
+    .form-actions{ flex-direction:column; }
+    .btn-secondary{ width:100%; }
+    .action-bar{ flex-direction:column; align-items:flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; animation-delay:0s !important; transition-duration:0.001ms !important; }
+    header.topbar, .stagger, .step{ opacity:1; transform:none; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-form">본문(조회 폼)으로 건너뛰기</a>
+
+<header class="topbar" data-region="identity">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">배</span>
+      <span class="brand-word">배송생활</span>
+    </div>
+    <nav class="toptabs" aria-label="주요 메뉴">
+      <a href="#" class="is-active" aria-current="page">내 배송함</a>
+      <a href="#">주문내역</a>
+      <a href="#">고객센터</a>
+    </nav>
+    <div class="topbar-spacer"></div>
+    <div class="avatar" aria-label="사용자 김">김</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- 조회 폼: 주인공 -->
+  <section class="card stagger" data-region="form" id="main-form" aria-labelledby="form-title">
+    <div class="card-head">
+      <h1 class="card-title" id="form-title">운송장 조회</h1>
+      <p class="card-sub">번호만 넣으면 택배사는 저희가 찾아드려요</p>
+    </div>
+
+    <div class="banner-error" role="status">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 6v5m0 3h.01M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      운송장 번호 1건의 형식을 확인해주세요
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="tn-1">운송장 번호</label>
+
+      <div class="field-row is-success">
+        <input class="field-input num" id="tn-1" type="text" inputmode="numeric" value="4821-9930-1174" aria-describedby="tn-1-ok">
+        <span class="field-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+      <span id="tn-1-ok" class="sr-only" style="position:absolute;left:-9999px;">확인된 운송장 번호입니다</span>
+
+      <div class="field-row is-error">
+        <input class="field-input num" id="tn-2" type="text" inputmode="numeric" value="1234" aria-invalid="true" aria-describedby="tn-2-err">
+        <span class="field-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 6.5v4.2m0 2.8h.01M17.4 10A7.4 7.4 0 1 1 2.6 10a7.4 7.4 0 0 1 14.8 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </span>
+      </div>
+      <p id="tn-2-err" class="field-error-msg">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 6.5v4.2m0 2.8h.01M17.4 10A7.4 7.4 0 1 1 2.6 10a7.4 7.4 0 0 1 14.8 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        운송장 번호는 12자리예요
+      </p>
+    </div>
+
+    <div class="field-2col">
+      <div>
+        <label class="field-label" for="carrier">택배사</label>
+        <select class="field-input" id="carrier">
+          <option>자동 감지 ▾</option>
+          <option>한빛택배</option>
+          <option>직접 선택</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label" for="receiver">수취인 이름</label>
+        <input class="field-input" id="receiver" type="text" placeholder="택배사 자동 감지 중에는 비활성돼요" disabled aria-describedby="receiver-help">
+      </div>
+    </div>
+    <p id="receiver-help" class="field-help">택배사를 자동으로 찾을 때는 수취인 이름을 몰라도 조회할 수 있어요</p>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary">조회</button>
+      <button type="button" class="btn btn-secondary">여러 건 조회</button>
+    </div>
+  </section>
+
+  <!-- 배송 요약 -->
+  <section class="card stagger" data-region="summary" aria-labelledby="summary-title">
+    <h2 class="sr-only" id="summary-title" style="position:absolute;left:-9999px;">배송 요약</h2>
+    <div class="summary-top">
+      <span class="pill-courier">한빛택배</span>
+      <span class="summary-tracking num">4821-9930-1174</span>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <p class="card-sub">상품</p>
+        <p class="summary-value">무선 이어폰 외 1건</p>
+      </div>
+      <div class="summary-item summary-hero">
+        <p class="card-sub">도착 예정</p>
+        <p class="summary-value num">오늘 18시~20시</p>
+      </div>
+      <div class="summary-item">
+        <p class="card-sub">받는 곳</p>
+        <p class="summary-value">서울 강남구 (문 앞)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 배송 타임라인 -->
+  <section class="card stagger" data-region="steps" aria-labelledby="steps-title">
+    <div class="card-head">
+      <h2 class="card-title" id="steps-title">배송 타임라인</h2>
+      <p class="card-sub">5단계 중 4번째 진행 중이에요</p>
+    </div>
+
+    <ol class="steps-list">
+      <li class="step is-done">
+        <div class="step-rail">
+          <span class="step-dot" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="step-line"></span>
+        </div>
+        <div class="step-body">
+          <div class="step-top">
+            <span class="step-time num">07-18 14:20</span>
+            <span class="step-loc">이천 허브</span>
+            <span class="step-badge">완료</span>
+          </div>
+          <p class="step-desc">집화 완료</p>
+        </div>
+      </li>
+
+      <li class="step is-done">
+        <div class="step-rail">
+          <span class="step-dot" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="step-line"></span>
+        </div>
+        <div class="step-body">
+          <div class="step-top">
+            <span class="step-time num">07-19 02:05</span>
+            <span class="step-loc">옥천 HUB</span>
+            <span class="step-badge">완료</span>
+          </div>
+          <p class="step-desc">간선 상차</p>
+        </div>
+      </li>
+
+      <li class="step is-delay">
+        <div class="step-rail">
+          <span class="step-dot" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 4.5v6m0 3.2h.01" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+          </span>
+          <span class="step-line"></span>
+        </div>
+        <div class="step-body">
+          <div class="step-top">
+            <span class="step-time num">07-19 09:41</span>
+            <span class="step-loc">강남 물류센터</span>
+            <span class="step-badge">지연</span>
+          </div>
+          <p class="step-desc">분류 지연</p>
+          <p class="step-callout">폭우로 인한 간선 도착 지연이 있었으며 당일 배송 물량이 이월되어 순차 처리 중입니다</p>
+        </div>
+      </li>
+
+      <li class="step is-current">
+        <div class="step-rail">
+          <span class="step-dot" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" fill="#fff"/></svg>
+          </span>
+          <span class="step-line"></span>
+        </div>
+        <div class="step-body">
+          <div class="step-top">
+            <span class="step-time num">07-20 08:12</span>
+            <span class="step-loc">강남2 배송점</span>
+            <span class="step-badge">진행중</span>
+          </div>
+          <p class="step-desc">배송 출발 (기사 김○○)</p>
+        </div>
+      </li>
+
+      <li class="step is-wait">
+        <div class="step-rail">
+          <span class="step-dot" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M6 10h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </span>
+        </div>
+        <div class="step-body">
+          <div class="step-top">
+            <span class="step-time num">—</span>
+            <span class="step-loc">수취인</span>
+            <span class="step-badge">대기</span>
+          </div>
+          <p class="step-desc">배송 완료</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- 액션: 알림 받기 + 주소 변경 요청 -->
+  <section class="card stagger" data-region="action" aria-labelledby="action-title">
+    <div class="action-bar">
+      <div class="action-left">
+        <label class="toggle" for="notify-toggle">
+          <input type="checkbox" id="notify-toggle" role="switch" checked aria-checked="true">
+          <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+        </label>
+        <div>
+          <p class="action-title" id="action-title">알림 받기</p>
+          <p class="action-sub">배송 상태가 바뀌면 바로 알려드려요</p>
+        </div>
+      </div>
+      <button type="button" class="btn btn-ghost">주소 변경 요청</button>
+    </div>
+  </section>
+
+  <div class="bottom-grid">
+    <!-- 최근 조회 목록 -->
+    <section class="card stagger" aria-labelledby="recent-title">
+      <div class="card-head">
+        <h2 class="card-title" id="recent-title">최근 조회</h2>
+        <p class="card-sub">최근 3건</p>
+      </div>
+      <ul class="recent-list">
+        <li>
+          <button type="button" class="recent-item" data-empty="false">
+            <span class="rt-num num">4821-9930-1174</span>
+            <span class="rt-status">오늘 도착 예정</span>
+            <svg class="rt-check" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="recent-item" data-empty="false">
+            <span class="rt-num num">7719-0021-8845</span>
+            <span class="rt-status">배송 완료(어제)</span>
+            <svg class="rt-check" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="recent-item" data-empty="true" id="recent-empty-trigger">
+            <span class="rt-num num">2210-5567-0093</span>
+            <span class="rt-status">조회 결과 없음</span>
+            <svg class="rt-check" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 빈 상태 -->
+    <section class="card stagger" data-region="empty" id="empty-panel" aria-labelledby="empty-title">
+      <div class="empty-box">
+        <span class="empty-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-4.5-4.5M8 10.5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </span>
+        <div>
+          <p class="empty-title" id="empty-title">운송장 번호를 찾을 수 없어요</p>
+          <p class="empty-desc">번호를 다시 확인하거나 택배사를 직접 선택해보세요.</p>
+        </div>
+        <button type="button" class="btn btn-ghost">택배사 선택</button>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<footer>STYLE 22 · 핀테크 소프트</footer>
+
+<script>
+  // 연출 전용 — 실패해도 위 HTML/CSS만으로 완전한 화면
+  (function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // 칩 선택 마이크로 인터랙션: 최근 조회 항목 클릭 시 blue-wash 강조 + 체크 pop-in
+    var items = document.querySelectorAll('.recent-item');
+    items.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        items.forEach(function(b){ b.classList.remove('is-selected'); });
+        btn.classList.add('is-selected');
+        if (btn.dataset.empty === 'true') {
+          var panel = document.getElementById('empty-panel');
+          if (panel) {
+            panel.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+          }
+        }
+      });
+    });
+
+    // 토글 스위치: aria-checked 동기화
+    var toggle = document.getElementById('notify-toggle');
+    if (toggle) {
+      toggle.addEventListener('change', function(){
+        toggle.setAttribute('aria-checked', toggle.checked ? 'true' : 'false');
+      });
+    }
+  })();
+</script>
+</body>
+</html>

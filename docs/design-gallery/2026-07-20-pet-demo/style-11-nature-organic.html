@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>곁에 — 입양 대기 동물</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F4F1E8;
+    --ink: #2B2A26;
+    --ink-muted: #55524A;
+    --ink-faint: #83806f;
+    --deep: #2D4A3E;
+    --deep-soft: #3E5F51;
+    --sage: #8BA888;
+    --sage-soft: #A9C0A6;
+    --terracotta: #C4704B;
+    --urgent-fill: #9C5230;
+    --seed: #B8A26E;
+    --cream: #F7F3E7;
+    --card-bg: #EFE9D9;
+    --card-bg-hover: #E8DFC5;
+    --photo-bg: #E3DAC3;
+    --border-ink: rgba(43, 42, 38, .16);
+    --border-ink-strong: rgba(43, 42, 38, .28);
+
+    --radius-lg: 28px 44px 28px 44px;
+    --radius-md: 18px 30px 18px 30px;
+    --radius-sm: 10px 16px 10px 16px;
+    --radius-pill: 999px 999px 999px 999px;
+
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+    --sp-6: 24px; --sp-8: 32px; --sp-12: 48px; --sp-16: 64px;
+
+    --fs-xs: 12px; --fs-sm: 14px; --fs-base: 16px; --fs-md: 20px;
+    --fs-lg: 24px; --fs-xl: 32px; --fs-2xl: 44px;
+
+    --font-display: "Gowun Batang", "Noto Serif KR", serif;
+    --font-body: "Pretendard", -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+
+    --shadow-soft: 0 2px 12px rgba(43, 42, 38, .06);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--fs-base);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+
+  /* 종이 결 — 미세 노이즈 오버레이, 가독 방해 없이 */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: .026;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .page-wrap { position: relative; z-index: 1; }
+
+  h1, h2, h3 { font-family: var(--font-display); margin: 0; color: var(--deep); }
+
+  button { font-family: inherit; cursor: pointer; }
+  ::selection { background: var(--sage-soft); color: var(--ink); }
+
+  /* ── 접근성 포커스 링 (모든 인터랙션 요소 공통) ── */
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+  .chip:focus-visible, .toggle-row:focus-within {
+    outline: 2.5px solid var(--deep-soft);
+    outline-offset: 2px;
+  }
+
+  /* ── 정체성 바 ── */
+  .identity-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: var(--sp-6) var(--sp-6) var(--sp-4);
+    animation: settleIn .5s ease-out both;
+  }
+
+  .brand { display: flex; align-items: center; gap: var(--sp-3); }
+
+  .brand-mark {
+    width: 34px; height: 34px;
+    background: var(--deep);
+    border-radius: 0% 70% 0% 70%;
+    transform: rotate(-45deg);
+    flex: none;
+  }
+  .brand-mark::after {
+    content: "";
+    display: block;
+    width: 60%; height: 60%;
+    margin: 20% auto 0;
+    background: var(--sage-soft);
+    border-radius: 0% 70% 0% 70%;
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    color: var(--deep);
+    letter-spacing: -0.01em;
+  }
+
+  .identity-controls { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+
+  .btn {
+    appearance: none;
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    padding: 0 20px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+
+  .btn-primary { background: var(--deep); color: var(--cream); }
+  .btn-primary:hover { background: var(--deep-soft); }
+
+  .btn-secondary { background: var(--card-bg); color: var(--ink); border-color: var(--border-ink-strong); }
+  .btn-secondary:hover { background: var(--card-bg-hover); }
+
+  .btn-ghost { background: transparent; color: var(--deep); border-color: var(--border-ink); }
+  .btn-ghost:hover { background: rgba(45, 74, 62, .07); }
+
+  .loc-select {
+    background: transparent;
+    border: 1.5px solid var(--border-ink);
+    border-radius: var(--radius-sm);
+    height: 40px;
+    padding: 0 var(--sp-4);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    transition: background-color .2s ease;
+  }
+  .loc-select:hover { background: rgba(45, 74, 62, .06); }
+
+  .fav-btn {
+    background: transparent;
+    border: 1.5px solid var(--border-ink);
+    border-radius: var(--radius-pill);
+    height: 40px;
+    padding: 0 var(--sp-4);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink);
+    transition: background-color .2s ease, border-color .2s ease;
+  }
+  .fav-btn:hover { background: rgba(196, 112, 75, .08); border-color: var(--terracotta); }
+  .fav-heart { color: var(--terracotta); font-size: var(--fs-base); line-height: 1; }
+
+  /* ── 레이아웃 ── */
+  .layout {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--sp-6) var(--sp-16);
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: var(--sp-8);
+    align-items: start;
+  }
+
+  /* ── 필터 패널 ── */
+  .filter-panel {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border-ink);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-6);
+    position: sticky;
+    top: var(--sp-6);
+    animation: settleIn .5s ease-out .06s both;
+  }
+  .filter-panel h2 {
+    font-size: var(--fs-base);
+    margin-bottom: var(--sp-4);
+    color: var(--deep);
+  }
+  .chip-group {
+    border: none;
+    padding: 0;
+    margin: 0 0 var(--sp-6);
+  }
+  .chip-group legend {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--ink-muted);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 0;
+    margin-bottom: var(--sp-2);
+  }
+  .chip-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+  .chip {
+    background: var(--bg);
+    border: 1.5px solid var(--border-ink-strong);
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink);
+    transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .chip:hover { background: var(--card-bg-hover); }
+  .chip.active {
+    background: var(--deep);
+    border-color: var(--deep);
+    color: var(--cream);
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    padding: var(--sp-2) 0;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .toggle-row input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .toggle-track {
+    position: relative;
+    width: 44px; height: 26px;
+    background: var(--bg);
+    border: 1.5px solid var(--border-ink-strong);
+    border-radius: var(--radius-pill);
+    flex: none;
+    transition: background-color .2s ease, border-color .2s ease;
+  }
+  .toggle-track::after {
+    content: "";
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 19px; height: 19px;
+    background: var(--ink-faint);
+    border-radius: 50%;
+    transition: transform .2s ease, background-color .2s ease;
+  }
+  .toggle-row input:checked + .toggle-track {
+    background: var(--deep);
+    border-color: var(--deep);
+  }
+  .toggle-row input:checked + .toggle-track::after {
+    transform: translateX(21px);
+    background: var(--cream);
+  }
+
+  /* ── 결과 헤더 ── */
+  .results-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-6);
+    animation: settleIn .5s ease-out 1.0s both;
+  }
+  .results-count { font-size: var(--fs-md); font-weight: 700; margin: 0; }
+  .results-count strong { font-variant-numeric: tabular-nums; color: var(--deep); }
+  .sort-select {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .sort-select select {
+    appearance: none;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border-ink-strong);
+    border-radius: var(--radius-sm);
+    padding: 8px 32px 8px 16px;
+    font-family: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink);
+    transition: background-color .2s ease;
+  }
+  .sort-select select:hover { background: var(--card-bg-hover); }
+  .sort-select .arrow {
+    position: absolute;
+    right: 14px;
+    pointer-events: none;
+    color: var(--ink-muted);
+    font-size: var(--fs-xs);
+  }
+
+  /* ── 동물 카드 그리드 ── */
+  .collection {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--sp-6);
+  }
+
+  .item-card {
+    --tilt: 0deg;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border-ink);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    animation: growCard .7s cubic-bezier(.16,1,.3,1) both;
+    transition: background-color .25s ease, transform .25s ease;
+    transform: rotate(var(--tilt));
+  }
+  .item-card:nth-child(1) { --tilt: -0.6deg; animation-delay: .30s; }
+  .item-card:nth-child(2) { --tilt: 0.5deg;  animation-delay: .38s; }
+  .item-card:nth-child(3) { --tilt: -0.4deg; animation-delay: .46s; }
+  .item-card:nth-child(4) { --tilt: 0.6deg;  animation-delay: .54s; }
+  .item-card:nth-child(5) { --tilt: -0.5deg; animation-delay: .62s; }
+  .item-card:nth-child(6) { --tilt: 0.4deg;  animation-delay: .70s; }
+
+  .item-card:hover { background: var(--card-bg-hover); transform: rotate(0deg); }
+  .item-card.is-urgent { border-color: var(--terracotta); border-width: 2px; }
+
+  .photo-frame {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    background: var(--photo-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .item-card:nth-child(even) .photo-frame { background: #E7DEC8; }
+
+  .photo-initial {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 88px;
+    color: var(--deep);
+    opacity: .38;
+    user-select: none;
+  }
+
+  /* 실루엣(발자국) — 사진 없음 폴백, 반복 없이 카드당 1개 */
+  .pawmark {
+    position: absolute;
+    right: var(--sp-4);
+    bottom: var(--sp-4);
+    width: 40px; height: 34px;
+    opacity: .3;
+  }
+  .pawmark span { position: absolute; background: var(--ink); border-radius: 50%; }
+  .pawmark .pad { width: 22px; height: 18px; left: 9px; bottom: 0; border-radius: 50% 50% 45% 45%; }
+  .pawmark .toe1 { width: 8px; height: 8px; left: 1px; top: 6px; }
+  .pawmark .toe2 { width: 8px; height: 8px; left: 12px; top: 0; }
+  .pawmark .toe3 { width: 8px; height: 8px; left: 23px; top: 0; }
+  .pawmark .toe4 { width: 8px; height: 8px; left: 32px; top: 6px; }
+
+  /* 줄기+잎 accent — 성장 은유, hover 시 점등 */
+  .leaf-accent {
+    position: absolute;
+    top: var(--sp-3);
+    left: var(--sp-3);
+    width: 10px;
+    height: 26px;
+    background: var(--sage);
+    border-radius: var(--radius-pill);
+    animation: leafDeepen .7s ease-out both;
+    transition: box-shadow .25s ease, background-color .25s ease;
+  }
+  .item-card:nth-child(1) .leaf-accent { animation-delay: .30s; }
+  .item-card:nth-child(2) .leaf-accent { animation-delay: .38s; }
+  .item-card:nth-child(3) .leaf-accent { animation-delay: .46s; }
+  .item-card:nth-child(4) .leaf-accent { animation-delay: .54s; }
+  .item-card:nth-child(5) .leaf-accent { animation-delay: .62s; }
+  .item-card:nth-child(6) .leaf-accent { animation-delay: .70s; }
+  .leaf-accent::after {
+    content: "";
+    position: absolute;
+    top: -6px; left: -3px;
+    width: 14px; height: 12px;
+    background: inherit;
+    border-radius: 0% 80% 0% 80%;
+  }
+  .item-card:hover .leaf-accent {
+    background: var(--deep);
+    box-shadow: 0 0 0 5px rgba(45, 74, 62, .14);
+  }
+
+  .status-badge {
+    position: absolute;
+    top: var(--sp-3);
+    right: var(--sp-3);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    line-height: 1.3;
+  }
+  .status-badge::before { content: "● "; font-size: 8px; }
+  .status-available { background: var(--deep); color: var(--cream); }
+  .status-urgent    { background: var(--urgent-fill); color: var(--cream); }
+  .status-adapting  { background: var(--sage); color: var(--ink); }
+  .status-reserved  { background: var(--seed); color: var(--ink); }
+
+  .card-body {
+    padding: var(--sp-4) var(--sp-4) var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    flex: 1;
+  }
+
+  .animal-name {
+    font-size: var(--fs-md);
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: break-word;
+    word-break: keep-all;
+  }
+  .animal-name.is-long { font-size: var(--fs-base); line-height: 1.5; }
+
+  .animal-meta {
+    font-size: var(--fs-sm);
+    color: var(--ink-muted);
+    margin: 0;
+  }
+
+  .shelter-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-2);
+    font-size: var(--fs-xs);
+    color: var(--ink-faint);
+    margin: var(--sp-1) 0 var(--sp-2);
+    padding-top: var(--sp-2);
+    border-top: 1px dashed var(--border-ink);
+  }
+  .shelter-line .days { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-muted); }
+
+  .tags { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+  .tag {
+    background: var(--sage-soft);
+    color: var(--ink);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+  }
+
+  .card-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-top: auto;
+  }
+  .card-actions .btn-primary { flex: 1; }
+
+  .heart-toggle {
+    flex: none;
+    width: 40px; height: 40px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border-ink-strong);
+    background: var(--bg);
+    color: var(--terracotta);
+    font-size: var(--fs-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color .2s ease, transform .15s ease;
+  }
+  .heart-toggle:hover { background: rgba(196, 112, 75, .1); }
+  .heart-toggle[aria-pressed="true"] { background: var(--terracotta); color: var(--cream); }
+  .heart-toggle:active { transform: scale(.92); }
+
+  /* ── 빈 상태 ── */
+  .empty-state {
+    background: var(--card-bg);
+    border: 1.5px dashed var(--border-ink-strong);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-16) var(--sp-6);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .empty-illustration { width: 72px; height: 72px; position: relative; margin-bottom: var(--sp-4); }
+  .empty-pot {
+    position: absolute; bottom: 0; left: 50%;
+    width: 46px; height: 34px;
+    transform: translateX(-50%);
+    background: var(--seed);
+    border-radius: 6px 6px 22px 22px;
+    opacity: .6;
+  }
+  .empty-stem {
+    position: absolute; bottom: 30px; left: 50%;
+    width: 3px; height: 30px;
+    background: var(--ink-faint);
+    border-radius: var(--radius-pill);
+    transform: translateX(-50%) rotate(18deg);
+    transform-origin: bottom center;
+    opacity: .55;
+  }
+  .empty-leaf {
+    position: absolute; bottom: 50px; left: 58%;
+    width: 16px; height: 11px;
+    background: var(--ink-faint);
+    border-radius: 0% 80% 0% 80%;
+    opacity: .5;
+    transform: rotate(20deg);
+  }
+  .empty-state h3 { font-size: var(--fs-lg); }
+  .empty-state p { margin: 0; color: var(--ink-muted); font-size: var(--fs-sm); }
+  .empty-state .btn { margin-top: var(--sp-4); }
+
+  /* ── 페이지네이션 ── */
+  .pagination-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    margin-top: var(--sp-8);
+  }
+  .pagination { display: flex; align-items: center; gap: var(--sp-1); }
+  .pagination button {
+    min-width: 36px; height: 36px;
+    padding: 0 8px;
+    background: transparent;
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    transition: background-color .2s ease, border-color .2s ease;
+  }
+  .pagination button:hover { background: var(--card-bg-hover); }
+  .pagination button.active {
+    background: var(--deep);
+    color: var(--cream);
+    border-color: var(--deep);
+  }
+  .pagination .ellipsis { color: var(--ink-faint); padding: 0 4px; }
+
+  /* ── 푸터 ── */
+  .site-footer {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-6) var(--sp-12);
+    text-align: center;
+    font-size: var(--fs-xs);
+    color: var(--ink-faint);
+    letter-spacing: .04em;
+  }
+
+  /* ── 히어로 진입 애니메이션 ── */
+  @keyframes settleIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes growCard {
+    0%   { opacity: 0; transform: translateY(18px) scaleY(.86) rotate(var(--tilt)); }
+    100% { opacity: 1; transform: translateY(0) scaleY(1) rotate(var(--tilt)); }
+  }
+  @keyframes leafDeepen {
+    0%   { background-color: var(--sage); }
+    100% { background-color: var(--deep); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .identity-bar, .filter-panel, .results-summary, .item-card, .leaf-accent {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .item-card { transform: rotate(var(--tilt)) !important; }
+    .leaf-accent { background-color: var(--deep) !important; }
+  }
+
+  /* ── 반응형 ── */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .filter-panel { position: static; }
+    .collection { grid-template-columns: repeat(2, 1fr); }
+    .identity-bar { padding: var(--sp-4); }
+  }
+  @media (max-width: 560px) {
+    .collection { grid-template-columns: 1fr; }
+    .identity-controls { width: 100%; justify-content: flex-start; }
+    .results-summary { align-items: flex-start; flex-direction: column; }
+    .pagination-row { flex-direction: column; align-items: stretch; }
+    .pagination { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <header class="identity-bar" data-region="identity">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="wordmark">곁에</span>
+    </div>
+    <div class="identity-controls">
+      <button type="button" class="loc-select">서울 전체 <span aria-hidden="true">▾</span></button>
+      <button type="button" class="btn btn-ghost">보호소 찾기</button>
+      <button type="button" class="fav-btn" id="favBtn" aria-label="관심 목록 보기">
+        <span class="fav-heart" aria-hidden="true">♥</span>
+        <span id="favCount">관심 3</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="filter-panel" data-region="filter">
+      <h2>필터</h2>
+
+      <fieldset class="chip-group" data-filter-group="species">
+        <legend>종류</legend>
+        <div class="chip-row">
+          <button type="button" class="chip active" data-value="dog">개</button>
+          <button type="button" class="chip" data-value="cat">고양이</button>
+          <button type="button" class="chip" data-value="etc">기타</button>
+        </div>
+      </fieldset>
+
+      <fieldset class="chip-group" data-filter-group="size">
+        <legend>크기</legend>
+        <div class="chip-row">
+          <button type="button" class="chip" data-value="small">소형</button>
+          <button type="button" class="chip" data-value="medium">중형</button>
+          <button type="button" class="chip" data-value="large">대형</button>
+        </div>
+      </fieldset>
+
+      <fieldset class="chip-group" data-filter-group="age">
+        <legend>나이</legend>
+        <div class="chip-row">
+          <button type="button" class="chip" data-value="baby">아기</button>
+          <button type="button" class="chip" data-value="adult">성견</button>
+          <button type="button" class="chip" data-value="senior">노령</button>
+        </div>
+      </fieldset>
+
+      <label class="toggle-row">
+        <span>중성화 완료</span>
+        <input type="checkbox" data-filter-toggle="neutered">
+        <span class="toggle-track" aria-hidden="true"></span>
+      </label>
+      <label class="toggle-row">
+        <span>긴급 보호</span>
+        <input type="checkbox" data-filter-toggle="urgent">
+        <span class="toggle-track" aria-hidden="true"></span>
+      </label>
+    </aside>
+
+    <section class="results-area">
+      <div class="results-summary" data-region="results">
+        <p class="results-count">서울 입양 대기 <strong>128</strong>마리</p>
+        <label class="sort-select">
+          <select id="sortSelect" aria-label="정렬 기준">
+            <option value="old">보호 시작일 순</option>
+            <option value="recent">최근 등록일순</option>
+          </select>
+          <span class="arrow" aria-hidden="true">▾</span>
+        </label>
+      </div>
+
+      <div class="collection" data-region="collection" id="collectionGrid">
+
+        <article class="item-card" data-region="item-card"
+          data-species="dog" data-size="medium" data-age="adult" data-neutered="true" data-urgent="false" data-days="42">
+          <div class="photo-frame">
+            <span class="photo-initial">하</span>
+            <span class="leaf-accent" aria-hidden="true"></span>
+            <span class="pawmark" aria-hidden="true">
+              <span class="toe1"></span><span class="toe2"></span><span class="toe3"></span><span class="toe4"></span><span class="pad"></span>
+            </span>
+            <span class="status-badge status-available">입양 가능</span>
+          </div>
+          <div class="card-body">
+            <h3 class="animal-name">하늘</h3>
+            <p class="animal-meta">믹스견 · 2살 · 남</p>
+            <div class="shelter-line"><span>마포보호소</span><span class="days">보호 42일째</span></div>
+            <div class="tags"><span class="tag">온순함</span><span class="tag">사람좋아함</span></div>
+            <div class="card-actions">
+              <button type="button" class="btn btn-primary">만나보기</button>
+              <button type="button" class="heart-toggle" aria-label="하늘 관심 등록" aria-pressed="false">♡</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card is-urgent" data-region="item-card"
+          data-species="dog" data-size="large" data-age="adult" data-neutered="true" data-urgent="true" data-days="118">
+          <div class="photo-frame">
+            <span class="photo-initial">보</span>
+            <span class="leaf-accent" aria-hidden="true"></span>
+            <span class="pawmark" aria-hidden="true">
+              <span class="toe1"></span><span class="toe2"></span><span class="toe3"></span><span class="toe4"></span><span class="pad"></span>
+            </span>
+            <span class="status-badge status-urgent">긴급</span>
+          </div>
+          <div class="card-body">
+            <h3 class="animal-name">보리</h3>
+            <p class="animal-meta">진돗개 믹스 · 5살 · 여</p>
+            <div class="shelter-line"><span>은평보호소</span><span class="days">보호 118일째</span></div>
+            <div class="tags"><span class="tag">조용함</span><span class="tag">산책좋아함</span></div>
+            <div class="card-actions">
+              <button type="button" class="btn btn-primary">만나보기</button>
+              <button type="button" class="heart-toggle" aria-label="보리 관심 등록" aria-pressed="false">♡</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card"
+          data-species="cat" data-size="small" data-age="unknown" data-neutered="false" data-urgent="false" data-days="7">
+          <div class="photo-frame">
+            <span class="photo-initial">까</span>
+            <span class="leaf-accent" aria-hidden="true"></span>
+            <span class="pawmark" aria-hidden="true">
+              <span class="toe1"></span><span class="toe2"></span><span class="toe3"></span><span class="toe4"></span><span class="pad"></span>
+            </span>
+            <span class="status-badge status-adapting">적응중</span>
+          </div>
+          <div class="card-body">
+            <h3 class="animal-name is-long">까망이 — 이름표 없이 발견되어 임시로 부른 이름이며 사람 손을 무서워하지만 간식 앞에서는 마음을 여는 아이</h3>
+            <p class="animal-meta">믹스묘 · —</p>
+            <div class="shelter-line"><span>성동보호소</span><span class="days">보호 7일째</span></div>
+            <div class="tags"><span class="tag">겁많음</span></div>
+            <div class="card-actions">
+              <button type="button" class="btn btn-primary">만나보기</button>
+              <button type="button" class="heart-toggle" aria-label="까망이 관심 등록" aria-pressed="false">♡</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card"
+          data-species="dog" data-size="small" data-age="baby" data-neutered="true" data-urgent="false" data-days="21">
+          <div class="photo-frame">
+            <span class="photo-initial">초</span>
+            <span class="leaf-accent" aria-hidden="true"></span>
+            <span class="pawmark" aria-hidden="true">
+              <span class="toe1"></span><span class="toe2"></span><span class="toe3"></span><span class="toe4"></span><span class="pad"></span>
+            </span>
+            <span class="status-badge status-available">입양 가능</span>
+          </div>
+          <div class="card-body">
+            <h3 class="animal-name">초코</h3>
+            <p class="animal-meta">푸들 · 1살 · 남</p>
+            <div class="shelter-line"><span>강서보호소</span><span class="days">보호 21일째</span></div>
+            <div class="tags"><span class="tag">활발함</span><span class="tag">배변완료</span></div>
+            <div class="card-actions">
+              <button type="button" class="btn btn-primary">만나보기</button>
+              <button type="button" class="heart-toggle" aria-label="초코 관심 등록" aria-pressed="false">♡</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card"
+          data-species="cat" data-size="small" data-age="adult" data-neutered="true" data-urgent="false" data-days="65">
+          <div class="photo-frame">
+            <span class="photo-initial">눈</span>
+            <span class="leaf-accent" aria-hidden="true"></span>
+            <span class="pawmark" aria-hidden="true">
+              <span class="toe1"></span><span class="toe2"></span><span class="toe3"></span><span class="toe4"></span><span class="pad"></span>
+            </span>
+            <span class="status-badge status-available">입양 가능</span>
+          </div>
+          <div class="card-body">
+            <h3 class="animal-name">눈이</h3>
+            <p class="animal-meta">코숏 · 3살 · 여</p>
+            <div class="shelter-line"><span>관악보호소</span><span class="days">보호 65일째</span></div>
+            <div class="tags"><span class="tag">독립적</span><span class="tag">조용함</span></div>
+            <div class="card-actions">
+              <button type="button" class="btn btn-primary">만나보기</button>
+              <button type="button" class="heart-toggle" aria-label="눈이 관심 등록" aria-pressed="false">♡</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card"
+          data-species="dog" data-size="small" data-age="senior" data-neutered="true" data-urgent="false" data-days="203">
+          <div class="photo-frame">
+            <span class="photo-initial">흰</span>
+            <span class="leaf-accent" aria-hidden="true"></span>
+            <span class="pawmark" aria-hidden="true">
+              <span class="toe1"></span><span class="toe2"></span><span class="toe3"></span><span class="toe4"></span><span class="pad"></span>
+            </span>
+            <span class="status-badge status-reserved">예약중</span>
+          </div>
+          <div class="card-body">
+            <h3 class="animal-name">흰둥</h3>
+            <p class="animal-meta">시츄 · 9살 · 남</p>
+            <div class="shelter-line"><span>노원보호소</span><span class="days">보호 203일째</span></div>
+            <div class="tags"><span class="tag">노령</span><span class="tag">온순함</span></div>
+            <div class="card-actions">
+              <button type="button" class="btn btn-primary">만나보기</button>
+              <button type="button" class="heart-toggle" aria-label="흰둥 관심 등록" aria-pressed="false">♡</button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="empty-state" data-region="empty" id="emptyState" hidden>
+        <div class="empty-illustration" aria-hidden="true">
+          <span class="empty-pot"></span>
+          <span class="empty-stem"></span>
+          <span class="empty-leaf"></span>
+        </div>
+        <h3>조건에 맞는 아이가 없어요</h3>
+        <p>지역이나 크기 조건을 넓혀보세요.</p>
+        <button type="button" class="btn btn-secondary" id="resetFilters">필터 초기화</button>
+      </div>
+
+      <div class="pagination-row" data-region="action">
+        <nav class="pagination" aria-label="결과 페이지">
+          <button type="button" aria-label="이전 페이지">‹</button>
+          <button type="button" class="active">1</button>
+          <button type="button">2</button>
+          <button type="button">3</button>
+          <span class="ellipsis">…</span>
+          <button type="button">22</button>
+          <button type="button" aria-label="다음 페이지">›</button>
+        </nav>
+        <button type="button" class="btn btn-ghost">지도로 보기</button>
+      </div>
+    </section>
+  </div>
+
+  <footer class="site-footer">STYLE 11 · 네이처 오가닉</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var grid = document.getElementById("collectionGrid");
+  var emptyState = document.getElementById("emptyState");
+  var cards = Array.prototype.slice.call(grid.querySelectorAll(".item-card"));
+  var favCount = 3;
+  var favCountEl = document.getElementById("favCount");
+
+  var state = { species: "dog", size: null, age: null, neutered: false, urgent: false };
+
+  function applyFilters() {
+    var visible = 0;
+    cards.forEach(function (card) {
+      var ok = true;
+      if (state.species && card.dataset.species !== state.species) ok = false;
+      if (state.size && card.dataset.size !== state.size) ok = false;
+      if (state.age && card.dataset.age !== state.age) ok = false;
+      if (state.neutered && card.dataset.neutered !== "true") ok = false;
+      if (state.urgent && card.dataset.urgent !== "true") ok = false;
+      card.style.display = ok ? "" : "none";
+      if (ok) visible++;
+    });
+    if (visible === 0) {
+      grid.hidden = true;
+      emptyState.hidden = false;
+    } else {
+      grid.hidden = false;
+      emptyState.hidden = true;
+    }
+  }
+
+  document.querySelectorAll(".chip-group").forEach(function (group) {
+    var key = group.getAttribute("data-filter-group");
+    var chips = Array.prototype.slice.call(group.querySelectorAll(".chip"));
+    chips.forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        var alreadyActive = chip.classList.contains("active");
+        chips.forEach(function (c) { c.classList.remove("active"); });
+        if (alreadyActive) {
+          state[key] = null;
+        } else {
+          chip.classList.add("active");
+          state[key] = chip.getAttribute("data-value");
+        }
+        applyFilters();
+      });
+    });
+  });
+
+  document.querySelectorAll("[data-filter-toggle]").forEach(function (input) {
+    input.addEventListener("change", function () {
+      state[input.getAttribute("data-filter-toggle")] = input.checked;
+      applyFilters();
+    });
+  });
+
+  var resetBtn = document.getElementById("resetFilters");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", function () {
+      state = { species: null, size: null, age: null, neutered: false, urgent: false };
+      document.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+      document.querySelectorAll("[data-filter-toggle]").forEach(function (i) { i.checked = false; });
+      applyFilters();
+    });
+  }
+
+  cards.forEach(function (card) {
+    var heart = card.querySelector(".heart-toggle");
+    heart.addEventListener("click", function () {
+      var pressed = heart.getAttribute("aria-pressed") === "true";
+      heart.setAttribute("aria-pressed", String(!pressed));
+      heart.textContent = pressed ? "♡" : "♥";
+      favCount += pressed ? -1 : 1;
+      favCountEl.textContent = "관심 " + Math.max(favCount, 0);
+    });
+  });
+
+  var sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) {
+    sortSelect.addEventListener("change", function () {
+      var dir = sortSelect.value === "recent" ? -1 : 1;
+      var sorted = cards.slice().sort(function (a, b) {
+        return dir * (parseInt(a.dataset.days, 10) - parseInt(b.dataset.days, 10));
+      });
+      sorted.forEach(function (card) { grid.appendChild(card); });
+    });
+  }
+
+  var pageButtons = Array.prototype.slice.call(document.querySelectorAll(".pagination button:not([aria-label])"));
+  pageButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      pageButtons.forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+    });
+  });
+})();
+</script>
+</body>
+</html>
