@@ -1,26 +1,28 @@
-<!doctype html><meta charset="utf-8"><title>호텔 예약 — 화면 세트 (스타일 고정)</title>
-<style>*{box-sizing:border-box}body{font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;margin:0 auto;padding:28px;background:#0d1117;color:#e6edf3;line-height:1.5;max-width:1300px}
+<!doctype html><meta charset="utf-8"><title>호텔 예약 — 화면 세트 + 디자인 시스템 검증</title>
+<style>*{box-sizing:border-box}body{font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;margin:0 auto;padding:28px;background:#0d1117;color:#e6edf3;line-height:1.5;max-width:1400px}
 h1{font-size:23px;margin:0 0 4px}.sub{color:#8b949e;font-size:14px;margin-bottom:8px}
 .b{display:inline-block;font-size:12px;background:#238636;color:#fff;padding:3px 10px;border-radius:99px;margin:0 6px 18px 0}
-.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
-@media(max-width:900px){.flow{grid-template-columns:1fr}}
-.card{border:1px solid #30363d;border-radius:10px;overflow:hidden;background:#161b22;position:relative}
-.card:hover{border-color:#a78bfa}
-.arrow{position:absolute;right:-11px;top:120px;z-index:2;color:#a78bfa;font-size:20px;font-weight:700}
-@media(max-width:900px){.arrow{display:none}}
-.shot{height:250px;overflow:hidden;background:#fff;border-bottom:1px solid #30363d}
-.shot iframe{width:1440px;height:1000px;border:0;transform:scale(.30);transform-origin:0 0;pointer-events:none}
+.b2{background:#8957e5}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start}
+@media(max-width:1100px){.flow{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.flow{grid-template-columns:1fr}}
+.card{border:1px solid #30363d;border-radius:10px;overflow:hidden;background:#161b22}
+.card:hover{border-color:#a78bfa}.card.new{border-color:#8957e5}
+.shot{height:230px;overflow:hidden;background:#fff;border-bottom:1px solid #30363d}
+.shot iframe{width:1440px;height:1000px;border:0;transform:scale(.28);transform-origin:0 0;pointer-events:none}
 .meta{padding:12px 14px}.step{font-size:11px;color:#8b949e;letter-spacing:.05em}
 .t{font-weight:700;font-size:15px;margin:3px 0}.ar{display:inline-block;font-size:11px;background:#a78bfa22;color:#a78bfa;padding:2px 9px;border-radius:99px}
 .n{font-size:12px;color:#8b949e;margin-top:5px}a{color:#58a6ff;font-size:12.5px;text-decoration:none}
-.note{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px 16px;font-size:13px;color:#9da7b3;margin-top:22px}
-.note b{color:#a78bfa}</style>
-<h1>호텔 예약 — 화면 세트 (5단계 전개)</h1>
-<div class="sub">domains.md <code>Travel &gt; Hotel = D → E → A</code> 를 3화면으로 펼침 · <b>스타일은 03 트렌디 SaaS 하나로 고정</b> · 화면마다 원형이 다름</div>
-<div><span class="b">style-lint 3/3 (전부 STYLE 03)</span><span class="b">archetype-lint 3/3 (화면 세트 모드 — D·E·K 각각)</span></div>
+.note{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px 18px;font-size:13px;color:#9da7b3;margin-top:22px}
+.note b{color:#a78bfa}.note code{background:#0d1117;padding:1px 6px;border-radius:4px;color:#e6edf3}
+.big{font-size:15px;color:#3fb950;font-weight:700}</style>
+<h1>호텔 예약 — 화면 세트 → 디자인 시스템 역추출 검증</h1>
+<div class="sub">5단계(세트 3화면) + 6단계(역추출) 완주 · 스타일 03 고정 · 화면마다 원형이 다름</div>
+<div><span class="b">style-lint 4/4</span><span class="b">archetype-lint 4/4 (D·E·K·J 각각)</span><span class="b b2">토큰 19/19 = 100% 일치</span></div>
 <div class="flow">
-<div class="card"><div class="arrow">→</div><div class="shot"><iframe src="screen-1-search.html" loading="lazy" scrolling="no"></iframe></div><div class="meta"><div class="step">STEP 1</div><div class="t">검색 결과</div><span class="ar">원형 D 컬렉션형</span><div class="n">호텔 고르기</div><a href="screen-1-search.html" target="_blank">전체 화면 →</a></div></div>
-<div class="card"><div class="arrow">→</div><div class="shot"><iframe src="screen-2-booking.html" loading="lazy" scrolling="no"></iframe></div><div class="meta"><div class="step">STEP 2</div><div class="t">예약 폼</div><span class="ar">원형 E 폼·입력형</span><div class="n">남산 그랜드 호텔 예약</div><a href="screen-2-booking.html" target="_blank">전체 화면 →</a></div></div>
-<div class="card"><div class="shot"><iframe src="screen-3-mybookings.html" loading="lazy" scrolling="no"></iframe></div><div class="meta"><div class="step">STEP 3</div><div class="t">내 예약</div><span class="ar">원형 K 프로필·설정형</span><div class="n">예약 확인·관리</div><a href="screen-3-mybookings.html" target="_blank">전체 화면 →</a></div></div>
+<div class="card"><div class="shot"><iframe src="screen-1-search.html" loading="lazy" scrolling="no"></iframe></div><div class="meta"><div class="step">SCREEN 1</div><div class="t">검색 결과</div><span class="ar">원형 D 컬렉션형</span><div class="n">호텔 고르기</div><a href="screen-1-search.html" target="_blank">전체 화면 →</a></div></div>
+<div class="card"><div class="shot"><iframe src="screen-2-booking.html" loading="lazy" scrolling="no"></iframe></div><div class="meta"><div class="step">SCREEN 2</div><div class="t">예약 폼</div><span class="ar">원형 E 폼·입력형</span><div class="n">남산 그랜드 호텔 예약</div><a href="screen-2-booking.html" target="_blank">전체 화면 →</a></div></div>
+<div class="card"><div class="shot"><iframe src="screen-3-mybookings.html" loading="lazy" scrolling="no"></iframe></div><div class="meta"><div class="step">SCREEN 3</div><div class="t">내 예약</div><span class="ar">원형 K 프로필·설정형</span><div class="n">예약 확인·관리</div><a href="screen-3-mybookings.html" target="_blank">전체 화면 →</a></div></div>
+<div class="card new"><div class="shot"><iframe src="screen-4-login.html" loading="lazy" scrolling="no"></iframe></div><div class="meta"><div class="step">SCREEN 4</div><div class="t">로그인</div><span class="ar">원형 J 인증형</span><div class="n">★ 디자인 시스템 문서만 보고 제작</div><a href="screen-4-login.html" target="_blank">전체 화면 →</a></div></div>
 </div>
-<div class="note"><b>1~4단계(발산)</b>는 화면 1장 × 여러 스타일로 <b>스타일을 고른다</b>. <b>5단계(수렴)</b>는 축이 뒤집혀 스타일 1개 × 화면 여러 장으로 <b>세트를 만든다</b>. 세 화면이 로고·사용자(정하람)·대표 호텔(남산 그랜드)을 공유해 한 제품으로 보이는지가 이 단계의 성공 기준이다.</div>
+<div class="note"><b>6단계 역추출 검증</b> — 세트 1~3화면에서 <code>design-system.md</code>(토큰·컴포넌트·금지·체크리스트, 26KB)를 뽑았다. 그리고 <b>그 문서만 주고</b>(기존 시안 HTML 접근 금지) 4번째 로그인 화면을 새로 만들었다. 결과: <span class="big">컬러 토큰 19개 전부 일치, 새로 지어낸 값 0개.</span> 역추출된 시스템이 실제로 "이후 모든 화면의 생산 기준"으로 작동한다는 뜻이다.<br><br><b>부수 성과</b> — 역추출 과정이 실제 버그를 잡았다: screen-1 의 카운트업 초기값이 <code>0</code> 이라 JS 실패 시 "서울 호텔 0곳"이 노출됐다. 마스터 프롬프트의 "JS 실패해도 HTML만으로 완전한 화면" 규칙 위반. 수정 완료.</div>

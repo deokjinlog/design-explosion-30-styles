@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로그인 · 여기묵자</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#FBFAFF;
+  --violet:#7C5CFF;
+  --pink:#FF8FC0;
+  --mint:#5EE6C8;
+  --ink:#17143A;
+  --muted:#7B7897;
+  --muted-text:#615D82;
+  --border:#EAE7F6;
+  --surface:#FFFFFF;
+
+  --success-bg:#E3FBF3; --success-fg:#137A56;
+  --warning-bg:#FFF3DE; --warning-fg:#9A5B00;
+  --neutral-bg:#EDEBFB; --neutral-fg:#4B4570;
+  --danger-bg:#FDE8ED;  --danger-fg:#C81E45;
+  --info-bg:#EFEAFF;    --info-fg:#5B3DDB;
+
+  --radius-lg:28px;
+  --radius-md:16px;
+  --radius-sm:10px;
+
+  --shadow-l1:0 10px 30px rgba(23,20,58,.06);
+  --shadow-l2:0 20px 40px rgba(124,92,255,.15);
+  --ring:0 0 0 4px rgba(124,92,255,.16);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  color:var(--ink); background:var(--bg);
+  min-height:100vh;
+}
+.tabnum{font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;}
+
+/* 배경 블롭 */
+.blob{position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0;}
+.blob-violet{width:420px; height:420px; background:var(--violet); opacity:.18; top:-130px; right:-110px;}
+.blob-mint{width:380px; height:380px; background:var(--mint); opacity:.18; bottom:-130px; left:-130px;}
+
+.auth-page{
+  position:relative; z-index:1;
+  min-height:calc(100vh - 64px);
+  display:flex; align-items:center; justify-content:center;
+  padding:48px 20px 24px;
+}
+
+.auth-card{
+  position:relative; z-index:1;
+  width:100%; max-width:440px;
+  background:var(--surface);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-l1);
+  padding:40px 36px 32px;
+}
+.reveal{opacity:0; transform:translateY(12px); animation:cardIn .4s ease forwards;}
+@keyframes cardIn{to{opacity:1; transform:translateY(0);}}
+
+/* 브랜드 */
+.brand{text-align:center; margin-bottom:22px;}
+.logo{
+  font-size:24px; font-weight:800; letter-spacing:-0.02em;
+  background:linear-gradient(90deg,var(--violet),var(--pink));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  display:inline-block;
+}
+.tagline{margin:6px 0 0; font-size:14px; font-weight:500; color:var(--muted-text);}
+
+/* 에러 배너 */
+.banner{
+  display:flex; align-items:flex-start; gap:10px;
+  background:var(--danger-bg); color:var(--danger-fg);
+  border-radius:var(--radius-md);
+  padding:12px 14px; margin-bottom:20px;
+  font-size:13px; font-weight:700;
+}
+.banner svg{flex:0 0 auto; margin-top:1px;}
+
+.auth-form{display:flex; flex-direction:column; gap:18px;}
+
+/* 필드 */
+.field{display:flex; flex-direction:column; gap:6px;}
+.field-top{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.field-label{font-size:13px; font-weight:700; color:var(--ink);}
+
+.state-flag{
+  font-size:10px; font-weight:800; letter-spacing:.02em; text-transform:uppercase;
+  padding:2px 8px; border-radius:999px; white-space:nowrap;
+}
+.state-flag--default{background:var(--bg); color:var(--muted-text); border:1px solid var(--border);}
+.state-flag--focus{background:var(--info-bg); color:var(--info-fg);}
+.state-flag--error{background:var(--danger-bg); color:var(--danger-fg);}
+.state-flag--disabled{background:var(--neutral-bg); color:var(--neutral-fg);}
+
+.input-wrap{position:relative;}
+.input-wrap input{
+  width:100%; height:44px; padding:0 44px 0 16px;
+  border-radius:var(--radius-md); border:1.5px solid var(--border);
+  background:var(--surface); color:var(--ink);
+  font-size:14px; font-weight:600; font-family:inherit;
+  transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.input-wrap input::placeholder{color:var(--muted-text); font-weight:500;}
+.input-wrap input:focus-visible,
+.input-wrap input:focus{
+  outline:none; border-color:var(--violet); box-shadow:var(--ring);
+}
+.state-icon{
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  pointer-events:none; color:var(--danger-fg);
+}
+.toggle-visibility{
+  position:absolute; right:6px; top:50%; transform:translateY(-50%);
+  width:32px; height:32px; border:none; background:transparent;
+  border-radius:50%; color:var(--muted-text);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:background .2s ease, color .2s ease;
+}
+.toggle-visibility:hover{background:var(--neutral-bg); color:var(--ink);}
+.toggle-visibility:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+.icon-eye-off{display:none;}
+.toggle-visibility[aria-pressed="true"] .icon-eye{display:none;}
+.toggle-visibility[aria-pressed="true"] .icon-eye-off{display:block;}
+
+.field.is-error .input-wrap input{border-color:var(--danger-fg); background:#FFFAFB;}
+.field.is-error .input-wrap input:focus-visible,
+.field.is-error .input-wrap input:focus{box-shadow:0 0 0 4px rgba(200,30,69,.14);}
+
+.field-msg{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600;}
+.field-msg.is-error{color:var(--danger-fg);}
+.field-msg svg{flex:0 0 auto;}
+
+/* 옵션 행 */
+.options-row{
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:10px; margin-top:-6px;
+}
+.checkbox-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer;}
+.checkbox-row input[type="checkbox"]{
+  width:18px; height:18px; border-radius:6px; border:1.5px solid var(--border);
+  accent-color:var(--violet); cursor:pointer;
+}
+.link{font-size:13px; font-weight:700; color:var(--violet); text-decoration:none;}
+.link:hover{text-decoration:underline;}
+.link:focus-visible{outline:2px solid var(--violet); outline-offset:2px; border-radius:4px;}
+
+/* 버튼 */
+.btn{
+  width:100%; height:44px; padding:0 20px;
+  border-radius:var(--radius-sm);
+  font-size:14px; font-weight:700; font-family:inherit;
+  border:1px solid transparent; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .2s ease, box-shadow .2s ease, background .2s ease,
+             color .2s ease, border-color .2s ease, opacity .2s ease;
+}
+.btn:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+.btn-primary{background:linear-gradient(90deg,var(--violet),var(--pink)); color:#fff; box-shadow:var(--shadow-l1);}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px); box-shadow:var(--shadow-l2);}
+.btn-primary:disabled{opacity:.72; cursor:not-allowed; transform:none; box-shadow:var(--shadow-l1);}
+.btn-secondary{background:var(--surface); color:var(--ink); border-color:var(--border); box-shadow:var(--shadow-l1);}
+.btn-secondary:hover{transform:translateY(-2px); box-shadow:var(--shadow-l2); border-color:var(--violet); color:var(--violet);}
+
+/* 구분선 */
+.divider{display:flex; align-items:center; gap:12px; color:var(--muted-text); font-size:12px; font-weight:700;}
+.divider::before,.divider::after{content:""; flex:1; height:1px; background:var(--border);}
+
+.social-list{display:flex; flex-direction:column; gap:10px;}
+.social-btn svg{flex:0 0 auto;}
+
+.signup-row{text-align:center; font-size:13px; font-weight:600; color:var(--muted-text); margin:0;}
+.signup-row .link{margin-left:4px;}
+
+.terms{
+  margin:20px 0 0; font-size:12px; font-weight:500; color:var(--muted-text);
+  text-align:center; line-height:1.6;
+}
+
+.page-footer{
+  position:relative; z-index:1;
+  text-align:center; font-size:12px; font-weight:700; color:var(--muted-text);
+  padding:8px 20px 32px;
+}
+
+/* 포커스 접근성 공통 */
+a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible{
+  outline:2px solid var(--violet); outline-offset:2px;
+}
+
+@media (max-width:900px){
+  .auth-page{padding:32px 16px 20px;}
+}
+@media (max-width:480px){
+  .auth-card{padding:32px 20px 24px; border-radius:var(--radius-lg);}
+  .logo{font-size:22px;}
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important;}
+  .reveal{opacity:1; transform:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="blob blob-violet" aria-hidden="true"></div>
+<div class="blob blob-mint" aria-hidden="true"></div>
+
+<main class="auth-page">
+  <div class="auth-card reveal">
+
+    <div class="brand" data-region="brand">
+      <span class="logo">여기묵자</span>
+      <p class="tagline">오늘 밤 어디서 묵을까</p>
+    </div>
+
+    <div class="banner" data-region="banner" role="alert">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 8v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="12" cy="16" r="1" fill="currentColor"/>
+      </svg>
+      <span>이메일 또는 비밀번호가 올바르지 않아요.</span>
+    </div>
+
+    <form class="auth-form" data-region="auth-form" id="loginForm" novalidate>
+
+      <div class="field is-error">
+        <div class="field-top">
+          <label class="field-label" for="email">이메일</label>
+          <span class="state-flag state-flag--error">에러</span>
+        </div>
+        <div class="input-wrap">
+          <input type="email" id="email" name="email" value="haram@yeogimukja."
+                 aria-invalid="true" aria-describedby="emailErrorMsg" autocomplete="email">
+          <svg class="state-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+            <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="field-msg is-error" id="emailErrorMsg">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 8v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="12" cy="16" r="1" fill="currentColor"/>
+          </svg>
+          이메일 형식을 확인해 주세요
+        </span>
+      </div>
+
+      <div class="field">
+        <div class="field-top">
+          <label class="field-label" for="password">비밀번호</label>
+          <span class="state-flag state-flag--focus">포커스</span>
+        </div>
+        <div class="input-wrap">
+          <input type="password" id="password" name="password" value="hogitel8"
+                 autocomplete="current-password" autofocus>
+          <button type="button" class="toggle-visibility" id="pwToggle" aria-pressed="false" aria-label="비밀번호 표시">
+            <svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3 3l18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M10.6 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17.7 17.7 0 0 1-3.4 4.3M6.6 6.6C4 8.3 2 12 2 12s3.6 7 10 7c1.4 0 2.7-.3 3.9-.8"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="options-row">
+        <label class="checkbox-row" for="keepLogin">
+          <input type="checkbox" id="keepLogin" name="keepLogin">
+          <span>로그인 상태 유지</span>
+          <span class="state-flag state-flag--default">기본</span>
+        </label>
+        <a class="link" href="#">비밀번호 찾기</a>
+      </div>
+
+      <div data-region="action">
+        <button type="submit" class="btn btn-primary" id="loginBtn">로그인</button>
+      </div>
+
+      <div class="divider">또는</div>
+
+      <div class="social-list">
+        <button type="button" class="btn btn-secondary social-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.6"/>
+            <text x="12" y="16" text-anchor="middle" font-size="11" font-weight="800" fill="currentColor" font-family="Pretendard, sans-serif">G</text>
+          </svg>
+          Google로 계속
+        </button>
+        <button type="button" class="btn btn-secondary social-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M15.4 3.7c.1 1-.3 2-1 2.8-.7.8-1.8 1.5-2.9 1.4-.1-1 .4-2.1 1-2.8.8-.9 2-1.5 2.9-1.4Zm3.6 15.4c-.5 1.1-1.1 2.1-1.9 3-1 1.2-2 2.4-3.5 2.4-1.4 0-1.9-.9-3.5-.9-1.6 0-2.2.9-3.5.9-1.4 0-2.5-1.3-3.5-2.5-2-2.4-3.5-6.8-1.5-9.8 1-1.5 2.7-2.4 4.3-2.4 1.4 0 2.3.9 3.5.9 1.1 0 1.8-.9 3.5-.9 1.4 0 2.9.8 3.9 2.1-3.4 1.9-2.9 6.7 1.2 7.2Z" fill="currentColor"/>
+          </svg>
+          Apple로 계속
+        </button>
+        <button type="button" class="btn btn-secondary social-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 4C6.9 4 2.8 7.3 2.8 11.4c0 2.6 1.7 4.9 4.3 6.2l-1 3.6c-.1.4.3.7.7.5l4.1-2.5c.4 0 .7.1 1.1.1 5.1 0 9.2-3.3 9.2-7.4C21.2 7.3 17.1 4 12 4Z" fill="currentColor"/>
+          </svg>
+          카카오로 계속
+        </button>
+      </div>
+
+      <p class="signup-row">아직 계정이 없으신가요?<a class="link" href="#">가입하기</a></p>
+    </form>
+
+    <p class="terms">로그인하면 여기묵자의 서비스 이용약관과 개인정보 처리방침에 동의하는 것으로 간주됩니다.</p>
+  </div>
+</main>
+
+<footer class="page-footer">STYLE 03 · 트렌디 SaaS</footer>
+
+<script>
+(function(){
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 비밀번호 표시 토글 — 연출 전용, 실패해도 기본 password(마스킹) 상태로 완결됨
+  var pwInput = document.getElementById('password');
+  var pwToggle = document.getElementById('pwToggle');
+  if (pwInput && pwToggle) {
+    pwToggle.addEventListener('click', function(){
+      var show = pwToggle.getAttribute('aria-pressed') !== 'true';
+      pwToggle.setAttribute('aria-pressed', show ? 'true' : 'false');
+      pwToggle.setAttribute('aria-label', show ? '비밀번호 숨기기' : '비밀번호 표시');
+      pwInput.type = show ? 'text' : 'password';
+    });
+  }
+
+  // 로그인 버튼 — 클릭 즉시 "…중" 텍스트로 바꾸고 disabled, 이후 원복 (§3-1 데모 피드백 패턴)
+  var form = document.getElementById('loginForm');
+  var loginBtn = document.getElementById('loginBtn');
+  if (form && loginBtn) {
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      if (loginBtn.disabled) return;
+      var original = loginBtn.textContent;
+      loginBtn.disabled = true;
+      loginBtn.setAttribute('aria-busy', 'true');
+      loginBtn.textContent = '로그인 중…';
+      window.setTimeout(function(){
+        loginBtn.textContent = original;
+        loginBtn.disabled = false;
+        loginBtn.removeAttribute('aria-busy');
+      }, reduced ? 200 : 1300);
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
