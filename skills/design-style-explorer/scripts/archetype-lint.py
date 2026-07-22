@@ -215,15 +215,18 @@ def main(argv):
         else:
             targets.append(a)
     if not targets:
-        print("검사할 *.html 없음")
-        return 0
+        # style-lint 와 같은 규율: 검사 0건은 통과가 아니다. 조용히 exit 0 을 내면
+        # 게이트가 있다는 착각만 남는다.
+        print("검사할 *.html 없음 → ❌ 게이트 무효. '통과' 로 세지 마세요.")
+        return 1
     # 화면 세트면 파일마다 원형이 다를 수 있다
     resolved = [(t, archetype_for(t, spec, code)) for t in targets]
     unknown = [t for t, c in resolved if c not in RULES]
     if unknown and len(unknown) == len(resolved):
         print(f"[SKIP] 원형을 알 수 없음 — 폴더에 _spec.json 을 두거나 --archetype A~K 를 지정하세요.")
         print("       " + " · ".join(f"{k}={v}" for k, v in ARCHETYPE_NAME.items()))
-        return 0
+        print("검사 0건 → ❌ 게이트 무효. '통과' 로 세지 마세요.")
+        return 1
     if spec.get("screens"):
         print(f"ℹ️ 화면 세트 모드 — 화면마다 원형을 따로 검사합니다 ({len(spec['screens'])}개 정의)\n")
     total, legacy = 0, 0

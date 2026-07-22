@@ -248,14 +248,20 @@ def main(argv):
         else:
             targets.append(a)
     if not targets:
-        print("검사할 style-*.html 없음")
-        return 0
+        print("검사할 style-*.html 없음 → ❌ 게이트 무효. '통과' 로 세지 마세요.")
+        return 1
     results = [lint(t, override) for t in targets]
     skipped = sum(1 for r in results if r is None)
-    checked = len(results) - skipped
+    # 구조 규칙이 0개인 스타일은 "검사했는데 위반 0" 이 아니라 "검사할 게 없음" 이다.
+    # 통과 건수에 섞으면 게이트가 실제보다 촘촘해 보인다.
+    manual_only = sum(1 for t in targets
+                      if style_of(t, override) and not RULES.get(style_of(t, override)))
+    checked = len(results) - skipped - manual_only
     total = sum(r for r in results if r is not None)
     if skipped:
         print(f"\n⚠️  스킵 {skipped}건 — 스타일 번호를 못 읽었습니다 (--style NN 으로 지정)")
+    if manual_only:
+        print(f"ℹ️  [MANUAL-ONLY] {manual_only}건 — 이 스타일엔 구조 규칙이 없습니다. 자동 통과가 아니라 사람이 봐야 합니다")
     if checked == 0:
         print("검사 0건 → ❌ 게이트 무효. '통과' 로 세지 마세요.")
         return 1
