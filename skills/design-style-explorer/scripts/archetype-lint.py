@@ -72,7 +72,10 @@ REGION_LABEL = {
 KEYWORDS = {
     "kpi": r"\bKPI\b|kpi-|전주 대비|전월 대비|전일 대비|지난주보다",
     "chart-part": r"도넛|구성비|conic-gradient|stroke-dasharray",
-    "goal": r"달성률|목표 진행|진행률|goal-(bar|ring|pct)",
+    # "진행률" 은 뺐다 — I 온보딩형은 progress(진행 표시)가 *필수*인데, 그 화면이
+    # 진행 표시를 "진행률" 이라고 쓰는 순간 필수를 만족시킨 바로 그 단어가 금지
+    # 위반으로 FAIL 났다. goal 이 잡으려던 건 대시보드식 달성률 게이지다.
+    "goal": r"달성률|목표 진행|goal-(bar|ring|pct)",
     "chart-trend": r"추이|line-chart|linechart|area-fill|스파크라인|sparkline",
     "table": r"<table\b|<tbody\b",
     "conversation": r"말풍선|bubble|chat-|-chat|대화|발화|speaker",

@@ -25,6 +25,27 @@ design-explosion-30-styles 에 관심 가져주셔서 고맙습니다.
 
 무작위 생성이 아닙니다. 새 스타일은 매력 축 · 팔레트(hex) · 타이포 · 시그니처 · 금지 목록까지 전용 프롬프트로 못 박아 주세요.
 
+### 게이트 두 개를 직접 돌려 보세요
+
+말로 확인하지 말고 **실행해서** 확인해 주세요. 둘 다 검사 대상이 0건이면 `exit 1` 로 "게이트 무효"를 냅니다 — **조용한 통과가 없습니다.**
+
+```bash
+S=skills/design-style-explorer/scripts
+python3 $S/style-lint.py     docs/design-gallery/<폴더>/     # ① 스타일 금지
+python3 $S/archetype-lint.py docs/design-gallery/<폴더>/     # ② 원형 적합성 (_spec.json 필요)
+```
+
+`[MANUAL-ONLY]` 로 나오면 그 스타일엔 구조 규칙이 아직 없다는 뜻입니다 — **자동 통과가 아니라 사람이 봐야 합니다.**
+
+### 단위 테스트
+
+`tests/` 는 pytest 스타일(맨 함수 `test_*`)이라 `unittest discover` 로는 **0건**이 나옵니다. pytest 가 없으면 딸려 있는 러너를 쓰세요.
+
+```bash
+python3 -m pytest tests/ -q   # pytest 가 있으면
+python3 tests/run.py          # 없으면 (표준 라이브러리만)
+```
+
 ### 금지는 린트로 강제합니다
 
 "이 스타일에선 이건 반칙"을 말로만 적지 말고, 코드가 잡게 해주세요.
