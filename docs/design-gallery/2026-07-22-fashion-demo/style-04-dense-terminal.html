@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>여덟시 — 재고 콘솔 · 여성 아우터</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#0A0C10;
+    --panel:#0E1116;
+    --panel2:#12161C;
+    --promptzone:#0C0F14;
+    --line:#262C36;
+    --line-soft:#1A1F27;
+    --amber:#F5A623;
+    --green:#3DDC84;
+    --red:#FF5252;
+    --blue:#4DA3FF;
+    --text:#C8CDD4;
+    --dim:#838C9B;   /* 판독 필요한 보조 텍스트 — 4.5:1 확보용으로 원 팔레트보다 살짝 밝게 조정 */
+    --faint:#5B6472; /* 장식용(ascii 텍스처·구분선)에만 — 본문 아님 */
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+    --fs-2xs:10px; --fs-xs:11px; --fs-sm:12px; --fs-base:13px; --fs-md:14px; --fs-lg:16px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg0);
+    color:var(--text);
+    font-family:'JetBrains Mono','Pretendard',ui-monospace,Menlo,monospace;
+    font-size:var(--fs-base);
+    line-height:1.4;
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:'tnum' 1;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,p,ul{ margin:0; }
+  ul{ list-style:none; padding:0; }
+  button,input,select,textarea{
+    font:inherit; color:inherit; background:none; border:none;
+    appearance:none; -webkit-appearance:none; border-radius:0; padding:0;
+  }
+  button{ cursor:pointer; text-align:left; }
+  :focus-visible{ outline:1px solid var(--amber); outline-offset:1px; }
+
+  /* 클릭 가능 요소 — hover 시 앰버 언더스코어 프리픽스 */
+  .hu{ position:relative; }
+  .hu::before{
+    content:'_'; display:inline-block; width:0; overflow:hidden;
+    color:var(--amber); font-weight:700; transition:width 120ms ease;
+    vertical-align:baseline;
+  }
+  .hu:hover::before, .hu:focus-visible::before{ width:0.62em; }
+
+  .term-shell{ max-width:1520px; margin:0 auto; padding:var(--sp-2) var(--sp-3) 0; }
+
+  /* ===== 상단 상태바 ===== */
+  .statusbar{
+    display:flex; align-items:center; flex-wrap:wrap; gap:var(--sp-4);
+    background:var(--promptzone); border:1px solid var(--line);
+    padding:6px 10px; font-size:var(--fs-xs); color:var(--dim);
+    letter-spacing:0.03em;
+  }
+  .statusbar b{ color:var(--text); font-weight:500; }
+  .statusbar .lbl{ text-transform:uppercase; color:var(--faint); margin-right:4px; }
+  .loadbar{ letter-spacing:0; color:var(--green); }
+  .statusbar .sep{ color:var(--line); }
+  .statusbar .clock{ margin-left:auto; color:var(--text); }
+
+  /* ===== 정체성 바 ===== */
+  header.identity{
+    display:flex; align-items:center; flex-wrap:wrap; gap:var(--sp-4);
+    background:var(--panel); border:1px solid var(--line); border-top:none;
+    padding:10px 12px;
+  }
+  .brand{ display:flex; align-items:center; gap:6px; font-size:var(--fs-lg); font-weight:700; white-space:nowrap; }
+  .brand-mark{ color:var(--amber); }
+  .brand-sys{ font-size:var(--fs-2xs); color:var(--faint); letter-spacing:0.08em; text-transform:uppercase; align-self:flex-end; padding-bottom:2px; }
+
+  nav.cat-tabs{ display:flex; gap:2px; flex-wrap:wrap; }
+  .cat-tab{
+    padding:6px 10px; font-size:var(--fs-sm); color:var(--dim);
+    border:1px solid transparent; letter-spacing:0.02em;
+  }
+  .cat-tab:hover{ color:var(--text); border-color:var(--line); }
+  .cat-tab[aria-current="page"]{
+    color:var(--amber); border:1px solid var(--line); background:var(--panel2);
+  }
+  .cat-tab[aria-current="page"]::after{ content:' ▸'; font-size:var(--fs-2xs); }
+
+  .id-search{
+    display:flex; align-items:center; gap:6px;
+    border:1px solid var(--line); background:var(--promptzone);
+    padding:6px 10px; min-width:180px; flex:1 1 180px; max-width:280px;
+  }
+  .id-search span{ color:var(--amber); }
+  .id-search input{ background:transparent; width:100%; font-size:var(--fs-sm); color:var(--text); }
+  .id-search input::placeholder{ color:var(--faint); }
+  .id-search:focus-within{ border-color:var(--amber); }
+
+  .id-right{ display:flex; align-items:center; gap:var(--sp-3); margin-left:auto; }
+  .id-cart{
+    display:flex; align-items:center; gap:6px; font-size:var(--fs-sm);
+    border:1px solid var(--line); padding:6px 10px; color:var(--dim);
+  }
+  .id-cart:hover{ color:var(--text); border-color:var(--blue); }
+  .id-cart .n{ color:var(--bg0); background:var(--amber); font-weight:700; padding:0 5px; font-size:var(--fs-2xs); }
+  .id-avatar{
+    width:30px; height:30px; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line); background:var(--panel2); color:var(--blue);
+    font-size:var(--fs-2xs); font-weight:700; letter-spacing:0.02em;
+  }
+
+  /* ===== 3분할 레이아웃 ===== */
+  .layout{
+    display:grid; grid-template-columns:200px 1fr 250px;
+    gap:1px; background:var(--line);
+    border:1px solid var(--line); border-top:none;
+  }
+  .panel-head{
+    display:flex; align-items:center; gap:6px;
+    background:var(--promptzone); color:var(--dim);
+    font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.08em;
+    padding:6px 10px; border-bottom:1px solid var(--line-soft);
+  }
+
+  /* ===== 필터 패널 ===== */
+  .filter-panel{ background:var(--panel); display:flex; flex-direction:column; min-width:0; }
+  .filter-body{ padding:10px 12px; display:flex; flex-direction:column; gap:var(--sp-4); }
+  .filter-group{ display:flex; flex-direction:column; gap:6px; }
+  .filter-label{ font-size:var(--fs-2xs); text-transform:uppercase; letter-spacing:0.08em; color:var(--faint); }
+
+  .filter-cat-list{ display:flex; flex-direction:column; }
+  .filter-cat{
+    display:flex; align-items:center; gap:6px;
+    padding:5px 6px; font-size:var(--fs-sm); color:var(--dim);
+    border-left:2px solid transparent;
+  }
+  .filter-cat:hover{ background:var(--panel2); color:var(--text); }
+  .filter-cat .mk{ width:1em; color:var(--amber); visibility:hidden; }
+  .filter-cat[aria-pressed="true"]{ color:var(--amber); border-left-color:var(--amber); background:var(--panel2); font-weight:700; }
+  .filter-cat[aria-pressed="true"] .mk{ visibility:visible; }
+
+  .chip-row{ display:flex; flex-wrap:wrap; gap:4px; }
+  .chip{
+    min-width:28px; height:26px; padding:0 8px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line); font-size:var(--fs-xs); color:var(--dim);
+  }
+  .chip:hover{ border-color:var(--blue); color:var(--text); }
+  .chip[aria-pressed="true"]{ border-color:var(--amber); color:var(--amber); background:var(--panel2); font-weight:700; }
+
+  .swatch-row{ display:flex; flex-wrap:wrap; gap:5px; }
+  .swatch{ width:16px; height:16px; background:var(--sw,#333); border:1px solid var(--line); position:relative; }
+  .swatch:hover{ border-color:var(--blue); }
+  .swatch[aria-pressed="true"]{ outline:2px solid var(--amber); outline-offset:1px; }
+
+  .price-range{ display:flex; align-items:center; gap:6px; font-size:var(--fs-2xs); color:var(--dim); }
+  .price-range input[type="range"]{ flex:1; height:14px; }
+  .price-range input[type="range"]::-webkit-slider-runnable-track{ height:2px; background:var(--line); }
+  .price-range input[type="range"]::-webkit-slider-thumb{
+    appearance:none; -webkit-appearance:none; width:8px; height:14px; margin-top:-6px;
+    background:var(--amber); border:none; border-radius:0;
+  }
+  .price-range input[type="range"]::-moz-range-track{ height:2px; background:var(--line); }
+  .price-range input[type="range"]::-moz-range-thumb{ width:8px; height:14px; background:var(--amber); border:none; border-radius:0; }
+
+  .toggle-row{ display:flex; align-items:center; gap:8px; font-size:var(--fs-sm); color:var(--dim); cursor:pointer; }
+  .toggle-row:hover{ color:var(--text); }
+  .tgl-input{ position:absolute; opacity:0; width:1px; height:1px; }
+  .tgl-box::before{ content:'[ ]'; color:var(--faint); }
+  .tgl-input:checked + .tgl-box::before{ content:'[x]'; color:var(--green); }
+  .tgl-input:focus-visible + .tgl-box{ outline:1px solid var(--amber); outline-offset:2px; }
+
+  .ascii-rule{ color:var(--line-soft); font-size:var(--fs-2xs); overflow:hidden; white-space:nowrap; user-select:none; }
+
+  /* ===== 메인 컬럼 ===== */
+  .main-col{ background:var(--bg0); min-width:0; display:flex; flex-direction:column; }
+  .results-head{
+    display:flex; align-items:center; flex-wrap:wrap; gap:var(--sp-3);
+    padding:10px 12px; border-bottom:1px solid var(--line);
+  }
+  .result-count{ font-size:var(--fs-md); }
+  .result-count .num{ color:var(--amber); font-weight:700; }
+  .sort-wrap{ position:relative; display:flex; align-items:center; gap:6px; margin-left:auto; }
+  .sort-wrap .lbl{ font-size:var(--fs-2xs); color:var(--faint); text-transform:uppercase; letter-spacing:0.08em; }
+  .sort-wrap select{
+    border:1px solid var(--line); background:var(--panel); color:var(--text);
+    font-size:var(--fs-sm); padding:6px 24px 6px 8px;
+  }
+  .sort-wrap select:hover{ border-color:var(--blue); }
+  .sort-wrap .caret{ position:absolute; right:8px; color:var(--dim); font-size:var(--fs-xs); pointer-events:none; }
+
+  .empty-toggle{ font-size:var(--fs-2xs); color:var(--faint); text-transform:uppercase; letter-spacing:0.06em; }
+  .empty-toggle:hover{ color:var(--dim); }
+
+  /* ===== 상품 그리드 ===== */
+  .collection{
+    display:grid; grid-template-columns:repeat(2, 1fr);
+    gap:1px; background:var(--line);
+  }
+  .item-card{
+    background:var(--panel); display:grid;
+    grid-template-columns:100px 1fr; gap:10px;
+    padding:10px; position:relative;
+    border-left:1px solid transparent;
+  }
+  .item-card:hover{ background:var(--panel2); border-left-color:var(--amber); }
+
+  .thumb{
+    aspect-ratio:3/4; background:var(--promptzone); border:1px solid var(--line-soft);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .thumb pre{
+    font-size:8px; line-height:1.15; color:var(--faint); text-align:center;
+    letter-spacing:0; margin:0; white-space:pre;
+  }
+  .thumb pre .code{ color:var(--dim); font-weight:700; }
+  .thumb pre .tag{ color:var(--faint); font-size:7px; }
+
+  .ic-body{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+  .ic-top{ display:flex; align-items:baseline; justify-content:space-between; gap:6px; }
+  .ic-brand{ color:var(--blue); font-size:var(--fs-xs); }
+  .ic-sku{ color:var(--faint); font-size:var(--fs-2xs); }
+  .ic-fav{ color:var(--dim); font-size:var(--fs-sm); line-height:1; flex-shrink:0; }
+  .ic-fav:hover{ color:var(--red); }
+  .ic-fav[data-active="true"]{ color:var(--red); }
+
+  .ic-name{
+    font-size:var(--fs-base); font-weight:500; color:var(--text);
+    line-height:1.35; overflow-wrap:break-word; word-break:keep-all;
+  }
+
+  .ic-swatches{ display:flex; gap:4px; }
+  .ic-swatches .swatch{ width:11px; height:11px; }
+
+  .ic-price{ display:flex; align-items:baseline; flex-wrap:wrap; gap:6px; margin-top:2px; }
+  .ic-orig{ color:var(--faint); text-decoration:line-through; font-size:var(--fs-xs); }
+  .ic-sale{ color:var(--amber); font-weight:700; font-size:var(--fs-md); }
+  .ic-disc{ color:var(--amber); font-size:var(--fs-xs); font-weight:700; }
+
+  .ic-rating{ font-size:var(--fs-xs); color:var(--dim); }
+  .ic-rating .star{ color:var(--green); }
+  .ic-rating.none{ color:var(--faint); }
+
+  .ic-status{ font-size:var(--fs-xs); font-weight:700; letter-spacing:0.02em; }
+  .ic-status .tag{ font-weight:700; }
+  .status-best{ color:var(--green); }
+  .status-ship{ color:var(--amber); }
+  .status-new{ color:var(--blue); }
+  .status-low{ color:var(--red); }
+
+  /* ===== 빈 상태 ===== */
+  .empty-state{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:var(--sp-2); padding:var(--sp-6) var(--sp-3); text-align:center;
+    color:var(--dim); border:1px dashed var(--line);
+  }
+  .empty-state[hidden]{ display:none; }
+  .empty-glyph{ color:var(--faint); font-size:var(--fs-sm); letter-spacing:0.3em; }
+  .empty-state h3{ font-size:var(--fs-md); color:var(--text); }
+  .empty-state p{ font-size:var(--fs-sm); color:var(--dim); }
+  .empty-cta{
+    margin-top:4px; padding:8px 16px; border:1px solid var(--amber); color:var(--amber);
+    font-size:var(--fs-sm); font-weight:700;
+  }
+  .empty-cta:hover{ background:var(--panel2); }
+
+  /* ===== 페이지네이션 ===== */
+  .pagination{
+    display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap;
+    padding:var(--sp-4) 12px; border-top:1px solid var(--line);
+  }
+  .page-btn{
+    min-width:28px; height:28px; padding:0 6px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line); color:var(--dim); font-size:var(--fs-sm);
+  }
+  .page-btn:hover{ border-color:var(--blue); color:var(--text); }
+  .page-btn[aria-current="page"]{ border-color:var(--amber); color:var(--amber); font-weight:700; }
+  .page-ellipsis{ color:var(--faint); padding:0 4px; }
+  .btn-more{
+    margin-left:var(--sp-3); height:28px; padding:0 14px;
+    border:1px solid var(--line); color:var(--text); font-size:var(--fs-sm); font-weight:500;
+  }
+  .btn-more:hover{ border-color:var(--amber); color:var(--amber); }
+
+  /* ===== 로그·큐 패널 ===== */
+  .side-log{ background:var(--panel); display:flex; flex-direction:column; min-width:0; }
+  .live-dot{ color:var(--green); }
+  .logstream{ display:flex; flex-direction:column-reverse; max-height:300px; overflow:hidden; }
+  .log-row{
+    display:flex; gap:6px; padding:5px 10px; font-size:var(--fs-2xs);
+    border-left:2px solid transparent; border-bottom:1px solid var(--line-soft);
+    opacity:1;
+  }
+  .log-row:hover{ background:var(--panel2); border-left-color:var(--amber); }
+  .log-row.q-match{ background:var(--panel2); }
+  /* column-reverse 컨테이너 — DOM 앞쪽(오래된 줄)이 시각적으로 아래쪽에 깔린다 */
+  .logstream .log-row:nth-child(-n+2){ opacity:0.45; }
+  .logstream .log-row:nth-child(n+3):nth-child(-n+4){ opacity:0.72; }
+  .ts{ color:var(--faint); flex-shrink:0; }
+  .lvl{ flex-shrink:0; font-weight:700; width:3.6em; }
+  .lvl-ok{ color:var(--green); }
+  .lvl-warn{ color:var(--amber); }
+  .lvl-err{ color:var(--red); }
+  .lvl-info{ color:var(--dim); }
+  .msg{ color:var(--text); overflow-wrap:break-word; word-break:break-word; }
+  .path{ color:var(--blue); }
+
+  .queue{ display:flex; flex-direction:column; }
+  .queue-row{
+    display:flex; align-items:center; gap:6px; padding:6px 10px; font-size:var(--fs-2xs);
+    color:var(--dim); border-bottom:1px solid var(--line-soft); border-left:2px solid transparent;
+  }
+  .queue-row:hover, .queue-row.q-match{ background:var(--panel2); border-left-color:var(--blue); color:var(--text); }
+  .queue-row .arrow{ color:var(--faint); }
+
+  /* ===== 프롬프트 라인 ===== */
+  .promptline{
+    display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+    background:var(--promptzone); border:1px solid var(--line); border-top:none;
+    padding:8px 12px; font-size:var(--fs-sm);
+  }
+  .prompt-user{ color:var(--green); }
+  .prompt-host{ color:var(--green); }
+  .prompt-path{ color:var(--blue); }
+  .prompt-sym{ color:var(--dim); }
+  .cursor{ color:var(--amber); font-weight:700; animation:blink 1s steps(1) infinite; }
+  @keyframes blink{ 0%,49%{ opacity:1; } 50%,100%{ opacity:0; } }
+
+  /* ===== 하단 펑션키 바 ===== */
+  .fkeys{ border:1px solid var(--line); border-top:none; background:var(--panel); }
+  .fk-row{ display:flex; flex-wrap:wrap; }
+  .fk{
+    flex:1 1 auto; display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:8px 6px; font-size:var(--fs-2xs); color:var(--dim);
+    border-right:1px solid var(--line-soft);
+  }
+  .fk:last-child{ border-right:none; }
+  .fk b{ color:var(--amber); }
+  .fk:hover{ background:var(--panel2); color:var(--text); }
+  .fk small{ color:var(--faint); }
+  .footer-credit{
+    text-align:center; padding:8px; font-size:var(--fs-xs); color:var(--faint);
+    letter-spacing:0.08em; border-top:1px solid var(--line-soft);
+  }
+
+  /* ===== 타이핑 리빌 (최신 로그 1~2줄, 시각적 맨 위 = DOM 마지막 자식) ===== */
+  @keyframes typeReveal{ from{ clip-path:inset(0 100% 0 0); } to{ clip-path:inset(0 0 0 0); } }
+  .logstream .log-row:nth-last-child(2) .msg{ animation:typeReveal 650ms steps(20,end) 1 backwards; }
+  .logstream .log-row:last-child .msg{ animation:typeReveal 650ms steps(20,end) 350ms 1 backwards; }
+
+  /* ===== 반응형 ===== */
+  @media (max-width:900px){
+    .layout{ grid-template-columns:1fr; }
+    .collection{ grid-template-columns:repeat(2,1fr); }
+    .side-log{ order:3; }
+    .filter-panel{ order:1; }
+    .main-col{ order:2; }
+  }
+  @media (max-width:640px){
+    .collection{ grid-template-columns:1fr; }
+    .item-card{ grid-template-columns:84px 1fr; }
+    .statusbar .clock{ margin-left:0; }
+    .id-right{ margin-left:0; width:100%; justify-content:space-between; }
+  }
+
+  /* ===== 접근성: 모션 축소 ===== */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation:none !important; transition:none !important; }
+    .cursor{ opacity:1; }
+    .logstream .msg{ clip-path:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="term-shell">
+
+  <div class="statusbar" aria-hidden="true">
+    <span><span class="lbl">HOST</span><b>8oclock-inv-03</b></span>
+    <span class="sep">│</span>
+    <span><span class="lbl">UPTIME</span><b id="uptime">03:22:47</b></span>
+    <span class="sep">│</span>
+    <span><span class="lbl">LOAD</span><span class="loadbar" id="loadbar">[▓▓▓▓▓▓▓▓░░]</span> <b id="loadval">0.82</b></span>
+    <span class="sep">│</span>
+    <span><span class="lbl">REQ/S</span><b id="reqs">142</b></span>
+    <span class="clock" id="clock">14:22:07</span>
+  </div>
+
+  <header class="identity" data-region="identity">
+    <div class="brand"><span class="brand-mark">&gt;</span> 여덟시 <span class="brand-sys">INVENTORY.SYS</span></div>
+    <nav class="cat-tabs" aria-label="카테고리">
+      <button class="cat-tab hu" aria-current="page">여성</button>
+      <button class="cat-tab hu">남성</button>
+      <button class="cat-tab hu">키즈</button>
+      <button class="cat-tab hu">세일</button>
+    </nav>
+    <div class="id-search">
+      <span>/</span>
+      <input type="text" placeholder="상품명·브랜드 검색" aria-label="검색">
+    </div>
+    <div class="id-right">
+      <button class="id-cart hu" aria-label="장바구니">CART <span class="n">3</span></button>
+      <div class="id-avatar" title="사용자: MD">MD</div>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ===== 필터 ===== -->
+    <aside class="filter-panel" data-region="filter">
+      <div class="panel-head">[1] FILTER</div>
+      <div class="filter-body">
+        <div class="filter-group">
+          <div class="filter-label">CATEGORY</div>
+          <div class="filter-cat-list">
+            <button class="filter-cat hu" aria-pressed="true"><span class="mk">▸</span>아우터</button>
+            <button class="filter-cat hu" aria-pressed="false"><span class="mk">▸</span>상의</button>
+            <button class="filter-cat hu" aria-pressed="false"><span class="mk">▸</span>하의</button>
+            <button class="filter-cat hu" aria-pressed="false"><span class="mk">▸</span>원피스</button>
+            <button class="filter-cat hu" aria-pressed="false"><span class="mk">▸</span>신발</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">SIZE</div>
+          <div class="chip-row">
+            <button class="chip" aria-pressed="false">XS</button>
+            <button class="chip" aria-pressed="false">S</button>
+            <button class="chip" aria-pressed="true">M</button>
+            <button class="chip" aria-pressed="false">L</button>
+            <button class="chip" aria-pressed="false">XL</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">COLOR</div>
+          <div class="swatch-row">
+            <button class="swatch" aria-pressed="true" style="--sw:#111318" aria-label="블랙"></button>
+            <button class="swatch" aria-pressed="false" style="--sw:#E9E7E1" aria-label="화이트"></button>
+            <button class="swatch" aria-pressed="false" style="--sw:#5B6472" aria-label="그레이"></button>
+            <button class="swatch" aria-pressed="false" style="--sw:#26303D" aria-label="네이비"></button>
+            <button class="swatch" aria-pressed="false" style="--sw:#8A6A4F" aria-label="베이지"></button>
+            <button class="swatch" aria-pressed="false" style="--sw:#5E2A26" aria-label="버건디"></button>
+            <button class="swatch" aria-pressed="false" style="--sw:#3D4A3D" aria-label="카키"></button>
+            <button class="swatch" aria-pressed="false" style="--sw:#4A3627" aria-label="브라운"></button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">PRICE</div>
+          <div class="price-range">
+            <span>₩0</span>
+            <input type="range" min="0" max="300000" value="180000" aria-label="가격대">
+            <span>₩300,000+</span>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="toggle-row"><input type="checkbox" class="tgl-input"><span class="tgl-box"></span><span>무료배송만</span></label>
+          <label class="toggle-row"><input type="checkbox" class="tgl-input" checked><span class="tgl-box"></span><span>재입고 알림 가능</span></label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== 메인: 결과 + 컬렉션 + 페이지네이션 ===== -->
+    <main class="main-col">
+      <div class="results-head" data-region="results">
+        <div class="result-count">여성 아우터 <span class="num">264</span>개</div>
+        <button class="empty-toggle hu" id="fk5inline" title="빈 상태 미리보기">[F5] SIM:EMPTY</button>
+        <div class="sort-wrap">
+          <span class="lbl">SORT</span>
+          <select aria-label="정렬">
+            <option selected>신상품순</option>
+            <option>인기순</option>
+            <option>낮은 가격순</option>
+            <option>리뷰 많은순</option>
+          </select>
+          <span class="caret">▾</span>
+        </div>
+      </div>
+
+      <section class="collection" id="collection" data-region="collection">
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" aria-hidden="true"><pre>░░░░░░░░░░░
+░▒▒▒▒▒▒▒▒▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▓<span class="code">8H</span>▓▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▒▒▒▒▒▒▒▒░
+<span class="tag">NO_IMAGE</span></pre></div>
+          <div class="ic-body">
+            <div class="ic-top">
+              <span class="ic-brand">여덟시 <span class="ic-sku">#8503-JKT01</span></span>
+              <button class="ic-fav" data-active="false" aria-label="찜하기">♡</button>
+            </div>
+            <h3 class="ic-name">오버핏 울 블렌드 코트</h3>
+            <div class="ic-swatches">
+              <span class="swatch" style="--sw:#111318"></span>
+              <span class="swatch" style="--sw:#8A6A4F"></span>
+              <span class="swatch" style="--sw:#5B6472"></span>
+            </div>
+            <div class="ic-price">
+              <span class="ic-orig">₩189,000</span>
+              <span class="ic-sale">₩132,300</span>
+              <span class="ic-disc">-30%</span>
+            </div>
+            <div class="ic-rating"><span class="star">★</span> 4.7 (1,284)</div>
+            <div class="ic-status status-best"><span class="tag">[OK]</span> 베스트</div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" aria-hidden="true"><pre>░░░░░░░░░░░
+░▒▒▒▒▒▒▒▒▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▓<span class="code">CM</span>▓▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▒▒▒▒▒▒▒▒░
+<span class="tag">NO_IMAGE</span></pre></div>
+          <div class="ic-body">
+            <div class="ic-top">
+              <span class="ic-brand">코튼밀 <span class="ic-sku">#4412-VST02</span></span>
+              <button class="ic-fav" data-active="false" aria-label="찜하기">♡</button>
+            </div>
+            <h3 class="ic-name">経량 패딩 베스트</h3>
+            <div class="ic-swatches">
+              <span class="swatch" style="--sw:#111318"></span>
+              <span class="swatch" style="--sw:#3D4A3D"></span>
+              <span class="swatch" style="--sw:#26303D"></span>
+            </div>
+            <div class="ic-price">
+              <span class="ic-orig">₩89,000</span>
+              <span class="ic-sale">₩62,300</span>
+              <span class="ic-disc">-30%</span>
+            </div>
+            <div class="ic-rating"><span class="star">★</span> 4.5 (612)</div>
+            <div class="ic-status status-ship"><span class="tag">[SHIP]</span> 무료배송</div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" aria-hidden="true"><pre>░░░░░░░░░░░
+░▒▒▒▒▒▒▒▒▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▓<span class="code">8H</span>▓▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▒▒▒▒▒▒▒▒░
+<span class="tag">NO_IMAGE</span></pre></div>
+          <div class="ic-body">
+            <div class="ic-top">
+              <span class="ic-brand">여덟시 <span class="ic-sku">#8503-COAT03</span></span>
+              <button class="ic-fav" data-active="false" aria-label="찜하기">♡</button>
+            </div>
+            <h3 class="ic-name">시그니처 캐시미어 100% 롱 코트 — 이탈리아 원단 · 한정 수량 리오더 불가 · 드라이클리닝 전용</h3>
+            <div class="ic-swatches">
+              <span class="swatch" style="--sw:#8A6A4F"></span>
+              <span class="swatch" style="--sw:#111318"></span>
+              <span class="swatch" style="--sw:#5B6472"></span>
+            </div>
+            <div class="ic-price">
+              <span class="ic-orig">₩1,290,000</span>
+              <span class="ic-sale">₩1,161,000</span>
+              <span class="ic-disc">-10%</span>
+            </div>
+            <div class="ic-rating none">—</div>
+            <div class="ic-status status-new"><span class="tag">[NEW]</span> 신상</div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" aria-hidden="true"><pre>░░░░░░░░░░░
+░▒▒▒▒▒▒▒▒▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▓<span class="code">DL</span>▓▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▒▒▒▒▒▒▒▒░
+<span class="tag">NO_IMAGE</span></pre></div>
+          <div class="ic-body">
+            <div class="ic-top">
+              <span class="ic-brand">데일리랩 <span class="ic-sku">#2201-JKT04</span></span>
+              <button class="ic-fav" data-active="false" aria-label="찜하기">♡</button>
+            </div>
+            <h3 class="ic-name">크롭 무스탕 자켓</h3>
+            <div class="ic-swatches">
+              <span class="swatch" style="--sw:#4A3627"></span>
+              <span class="swatch" style="--sw:#111318"></span>
+              <span class="swatch" style="--sw:#5E2A26"></span>
+            </div>
+            <div class="ic-price">
+              <span class="ic-orig">₩259,000</span>
+              <span class="ic-sale">₩155,400</span>
+              <span class="ic-disc">-40%</span>
+            </div>
+            <div class="ic-rating"><span class="star">★</span> 4.2 (338)</div>
+            <div class="ic-status status-low"><span class="tag">[LOW]</span> 품절임박</div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" aria-hidden="true"><pre>░░░░░░░░░░░
+░▒▒▒▒▒▒▒▒▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▓<span class="code">CM</span>▓▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▒▒▒▒▒▒▒▒░
+<span class="tag">NO_IMAGE</span></pre></div>
+          <div class="ic-body">
+            <div class="ic-top">
+              <span class="ic-brand">코튼밀 <span class="ic-sku">#1103-HOOD02</span></span>
+              <button class="ic-fav" data-active="false" aria-label="찜하기">♡</button>
+            </div>
+            <h3 class="ic-name">베이직 후드 집업</h3>
+            <div class="ic-swatches">
+              <span class="swatch" style="--sw:#111318"></span>
+              <span class="swatch" style="--sw:#5B6472"></span>
+              <span class="swatch" style="--sw:#26303D"></span>
+            </div>
+            <div class="ic-price">
+              <span class="ic-orig">₩49,000</span>
+              <span class="ic-sale">₩39,200</span>
+              <span class="ic-disc">-20%</span>
+            </div>
+            <div class="ic-rating"><span class="star">★</span> 4.8 (2,041)</div>
+            <div class="ic-status status-best"><span class="tag">[OK]</span> 베스트</div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" aria-hidden="true"><pre>░░░░░░░░░░░
+░▒▒▒▒▒▒▒▒▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▓<span class="code">8H</span>▓▒░
+░▒▓▓▓▓▓▓▓▒░
+░▒▒▒▒▒▒▒▒▒░
+<span class="tag">NO_IMAGE</span></pre></div>
+          <div class="ic-body">
+            <div class="ic-top">
+              <span class="ic-brand">여덟시 <span class="ic-sku">#8503-DENIM06</span></span>
+              <button class="ic-fav" data-active="false" aria-label="찜하기">♡</button>
+            </div>
+            <h3 class="ic-name">워시드 데님 트러커</h3>
+            <div class="ic-swatches">
+              <span class="swatch" style="--sw:#26303D"></span>
+              <span class="swatch" style="--sw:#111318"></span>
+              <span class="swatch" style="--sw:#5B6472"></span>
+            </div>
+            <div class="ic-price">
+              <span class="ic-orig">₩119,000</span>
+              <span class="ic-sale">₩95,200</span>
+              <span class="ic-disc">-20%</span>
+            </div>
+            <div class="ic-rating"><span class="star">★</span> 4.4 (517)</div>
+            <div class="ic-status status-ship"><span class="tag">[SHIP]</span> 무료배송</div>
+          </div>
+        </article>
+
+      </section>
+
+      <div class="empty-state" id="emptyState" data-region="empty" hidden>
+        <div class="empty-glyph">░ ░ ░</div>
+        <h3>조건에 맞는 상품이 없어요</h3>
+        <p>사이즈나 색상 조건을 줄여보세요.</p>
+        <button class="empty-cta hu" id="resetFilterBtn">필터 초기화</button>
+      </div>
+
+      <nav class="pagination" data-region="action" aria-label="페이지네이션">
+        <button class="page-btn hu" aria-label="이전 페이지">‹</button>
+        <button class="page-btn hu" aria-current="page">1</button>
+        <button class="page-btn hu">2</button>
+        <button class="page-btn hu">3</button>
+        <span class="page-ellipsis">…</span>
+        <button class="page-btn hu">22</button>
+        <button class="page-btn hu" aria-label="다음 페이지">›</button>
+        <button class="btn-more hu">더 보기</button>
+      </nav>
+    </main>
+
+    <!-- ===== 이벤트 로그 + 동기화 큐 ===== -->
+    <aside class="side-log">
+      <div class="panel-head">[2] EVENT_LOG <span class="live-dot" aria-hidden="true">●</span> LIVE</div>
+      <div class="logstream" id="logstream">
+        <div class="log-row" data-req="R4466"><span class="ts">[14:20:39]</span><span class="lvl lvl-info">INFO</span><span class="msg">리뷰 등록 <span class="path">/reviews/8503-JKT01</span> ★4.7</span></div>
+        <div class="log-row" data-req="R4467"><span class="ts">[14:20:51]</span><span class="lvl lvl-ok">OK</span><span class="msg">주문 확정 <span class="path">/orders/88231</span></span></div>
+        <div class="log-row" data-req="R4468"><span class="ts">[14:21:05]</span><span class="lvl lvl-err">ERR</span><span class="msg">동기화 실패 <span class="path">/sync/warehouse-03</span> timeout</span></div>
+        <div class="log-row" data-req="R4469"><span class="ts">[14:21:22]</span><span class="lvl lvl-info">INFO</span><span class="msg">가격 변경 <span class="path">/pricing/1103-HOOD02</span></span></div>
+        <div class="log-row" data-req="R4470"><span class="ts">[14:21:44]</span><span class="lvl lvl-warn">WARN</span><span class="msg">재고 임박 <span class="path">/inv/2201-JKT04</span> 잔여 3</span></div>
+        <div class="log-row" data-req="R4471"><span class="ts">[14:21:58]</span><span class="lvl lvl-ok">OK</span><span class="msg">입고 확인 <span class="path">/inv/8503-JKT01</span> +12</span></div>
+      </div>
+
+      <div class="panel-head">[3] SYNC_QUEUE</div>
+      <div class="queue" id="queue">
+        <div class="queue-row" data-req="R4468"><span class="arrow">▸</span> R4468 <span class="path">/sync/warehouse-03</span></div>
+        <div class="queue-row" data-req="R4469"><span class="arrow">▸</span> R4469 <span class="path">/pricing/1103-HOOD02</span></div>
+        <div class="queue-row" data-req="R4470"><span class="arrow">▸</span> R4470 <span class="path">/inv/2201-JKT04</span></div>
+        <div class="queue-row" data-req="R4471"><span class="arrow">▸</span> R4471 <span class="path">/inv/8503-JKT01</span></div>
+      </div>
+    </aside>
+
+  </div>
+
+  <div class="promptline">
+    <span class="prompt-user">mdops</span><span class="prompt-sym">@</span><span class="prompt-host">8oclock-inv</span><span class="prompt-sym">:</span><span class="prompt-path">~/women/outer</span><span class="prompt-sym">$</span>
+    <span class="cursor" id="cursor">█</span>
+  </div>
+
+  <footer class="fkeys">
+    <div class="fk-row">
+      <button class="fk hu"><b>F1</b><small>필터</small></button>
+      <button class="fk hu"><b>F2</b><small>정렬</small></button>
+      <button class="fk hu"><b>F3</b><small>찜목록</small></button>
+      <button class="fk hu"><b>F4</b><small>새로고침</small></button>
+      <button class="fk hu" id="fk5"><b>F5</b><small>빈결과 SIM</small></button>
+    </div>
+    <div class="footer-credit">STYLE 04 · 고밀도 터미널</div>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- 빈 상태 시뮬레이션 토글 (F5) ---- */
+  var collection = document.getElementById('collection');
+  var emptyState = document.getElementById('emptyState');
+  function toggleEmpty(){
+    var showingEmpty = !emptyState.hidden;
+    emptyState.hidden = showingEmpty;
+    collection.hidden = !showingEmpty;
+  }
+  var fk5 = document.getElementById('fk5');
+  var fk5inline = document.getElementById('fk5inline');
+  if (fk5) fk5.addEventListener('click', toggleEmpty);
+  if (fk5inline) fk5inline.addEventListener('click', toggleEmpty);
+  var resetBtn = document.getElementById('resetFilterBtn');
+  if (resetBtn) resetBtn.addEventListener('click', function(){
+    emptyState.hidden = true;
+    collection.hidden = false;
+  });
+
+  /* ---- 로그 ↔ 큐 상호 하이라이트 ---- */
+  var logstream = document.getElementById('logstream');
+  var queue = document.getElementById('queue');
+  function setMatch(req, on){
+    document.querySelectorAll('[data-req="' + req + '"]').forEach(function(el){
+      el.classList.toggle('q-match', on);
+    });
+  }
+  function wireHover(container){
+    container.addEventListener('mouseover', function(e){
+      var row = e.target.closest('[data-req]');
+      if (row) setMatch(row.getAttribute('data-req'), true);
+    });
+    container.addEventListener('mouseout', function(e){
+      var row = e.target.closest('[data-req]');
+      if (row) setMatch(row.getAttribute('data-req'), false);
+    });
+  }
+  wireHover(logstream);
+  wireHover(queue);
+
+  if (reduced) return; /* ---- 이하 앰비언트 연출은 reduced-motion 시 실행하지 않음 ---- */
+
+  /* ---- 상태바 시계·업타임 ---- */
+  var clockEl = document.getElementById('clock');
+  var uptimeEl = document.getElementById('uptime');
+  var t0 = Date.now();
+  var uptimeBase = 3*3600 + 22*60 + 47;
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function fmtHMS(sec){
+    var h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = Math.floor(sec%60);
+    return pad(h)+':'+pad(m)+':'+pad(s);
+  }
+  setInterval(function(){
+    var now = new Date();
+    clockEl.textContent = pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+    var elapsed = Math.floor((Date.now()-t0)/1000);
+    uptimeEl.textContent = fmtHMS(uptimeBase + elapsed);
+  }, 1000);
+
+  /* ---- load / req·s 미세 흔들림 ---- */
+  var loadEl = document.getElementById('loadval');
+  var loadbarEl = document.getElementById('loadbar');
+  var reqsEl = document.getElementById('reqs');
+  setInterval(function(){
+    var load = (0.72 + Math.random()*0.22).toFixed(2);
+    loadEl.textContent = load;
+    var filled = Math.min(10, Math.round(load*10));
+    loadbarEl.textContent = '[' + '▓'.repeat(filled) + '░'.repeat(10-filled) + ']';
+    reqsEl.textContent = String(132 + Math.floor(Math.random()*20));
+  }, 2200);
+
+  /* ---- 흐르는 이벤트 로그 ---- */
+  var pool = [
+    {lvl:'ok',   msg:'정가 복귀 <span class="path">/pricing/8503-JKT01</span>'},
+    {lvl:'info', msg:'찜 등록 <span class="path">/wishlist/2201-JKT04</span>'},
+    {lvl:'warn', msg:'재고 임박 <span class="path">/inv/4412-VST02</span> 잔여 5'},
+    {lvl:'ok',   msg:'입고 확인 <span class="path">/inv/1103-HOOD02</span> +30'},
+    {lvl:'err',  msg:'결제 재시도 <span class="path">/orders/88244</span> 3/5'},
+    {lvl:'info', msg:'리뷰 등록 <span class="path">/reviews/8503-DENIM06</span> ★4.4'},
+    {lvl:'ok',   msg:'주문 확정 <span class="path">/orders/88251</span>'},
+    {lvl:'warn', msg:'배송 지연 <span class="path">/ship/2201-JKT04</span> +1일'}
+  ];
+  var reqSeq = 4472;
+  function addLogRow(){
+    var pick = pool[Math.floor(Math.random()*pool.length)];
+    var now = new Date();
+    var ts = '[' + pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds()) + ']';
+    var lvlText = {ok:'OK', info:'INFO', warn:'WARN', err:'ERR'}[pick.lvl];
+    var req = 'R' + (reqSeq++);
+    var row = document.createElement('div');
+    row.className = 'log-row';
+    row.setAttribute('data-req', req);
+    row.innerHTML = '<span class="ts">'+ts+'</span><span class="lvl lvl-'+pick.lvl+'">'+lvlText+'</span><span class="msg">'+pick.msg+'</span>';
+    /* column-reverse: 마지막 DOM 자식이 시각적 맨 위(최신) — 새 줄은 append, 초과분은 맨 앞(가장 오래된 줄)에서 제거 */
+    logstream.appendChild(row);
+    while (logstream.children.length > 8){
+      logstream.removeChild(logstream.firstChild);
+    }
+  }
+  function scheduleLog(){
+    var delay = 6000 + Math.random()*6000;
+    setTimeout(function(){ addLogRow(); scheduleLog(); }, delay);
+  }
+  scheduleLog();
+})();
+</script>
+</body>
+</html>

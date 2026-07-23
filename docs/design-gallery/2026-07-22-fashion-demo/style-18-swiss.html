@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>여덟시 — 여성 아우터</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+  /* ============ 토큰 ============ */
+  :root{
+    --bg:#FFFFFF;
+    --ink:#111111;
+    --red:#E2231A;
+    --line:#E4E4E4;
+    --gray:#6B6B6B;
+    --row-hover:#FAFAFA;
+
+    --s1:4px; --s2:8px; --s3:16px; --s4:24px; --s5:32px; --s6:48px; --s7:64px; --s8:96px;
+
+    --fs-label:11px;
+    --fs-xs:12px;
+    --fs-sm:14px;
+    --fs-base:16px;
+    --fs-md:20px;
+    --fs-lg:24px;
+    --fs-xl:32px;
+    --fs-hero:clamp(48px, 9vw, 112px);
+
+    --font-display:'Inter','Helvetica Neue',Arial,sans-serif;
+    --font-body:'Pretendard','Inter','Helvetica Neue',Arial,sans-serif;
+
+    --dur:240ms;
+    --ease:cubic-bezier(.2,.7,.3,1);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ background:var(--bg); }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:var(--fs-base);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums;
+  }
+  h1,h2,h3,p,ul,ol,figure{ margin:0; padding:0; }
+  ul{ list-style:none; }
+  button{ font:inherit; color:inherit; background:none; border:none; cursor:pointer; }
+  input{ font:inherit; color:inherit; }
+  a{ color:inherit; text-decoration:none; }
+  svg{ display:block; }
+
+  .num{ font-variant-numeric:tabular-nums; }
+
+  :focus{ outline:none; }
+  :focus-visible{
+    outline:2px solid var(--red);
+    outline-offset:2px;
+  }
+
+  .eyebrow{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:var(--fs-label);
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--gray);
+    display:block;
+  }
+
+  .container{
+    max-width:1440px;
+    margin:0 auto;
+    padding:0 var(--s6);
+  }
+
+  /* ============ 1. 정체성 바 ============ */
+  header[data-region="identity"]{
+    border-bottom:1px solid var(--line);
+  }
+  .identity-row{
+    display:flex;
+    align-items:center;
+    gap:var(--s6);
+    height:72px;
+  }
+  .logo{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:var(--fs-lg);
+    letter-spacing:-0.02em;
+    flex:0 0 auto;
+  }
+  .top-nav{
+    display:flex;
+    gap:var(--s5);
+    flex:1 1 auto;
+  }
+  .top-nav a{
+    font-size:var(--fs-sm);
+    font-weight:500;
+    color:var(--gray);
+    padding:var(--s2) 0;
+    border-bottom:2px solid transparent;
+    transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  .top-nav a:hover{ color:var(--ink); }
+  .top-nav a.is-active{
+    color:var(--ink);
+    border-bottom-color:var(--ink);
+    font-weight:700;
+  }
+  .identity-tools{
+    display:flex;
+    align-items:center;
+    gap:var(--s4);
+    flex:0 0 auto;
+  }
+  .search-box{
+    display:flex;
+    align-items:center;
+    gap:var(--s2);
+    border-bottom:1px solid var(--line);
+    padding:var(--s1) 0;
+    width:140px;
+    transition:border-color var(--dur) var(--ease);
+  }
+  .search-box:focus-within{ border-color:var(--ink); }
+  .search-box input{
+    border:none;
+    background:none;
+    width:100%;
+    font-size:var(--fs-sm);
+    color:var(--ink);
+  }
+  .search-box input::placeholder{ color:var(--gray); }
+  .icon-btn{
+    position:relative;
+    width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink);
+  }
+  .cart-count{
+    position:absolute;
+    top:-2px; right:-6px;
+    min-width:16px; height:16px;
+    padding:0 3px;
+    border:1px solid var(--ink);
+    background:var(--bg);
+    font-size:10px;
+    font-weight:700;
+    line-height:14px;
+    text-align:center;
+  }
+  .avatar{
+    width:32px; height:32px;
+    border:1px solid var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; letter-spacing:.02em;
+  }
+
+  /* ============ 12컬럼 룰러 (격자가 눈에 보인다) ============ */
+  .ruler-wrap{
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  .ruler{
+    display:grid;
+    grid-template-columns:repeat(12, 1fr);
+    height:22px;
+  }
+  .ruler span{
+    border-right:1px solid var(--line);
+    font-family:var(--font-display);
+    font-size:9px;
+    color:var(--gray);
+    letter-spacing:.06em;
+    display:flex;
+    align-items:center;
+    padding-left:var(--s2);
+    transform:scaleX(0);
+    transform-origin:left;
+    animation:ruler-draw var(--dur) var(--ease) 200ms forwards;
+  }
+  .ruler span:last-child{ border-right:none; }
+  @keyframes ruler-draw{
+    from{ transform:scaleX(0); }
+    to{ transform:scaleX(1); }
+  }
+  .ruler span i{
+    transform:scaleX(-1); /* 부모 스케일 보정 — 텍스트가 안 눌리게 */
+    display:inline-block;
+    font-style:normal;
+  }
+
+  /* ============ 레이아웃 ============ */
+  main.layout{
+    display:grid;
+    grid-template-columns:repeat(12, 1fr);
+    column-gap:var(--s4);
+    padding:var(--s6) var(--s6) var(--s8);
+    max-width:1440px;
+    margin:0 auto;
+  }
+
+  /* ---- 필터 사이드바 ---- */
+  aside[data-region="filter"]{
+    grid-column:1 / span 3;
+  }
+  .filter-group{
+    padding:var(--s5) 0;
+    border-bottom:1px solid var(--line);
+  }
+  .filter-group:first-child{ padding-top:0; }
+  .filter-group h3{
+    font-size:var(--fs-sm);
+    font-weight:700;
+    margin-bottom:var(--s3);
+  }
+  .cat-list li{ position:relative; }
+  .cat-list a{
+    display:flex;
+    align-items:center;
+    height:36px;
+    padding-left:var(--s3);
+    font-size:var(--fs-sm);
+    color:var(--ink);
+    border-left:2px solid transparent;
+    transition:background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  .cat-list a:hover{
+    background:var(--row-hover);
+    border-left-color:var(--red);
+  }
+  .cat-list a.is-selected{
+    font-weight:700;
+    border-left-color:var(--ink);
+  }
+  .cat-list a:hover.is-selected{ border-left-color:var(--red); }
+
+  .chip-row{ display:flex; flex-wrap:wrap; gap:var(--s2); }
+  .chip{
+    min-width:36px; height:32px;
+    padding:0 var(--s2);
+    border:1px solid var(--line);
+    font-size:var(--fs-xs);
+    font-weight:500;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color var(--dur) var(--ease);
+  }
+  .chip:hover{ border-color:var(--ink); }
+  .chip.is-selected{
+    border:2px solid var(--ink);
+    font-weight:700;
+  }
+
+  .swatch-row{ display:flex; flex-wrap:wrap; gap:var(--s2); }
+  .swatch{
+    width:24px; height:24px;
+    border:1px solid var(--line);
+    position:relative;
+  }
+  .swatch.is-selected{ outline:2px solid var(--ink); outline-offset:2px; }
+  .swatch.tone-1{ background:#111111; }
+  .swatch.tone-2{ background:#2E2E2E; }
+  .swatch.tone-3{ background:#4A4A4A; }
+  .swatch.tone-4{ background:#6B6B6B; }
+  .swatch.tone-5{ background:#8C8C8C; }
+  .swatch.tone-6{ background:#ADADAD; }
+  .swatch.tone-7{ background:#D6D6D6; }
+  .swatch.tone-8{ background:#FFFFFF; }
+
+  .price-slider{ padding-top:var(--s2); }
+  .price-track{
+    position:relative;
+    height:2px;
+    background:var(--line);
+    margin:var(--s5) var(--s2) var(--s3);
+  }
+  .price-fill{ position:absolute; inset:0; background:var(--ink); }
+  .price-thumb{
+    position:absolute;
+    top:50%; transform:translate(-50%,-50%);
+    width:12px; height:12px;
+    background:var(--ink);
+  }
+  .price-thumb.min{ left:0; }
+  .price-thumb.max{ left:100%; }
+  .price-labels{
+    display:flex; justify-content:space-between;
+    font-size:var(--fs-xs); color:var(--gray);
+  }
+
+  .toggle-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:var(--s2) 0;
+  }
+  .toggle-row span{ font-size:var(--fs-sm); }
+  .switch{
+    width:36px; height:18px;
+    border:1px solid var(--ink);
+    position:relative;
+    flex:0 0 auto;
+  }
+  .switch::after{
+    content:"";
+    position:absolute;
+    top:1px; left:1px;
+    width:14px; height:14px;
+    background:var(--gray);
+    transition:transform var(--dur) var(--ease), background-color var(--dur) var(--ease);
+  }
+  .switch.is-on{ background:var(--ink); }
+  .switch.is-on::after{
+    background:var(--bg);
+    transform:translateX(17px);
+  }
+
+  /* ---- 메인 컬럼 ---- */
+  section.main-col{ grid-column:4 / span 9; }
+
+  div[data-region="results"]{
+    padding-bottom:var(--s5);
+    margin-bottom:var(--s5);
+    border-bottom:1px solid var(--line);
+  }
+  .hero-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:var(--s5);
+    flex-wrap:wrap;
+  }
+  h1.hero-title{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:var(--fs-hero);
+    letter-spacing:-0.03em;
+    line-height:0.9;
+    color:var(--ink);
+  }
+  .result-meta{
+    display:flex;
+    align-items:center;
+    gap:var(--s3);
+    padding-bottom:var(--s2);
+  }
+  .result-count{
+    font-size:var(--fs-md);
+    color:var(--gray);
+    font-weight:500;
+  }
+
+  .sort{ position:relative; }
+  .sort summary{
+    list-style:none;
+    cursor:pointer;
+    display:flex; align-items:center; gap:var(--s1);
+    font-size:var(--fs-sm);
+    font-weight:600;
+    padding-bottom:2px;
+    border-bottom:2px solid var(--ink);
+  }
+  .sort summary::-webkit-details-marker{ display:none; }
+  .sort .caret{ color:var(--gray); transition:transform var(--dur) var(--ease), color var(--dur) var(--ease); }
+  .sort[open] .caret{ color:var(--ink); transform:rotate(180deg); }
+  .sort-menu{
+    position:absolute;
+    right:0; top:calc(100% + var(--s2));
+    background:var(--bg);
+    border:1px solid var(--line);
+    min-width:160px;
+    z-index:5;
+  }
+  .sort-menu li a{
+    display:block;
+    padding:var(--s2) var(--s3);
+    font-size:var(--fs-sm);
+    border-left:2px solid transparent;
+    transition:background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  .sort-menu li a:hover{ background:var(--row-hover); border-left-color:var(--red); }
+  .sort-menu li a.is-current{ font-weight:700; }
+
+  /* ---- 상품 그리드 ---- */
+  div[data-region="collection"]{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:var(--s4);
+  }
+  article[data-region="item-card"]{
+    border:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    transition:border-color var(--dur) var(--ease);
+    opacity:0;
+    transform:translateY(4px);
+    animation:card-in 320ms var(--ease) forwards;
+  }
+  article[data-region="item-card"]:hover{ border-color:var(--ink); }
+  article[data-region="item-card"]:nth-child(1){ animation-delay:500ms; }
+  article[data-region="item-card"]:nth-child(2){ animation-delay:560ms; }
+  article[data-region="item-card"]:nth-child(3){ animation-delay:620ms; }
+  article[data-region="item-card"]:nth-child(4){ animation-delay:680ms; }
+  article[data-region="item-card"]:nth-child(5){ animation-delay:740ms; }
+  article[data-region="item-card"]:nth-child(6){ animation-delay:800ms; }
+  @keyframes card-in{
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  .photo{
+    position:relative;
+    aspect-ratio:3 / 4;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .photo .mono{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:64px;
+    color:var(--line);
+    letter-spacing:-0.02em;
+  }
+  .card-badge{
+    position:absolute;
+    top:var(--s3); left:var(--s3);
+    display:flex; align-items:center; gap:6px;
+    font-size:var(--fs-xs);
+    font-weight:700;
+    background:var(--bg);
+    padding:4px 8px;
+    border:1px solid var(--line);
+  }
+  .card-badge .dot{
+    width:7px; height:7px;
+    flex:0 0 auto;
+  }
+  .badge--best .dot{ background:var(--ink); }
+  .badge--best{ color:var(--ink); }
+  .badge--new .dot{ background:transparent; border:1.5px solid var(--ink); }
+  .badge--new{ color:var(--ink); }
+  .badge--ship .dot{ background:var(--gray); }
+  .badge--ship{ color:var(--gray); }
+  .badge--low .dot{ background:var(--red); }
+  .badge--low{ color:var(--red); }
+
+  .wish{
+    position:absolute;
+    top:var(--s3); right:var(--s3);
+    width:28px; height:28px;
+    background:var(--bg);
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink);
+  }
+  .wish svg{ width:15px; height:15px; }
+  .wish[aria-pressed="true"] svg{ fill:var(--ink); }
+
+  .card-body{
+    padding:var(--s3);
+    display:flex;
+    flex-direction:column;
+    gap:var(--s2);
+    flex:1;
+  }
+  .card-brand{
+    font-size:var(--fs-xs);
+    font-weight:700;
+    color:var(--gray);
+    letter-spacing:.02em;
+  }
+  .card-name{
+    font-size:var(--fs-sm);
+    font-weight:600;
+    line-height:1.35;
+    color:var(--ink);
+    overflow-wrap:break-word;
+  }
+  .card-swatches{ display:flex; gap:4px; }
+  .card-swatches .swatch{ width:14px; height:14px; }
+  .card-price{
+    display:flex;
+    align-items:baseline;
+    gap:var(--s2);
+    flex-wrap:wrap;
+    margin-top:auto;
+  }
+  .price-old{
+    font-size:var(--fs-xs);
+    color:var(--gray);
+    text-decoration:line-through;
+  }
+  .price-arrow{ color:var(--gray); font-size:var(--fs-xs); }
+  .price-new{
+    font-size:var(--fs-md);
+    font-weight:800;
+    color:var(--ink);
+  }
+  .price-off{
+    font-size:var(--fs-xs);
+    font-weight:700;
+    color:var(--gray);
+  }
+  .card-rating{
+    font-size:var(--fs-xs);
+    color:var(--gray);
+    display:flex; align-items:center; gap:4px;
+  }
+  .card-rating .star{ color:var(--ink); }
+  .card-rating.is-missing{ color:var(--gray); }
+
+  /* ---- 페이지네이션 ---- */
+  nav[data-region="action"].pagination{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:var(--s4);
+    margin-top:var(--s6);
+    padding-top:var(--s5);
+    border-top:1px solid var(--line);
+  }
+  .pages{ display:flex; align-items:center; gap:var(--s2); }
+  .pages li{ display:flex; }
+  .pages button{
+    min-width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:var(--fs-sm);
+    color:var(--gray);
+    border-bottom:2px solid transparent;
+  }
+  .pages button:hover{ color:var(--ink); }
+  .pages button.active{
+    color:var(--ink);
+    font-weight:700;
+    border-bottom-color:var(--ink);
+  }
+  .pages .ellipsis{ color:var(--gray); padding:0 var(--s1); }
+  .btn-primary{
+    height:40px;
+    padding:0 var(--s5);
+    background:var(--ink);
+    color:var(--bg);
+    font-weight:700;
+    font-size:var(--fs-sm);
+  }
+  .btn-primary:hover{ opacity:.85; }
+
+  /* ---- 빈 상태 데모 ---- */
+  div[data-region="empty"]{
+    margin-top:var(--s7);
+    padding:var(--s7) var(--s4);
+    border:1px solid var(--line);
+    text-align:left;
+  }
+  .empty-head{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:var(--fs-xl);
+    letter-spacing:-0.02em;
+    margin:var(--s2) 0 var(--s2);
+  }
+  .empty-desc{ color:var(--gray); font-size:var(--fs-sm); margin-bottom:var(--s4); }
+  .btn-secondary{
+    height:40px;
+    padding:0 var(--s5);
+    border:1px solid var(--ink);
+    font-weight:700;
+    font-size:var(--fs-sm);
+  }
+  .btn-secondary:hover{ background:var(--row-hover); }
+
+  /* ============ 푸터 ============ */
+  footer{
+    border-top:1px solid var(--line);
+    padding:var(--s4) var(--s6);
+  }
+  footer .foot-row{
+    max-width:1440px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:var(--s2);
+  }
+  footer p{
+    font-size:var(--fs-xs);
+    color:var(--gray);
+    font-weight:600;
+    letter-spacing:.04em;
+  }
+
+  /* ============ 반응형 ============ */
+  @media (max-width:900px){
+    .container, main.layout, footer .foot-row{ padding-left:var(--s4); padding-right:var(--s4); }
+    main.layout{ display:block; padding-top:var(--s5); }
+    aside[data-region="filter"]{ margin-bottom:var(--s6); border-bottom:1px solid var(--line); padding-bottom:var(--s5); }
+    div[data-region="collection"]{ grid-template-columns:repeat(2, 1fr); }
+    .top-nav{ gap:var(--s3); }
+    .search-box{ width:88px; }
+    .ruler span:nth-child(n+7){ display:none; }
+    .ruler{ grid-template-columns:repeat(6,1fr); }
+  }
+  @media (max-width:520px){
+    div[data-region="collection"]{ grid-template-columns:1fr; }
+    .identity-row{ gap:var(--s3); flex-wrap:wrap; height:auto; padding:var(--s2) 0; }
+    .search-box{ order:3; width:100%; }
+    nav[data-region="action"].pagination{ justify-content:center; }
+  }
+
+  /* ============ 모션 감쇠 ============ */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation:none !important;
+      transition:none !important;
+    }
+    .ruler span{ transform:scaleX(1) !important; }
+    article[data-region="item-card"]{ opacity:1 !important; transform:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header data-region="identity">
+  <div class="container identity-row">
+    <span class="logo">여덟시</span>
+    <nav class="top-nav" aria-label="카테고리">
+      <a href="#" class="is-active" aria-current="page">여성</a>
+      <a href="#">남성</a>
+      <a href="#">키즈</a>
+      <a href="#">세일</a>
+    </nav>
+    <div class="identity-tools">
+      <label class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" placeholder="검색" aria-label="검색">
+      </label>
+      <button class="icon-btn" aria-label="장바구니, 상품 3개" type="button">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l-1.2 11a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="cart-count num" aria-hidden="true">3</span>
+      </button>
+      <span class="avatar" aria-label="내 계정">MY</span>
+    </div>
+  </div>
+</header>
+
+<div class="ruler-wrap">
+  <div class="container">
+    <div class="ruler" aria-hidden="true">
+      <span><i>01</i></span><span><i>02</i></span><span><i>03</i></span><span><i>04</i></span>
+      <span><i>05</i></span><span><i>06</i></span><span><i>07</i></span><span><i>08</i></span>
+      <span><i>09</i></span><span><i>10</i></span><span><i>11</i></span><span><i>12</i></span>
+    </div>
+  </div>
+</div>
+
+<main class="layout">
+
+  <aside data-region="filter" aria-label="상품 필터">
+    <div class="filter-group">
+      <span class="eyebrow">FILTER</span>
+    </div>
+
+    <div class="filter-group">
+      <h3>카테고리</h3>
+      <ul class="cat-list">
+        <li><a href="#" class="is-selected">아우터</a></li>
+        <li><a href="#">상의</a></li>
+        <li><a href="#">하의</a></li>
+        <li><a href="#">원피스</a></li>
+        <li><a href="#">신발</a></li>
+      </ul>
+    </div>
+
+    <div class="filter-group">
+      <h3>사이즈</h3>
+      <div class="chip-row">
+        <span class="chip">XS</span>
+        <span class="chip">S</span>
+        <span class="chip is-selected">M</span>
+        <span class="chip">L</span>
+        <span class="chip">XL</span>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <h3>색상</h3>
+      <div class="swatch-row" role="list" aria-label="색상 스와치 8개, 블랙 선택됨">
+        <span class="swatch tone-1 is-selected" role="listitem" aria-label="블랙, 선택됨"></span>
+        <span class="swatch tone-2" role="listitem" aria-label="색상 2"></span>
+        <span class="swatch tone-3" role="listitem" aria-label="색상 3"></span>
+        <span class="swatch tone-4" role="listitem" aria-label="색상 4"></span>
+        <span class="swatch tone-5" role="listitem" aria-label="색상 5"></span>
+        <span class="swatch tone-6" role="listitem" aria-label="색상 6"></span>
+        <span class="swatch tone-7" role="listitem" aria-label="색상 7"></span>
+        <span class="swatch tone-8" role="listitem" aria-label="색상 8"></span>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <h3>가격</h3>
+      <div class="price-slider">
+        <div class="price-track">
+          <div class="price-fill"></div>
+          <span class="price-thumb min"></span>
+          <span class="price-thumb max"></span>
+        </div>
+        <div class="price-labels">
+          <span class="num">₩0</span>
+          <span class="num">₩300,000+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="toggle-row">
+        <span>무료배송만</span>
+        <span class="switch" role="switch" aria-checked="false" aria-label="무료배송만"></span>
+      </div>
+      <div class="toggle-row">
+        <span>재입고 알림 가능</span>
+        <span class="switch" role="switch" aria-checked="false" aria-label="재입고 알림 가능"></span>
+      </div>
+    </div>
+  </aside>
+
+  <section class="main-col">
+
+    <div data-region="results">
+      <span class="eyebrow">RESULTS</span>
+      <div class="hero-head">
+        <h1 class="hero-title">여성 아우터</h1>
+        <div class="result-meta">
+          <span class="result-count num">264개</span>
+          <details class="sort">
+            <summary>신상품순 <span class="caret">▾</span></summary>
+            <ul class="sort-menu">
+              <li><a href="#" class="is-current">신상품순</a></li>
+              <li><a href="#">인기순</a></li>
+              <li><a href="#">낮은 가격순</a></li>
+              <li><a href="#">리뷰 많은순</a></li>
+            </ul>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <span class="eyebrow" style="display:block;margin-bottom:var(--s3)">COLLECTION</span>
+    <div data-region="collection">
+
+      <article data-region="item-card">
+        <div class="photo">
+          <span class="mono" aria-hidden="true">여</span>
+          <span class="card-badge badge--best"><i class="dot"></i>베스트</span>
+          <button class="wish" aria-pressed="false" aria-label="찜하기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20.5s-7.6-4.6-10-9.3C.5 8 2 4.5 5.5 4c2.2-.3 4.2.9 6.5 3.2C14.3 4.9 16.3 3.7 18.5 4c3.5.5 5 4 3.5 7.2-2.4 4.7-10 9.3-10 9.3Z"/></svg>
+          </button>
+        </div>
+        <div class="card-body">
+          <span class="card-brand">여덟시</span>
+          <h2 class="card-name">오버핏 울 블렌드 코트</h2>
+          <div class="card-swatches">
+            <span class="swatch tone-1"></span><span class="swatch tone-4"></span><span class="swatch tone-7"></span>
+          </div>
+          <div class="card-price">
+            <span class="price-old num">₩189,000</span>
+            <span class="price-arrow">→</span>
+            <span class="price-new num">₩132,300</span>
+            <span class="price-off num">30%</span>
+          </div>
+          <span class="card-rating"><span class="star">★</span><span class="num">4.7</span><span class="num">(1,284)</span></span>
+        </div>
+      </article>
+
+      <article data-region="item-card">
+        <div class="photo">
+          <span class="mono" aria-hidden="true">코</span>
+          <span class="card-badge badge--ship"><i class="dot"></i>무료배송</span>
+          <button class="wish" aria-pressed="false" aria-label="찜하기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20.5s-7.6-4.6-10-9.3C.5 8 2 4.5 5.5 4c2.2-.3 4.2.9 6.5 3.2C14.3 4.9 16.3 3.7 18.5 4c3.5.5 5 4 3.5 7.2-2.4 4.7-10 9.3-10 9.3Z"/></svg>
+          </button>
+        </div>
+        <div class="card-body">
+          <span class="card-brand">코튼밀</span>
+          <h2 class="card-name">経량 패딩 베스트</h2>
+          <div class="card-swatches">
+            <span class="swatch tone-1"></span><span class="swatch tone-3"></span><span class="swatch tone-6"></span>
+          </div>
+          <div class="card-price">
+            <span class="price-old num">₩89,000</span>
+            <span class="price-arrow">→</span>
+            <span class="price-new num">₩62,300</span>
+            <span class="price-off num">30%</span>
+          </div>
+          <span class="card-rating"><span class="star">★</span><span class="num">4.5</span><span class="num">(612)</span></span>
+        </div>
+      </article>
+
+      <article data-region="item-card">
+        <div class="photo">
+          <span class="mono" aria-hidden="true">여</span>
+          <span class="card-badge badge--new"><i class="dot"></i>신상</span>
+          <button class="wish" aria-pressed="false" aria-label="찜하기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20.5s-7.6-4.6-10-9.3C.5 8 2 4.5 5.5 4c2.2-.3 4.2.9 6.5 3.2C14.3 4.9 16.3 3.7 18.5 4c3.5.5 5 4 3.5 7.2-2.4 4.7-10 9.3-10 9.3Z"/></svg>
+          </button>
+        </div>
+        <div class="card-body">
+          <span class="card-brand">여덟시</span>
+          <h2 class="card-name">시그니처 캐시미어 100% 롱 코트 — 이탈리아 원단 · 한정 수량 리오더 불가 · 드라이클리닝 전용</h2>
+          <div class="card-swatches">
+            <span class="swatch tone-1"></span><span class="swatch tone-5"></span><span class="swatch tone-8"></span>
+          </div>
+          <div class="card-price">
+            <span class="price-old num">₩1,290,000</span>
+            <span class="price-arrow">→</span>
+            <span class="price-new num">₩1,161,000</span>
+            <span class="price-off num">10%</span>
+          </div>
+          <span class="card-rating is-missing">—</span>
+        </div>
+      </article>
+
+      <article data-region="item-card">
+        <div class="photo">
+          <span class="mono" aria-hidden="true">데</span>
+          <span class="card-badge badge--low"><i class="dot"></i>품절임박</span>
+          <button class="wish" aria-pressed="false" aria-label="찜하기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20.5s-7.6-4.6-10-9.3C.5 8 2 4.5 5.5 4c2.2-.3 4.2.9 6.5 3.2C14.3 4.9 16.3 3.7 18.5 4c3.5.5 5 4 3.5 7.2-2.4 4.7-10 9.3-10 9.3Z"/></svg>
+          </button>
+        </div>
+        <div class="card-body">
+          <span class="card-brand">데일리랩</span>
+          <h2 class="card-name">크롭 무스탕 자켓</h2>
+          <div class="card-swatches">
+            <span class="swatch tone-2"></span><span class="swatch tone-4"></span><span class="swatch tone-7"></span>
+          </div>
+          <div class="card-price">
+            <span class="price-old num">₩259,000</span>
+            <span class="price-arrow">→</span>
+            <span class="price-new num">₩155,400</span>
+            <span class="price-off num">40%</span>
+          </div>
+          <span class="card-rating"><span class="star">★</span><span class="num">4.2</span><span class="num">(338)</span></span>
+        </div>
+      </article>
+
+      <article data-region="item-card">
+        <div class="photo">
+          <span class="mono" aria-hidden="true">코</span>
+          <span class="card-badge badge--best"><i class="dot"></i>베스트</span>
+          <button class="wish" aria-pressed="false" aria-label="찜하기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20.5s-7.6-4.6-10-9.3C.5 8 2 4.5 5.5 4c2.2-.3 4.2.9 6.5 3.2C14.3 4.9 16.3 3.7 18.5 4c3.5.5 5 4 3.5 7.2-2.4 4.7-10 9.3-10 9.3Z"/></svg>
+          </button>
+        </div>
+        <div class="card-body">
+          <span class="card-brand">코튼밀</span>
+          <h2 class="card-name">베이직 후드 집업</h2>
+          <div class="card-swatches">
+            <span class="swatch tone-1"></span><span class="swatch tone-4"></span><span class="swatch tone-8"></span>
+          </div>
+          <div class="card-price">
+            <span class="price-old num">₩49,000</span>
+            <span class="price-arrow">→</span>
+            <span class="price-new num">₩39,200</span>
+            <span class="price-off num">20%</span>
+          </div>
+          <span class="card-rating"><span class="star">★</span><span class="num">4.8</span><span class="num">(2,041)</span></span>
+        </div>
+      </article>
+
+      <article data-region="item-card">
+        <div class="photo">
+          <span class="mono" aria-hidden="true">여</span>
+          <span class="card-badge badge--ship"><i class="dot"></i>무료배송</span>
+          <button class="wish" aria-pressed="false" aria-label="찜하기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20.5s-7.6-4.6-10-9.3C.5 8 2 4.5 5.5 4c2.2-.3 4.2.9 6.5 3.2C14.3 4.9 16.3 3.7 18.5 4c3.5.5 5 4 3.5 7.2-2.4 4.7-10 9.3-10 9.3Z"/></svg>
+          </button>
+        </div>
+        <div class="card-body">
+          <span class="card-brand">여덟시</span>
+          <h2 class="card-name">워시드 데님 트러커</h2>
+          <div class="card-swatches">
+            <span class="swatch tone-3"></span><span class="swatch tone-6"></span><span class="swatch tone-8"></span>
+          </div>
+          <div class="card-price">
+            <span class="price-old num">₩119,000</span>
+            <span class="price-arrow">→</span>
+            <span class="price-new num">₩95,200</span>
+            <span class="price-off num">20%</span>
+          </div>
+          <span class="card-rating"><span class="star">★</span><span class="num">4.4</span><span class="num">(517)</span></span>
+        </div>
+      </article>
+
+    </div>
+
+    <nav data-region="action" class="pagination" aria-label="페이지네이션">
+      <ul class="pages">
+        <li><button aria-label="이전 페이지">‹</button></li>
+        <li><button class="active" aria-current="page">1</button></li>
+        <li><button>2</button></li>
+        <li><button>3</button></li>
+        <li class="ellipsis">…</li>
+        <li><button>22</button></li>
+        <li><button aria-label="다음 페이지">›</button></li>
+      </ul>
+      <button class="btn-primary" type="button">더 보기</button>
+    </nav>
+
+    <div data-region="empty">
+      <span class="eyebrow">EMPTY STATE</span>
+      <h3 class="empty-head">조건에 맞는 상품이 없어요</h3>
+      <p class="empty-desc">사이즈나 색상 조건을 줄여보세요.</p>
+      <button class="btn-secondary" type="button">필터 초기화</button>
+    </div>
+
+  </section>
+</main>
+
+<footer>
+  <div class="foot-row">
+    <p>STYLE 18 · 스위스</p>
+    <p>International Typographic Style</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  try{
+    document.querySelectorAll('.wish').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var pressed = btn.getAttribute('aria-pressed') === 'true';
+        btn.setAttribute('aria-pressed', String(!pressed));
+      });
+    });
+
+    document.querySelectorAll('.switch').forEach(function(sw){
+      sw.setAttribute('tabindex', '0');
+      function toggle(){
+        var on = sw.getAttribute('aria-checked') === 'true';
+        sw.setAttribute('aria-checked', String(!on));
+        sw.classList.toggle('is-on', !on);
+      }
+      sw.addEventListener('click', toggle);
+      sw.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
+      });
+    });
+
+    // 정렬 메뉴: 항목 선택 시 요약 라벨 갱신 (JS 실패해도 기본 "신상품순"이 이미 렌더되어 있음)
+    var sortEl = document.querySelector('.sort');
+    if(sortEl){
+      var summary = sortEl.querySelector('summary');
+      var label = summary.firstChild;
+      sortEl.querySelectorAll('.sort-menu a').forEach(function(a){
+        a.addEventListener('click', function(e){
+          e.preventDefault();
+          sortEl.querySelectorAll('.sort-menu a').forEach(function(x){ x.classList.remove('is-current'); });
+          a.classList.add('is-current');
+          label.textContent = a.textContent + ' ';
+          sortEl.removeAttribute('open');
+        });
+      });
+    }
+  }catch(err){
+    /* JS 실패해도 위 마크업만으로 화면은 완전하다 */
+  }
+})();
+</script>
+
+</body>
+</html>

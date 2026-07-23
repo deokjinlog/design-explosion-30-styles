@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>여덟시 — 여성 아우터 (STYLE 30 · 데이터 리치 라이트)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --canvas:#F9FAFB;
+    --zebra:#F3F4F6;
+    --hover-row:#EFF6FF;
+    --grid:#E5E7EB;
+    --grid-strong:#D1D5DB;
+    --text:#111827;
+    --text-muted:#4B5563;      /* darker than spec's #6B7280 for guaranteed 4.5:1 at 13px */
+    --text-faint:#6B7280;
+    --primary:#2563EB;
+    --on-primary:#FFFFFF;
+    --primary-soft:#DBEAFE;
+    --success:#059669; --success-bg:#D1FAE5;
+    --warning:#B45309; --warning-bg:#FEF3C7;   /* darkened from #D97706 for AA on light bg */
+    --danger:#DC2626; --danger-bg:#FEE2E2;
+    --neutral:#4B5563; --neutral-bg:#E5E7EB;
+    --progress:#7C3AED; --progress-bg:#EDE9FE;
+    --radius-panel:8px;
+    --radius-control:6px;
+    --shadow-float:0 4px 12px rgba(17,24,39,.08);
+    --sidebar-w:224px;
+    --sidebar-w-collapsed:56px;
+    --topbar-h:52px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size:13px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .num, .tnum, input, select, button, .price-sale, .price-original, .discount,
+  .rating-value, .review-count, .results-count .count, .chip-summary, .badge,
+  .pagination button{
+    font-family:'Inter','Pretendard',sans-serif;
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1;
+  }
+  h1,h2,h3{ margin:0; font-weight:600; }
+  p{ margin:0; }
+  ul{ list-style:none; margin:0; padding:0; }
+  a{ color:inherit; text-decoration:none; }
+  button{ font:inherit; color:inherit; background:none; border:none; cursor:pointer; }
+  input{ font:inherit; }
+  svg{ display:block; flex-shrink:0; }
+
+  .skip-link{
+    position:absolute; left:8px; top:-40px; background:var(--primary); color:#fff;
+    padding:8px 12px; border-radius:var(--radius-control); z-index:200; transition:top .15s;
+  }
+  .skip-link:focus{ top:8px; }
+
+  :focus-visible{ outline:2px solid var(--primary); outline-offset:1px; border-radius:2px; }
+
+  /* ============ TOPBAR (identity) ============ */
+  .topbar{
+    position:sticky; top:0; z-index:50; height:var(--topbar-h);
+    background:var(--bg); border-bottom:1px solid var(--grid);
+  }
+  .topbar-inner{
+    height:100%; max-width:1440px; margin:0 auto; padding:0 24px;
+    display:flex; align-items:center; gap:32px;
+  }
+  .brand{
+    font-size:16px; font-weight:700; letter-spacing:-0.01em; white-space:nowrap;
+  }
+  .primary-nav{ display:flex; align-items:center; gap:4px; flex:1; min-width:0; }
+  .nav-link{
+    padding:8px 12px; border-radius:var(--radius-control); font-size:13px; font-weight:500;
+    color:var(--text-muted); white-space:nowrap;
+  }
+  .nav-link:hover{ background:var(--zebra); color:var(--text); }
+  .nav-link.is-active{ color:var(--primary); background:var(--primary-soft); font-weight:600; }
+  .nav-link--sale{ color:var(--danger); }
+  .nav-link--sale:hover{ background:var(--danger-bg); color:var(--danger); }
+
+  .topbar-actions{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .search-field{
+    display:flex; align-items:center; gap:6px; height:32px; padding:0 10px;
+    border:1px solid var(--grid); border-radius:var(--radius-control); background:var(--canvas);
+    width:220px;
+  }
+  .search-field:focus-within{ border-color:var(--primary); background:var(--bg); }
+  .search-field svg{ color:var(--text-faint); }
+  .search-field input{
+    border:none; background:transparent; outline:none; width:100%; font-size:13px; color:var(--text);
+  }
+  .search-field input::placeholder{ color:var(--text-faint); }
+
+  .icon-btn{
+    position:relative; width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+    border-radius:var(--radius-control); color:var(--text-muted);
+  }
+  .icon-btn:hover{ background:var(--zebra); color:var(--text); }
+  .cart-btn .badge{
+    position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 3px;
+    background:var(--primary); color:#fff; border-radius:8px; font-size:10px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; line-height:1;
+    border:1.5px solid var(--bg);
+  }
+  .avatar-btn{
+    width:32px; height:32px; border-radius:50%; background:var(--zebra); color:var(--text-muted);
+    display:flex; align-items:center; justify-content:center; border:1px solid var(--grid);
+  }
+  .avatar-btn:hover{ background:var(--primary-soft); color:var(--primary); }
+
+  /* ============ SHELL / SIDEBAR ============ */
+  .shell{ max-width:1440px; margin:0 auto; display:grid; grid-template-columns:var(--sidebar-w) 1fr; align-items:start; }
+
+  .sidebar{
+    position:sticky; top:var(--topbar-h); align-self:start;
+    height:calc(100vh - var(--topbar-h));
+    overflow-y:auto;
+    border-right:1px solid var(--grid);
+    padding:16px 12px 24px;
+    transition:width .15s ease;
+  }
+  .sidebar-head{ display:flex; align-items:center; justify-content:space-between; padding:4px 4px 12px; }
+  .sidebar-head h2{ font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text-muted); }
+  .sidebar-collapse-btn{
+    width:24px; height:24px; border-radius:var(--radius-control); border:1px solid var(--grid);
+    display:flex; align-items:center; justify-content:center; color:var(--text-muted);
+  }
+  .sidebar-collapse-btn:hover{ background:var(--zebra); }
+
+  .filter-group{ padding:12px 4px; border-bottom:1px solid var(--grid); }
+  .filter-group:last-of-type{ border-bottom:none; }
+  .filter-title{
+    font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--text-faint); margin-bottom:8px;
+  }
+  .filter-list{ display:flex; flex-direction:column; gap:2px; }
+  .filter-option{
+    width:100%; text-align:left; height:32px; padding:0 10px; border-radius:var(--radius-control);
+    font-size:13px; color:var(--text-muted); display:flex; align-items:center; justify-content:space-between;
+  }
+  .filter-option:hover{ background:var(--zebra); color:var(--text); }
+  .filter-option.is-selected{
+    background:var(--primary-soft); color:var(--primary); font-weight:600;
+  }
+  .filter-option.is-selected::after{ content:"✓"; font-size:12px; }
+
+  .chip-row{ display:flex; flex-wrap:wrap; gap:6px; }
+  .size-chip{
+    min-width:36px; height:30px; padding:0 8px; border:1px solid var(--grid); border-radius:var(--radius-control);
+    font-size:12px; font-weight:500; color:var(--text-muted); background:var(--bg);
+  }
+  .size-chip:hover{ border-color:var(--grid-strong); color:var(--text); }
+  .size-chip.is-active{ border-color:var(--primary); background:var(--primary-soft); color:var(--primary); font-weight:700; }
+
+  .swatch-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .swatch-btn{
+    position:relative; height:28px; border-radius:4px; border:1px solid var(--grid);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .swatch-btn.is-active{ outline:2px solid var(--primary); outline-offset:1px; }
+  .swatch-btn.is-active::after{ content:"✓"; font-size:11px; font-weight:700; }
+  .sw-black{ background:#1F2937; } .sw-black.is-active::after{ color:#fff; }
+  .sw-white{ background:#FFFFFF; } .sw-white.is-active::after{ color:#111827; }
+  .sw-gray{ background:#9CA3AF; } .sw-gray.is-active::after{ color:#111827; }
+  .sw-navy{ background:#1E3A5F; } .sw-navy.is-active::after{ color:#fff; }
+  .sw-beige{ background:#D8CBB3; } .sw-beige.is-active::after{ color:#111827; }
+  .sw-khaki{ background:#7C8265; } .sw-khaki.is-active::after{ color:#fff; }
+  .sw-burgundy{ background:#6B2737; } .sw-burgundy.is-active::after{ color:#fff; }
+  .sw-ivory{ background:#F0EAD6; } .sw-ivory.is-active::after{ color:#111827; }
+  .sw-label{
+    position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;
+  }
+
+  .price-range{ padding:4px 2px 0; }
+  .price-range input[type="range"]{ width:100%; accent-color:var(--primary); }
+  .price-labels{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-top:2px; }
+
+  .toggle-row{
+    display:flex; align-items:center; justify-content:space-between; height:32px; font-size:13px; color:var(--text-muted);
+  }
+  .toggle-switch{ appearance:none; width:32px; height:18px; border-radius:9px; background:var(--grid); position:relative; cursor:pointer; flex-shrink:0; border:1px solid var(--grid-strong); }
+  .toggle-switch::after{
+    content:""; position:absolute; top:1px; left:1px; width:14px; height:14px; border-radius:50%;
+    background:#fff; box-shadow:0 1px 2px rgba(17,24,39,.25); transition:transform .12s ease;
+  }
+  .toggle-switch:checked{ background:var(--primary); border-color:var(--primary); }
+  .toggle-switch:checked::after{ transform:translateX(14px); }
+
+  .filter-reset-link{
+    margin-top:12px; width:100%; height:32px; border:1px solid var(--grid); border-radius:var(--radius-control);
+    font-size:12px; font-weight:600; color:var(--text-muted);
+  }
+  .filter-reset-link:hover{ background:var(--zebra); color:var(--text); }
+
+  /* collapsed sidebar */
+  .shell.is-collapsed{ grid-template-columns:var(--sidebar-w-collapsed) 1fr; }
+  .shell.is-collapsed .sidebar{ width:var(--sidebar-w-collapsed); padding:16px 8px; overflow:hidden; }
+  .shell.is-collapsed .sidebar-head h2,
+  .shell.is-collapsed .filter-group{ display:none; }
+  .shell.is-collapsed .sidebar-collapse-btn{ transform:rotate(180deg); }
+
+  /* ============ MAIN / TOOLBAR ============ */
+  .content{ min-width:0; padding:0 24px 48px; }
+
+  .toolbar{
+    position:sticky; top:var(--topbar-h); z-index:40; background:var(--bg);
+    border-bottom:1px solid var(--grid); padding:10px 0; margin:0 -24px; padding-left:24px; padding-right:24px;
+  }
+  .active-chips{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; height:26px; padding:0 8px 0 10px;
+    border-radius:var(--radius-control); font-size:12px; font-weight:600;
+    border:1px solid var(--primary); background:var(--hover-row); color:var(--primary);
+  }
+  .chip button{
+    width:16px; height:16px; display:flex; align-items:center; justify-content:center; border-radius:3px;
+    color:var(--primary); font-size:11px;
+  }
+  .chip button:hover{ background:var(--primary); color:#fff; }
+  .chip-summary{
+    border-color:var(--grid); background:var(--bg); color:var(--text-muted); font-weight:500; padding:0 10px;
+  }
+  .chip-summary button{ color:var(--primary); font-weight:700; width:auto; padding:0 2px; }
+  .chip-summary button:hover{ background:none; text-decoration:underline; }
+
+  /* ============ RESULTS HEADER ============ */
+  .results-header{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    padding:16px 0 12px;
+  }
+  .results-count{ font-size:20px; font-weight:600; letter-spacing:-0.01em; }
+  .results-count .count{ font-size:20px; font-weight:700; color:var(--primary); }
+  .results-controls{ display:flex; align-items:center; gap:16px; }
+
+  .sort-control{ position:relative; }
+  #sortBtn{
+    display:flex; align-items:center; gap:6px; height:32px; padding:0 12px;
+    border:1px solid var(--grid); border-radius:var(--radius-control); font-size:13px; font-weight:500;
+    color:var(--text-muted); background:var(--bg);
+  }
+  #sortBtn:hover{ border-color:var(--grid-strong); }
+  #sortBtn[aria-expanded="true"]{ border-color:var(--primary); color:var(--primary); }
+  #sortLabel{ color:var(--text); font-weight:600; }
+  #sortBtn[aria-expanded="true"] #sortLabel{ color:var(--primary); }
+  .caret{ transition:transform .12s ease; color:var(--text-faint); }
+  #sortBtn[aria-expanded="true"] .caret{ transform:rotate(180deg); }
+
+  .sort-menu{
+    position:absolute; top:calc(100% + 4px); right:0; min-width:160px; z-index:60;
+    background:var(--bg); border:1px solid var(--grid); border-radius:var(--radius-panel);
+    box-shadow:var(--shadow-float); padding:4px; list-style:none; margin:0;
+  }
+  .sort-menu li{
+    padding:0 10px; height:32px; display:flex; align-items:center; font-size:13px; color:var(--text-muted);
+    border-radius:var(--radius-control); cursor:pointer;
+  }
+  .sort-menu li:hover{ background:var(--hover-row); }
+  .sort-menu li[aria-selected="true"]{ color:var(--primary); font-weight:600; background:var(--primary-soft); }
+
+  .ghost-link{ font-size:12px; color:var(--text-faint); text-decoration:underline; text-underline-offset:2px; }
+  .ghost-link:hover{ color:var(--primary); }
+
+  /* ============ SELECTION BAR ============ */
+  .selection-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    height:40px; padding:0 14px; margin-bottom:12px;
+    background:var(--primary-soft); border:1px solid var(--primary); border-radius:var(--radius-panel);
+    font-size:13px; color:var(--primary); font-weight:600;
+  }
+  .selection-bar strong{ font-weight:700; }
+  .selection-bar button{
+    height:26px; padding:0 10px; border-radius:var(--radius-control); background:var(--bg);
+    border:1px solid var(--primary); color:var(--primary); font-size:12px; font-weight:600;
+  }
+  .selection-bar button:hover{ background:var(--primary); color:#fff; }
+
+  /* ============ COLLECTION GRID ============ */
+  .collection{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background:var(--grid); border:1px solid var(--grid); border-radius:var(--radius-panel);
+    overflow:hidden;
+  }
+  .item-card{
+    position:relative; background:var(--bg); padding:14px 14px 16px; display:flex; flex-direction:column;
+  }
+  .item-card::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--primary);
+    opacity:0; transform:scaleY(.3); transform-origin:center; transition:opacity .08s ease, transform .08s ease;
+  }
+  .item-card:hover{ background:var(--hover-row); z-index:1; }
+  .item-card:hover::before{ opacity:1; transform:scaleY(1); }
+
+  .wishlist-btn{
+    position:absolute; top:10px; right:10px; z-index:2; width:28px; height:28px; border-radius:var(--radius-control);
+    background:rgba(255,255,255,.9); border:1px solid var(--grid); display:flex; align-items:center; justify-content:center;
+    color:var(--text-muted);
+  }
+  .wishlist-btn:hover{ color:var(--danger); border-color:var(--danger); }
+  .wishlist-btn[aria-pressed="true"]{ color:var(--danger); border-color:var(--danger); }
+  .wishlist-btn[aria-pressed="true"] svg{ fill:var(--danger); }
+
+  .thumb{
+    position:relative; width:100%; aspect-ratio:3/4; border-radius:6px; margin-bottom:10px;
+    background:var(--zebra); border:1px solid var(--grid);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .thumb-mark{
+    font-size:13px; font-weight:700; letter-spacing:.02em; color:var(--text-faint);
+    border:1px solid var(--grid-strong); border-radius:4px; padding:4px 10px;
+  }
+  .quickview-btn{
+    position:absolute; left:8px; right:8px; bottom:8px; height:30px; border-radius:var(--radius-control);
+    background:var(--text); color:#fff; font-size:12px; font-weight:600;
+    opacity:0; transform:translateY(6px); transition:opacity .12s ease, transform .12s ease;
+  }
+  .item-card:hover .quickview-btn,
+  .quickview-btn:focus-visible{ opacity:1; transform:translateY(0); }
+  .quickview-btn:hover{ background:var(--primary); }
+
+  .badge{
+    align-self:flex-start; height:20px; padding:0 8px; border-radius:4px; font-size:11px; font-weight:700;
+    display:flex; align-items:center; margin-bottom:6px; letter-spacing:.01em;
+  }
+  .badge-best{ color:var(--success); background:var(--success-bg); }
+  .badge-new{ color:var(--progress); background:var(--progress-bg); }
+  .badge-shipping{ color:var(--primary); background:var(--primary-soft); }
+  .badge-low{ color:var(--warning); background:var(--warning-bg); }
+
+  .brand-name{ font-size:11px; font-weight:600; color:var(--text-faint); text-transform:uppercase; letter-spacing:.03em; margin-bottom:2px; }
+  .product-name{
+    font-size:13px; font-weight:600; line-height:1.4; color:var(--text); margin-bottom:8px;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .card-spacer{ flex:1; }
+
+  .swatches{ display:flex; gap:4px; margin-bottom:8px; }
+  .mini-swatch{ width:14px; height:14px; border-radius:3px; border:1px solid rgba(17,24,39,.15); }
+
+  .price-row{ display:flex; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+  .price-original{ font-size:12px; color:var(--text-faint); text-decoration:line-through; }
+  .price-sale{ font-size:18px; font-weight:700; color:var(--text); letter-spacing:-0.01em; }
+  .discount{ font-size:12px; font-weight:700; color:var(--danger); }
+
+  .rating-row{ display:flex; align-items:center; gap:4px; font-size:12px; color:var(--text-muted); }
+  .stars{ color:var(--warning); font-size:12px; letter-spacing:-1px; }
+  .rating-value{ font-weight:700; color:var(--text); }
+  .review-count{ color:var(--text-faint); }
+  .rating-missing .rating-value{ color:var(--text-faint); font-weight:400; }
+
+  .compare-select{
+    position:absolute; bottom:10px; right:10px; display:flex; align-items:center; gap:4px;
+    font-size:11px; color:var(--text-faint); opacity:0; transition:opacity .12s ease;
+  }
+  .item-card:hover .compare-select,
+  .compare-select:has(input:checked){ opacity:1; }
+  .compare-select input{ accent-color:var(--primary); width:14px; height:14px; }
+
+  /* ============ PAGINATION ============ */
+  .pagination-wrap{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    padding:20px 0 8px;
+  }
+  .pagination{ display:flex; align-items:center; gap:2px; }
+  .pagination button{
+    min-width:32px; height:32px; padding:0 8px; border-radius:var(--radius-control); font-size:13px; font-weight:500;
+    color:var(--text-muted);
+  }
+  .pagination button:hover:not(:disabled){ background:var(--zebra); color:var(--text); }
+  .pagination button.is-current{ background:var(--primary); color:#fff; font-weight:700; }
+  .pagination button:disabled{ color:var(--grid-strong); cursor:not-allowed; }
+  .pagination .ellipsis{ color:var(--text-faint); padding:0 4px; }
+
+  .btn{
+    height:36px; padding:0 16px; border-radius:var(--radius-control); font-size:13px; font-weight:600;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn-secondary{ border:1px solid var(--grid); color:var(--text); background:var(--bg); }
+  .btn-secondary:hover{ border-color:var(--grid-strong); background:var(--zebra); }
+  .btn-secondary:active{ background:var(--zebra); transform:translateY(1px); }
+  .btn-primary{ background:var(--primary); color:#fff; border:1px solid var(--primary); }
+  .btn-primary:hover{ background:#1D4ED8; }
+  .btn-primary:active{ background:#1E40AF; }
+
+  /* ============ EMPTY STATE ============ */
+  .empty-state{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    padding:64px 24px; border:1px dashed var(--grid-strong); border-radius:var(--radius-panel); background:var(--canvas);
+    gap:8px; margin-top:16px;
+  }
+  .empty-icon{ color:var(--text-faint); margin-bottom:8px; }
+  .empty-state h2{ font-size:16px; font-weight:600; color:var(--text); }
+  .empty-state p{ font-size:13px; color:var(--text-muted); margin-bottom:8px; }
+
+  /* ============ FOOTER ============ */
+  .page-footer{
+    max-width:1440px; margin:0 auto; padding:16px 24px 32px; border-top:1px solid var(--grid);
+    font-size:11px; color:var(--text-faint); text-align:center; letter-spacing:.02em;
+  }
+
+  /* ============ LOAD-SEQUENCE (CSS-only, no JS dependency) ============ */
+  @keyframes chromeIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes chipIn{ from{ opacity:0; transform:translateY(-2px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes gridLineIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes cardIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes countPulse{ from{ opacity:.4; } to{ opacity:1; } }
+
+  .topbar, .sidebar{ animation:chromeIn .12s ease both; }
+  .active-chips .chip{ opacity:0; animation:chipIn .12s ease forwards; }
+  .active-chips .chip:nth-child(1){ animation-delay:.30s; }
+  .active-chips .chip:nth-child(2){ animation-delay:.32s; }
+  .active-chips .chip:nth-child(3){ animation-delay:.34s; }
+  .active-chips .chip:nth-child(4){ animation-delay:.36s; }
+  .collection{ animation:gridLineIn .15s ease .40s both; }
+  .item-card{ opacity:0; animation:cardIn .09s ease forwards; }
+  .item-card:nth-child(1){ animation-delay:.55s; }
+  .item-card:nth-child(2){ animation-delay:.565s; }
+  .item-card:nth-child(3){ animation-delay:.58s; }
+  .item-card:nth-child(4){ animation-delay:.595s; }
+  .item-card:nth-child(5){ animation-delay:.61s; }
+  .item-card:nth-child(6){ animation-delay:.625s; }
+
+  /* ============ REDUCED MOTION — remove all choreography, render final state ============ */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation:none !important; transition:none !important;
+    }
+    .topbar, .sidebar, .active-chips .chip, .collection, .item-card{
+      opacity:1 !important; transform:none !important;
+    }
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:1080px){
+    .collection{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:900px){
+    .shell{ grid-template-columns:1fr; }
+    .sidebar{
+      position:static; height:auto; width:auto; border-right:none; border-bottom:1px solid var(--grid);
+      max-height:none; padding:12px 16px;
+    }
+    .content{ padding:0 16px 40px; }
+    .toolbar{ margin:0 -16px; padding-left:16px; padding-right:16px; top:var(--topbar-h); }
+    .topbar-inner{ padding:0 16px; gap:12px; }
+    .search-field{ width:120px; }
+    .primary-nav{ gap:0; }
+    .collection{ grid-template-columns:repeat(2,1fr); }
+    .shell.is-collapsed .sidebar{ display:none; }
+  }
+  @media (max-width:600px){
+    .collection{ grid-template-columns:1fr; }
+    .brand{ font-size:14px; }
+    .search-field{ display:none; }
+    .results-header{ flex-direction:column; align-items:flex-start; }
+    .pagination-wrap{ flex-direction:column; align-items:stretch; }
+    .pagination{ justify-content:center; flex-wrap:wrap; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<header class="topbar" data-region="identity">
+  <div class="topbar-inner">
+    <a class="brand" href="#" aria-label="여덟시 홈으로">여덟시</a>
+    <nav class="primary-nav" aria-label="주요 카테고리">
+      <a href="#" class="nav-link is-active" aria-current="page">여성</a>
+      <a href="#" class="nav-link">남성</a>
+      <a href="#" class="nav-link">키즈</a>
+      <a href="#" class="nav-link nav-link--sale">세일</a>
+    </nav>
+    <div class="topbar-actions">
+      <label class="search-field">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" placeholder="브랜드, 상품, 키워드 검색" aria-label="상품 검색">
+      </label>
+      <button class="icon-btn cart-btn" aria-label="장바구니, 담긴 상품 3개">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="badge" aria-hidden="true">3</span>
+      </button>
+      <button class="avatar-btn" aria-label="내 계정 메뉴">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="shell" id="shell">
+  <aside class="sidebar" data-region="filter" id="filterPanel">
+    <div class="sidebar-head">
+      <h2>필터</h2>
+      <button class="sidebar-collapse-btn" id="collapseBtn" aria-expanded="true" aria-controls="filterPanel" aria-label="필터 패널 접기">‹</button>
+    </div>
+
+    <div class="filter-group">
+      <h3 class="filter-title">카테고리</h3>
+      <ul class="filter-list" role="list">
+        <li><button class="filter-option is-selected" aria-pressed="true">아우터</button></li>
+        <li><button class="filter-option" aria-pressed="false">상의</button></li>
+        <li><button class="filter-option" aria-pressed="false">하의</button></li>
+        <li><button class="filter-option" aria-pressed="false">원피스</button></li>
+        <li><button class="filter-option" aria-pressed="false">신발</button></li>
+      </ul>
+    </div>
+
+    <div class="filter-group">
+      <h3 class="filter-title">사이즈</h3>
+      <div class="chip-row" role="group" aria-label="사이즈 선택">
+        <button class="size-chip" aria-pressed="false">XS</button>
+        <button class="size-chip" aria-pressed="false">S</button>
+        <button class="size-chip is-active" aria-pressed="true">M</button>
+        <button class="size-chip" aria-pressed="false">L</button>
+        <button class="size-chip" aria-pressed="false">XL</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <h3 class="filter-title">색상</h3>
+      <div class="swatch-row" role="group" aria-label="색상 선택">
+        <button class="swatch-btn sw-black is-active" aria-pressed="true"><span class="sw-label">블랙</span></button>
+        <button class="swatch-btn sw-white" aria-pressed="false"><span class="sw-label">화이트</span></button>
+        <button class="swatch-btn sw-gray" aria-pressed="false"><span class="sw-label">그레이</span></button>
+        <button class="swatch-btn sw-navy" aria-pressed="false"><span class="sw-label">네이비</span></button>
+        <button class="swatch-btn sw-beige" aria-pressed="false"><span class="sw-label">베이지</span></button>
+        <button class="swatch-btn sw-khaki" aria-pressed="false"><span class="sw-label">카키</span></button>
+        <button class="swatch-btn sw-burgundy" aria-pressed="false"><span class="sw-label">버건디</span></button>
+        <button class="swatch-btn sw-ivory" aria-pressed="false"><span class="sw-label">아이보리</span></button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <h3 class="filter-title">가격</h3>
+      <div class="price-range">
+        <input type="range" min="0" max="300000" value="300000" step="10000" aria-label="최대 가격">
+        <div class="price-labels"><span>₩0</span><span>₩300,000+</span></div>
+      </div>
+    </div>
+
+    <div class="filter-group filter-toggles">
+      <label class="toggle-row">무료배송만 <input type="checkbox" class="toggle-switch" aria-label="무료배송만 보기"></label>
+      <label class="toggle-row">재입고 알림 가능 <input type="checkbox" class="toggle-switch" aria-label="재입고 알림 가능만 보기"></label>
+    </div>
+
+    <button class="filter-reset-link" id="resetFromSidebar">필터 초기화</button>
+  </aside>
+
+  <main class="content" id="main">
+    <div class="toolbar">
+      <div class="active-chips" id="activeChips" aria-label="적용된 필터">
+        <span class="chip">아우터<button aria-label="아우터 필터 해제">✕</button></span>
+        <span class="chip">M<button aria-label="M 사이즈 필터 해제">✕</button></span>
+        <span class="chip">블랙<button aria-label="블랙 필터 해제">✕</button></span>
+        <span class="chip chip-summary">필터 3개 · <button id="resetAllBtn">초기화</button></span>
+      </div>
+    </div>
+
+    <div class="results-header" data-region="results">
+      <h1 class="results-count">여성 아우터 <span class="count" id="resultCount" data-target="264">264</span>개</h1>
+      <div class="results-controls">
+        <div class="sort-control">
+          <button id="sortBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="sortMenu">
+            정렬: <span id="sortLabel">신상품순</span>
+            <svg class="caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <ul class="sort-menu" id="sortMenu" role="listbox" aria-label="정렬 기준" hidden>
+            <li role="option" aria-selected="true" data-sort="new" data-label="신상품순">신상품순</li>
+            <li role="option" aria-selected="false" data-sort="popular" data-label="인기순">인기순</li>
+            <li role="option" aria-selected="false" data-sort="price-asc" data-label="낮은 가격순">낮은 가격순</li>
+            <li role="option" aria-selected="false" data-sort="reviews" data-label="리뷰 많은순">리뷰 많은순</li>
+          </ul>
+        </div>
+        <button class="ghost-link" id="emptyDemoBtn" aria-pressed="false">빈 상태 미리보기</button>
+      </div>
+    </div>
+
+    <div class="selection-bar" id="selectionBar" hidden>
+      <span><strong id="selCount">0</strong>개 선택됨 · 비교하기</span>
+      <button id="selClearBtn">선택 해제</button>
+    </div>
+
+    <div class="collection" data-region="collection" id="collectionGrid">
+
+      <article class="item-card" data-region="item-card" data-price="132300" data-reviews="1284" data-rating="4.7">
+        <button class="wishlist-btn" aria-pressed="false" aria-label="오버핏 울 블렌드 코트 찜하기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+        <div class="thumb"><span class="thumb-mark">여덟시</span>
+          <button class="quickview-btn">빠른 보기</button>
+        </div>
+        <span class="badge badge-best">베스트</span>
+        <p class="brand-name">여덟시</p>
+        <h3 class="product-name">오버핏 울 블렌드 코트</h3>
+        <div class="swatches" aria-label="색상 옵션 3종">
+          <span class="mini-swatch" style="background:#1F2937"></span>
+          <span class="mini-swatch" style="background:#D8CBB3"></span>
+          <span class="mini-swatch" style="background:#6B2737"></span>
+        </div>
+        <div class="card-spacer"></div>
+        <div class="price-row">
+          <span class="price-original">₩189,000</span>
+          <span class="price-sale">₩132,300</span>
+          <span class="discount">30%</span>
+        </div>
+        <div class="rating-row">
+          <span class="stars" aria-hidden="true">★</span><span class="rating-value">4.7</span><span class="review-count">(1,284)</span>
+        </div>
+        <label class="compare-select"><input type="checkbox" class="compare-checkbox" aria-label="오버핏 울 블렌드 코트 비교 선택">비교</label>
+      </article>
+
+      <article class="item-card" data-region="item-card" data-price="62300" data-reviews="612" data-rating="4.5">
+        <button class="wishlist-btn" aria-pressed="false" aria-label="経량 패딩 베스트 찜하기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+        <div class="thumb"><span class="thumb-mark">코튼밀</span>
+          <button class="quickview-btn">빠른 보기</button>
+        </div>
+        <span class="badge badge-shipping">무료배송</span>
+        <p class="brand-name">코튼밀</p>
+        <h3 class="product-name">経량 패딩 베스트</h3>
+        <div class="swatches" aria-label="색상 옵션 3종">
+          <span class="mini-swatch" style="background:#9CA3AF"></span>
+          <span class="mini-swatch" style="background:#1E3A5F"></span>
+          <span class="mini-swatch" style="background:#F0EAD6"></span>
+        </div>
+        <div class="card-spacer"></div>
+        <div class="price-row">
+          <span class="price-original">₩89,000</span>
+          <span class="price-sale">₩62,300</span>
+          <span class="discount">30%</span>
+        </div>
+        <div class="rating-row">
+          <span class="stars" aria-hidden="true">★</span><span class="rating-value">4.5</span><span class="review-count">(612)</span>
+        </div>
+        <label class="compare-select"><input type="checkbox" class="compare-checkbox" aria-label="経량 패딩 베스트 비교 선택">비교</label>
+      </article>
+
+      <article class="item-card" data-region="item-card" data-price="1161000" data-reviews="0" data-rating="0">
+        <button class="wishlist-btn" aria-pressed="false" aria-label="시그니처 캐시미어 100% 롱 코트 찜하기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+        <div class="thumb"><span class="thumb-mark">여덟시</span>
+          <button class="quickview-btn">빠른 보기</button>
+        </div>
+        <span class="badge badge-new">신상</span>
+        <p class="brand-name">여덟시</p>
+        <h3 class="product-name" title="시그니처 캐시미어 100% 롱 코트 — 이탈리아 원단 · 한정 수량 리오더 불가 · 드라이클리닝 전용">시그니처 캐시미어 100% 롱 코트 — 이탈리아 원단 · 한정 수량 리오더 불가 · 드라이클리닝 전용</h3>
+        <div class="swatches" aria-label="색상 옵션 3종">
+          <span class="mini-swatch" style="background:#1F2937"></span>
+          <span class="mini-swatch" style="background:#9CA3AF"></span>
+          <span class="mini-swatch" style="background:#D8CBB3"></span>
+        </div>
+        <div class="card-spacer"></div>
+        <div class="price-row">
+          <span class="price-original">₩1,290,000</span>
+          <span class="price-sale">₩1,161,000</span>
+          <span class="discount">10%</span>
+        </div>
+        <div class="rating-row rating-missing">
+          <span class="rating-value">—</span>
+        </div>
+        <label class="compare-select"><input type="checkbox" class="compare-checkbox" aria-label="시그니처 캐시미어 100% 롱 코트 비교 선택">비교</label>
+      </article>
+
+      <article class="item-card" data-region="item-card" data-price="155400" data-reviews="338" data-rating="4.2">
+        <button class="wishlist-btn" aria-pressed="false" aria-label="크롭 무스탕 자켓 찜하기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+        <div class="thumb"><span class="thumb-mark">데일리랩</span>
+          <button class="quickview-btn">빠른 보기</button>
+        </div>
+        <span class="badge badge-low">품절임박</span>
+        <p class="brand-name">데일리랩</p>
+        <h3 class="product-name">크롭 무스탕 자켓</h3>
+        <div class="swatches" aria-label="색상 옵션 3종">
+          <span class="mini-swatch" style="background:#F0EAD6"></span>
+          <span class="mini-swatch" style="background:#7C8265"></span>
+          <span class="mini-swatch" style="background:#1F2937"></span>
+        </div>
+        <div class="card-spacer"></div>
+        <div class="price-row">
+          <span class="price-original">₩259,000</span>
+          <span class="price-sale">₩155,400</span>
+          <span class="discount">40%</span>
+        </div>
+        <div class="rating-row">
+          <span class="stars" aria-hidden="true">★</span><span class="rating-value">4.2</span><span class="review-count">(338)</span>
+        </div>
+        <label class="compare-select"><input type="checkbox" class="compare-checkbox" aria-label="크롭 무스탕 자켓 비교 선택">비교</label>
+      </article>
+
+      <article class="item-card" data-region="item-card" data-price="39200" data-reviews="2041" data-rating="4.8">
+        <button class="wishlist-btn" aria-pressed="false" aria-label="베이직 후드 집업 찜하기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+        <div class="thumb"><span class="thumb-mark">코튼밀</span>
+          <button class="quickview-btn">빠른 보기</button>
+        </div>
+        <span class="badge badge-best">베스트</span>
+        <p class="brand-name">코튼밀</p>
+        <h3 class="product-name">베이직 후드 집업</h3>
+        <div class="swatches" aria-label="색상 옵션 3종">
+          <span class="mini-swatch" style="background:#1F2937"></span>
+          <span class="mini-swatch" style="background:#9CA3AF"></span>
+          <span class="mini-swatch" style="background:#1E3A5F"></span>
+        </div>
+        <div class="card-spacer"></div>
+        <div class="price-row">
+          <span class="price-original">₩49,000</span>
+          <span class="price-sale">₩39,200</span>
+          <span class="discount">20%</span>
+        </div>
+        <div class="rating-row">
+          <span class="stars" aria-hidden="true">★</span><span class="rating-value">4.8</span><span class="review-count">(2,041)</span>
+        </div>
+        <label class="compare-select"><input type="checkbox" class="compare-checkbox" aria-label="베이직 후드 집업 비교 선택">비교</label>
+      </article>
+
+      <article class="item-card" data-region="item-card" data-price="95200" data-reviews="517" data-rating="4.4">
+        <button class="wishlist-btn" aria-pressed="false" aria-label="워시드 데님 트러커 찜하기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+        <div class="thumb"><span class="thumb-mark">여덟시</span>
+          <button class="quickview-btn">빠른 보기</button>
+        </div>
+        <span class="badge badge-shipping">무료배송</span>
+        <p class="brand-name">여덟시</p>
+        <h3 class="product-name">워시드 데님 트러커</h3>
+        <div class="swatches" aria-label="색상 옵션 3종">
+          <span class="mini-swatch" style="background:#1E3A5F"></span>
+          <span class="mini-swatch" style="background:#9CA3AF"></span>
+          <span class="mini-swatch" style="background:#1F2937"></span>
+        </div>
+        <div class="card-spacer"></div>
+        <div class="price-row">
+          <span class="price-original">₩119,000</span>
+          <span class="price-sale">₩95,200</span>
+          <span class="discount">20%</span>
+        </div>
+        <div class="rating-row">
+          <span class="stars" aria-hidden="true">★</span><span class="rating-value">4.4</span><span class="review-count">(517)</span>
+        </div>
+        <label class="compare-select"><input type="checkbox" class="compare-checkbox" aria-label="워시드 데님 트러커 비교 선택">비교</label>
+      </article>
+
+    </div>
+
+    <div class="pagination-wrap" data-region="action">
+      <nav class="pagination" aria-label="상품 목록 페이지 네비게이션">
+        <button aria-label="이전 페이지" disabled>‹</button>
+        <button class="is-current" aria-current="page">1</button>
+        <button>2</button>
+        <button>3</button>
+        <span class="ellipsis">…</span>
+        <button>22</button>
+        <button aria-label="다음 페이지">›</button>
+      </nav>
+      <button class="btn btn-secondary" id="loadMoreBtn">더 보기</button>
+    </div>
+
+    <div class="empty-state" data-region="empty" id="emptyState" hidden>
+      <svg class="empty-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      <h2>조건에 맞는 상품이 없어요</h2>
+      <p>사이즈나 색상 조건을 줄여보세요.</p>
+      <button class="btn btn-primary" id="emptyResetBtn">필터 초기화</button>
+    </div>
+
+  </main>
+</div>
+
+<footer class="page-footer">STYLE 30 · 데이터 리치 라이트</footer>
+
+<script>
+(function(){
+  "use strict";
+  try {
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- sidebar collapse ---- */
+    var shell = document.getElementById('shell');
+    var collapseBtn = document.getElementById('collapseBtn');
+    if (collapseBtn && shell) {
+      collapseBtn.addEventListener('click', function(){
+        var collapsed = shell.classList.toggle('is-collapsed');
+        collapseBtn.setAttribute('aria-expanded', String(!collapsed));
+        collapseBtn.textContent = collapsed ? '›' : '‹';
+      });
+    }
+
+    /* ---- filter option toggles (visual only — decorative state) ---- */
+    document.querySelectorAll('.filter-option').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.querySelectorAll('.filter-option').forEach(function(o){ o.classList.remove('is-selected'); o.setAttribute('aria-pressed','false'); });
+        btn.classList.add('is-selected');
+        btn.setAttribute('aria-pressed','true');
+      });
+    });
+    document.querySelectorAll('.size-chip').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.querySelectorAll('.size-chip').forEach(function(o){ o.classList.remove('is-active'); o.setAttribute('aria-pressed','false'); });
+        btn.classList.add('is-active');
+        btn.setAttribute('aria-pressed','true');
+      });
+    });
+    document.querySelectorAll('.swatch-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.querySelectorAll('.swatch-btn').forEach(function(o){ o.classList.remove('is-active'); o.setAttribute('aria-pressed','false'); });
+        btn.classList.add('is-active');
+        btn.setAttribute('aria-pressed','true');
+      });
+    });
+
+    /* ---- active chip removal ---- */
+    var activeChips = document.getElementById('activeChips');
+    if (activeChips) {
+      activeChips.querySelectorAll('.chip:not(.chip-summary) button').forEach(function(x){
+        x.addEventListener('click', function(){
+          var chip = x.closest('.chip');
+          if (chip) chip.remove();
+          updateFilterSummary();
+        });
+      });
+    }
+    function updateFilterSummary(){
+      if (!activeChips) return;
+      var count = activeChips.querySelectorAll('.chip:not(.chip-summary)').length;
+      var summary = activeChips.querySelector('.chip-summary');
+      if (summary) {
+        var btn = summary.querySelector('button');
+        summary.childNodes[0].nodeValue = '필터 ' + count + '개 · ';
+        if (count === 0) summary.style.display = 'none';
+      }
+    }
+    var resetAllBtn = document.getElementById('resetAllBtn');
+    var resetFromSidebar = document.getElementById('resetFromSidebar');
+    function resetAllFilters(){
+      if (activeChips) {
+        activeChips.querySelectorAll('.chip:not(.chip-summary)').forEach(function(c){ c.remove(); });
+        var summary = activeChips.querySelector('.chip-summary');
+        if (summary) summary.style.display = 'none';
+      }
+    }
+    if (resetAllBtn) resetAllBtn.addEventListener('click', resetAllFilters);
+    if (resetFromSidebar) resetFromSidebar.addEventListener('click', resetAllFilters);
+
+    /* ---- sort dropdown + FLIP reorder ---- */
+    var sortBtn = document.getElementById('sortBtn');
+    var sortMenu = document.getElementById('sortMenu');
+    var sortLabel = document.getElementById('sortLabel');
+    var grid = document.getElementById('collectionGrid');
+
+    function closeSortMenu(){
+      if (!sortMenu) return;
+      sortMenu.hidden = true;
+      sortBtn.setAttribute('aria-expanded', 'false');
+    }
+    if (sortBtn && sortMenu) {
+      sortBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var isOpen = !sortMenu.hidden;
+        sortMenu.hidden = isOpen;
+        sortBtn.setAttribute('aria-expanded', String(!isOpen));
+      });
+      document.addEventListener('click', function(e){
+        if (!sortMenu.hidden && !sortMenu.contains(e.target) && e.target !== sortBtn) closeSortMenu();
+      });
+      sortMenu.querySelectorAll('li').forEach(function(li){
+        li.addEventListener('click', function(){
+          sortMenu.querySelectorAll('li').forEach(function(o){ o.setAttribute('aria-selected','false'); });
+          li.setAttribute('aria-selected','true');
+          sortLabel.textContent = li.getAttribute('data-label');
+          closeSortMenu();
+          reorderGrid(li.getAttribute('data-sort'));
+        });
+      });
+    }
+
+    function reorderGrid(mode){
+      if (!grid) return;
+      var cards = Array.prototype.slice.call(grid.children);
+      var firstRects = reduceMotion ? null : cards.map(function(c){ return c.getBoundingClientRect(); });
+
+      var sorted = cards.slice();
+      if (mode === 'popular' || mode === 'reviews') {
+        sorted.sort(function(a,b){ return (+b.dataset.reviews) - (+a.dataset.reviews); });
+      } else if (mode === 'price-asc') {
+        sorted.sort(function(a,b){ return (+a.dataset.price) - (+b.dataset.price); });
+      } /* 'new' keeps original DOM order */
+
+      sorted.forEach(function(c){ grid.appendChild(c); });
+
+      if (!reduceMotion && firstRects) {
+        var lastRects = sorted.map(function(c){ return c.getBoundingClientRect(); });
+        sorted.forEach(function(c, i){
+          var first = firstRects[cards.indexOf(c)];
+          var last = lastRects[i];
+          var dx = first.left - last.left;
+          var dy = first.top - last.top;
+          if (dx || dy) {
+            c.style.transition = 'none';
+            c.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+            requestAnimationFrame(function(){
+              c.style.transition = 'transform .12s ease';
+              c.style.transform = '';
+            });
+          }
+        });
+      }
+    }
+
+    /* ---- compare / selection bar ---- */
+    var selectionBar = document.getElementById('selectionBar');
+    var selCount = document.getElementById('selCount');
+    var selClearBtn = document.getElementById('selClearBtn');
+    var compareChecks = document.querySelectorAll('.compare-checkbox');
+    function refreshSelection(){
+      var n = document.querySelectorAll('.compare-checkbox:checked').length;
+      if (selCount) selCount.textContent = String(n);
+      if (selectionBar) selectionBar.hidden = n === 0;
+    }
+    compareChecks.forEach(function(cb){ cb.addEventListener('change', refreshSelection); });
+    if (selClearBtn) {
+      selClearBtn.addEventListener('click', function(){
+        compareChecks.forEach(function(cb){ cb.checked = false; });
+        refreshSelection();
+      });
+    }
+
+    /* ---- wishlist toggle ---- */
+    document.querySelectorAll('.wishlist-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var pressed = btn.getAttribute('aria-pressed') === 'true';
+        btn.setAttribute('aria-pressed', String(!pressed));
+      });
+    });
+
+    /* ---- empty state demo toggle ---- */
+    var emptyDemoBtn = document.getElementById('emptyDemoBtn');
+    var emptyState = document.getElementById('emptyState');
+    var emptyResetBtn = document.getElementById('emptyResetBtn');
+    var collectionGrid = document.getElementById('collectionGrid');
+    var paginationWrap = document.querySelector('.pagination-wrap');
+    function showEmpty(show){
+      if (emptyState) emptyState.hidden = !show;
+      if (collectionGrid) collectionGrid.hidden = show;
+      if (paginationWrap) paginationWrap.hidden = show;
+      if (emptyDemoBtn) {
+        emptyDemoBtn.setAttribute('aria-pressed', String(show));
+        emptyDemoBtn.textContent = show ? '상품 목록으로 돌아가기' : '빈 상태 미리보기';
+      }
+    }
+    if (emptyDemoBtn) emptyDemoBtn.addEventListener('click', function(){
+      showEmpty(emptyState.hidden);
+    });
+    if (emptyResetBtn) emptyResetBtn.addEventListener('click', function(){ showEmpty(false); });
+
+    /* ---- results count-up (final value already in HTML; animate only if motion allowed) ---- */
+    var resultCount = document.getElementById('resultCount');
+    if (resultCount && !reduceMotion) {
+      var target = parseInt(resultCount.getAttribute('data-target'), 10) || 0;
+      var start = null;
+      var duration = 600;
+      resultCount.textContent = '0';
+      function step(ts){
+        if (start === null) start = ts;
+        var p = Math.min(1, (ts - start) / duration);
+        var eased = 1 - Math.pow(1 - p, 3);
+        resultCount.textContent = String(Math.round(target * eased));
+        if (p < 1) requestAnimationFrame(step);
+        else resultCount.textContent = String(target);
+      }
+      requestAnimationFrame(step);
+    }
+  } catch (err) {
+    /* JS 실패해도 HTML만으로 완전한 화면 — 아무 것도 하지 않고 정적 상태를 유지 */
+  }
+})();
+</script>
+</body>
+</html>

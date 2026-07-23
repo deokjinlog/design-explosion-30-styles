@@ -1,0 +1,1011 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>여덟시 — 여성 아우터 · STYLE 17 Y2K 베이퍼웨이브</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  @property --angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  :root {
+    --bg-1: #1A0B2E;
+    --bg-2: #2D0B45;
+    --bg-3: #0B0221;
+    --magenta: #FF2FB9;
+    --cyan: #22E1FF;
+    --purple: #A24BFF;
+    --lime-cyan: #66FFE3;
+    --neon-pink: #FF6EC7;
+    --danger: #FF3B6B;
+    --success: #3BFFB0;
+    --chrome-bar-1: #B8C6DA;
+    --chrome-bar-2: #5C6B87;
+    --chrome-bar-3: #E7EEF7;
+    --card-bg: rgba(45, 11, 69, .6);
+    --text-body: #E7EEF7;
+    --text-muted: #C9BFE0;
+    --border-hair: rgba(231, 238, 247, .14);
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+    --sp-6: 24px; --sp-8: 32px; --sp-12: 48px; --sp-16: 64px;
+    --radius-card: 14px;
+    --radius-btn: 8px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { color-scheme: dark; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    color: var(--text-body);
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(162, 75, 255, .28), transparent 55%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 55%, var(--bg-3) 100%);
+    background-attachment: fixed;
+    line-height: 1.55;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img, svg { display: block; max-width: 100%; }
+
+  button, input, select { font-family: inherit; color: inherit; }
+
+  a { color: inherit; text-decoration: none; }
+
+  ::selection { background: var(--magenta); color: #fff; }
+
+  :focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* ===== 배경 연출 레이어 (전부 순수 CSS, JS 무의존) ===== */
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  }
+
+  .synth-grid {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 46vh; z-index: 1;
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(255, 47, 185, .55) 0 1.5px, transparent 1.5px 64px),
+      repeating-linear-gradient(0deg, rgba(34, 225, 255, .5) 0 1.5px, transparent 1.5px 44px);
+    background-position: center bottom;
+    transform-origin: bottom center;
+    transform: perspective(320px) rotateX(66deg) scaleY(1);
+    mask-image: linear-gradient(to top, black 0%, black 55%, transparent 96%);
+    -webkit-mask-image: linear-gradient(to top, black 0%, black 55%, transparent 96%);
+    animation: grid-reveal 900ms cubic-bezier(.2, .8, .3, 1) both;
+  }
+
+  .horizon-glow {
+    position: fixed; left: 0; right: 0; bottom: 46vh; height: 160px; z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 60% 100% at 50% 100%, rgba(255, 110, 199, .5), rgba(34, 225, 255, .28) 55%, transparent 85%);
+    filter: blur(2px);
+  }
+
+  .stars { position: fixed; inset: 0 0 46vh 0; z-index: 1; pointer-events: none; }
+  .star {
+    position: absolute; color: #fff; text-shadow: 0 0 8px rgba(255, 255, 255, .9);
+    animation: twinkle 2.6s ease-in-out infinite;
+    opacity: 0;
+  }
+
+  .scanlines {
+    position: fixed; inset: 0; z-index: 60; pointer-events: none;
+    background: repeating-linear-gradient(to bottom,
+      rgba(255, 255, 255, .055) 0px, rgba(255, 255, 255, .055) 1px,
+      transparent 1px, transparent 3px);
+    mix-blend-mode: overlay;
+  }
+
+  @keyframes grid-reveal {
+    from { opacity: 0; transform: perspective(320px) rotateX(66deg) scaleY(.15); }
+    to   { opacity: 1; transform: perspective(320px) rotateX(66deg) scaleY(1); }
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(.5); }
+    50%      { opacity: 1; transform: scale(1); }
+  }
+
+  /* ===== 크롬 텍스트 ===== */
+  .chrome-text {
+    background-image: linear-gradient(120deg,
+      #FFFFFF 0%, #C7D6EA 18%, #6B7A99 40%, #EFF6FF 58%, #9FB4CC 78%, #E7EEF7 100%);
+    background-size: 220% 100%;
+    background-position: 0% 0%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 1px 0 #2A3450;
+    transition: background-position .5s ease;
+  }
+  .chrome-text:hover { background-position: 100% 0%; }
+
+  .chrome-num { font-family: 'Orbitron', sans-serif; font-weight: 800; }
+  .chrome-kr { font-family: 'Pretendard', sans-serif; font-weight: 800; }
+
+  .tabular { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+  .logo {
+    font-family: 'Pretendard', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: .02em;
+    transform: skewX(-6deg);
+    display: inline-block;
+    clip-path: inset(0 0 0 0);
+    animation: logo-reveal 650ms cubic-bezier(.2, .8, .2, 1) 260ms both;
+    position: relative;
+  }
+  .logo::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .85) 48%, transparent 66%);
+    background-size: 260% 100%;
+    background-position: -160% 0;
+    mix-blend-mode: overlay;
+    animation: sheen-sweep 700ms ease 380ms 1;
+    pointer-events: none;
+  }
+
+  @keyframes logo-reveal {
+    from { clip-path: inset(0 0 100% 0); }
+    to   { clip-path: inset(0 0 0% 0); }
+  }
+  @keyframes sheen-sweep {
+    from { background-position: -160% 0; }
+    to   { background-position: 160% 0; }
+  }
+
+  /* ===== 크롬 버튼 ===== */
+  .btn-chrome {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
+    height: 40px; padding: 0 var(--sp-4);
+    border-radius: var(--radius-btn);
+    border: 1px solid rgba(255, 255, 255, .35);
+    background: linear-gradient(180deg, var(--chrome-bar-1) 0%, var(--chrome-bar-2) 52%, var(--chrome-bar-3) 100%);
+    color: #1A1E2B;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .12) inset, 0 6px 18px rgba(0, 0, 0, .35);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-chrome:hover { box-shadow: 0 0 22px rgba(255, 47, 185, .45), 0 0 0 1px rgba(255, 255, 255, .18) inset; }
+  .btn-chrome:active {
+    background: linear-gradient(0deg, var(--chrome-bar-1) 0%, var(--chrome-bar-2) 52%, var(--chrome-bar-3) 100%);
+    animation: glitch-press 90ms steps(2) 1;
+  }
+  @keyframes glitch-press {
+    0% { transform: translateX(0); }
+    40% { transform: translateX(-2px); }
+    70% { transform: translateX(2px); }
+    100% { transform: translateX(0); }
+  }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
+    height: 36px; padding: 0 var(--sp-3);
+    border-radius: var(--radius-btn);
+    border: 1px solid var(--border-hair);
+    background: rgba(255, 255, 255, .03);
+    color: var(--text-body);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .btn-ghost:hover { border-color: var(--cyan); background: rgba(34, 225, 255, .08); }
+
+  /* ===== 레이아웃 ===== */
+  .page-shell { position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; }
+
+  .identity-bar {
+    position: sticky; top: 0; z-index: 40;
+    border-bottom: 1px solid var(--border-hair);
+    background: rgba(11, 2, 33, .72);
+    backdrop-filter: blur(10px);
+  }
+  .identity-inner {
+    max-width: 1280px; margin: 0 auto; padding: var(--sp-3) var(--sp-6);
+    display: flex; align-items: center; gap: var(--sp-8);
+  }
+  .cat-nav { display: flex; gap: var(--sp-6); flex: 1; }
+  .cat-link {
+    font-size: 14px; font-weight: 600; color: var(--text-muted);
+    padding: var(--sp-2) 0; position: relative;
+  }
+  .cat-link.active { color: #fff; }
+  .cat-link.active::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -13px; height: 2px;
+    background: linear-gradient(90deg, var(--magenta), var(--cyan));
+    box-shadow: 0 0 8px var(--magenta);
+  }
+  .cat-link.sale { color: var(--neon-pink); }
+  .cat-link:hover { color: #fff; }
+
+  .identity-actions { display: flex; align-items: center; gap: var(--sp-4); }
+
+  .search-box {
+    display: flex; align-items: center; gap: var(--sp-2);
+    height: 38px; padding: 0 var(--sp-3); width: 220px;
+    border-radius: 999px;
+    border: 1px solid var(--border-hair);
+    background: rgba(255, 255, 255, .04);
+  }
+  .search-box:focus-within { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(34, 225, 255, .18); }
+  .search-box input {
+    border: 0; background: transparent; outline: none; width: 100%;
+    font-size: 13px; color: var(--text-body);
+  }
+  .search-box input::placeholder { color: var(--text-muted); }
+  .search-box svg { flex: none; opacity: .75; }
+
+  .icon-btn {
+    position: relative; width: 38px; height: 38px; border-radius: 999px;
+    border: 1px solid var(--border-hair);
+    background: rgba(255, 255, 255, .04);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .icon-btn:hover { border-color: var(--magenta); box-shadow: 0 0 14px rgba(255, 47, 185, .35); }
+  .cart-badge {
+    position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 4px;
+    border-radius: 999px; font-size: 11px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, #fff, var(--magenta));
+    color: #1A1E2B;
+    box-shadow: 0 0 8px rgba(255, 47, 185, .7);
+  }
+  .avatar-btn {
+    width: 38px; height: 38px; border-radius: 999px;
+    border: 1px solid var(--border-hair);
+    background: linear-gradient(120deg, var(--magenta), var(--cyan), var(--purple), var(--lime-cyan), var(--magenta));
+    padding: 2px; cursor: pointer;
+  }
+  .avatar-btn span {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%; border-radius: 999px; background: #17092b;
+  }
+
+  .layout {
+    flex: 1;
+    max-width: 1280px; margin: 0 auto; width: 100%;
+    padding: var(--sp-8) var(--sp-6) var(--sp-16);
+    display: grid; grid-template-columns: 260px 1fr; gap: var(--sp-8);
+  }
+
+  /* ===== 필터 ===== */
+  .filter-panel {
+    align-self: start;
+    border-radius: var(--radius-card);
+    background: var(--card-bg);
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+    padding: var(--sp-6);
+    box-shadow: 0 0 24px rgba(162, 75, 255, .22), inset 0 1px 0 rgba(255, 255, 255, .1);
+  }
+  .filter-panel::before {
+    content: ""; position: absolute; inset: 0; border-radius: var(--radius-card); padding: 1px;
+    background: linear-gradient(135deg, var(--magenta), var(--cyan), var(--purple), var(--lime-cyan));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+  .filter-title {
+    margin: 0 0 var(--sp-6); font-size: 18px;
+  }
+  .filter-group { margin-bottom: var(--sp-6); }
+  .filter-group:last-child { margin-bottom: 0; }
+  .filter-group h3 {
+    margin: 0 0 var(--sp-3); font-size: 12px; font-weight: 700;
+    letter-spacing: .06em; color: var(--text-muted); text-transform: uppercase;
+  }
+
+  .cat-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .cat-item {
+    padding: var(--sp-2) var(--sp-3); border-radius: 6px; font-size: 14px; cursor: pointer;
+    color: var(--text-muted); border-left: 2px solid transparent;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .cat-item:hover { background: rgba(162, 75, 255, .12); border-left-color: var(--purple); color: #fff; }
+  .cat-item.active {
+    color: #fff; font-weight: 700;
+    background: rgba(255, 47, 185, .14);
+    border-left-color: var(--magenta);
+  }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+  .chip {
+    height: 32px; min-width: 40px; padding: 0 var(--sp-3);
+    border-radius: 999px; border: 1px solid var(--border-hair);
+    background: rgba(255, 255, 255, .04); color: var(--text-body);
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+  }
+  .chip:hover { border-color: var(--cyan); }
+  .chip.selected {
+    color: #1A1E2B; border-color: transparent;
+    background: linear-gradient(180deg, var(--chrome-bar-1), var(--chrome-bar-2), var(--chrome-bar-3));
+    box-shadow: 0 0 12px rgba(34, 225, 255, .5);
+  }
+
+  .swatch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-3); }
+  .swatch-btn {
+    width: 30px; height: 30px; border-radius: 999px; padding: 2px; cursor: pointer;
+    border: 1px solid var(--border-hair); background: transparent;
+  }
+  .swatch-btn span { display: block; width: 100%; height: 100%; border-radius: 999px; background: var(--c); }
+  .swatch-btn.selected {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 2px rgba(34, 225, 255, .3), 0 0 10px rgba(34, 225, 255, .6);
+  }
+
+  .price-slider input[type="range"] {
+    width: 100%; accent-color: var(--magenta);
+    height: 4px; border-radius: 999px;
+  }
+  .price-labels {
+    display: flex; justify-content: space-between; font-size: 12px;
+    color: var(--text-muted); margin-top: var(--sp-2);
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .toggles { display: flex; flex-direction: column; gap: var(--sp-3); }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; cursor: pointer; }
+  .switch { position: relative; width: 40px; height: 22px; flex: none; }
+  .switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+  .switch .track {
+    position: absolute; inset: 0; border-radius: 999px;
+    background: rgba(255, 255, 255, .12); border: 1px solid var(--border-hair);
+    transition: background .2s ease, box-shadow .2s ease;
+  }
+  .switch .knob {
+    position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 999px;
+    background: linear-gradient(180deg, var(--chrome-bar-1), var(--chrome-bar-3));
+    transition: transform .2s ease;
+  }
+  .switch input:checked + .track { background: rgba(255, 47, 185, .35); box-shadow: 0 0 10px rgba(255, 47, 185, .6); }
+  .switch input:checked + .track + .knob { transform: translateX(18px); }
+  .switch input:focus-visible + .track { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  /* ===== 결과 헤더 ===== */
+  .content { display: flex; flex-direction: column; gap: var(--sp-6); }
+
+  .results-header {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4);
+    flex-wrap: wrap;
+  }
+  .results-count { margin: 0; font-size: 20px; font-weight: 700; }
+  .results-count .count-num { font-size: 22px; }
+  .results-side { display: flex; align-items: center; gap: var(--sp-4); }
+
+  .sort-wrap { position: relative; }
+  .sort-wrap select {
+    appearance: none; -webkit-appearance: none;
+    height: 36px; padding: 0 var(--sp-8) 0 var(--sp-3);
+    border-radius: var(--radius-btn); border: 1px solid var(--border-hair);
+    background: rgba(255, 255, 255, .04); color: var(--text-body);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .sort-wrap select:hover { border-color: var(--cyan); }
+  .sort-wrap::after {
+    content: "▾"; position: absolute; right: var(--sp-3); top: 50%; transform: translateY(-50%);
+    color: var(--cyan); pointer-events: none; font-size: 12px;
+  }
+
+  .empty-preview-toggle {
+    font-size: 12px; color: var(--text-muted); background: transparent; border: 1px dashed var(--border-hair);
+    border-radius: var(--radius-btn); height: 36px; padding: 0 var(--sp-3); cursor: pointer;
+  }
+  .empty-preview-toggle:hover { color: #fff; border-color: var(--purple); }
+
+  /* ===== 컬렉션 그리드 ===== */
+  .collection-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-6);
+  }
+
+  .item-card {
+    position: relative;
+    border-radius: var(--radius-card);
+    background: var(--card-bg);
+    box-shadow: 0 0 24px rgba(255, 47, 185, .28), inset 0 1px 0 rgba(255, 255, 255, .12);
+    display: flex; flex-direction: column;
+    opacity: 0; transform: translateY(24px);
+    animation: card-rise 480ms cubic-bezier(.2, .8, .2, 1) both;
+    animation-delay: calc(900ms + (var(--i, 0) * 120ms));
+    transition: box-shadow .25s ease;
+  }
+  .item-card::before {
+    content: ""; position: absolute; inset: 0; border-radius: var(--radius-card); padding: 1px;
+    background: linear-gradient(var(--angle, 0deg),
+      var(--magenta), var(--cyan), var(--purple), var(--lime-cyan), var(--magenta));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+  .item-card:hover {
+    box-shadow: 0 0 32px rgba(255, 47, 185, .42), inset 0 1px 0 rgba(255, 255, 255, .12);
+  }
+  .item-card:hover::before { animation: spin-angle 1.2s linear; }
+
+  @keyframes card-rise {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin-angle { to { --angle: 360deg; } }
+
+  .card-bracket {
+    position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 3;
+  }
+  .card-bracket.tl { top: 8px; left: 8px; border-top: 2px solid var(--cyan); border-left: 2px solid var(--cyan); }
+  .card-bracket.br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--magenta); border-right: 2px solid var(--magenta); }
+
+  .card-photo {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      repeating-linear-gradient(to bottom, rgba(255, 255, 255, .05) 0 1px, transparent 1px 3px),
+      linear-gradient(160deg, var(--holo-1, #3a1660) 0%, var(--holo-2, #14243f) 45%, var(--holo-3, #4a0f3c) 100%);
+  }
+  .card-photo-mark {
+    font-size: 56px; font-weight: 900;
+    opacity: .9;
+  }
+  .card-sticker {
+    position: absolute; top: 10px; left: 10px; width: 30px; height: 30px; border-radius: 999px;
+    background: linear-gradient(135deg, var(--magenta), var(--cyan), var(--lime-cyan), var(--purple), var(--magenta));
+    box-shadow: 0 0 10px rgba(255, 255, 255, .4);
+    animation: sticker-spin 6s linear infinite;
+  }
+  @keyframes sticker-spin { to { transform: rotate(360deg); } }
+
+  .badge {
+    position: absolute; top: 10px; right: 10px;
+    padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;
+    letter-spacing: .02em;
+    background: rgba(11, 2, 33, .72);
+    border: 1px solid;
+    color: #fff;
+  }
+  .badge-best { border-color: var(--neon-pink); box-shadow: 0 0 10px rgba(255, 110, 199, .55); }
+  .badge-new { border-color: var(--lime-cyan); box-shadow: 0 0 10px rgba(102, 255, 227, .55); }
+  .badge-freeship { border-color: var(--purple); box-shadow: 0 0 10px rgba(162, 75, 255, .55); }
+  .badge-lowstock { border-color: var(--danger); box-shadow: 0 0 10px rgba(255, 59, 107, .55); color: #FFD3DE; }
+
+  .wish-btn {
+    position: absolute; bottom: 10px; right: 10px; width: 32px; height: 32px; border-radius: 999px;
+    border: 1px solid var(--border-hair); background: rgba(11, 2, 33, .55);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .wish-btn svg { stroke: #fff; fill: none; transition: fill .2s ease, stroke .2s ease; }
+  .wish-btn[aria-pressed="true"] svg { fill: var(--neon-pink); stroke: var(--neon-pink); }
+  .wish-btn:hover { border-color: var(--neon-pink); }
+
+  .card-body { padding: var(--sp-4); display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .brand { margin: 0; font-size: 12px; color: var(--text-muted); font-weight: 700; letter-spacing: .02em; }
+  .product-name {
+    margin: 0; font-size: 15px; font-weight: 700; color: var(--text-body);
+    line-height: 1.4; overflow-wrap: break-word; word-break: keep-all;
+  }
+  .swatches { display: flex; gap: 6px; margin: 2px 0; }
+  .swatches span {
+    width: 14px; height: 14px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .35);
+    background: var(--c);
+  }
+  .price-row { display: flex; align-items: baseline; gap: var(--sp-2); flex-wrap: wrap; margin-top: 4px; }
+  .price-orig { font-size: 12px; color: var(--text-muted); text-decoration: line-through; }
+  .price-sale { font-size: 19px; }
+  .discount { font-size: 12px; font-weight: 800; color: var(--danger); }
+  .rating-row { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .rating-row .rating { color: #FFD873; font-weight: 700; }
+  .rating-missing { font-size: 13px; color: var(--text-muted); font-weight: 700; }
+
+  /* ===== 빈 상태 ===== */
+  .empty-state {
+    display: none;
+    flex-direction: column; align-items: center; text-align: center; gap: var(--sp-3);
+    padding: var(--sp-16) var(--sp-6);
+    border-radius: var(--radius-card);
+    background: var(--card-bg);
+    position: relative;
+    box-shadow: 0 0 24px rgba(162, 75, 255, .22), inset 0 1px 0 rgba(255, 255, 255, .1);
+  }
+  .empty-state.is-visible { display: flex; }
+  .empty-state::before {
+    content: ""; position: absolute; inset: 0; border-radius: var(--radius-card); padding: 1px;
+    background: linear-gradient(135deg, var(--magenta), var(--cyan), var(--purple), var(--lime-cyan));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+  .empty-icon { width: 56px; height: 56px; opacity: .85; }
+  .empty-headline { font-size: 22px; margin: 0; }
+  .empty-desc { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+  /* ===== 페이지네이션 / 액션 ===== */
+  .action-row {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--sp-4);
+    margin-top: var(--sp-4);
+  }
+  .pagination { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; }
+  .pagination button, .pagination span {
+    min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 6px; font-size: 13px; font-family: 'Orbitron', sans-serif;
+    color: var(--text-muted); background: transparent; border: 1px solid transparent; cursor: pointer;
+  }
+  .pagination .ellipsis { cursor: default; }
+  .pagination button:hover { border-color: var(--cyan); color: #fff; }
+  .pagination button.current {
+    color: #1A1E2B; font-weight: 800;
+    background: linear-gradient(180deg, var(--chrome-bar-1), var(--chrome-bar-2), var(--chrome-bar-3));
+    box-shadow: 0 0 10px rgba(34, 225, 255, .5);
+  }
+
+  footer {
+    text-align: center; padding: var(--sp-8) var(--sp-6) var(--sp-12);
+    font-size: 12px; color: var(--text-muted); letter-spacing: .04em;
+    position: relative; z-index: 2;
+  }
+
+  /* ===== 반응형 ===== */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .collection-grid { grid-template-columns: repeat(2, 1fr); }
+    .cat-nav { display: none; }
+    .search-box { width: 140px; }
+  }
+  @media (max-width: 560px) {
+    .collection-grid { grid-template-columns: 1fr; }
+    .identity-inner { padding: var(--sp-3) var(--sp-4); gap: var(--sp-4); }
+    .layout { padding: var(--sp-6) var(--sp-4) var(--sp-12); }
+  }
+
+  /* ===== 접근성: 모션 축소 ===== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+    .synth-grid { animation: none; opacity: 1; transform: perspective(320px) rotateX(66deg) scaleY(1); }
+    .logo { animation: none; clip-path: inset(0 0 0 0); }
+    .logo::after { animation: none; opacity: 0; }
+    .item-card { opacity: 1; transform: translateY(0); animation: none; }
+    .item-card:hover::before { animation: none; }
+    .card-sticker { animation: none; }
+    .star { animation: none; opacity: .65; }
+    .scanlines { opacity: 1; }
+    .btn-chrome:active { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="synth-grid" aria-hidden="true"></div>
+  <div class="horizon-glow" aria-hidden="true"></div>
+  <div class="stars" aria-hidden="true">
+    <span class="star" style="top:10%; left:8%;  font-size:14px; animation-delay:1.5s;">✦</span>
+    <span class="star" style="top:22%; left:88%; font-size:11px; animation-delay:1.7s;">✧</span>
+    <span class="star" style="top:6%;  left:46%; font-size:10px; animation-delay:1.9s;">✦</span>
+    <span class="star" style="top:34%; left:64%; font-size:13px; animation-delay:2.1s;">✧</span>
+    <span class="star" style="top:16%; left:28%; font-size:9px;  animation-delay:2.3s;">✦</span>
+    <span class="star" style="top:40%; left:12%; font-size:12px; animation-delay:1.6s;">✧</span>
+  </div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <div class="page-shell">
+
+    <header class="identity-bar" data-region="identity">
+      <div class="identity-inner">
+        <a href="#" class="logo chrome-text">여덟시</a>
+        <nav class="cat-nav" aria-label="카테고리">
+          <a href="#" class="cat-link active" aria-current="page">여성</a>
+          <a href="#" class="cat-link">남성</a>
+          <a href="#" class="cat-link">키즈</a>
+          <a href="#" class="cat-link sale">세일</a>
+        </nav>
+        <div class="identity-actions">
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" placeholder="상품, 브랜드 검색" aria-label="상품 검색">
+          </div>
+          <button type="button" class="icon-btn" id="cartBtn" aria-label="장바구니, 담긴 상품 3개">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <span class="cart-badge chrome-num tabular">3</span>
+          </button>
+          <button type="button" class="avatar-btn" aria-label="내 계정">
+            <span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E7EEF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+            </span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+
+      <aside class="filter-panel" data-region="filter">
+        <h2 class="filter-title chrome-text chrome-kr">필터</h2>
+
+        <div class="filter-group">
+          <h3>카테고리</h3>
+          <ul class="cat-list" id="catList">
+            <li class="cat-item active" data-active="true">아우터</li>
+            <li class="cat-item">상의</li>
+            <li class="cat-item">하의</li>
+            <li class="cat-item">원피스</li>
+            <li class="cat-item">신발</li>
+          </ul>
+        </div>
+
+        <div class="filter-group">
+          <h3>사이즈</h3>
+          <div class="chip-row" role="group" aria-label="사이즈 선택" id="sizeGroup">
+            <button type="button" class="chip" data-size="XS">XS</button>
+            <button type="button" class="chip" data-size="S">S</button>
+            <button type="button" class="chip selected" data-size="M" aria-pressed="true">M</button>
+            <button type="button" class="chip" data-size="L">L</button>
+            <button type="button" class="chip" data-size="XL">XL</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h3>색상</h3>
+          <div class="swatch-grid" role="group" aria-label="색상 선택" id="colorGroup">
+            <button type="button" class="swatch-btn selected" style="--c:#15121b" aria-pressed="true" aria-label="블랙"><span></span></button>
+            <button type="button" class="swatch-btn" style="--c:#f2f2f0" aria-label="화이트"><span></span></button>
+            <button type="button" class="swatch-btn" style="--c:#8b8b93" aria-label="그레이"><span></span></button>
+            <button type="button" class="swatch-btn" style="--c:#1c2540" aria-label="네이비"><span></span></button>
+            <button type="button" class="swatch-btn" style="--c:#d8c7a1" aria-label="베이지"><span></span></button>
+            <button type="button" class="swatch-btn" style="--c:#6b6b45" aria-label="카키"><span></span></button>
+            <button type="button" class="swatch-btn" style="--c:#5c1f2e" aria-label="버건디"><span></span></button>
+            <button type="button" class="swatch-btn" style="--c:#5a3d2b" aria-label="브라운"><span></span></button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h3>가격</h3>
+          <div class="price-slider">
+            <input type="range" min="0" max="300000" step="10000" value="300000" aria-label="최대 가격">
+            <div class="price-labels tabular">
+              <span>₩0</span><span>₩300,000+</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group toggles">
+          <label class="toggle-row">
+            <span>무료배송만</span>
+            <span class="switch">
+              <input type="checkbox">
+              <span class="track"></span>
+              <span class="knob"></span>
+            </span>
+          </label>
+          <label class="toggle-row">
+            <span>재입고 알림 가능</span>
+            <span class="switch">
+              <input type="checkbox">
+              <span class="track"></span>
+              <span class="knob"></span>
+            </span>
+          </label>
+        </div>
+      </aside>
+
+      <section class="content">
+
+        <div class="results-header" data-region="results">
+          <p class="results-count">여성 아우터 <span class="count-num chrome-text chrome-kr tabular">264</span>개</p>
+          <div class="results-side">
+            <div class="sort-wrap">
+              <label for="sortSelect" class="sr-only">정렬</label>
+              <select id="sortSelect">
+                <option>신상품순</option>
+                <option>인기순</option>
+                <option>낮은 가격순</option>
+                <option>리뷰 많은순</option>
+              </select>
+            </div>
+            <button type="button" class="empty-preview-toggle" id="emptyToggle" aria-pressed="false">빈 상태 미리보기</button>
+          </div>
+        </div>
+
+        <div class="collection-grid" data-region="collection" id="collectionGrid">
+
+          <article class="item-card" style="--i:0" data-region="item-card">
+            <span class="card-bracket tl" aria-hidden="true"></span>
+            <span class="card-bracket br" aria-hidden="true"></span>
+            <div class="card-photo" style="--holo-1:#3a1660; --holo-2:#182a4a; --holo-3:#4a0f3c;">
+              <span class="card-sticker" aria-hidden="true"></span>
+              <span class="card-photo-mark chrome-text">여</span>
+              <span class="badge badge-best">★ 베스트</span>
+              <button type="button" class="wish-btn" aria-pressed="false" aria-label="찜하기">
+                <svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.2C.6 8.4 2.2 4.6 5.8 4.1c2-.3 3.9.7 5 2.4a5.6 5.6 0 0 1 5-2.4c3.6.5 5.2 4.3 3.8 7.7C19.5 16.4 12 21 12 21Z"/></svg>
+              </button>
+            </div>
+            <div class="card-body">
+              <p class="brand">여덟시</p>
+              <h3 class="product-name">오버핏 울 블렌드 코트</h3>
+              <div class="swatches" aria-label="색상 옵션">
+                <span style="--c:#15121b"></span><span style="--c:#1c2540"></span><span style="--c:#5a3d2b"></span>
+              </div>
+              <div class="price-row tabular">
+                <span class="price-orig">₩189,000</span>
+                <span class="price-sale chrome-text chrome-num">₩132,300</span>
+                <span class="discount">30%</span>
+              </div>
+              <div class="rating-row tabular"><span class="rating">★ 4.7</span> <span>(1,284)</span></div>
+            </div>
+          </article>
+
+          <article class="item-card" style="--i:1" data-region="item-card">
+            <span class="card-bracket tl" aria-hidden="true"></span>
+            <span class="card-bracket br" aria-hidden="true"></span>
+            <div class="card-photo" style="--holo-1:#123a3a; --holo-2:#2a1c46; --holo-3:#0f2f4a;">
+              <span class="card-sticker" aria-hidden="true"></span>
+              <span class="card-photo-mark chrome-text">코</span>
+              <span class="badge badge-freeship">무료배송</span>
+              <button type="button" class="wish-btn" aria-pressed="false" aria-label="찜하기">
+                <svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.2C.6 8.4 2.2 4.6 5.8 4.1c2-.3 3.9.7 5 2.4a5.6 5.6 0 0 1 5-2.4c3.6.5 5.2 4.3 3.8 7.7C19.5 16.4 12 21 12 21Z"/></svg>
+              </button>
+            </div>
+            <div class="card-body">
+              <p class="brand">코튼밀</p>
+              <h3 class="product-name">経량 패딩 베스트</h3>
+              <div class="swatches" aria-label="색상 옵션">
+                <span style="--c:#1c2540"></span><span style="--c:#8b8b93"></span><span style="--c:#5c1f2e"></span>
+              </div>
+              <div class="price-row tabular">
+                <span class="price-orig">₩89,000</span>
+                <span class="price-sale chrome-text chrome-num">₩62,300</span>
+                <span class="discount">30%</span>
+              </div>
+              <div class="rating-row tabular"><span class="rating">★ 4.5</span> <span>(612)</span></div>
+            </div>
+          </article>
+
+          <article class="item-card" style="--i:2" data-region="item-card">
+            <span class="card-bracket tl" aria-hidden="true"></span>
+            <span class="card-bracket br" aria-hidden="true"></span>
+            <div class="card-photo" style="--holo-1:#4a0f3c; --holo-2:#231246; --holo-3:#123a3a;">
+              <span class="card-sticker" aria-hidden="true"></span>
+              <span class="card-photo-mark chrome-text">여</span>
+              <span class="badge badge-new">✦ 신상</span>
+              <button type="button" class="wish-btn" aria-pressed="false" aria-label="찜하기">
+                <svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.2C.6 8.4 2.2 4.6 5.8 4.1c2-.3 3.9.7 5 2.4a5.6 5.6 0 0 1 5-2.4c3.6.5 5.2 4.3 3.8 7.7C19.5 16.4 12 21 12 21Z"/></svg>
+              </button>
+            </div>
+            <div class="card-body">
+              <p class="brand">여덟시</p>
+              <h3 class="product-name">시그니처 캐시미어 100% 롱 코트 — 이탈리아 원단 · 한정 수량 리오더 불가 · 드라이클리닝 전용</h3>
+              <div class="swatches" aria-label="색상 옵션">
+                <span style="--c:#15121b"></span><span style="--c:#d8c7a1"></span><span style="--c:#5a3d2b"></span>
+              </div>
+              <div class="price-row tabular">
+                <span class="price-orig">₩1,290,000</span>
+                <span class="price-sale chrome-text chrome-num">₩1,161,000</span>
+                <span class="discount">10%</span>
+              </div>
+              <div class="rating-row tabular"><span class="rating-missing">—</span></div>
+            </div>
+          </article>
+
+          <article class="item-card" style="--i:3" data-region="item-card">
+            <span class="card-bracket tl" aria-hidden="true"></span>
+            <span class="card-bracket br" aria-hidden="true"></span>
+            <div class="card-photo" style="--holo-1:#2a1c46; --holo-2:#4a0f3c; --holo-3:#182a4a;">
+              <span class="card-sticker" aria-hidden="true"></span>
+              <span class="card-photo-mark chrome-text">데</span>
+              <span class="badge badge-lowstock">품절임박</span>
+              <button type="button" class="wish-btn" aria-pressed="false" aria-label="찜하기">
+                <svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.2C.6 8.4 2.2 4.6 5.8 4.1c2-.3 3.9.7 5 2.4a5.6 5.6 0 0 1 5-2.4c3.6.5 5.2 4.3 3.8 7.7C19.5 16.4 12 21 12 21Z"/></svg>
+              </button>
+            </div>
+            <div class="card-body">
+              <p class="brand">데일리랩</p>
+              <h3 class="product-name">크롭 무스탕 자켓</h3>
+              <div class="swatches" aria-label="색상 옵션">
+                <span style="--c:#5a3d2b"></span><span style="--c:#d8c7a1"></span><span style="--c:#15121b"></span>
+              </div>
+              <div class="price-row tabular">
+                <span class="price-orig">₩259,000</span>
+                <span class="price-sale chrome-text chrome-num">₩155,400</span>
+                <span class="discount">40%</span>
+              </div>
+              <div class="rating-row tabular"><span class="rating">★ 4.2</span> <span>(338)</span></div>
+            </div>
+          </article>
+
+          <article class="item-card" style="--i:4" data-region="item-card">
+            <span class="card-bracket tl" aria-hidden="true"></span>
+            <span class="card-bracket br" aria-hidden="true"></span>
+            <div class="card-photo" style="--holo-1:#0f2f4a; --holo-2:#3a1660; --holo-3:#123a3a;">
+              <span class="card-sticker" aria-hidden="true"></span>
+              <span class="card-photo-mark chrome-text">코</span>
+              <span class="badge badge-best">★ 베스트</span>
+              <button type="button" class="wish-btn" aria-pressed="false" aria-label="찜하기">
+                <svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.2C.6 8.4 2.2 4.6 5.8 4.1c2-.3 3.9.7 5 2.4a5.6 5.6 0 0 1 5-2.4c3.6.5 5.2 4.3 3.8 7.7C19.5 16.4 12 21 12 21Z"/></svg>
+              </button>
+            </div>
+            <div class="card-body">
+              <p class="brand">코튼밀</p>
+              <h3 class="product-name">베이직 후드 집업</h3>
+              <div class="swatches" aria-label="색상 옵션">
+                <span style="--c:#8b8b93"></span><span style="--c:#1c2540"></span><span style="--c:#5c1f2e"></span>
+              </div>
+              <div class="price-row tabular">
+                <span class="price-orig">₩49,000</span>
+                <span class="price-sale chrome-text chrome-num">₩39,200</span>
+                <span class="discount">20%</span>
+              </div>
+              <div class="rating-row tabular"><span class="rating">★ 4.8</span> <span>(2,041)</span></div>
+            </div>
+          </article>
+
+          <article class="item-card" style="--i:5" data-region="item-card">
+            <span class="card-bracket tl" aria-hidden="true"></span>
+            <span class="card-bracket br" aria-hidden="true"></span>
+            <div class="card-photo" style="--holo-1:#182a4a; --holo-2:#5c1f2e; --holo-3:#231246;">
+              <span class="card-sticker" aria-hidden="true"></span>
+              <span class="card-photo-mark chrome-text">여</span>
+              <span class="badge badge-freeship">무료배송</span>
+              <button type="button" class="wish-btn" aria-pressed="false" aria-label="찜하기">
+                <svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.2C.6 8.4 2.2 4.6 5.8 4.1c2-.3 3.9.7 5 2.4a5.6 5.6 0 0 1 5-2.4c3.6.5 5.2 4.3 3.8 7.7C19.5 16.4 12 21 12 21Z"/></svg>
+              </button>
+            </div>
+            <div class="card-body">
+              <p class="brand">여덟시</p>
+              <h3 class="product-name">워시드 데님 트러커</h3>
+              <div class="swatches" aria-label="색상 옵션">
+                <span style="--c:#1c2540"></span><span style="--c:#15121b"></span><span style="--c:#8b8b93"></span>
+              </div>
+              <div class="price-row tabular">
+                <span class="price-orig">₩119,000</span>
+                <span class="price-sale chrome-text chrome-num">₩95,200</span>
+                <span class="discount">20%</span>
+              </div>
+              <div class="rating-row tabular"><span class="rating">★ 4.4</span> <span>(517)</span></div>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="empty-state" id="emptyState" data-region="empty">
+          <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="url(#emptyGrad)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <defs>
+              <linearGradient id="emptyGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#FF2FB9"/>
+                <stop offset="100%" stop-color="#22E1FF"/>
+              </linearGradient>
+            </defs>
+            <circle cx="10" cy="10" r="6.5"/>
+            <line x1="15" y1="15" x2="20.5" y2="20.5"/>
+            <line x1="7.5" y1="10" x2="12.5" y2="10"/>
+          </svg>
+          <h3 class="empty-headline chrome-text chrome-kr">조건에 맞는 상품이 없어요</h3>
+          <p class="empty-desc">사이즈나 색상 조건을 줄여보세요.</p>
+          <button type="button" class="btn-chrome" id="resetFilterBtn">필터 초기화</button>
+        </div>
+
+        <div class="action-row" data-region="action">
+          <nav class="pagination" aria-label="페이지">
+            <button type="button" aria-label="이전 페이지">‹</button>
+            <button type="button" class="current tabular" aria-current="page">1</button>
+            <button type="button" class="tabular">2</button>
+            <button type="button" class="tabular">3</button>
+            <span class="ellipsis" aria-hidden="true">…</span>
+            <button type="button" class="tabular">22</button>
+            <button type="button" aria-label="다음 페이지">›</button>
+          </nav>
+          <button type="button" class="btn-chrome" id="loadMoreBtn">더 보기</button>
+        </div>
+
+      </section>
+    </main>
+
+    <footer>STYLE 17 · Y2K 베이퍼웨이브</footer>
+  </div>
+
+<script>
+(function () {
+  try {
+    // 카테고리 선택
+    var catList = document.getElementById('catList');
+    if (catList) {
+      catList.addEventListener('click', function (e) {
+        var item = e.target.closest('.cat-item');
+        if (!item) return;
+        catList.querySelectorAll('.cat-item').forEach(function (el) { el.classList.remove('active'); el.removeAttribute('data-active'); });
+        item.classList.add('active');
+        item.setAttribute('data-active', 'true');
+      });
+    }
+
+    // 사이즈 칩
+    var sizeGroup = document.getElementById('sizeGroup');
+    if (sizeGroup) {
+      sizeGroup.addEventListener('click', function (e) {
+        var chip = e.target.closest('.chip');
+        if (!chip) return;
+        sizeGroup.querySelectorAll('.chip').forEach(function (el) { el.classList.remove('selected'); el.setAttribute('aria-pressed', 'false'); });
+        chip.classList.add('selected');
+        chip.setAttribute('aria-pressed', 'true');
+      });
+    }
+
+    // 색상 스와치
+    var colorGroup = document.getElementById('colorGroup');
+    if (colorGroup) {
+      colorGroup.addEventListener('click', function (e) {
+        var sw = e.target.closest('.swatch-btn');
+        if (!sw) return;
+        colorGroup.querySelectorAll('.swatch-btn').forEach(function (el) { el.classList.remove('selected'); el.setAttribute('aria-pressed', 'false'); });
+        sw.classList.add('selected');
+        sw.setAttribute('aria-pressed', 'true');
+      });
+    }
+
+    // 찜 토글
+    document.querySelectorAll('.wish-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var pressed = btn.getAttribute('aria-pressed') === 'true';
+        btn.setAttribute('aria-pressed', pressed ? 'false' : 'true');
+      });
+    });
+
+    // 페이지네이션 현재 페이지
+    document.querySelectorAll('.pagination button.tabular').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.pagination button').forEach(function (el) { el.classList.remove('current'); el.removeAttribute('aria-current'); });
+        btn.classList.add('current');
+        btn.setAttribute('aria-current', 'page');
+      });
+    });
+
+    // 빈 상태 미리보기 토글
+    var emptyToggle = document.getElementById('emptyToggle');
+    var emptyState = document.getElementById('emptyState');
+    var collectionGrid = document.getElementById('collectionGrid');
+    if (emptyToggle && emptyState && collectionGrid) {
+      emptyToggle.addEventListener('click', function () {
+        var showing = emptyState.classList.toggle('is-visible');
+        collectionGrid.style.display = showing ? 'none' : 'grid';
+        emptyToggle.setAttribute('aria-pressed', showing ? 'true' : 'false');
+        emptyToggle.textContent = showing ? '상품 목록으로 돌아가기' : '빈 상태 미리보기';
+      });
+    }
+    var resetBtn = document.getElementById('resetFilterBtn');
+    if (resetBtn && emptyToggle) {
+      resetBtn.addEventListener('click', function () { emptyToggle.click(); });
+    }
+  } catch (err) {
+    // JS 실패해도 정적 마크업(카드 6장·필터 기본 선택·크롬 텍스트·격자·스캔라인)은 그대로 유지된다.
+  }
+})();
+</script>
+</body>
+</html>

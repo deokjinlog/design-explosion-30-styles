@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>여덟시 — 여성 아우터 | STYLE 28 하이컨트라스트 접근성</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --surface:#FFFFFF;
+    --zone:#F4F5F7;
+    --ink:#111111;
+    --ink-soft:#2A2A2A;
+    --border:#111111;
+    --bw:2px;
+    --bw-strong:3px;
+    --focus:#0B5FFF;
+    --blue:#0B5FFF;
+    --on-blue:#FFFFFF;
+    --green:#067647;
+    --on-green:#FFFFFF;
+    --warning:#8A5A00;
+    --danger:#B00020;
+    --radius:9px;
+    --radius-sm:8px;
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px; --sp-16:64px;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight:500;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  img,svg{ display:block; max-width:100%; }
+  button, input, select{ font-family:inherit; color:inherit; }
+
+  .num, .price, .count, .field-value{
+    font-family:'Inter','Pretendard',sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings:"tnum" 1;
+  }
+
+  /* ============ 접근성 기본기 ============ */
+  .skip-link{
+    position:absolute; left:8px; top:-60px;
+    background:var(--ink); color:#fff; padding:12px 20px;
+    border-radius:var(--radius-sm); z-index:200; font-weight:700;
+    transition:top .12s ease-out;
+  }
+  .skip-link:focus{ top:8px; }
+
+  a, button, input, select, [tabindex]{
+    outline-offset:3px;
+  }
+  a:focus-visible, button:focus-visible, input:focus-visible,
+  select:focus-visible, [tabindex]:focus-visible, .toggle-input:focus-visible,
+  .chip-input:focus-visible, .swatch-input:focus-visible{
+    outline:3px solid var(--focus);
+    outline-offset:3px;
+    border-radius:2px;
+  }
+
+  .visually-hidden{
+    position:absolute !important; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  /* ============ 타이포 스케일 ============ */
+  .fs-display{ font-size:40px; line-height:48px; font-weight:800; }
+  .fs-h1{ font-size:30px; line-height:38px; font-weight:700; }
+  .fs-h2{ font-size:24px; line-height:32px; font-weight:700; }
+  .fs-title{ font-size:20px; line-height:28px; font-weight:700; }
+  .fs-body{ font-size:16px; line-height:26px; font-weight:500; }
+  .fs-label{ font-size:15px; line-height:20px; font-weight:600; }
+  .fs-caption{ font-size:14px; line-height:20px; font-weight:500; }
+
+  /* ============ 레이아웃 ============ */
+  .container{ max-width:1280px; margin:0 auto; padding:0 24px; }
+
+  /* ============ 상단 정체성 바 ============ */
+  header[data-region="identity"]{
+    background:var(--surface);
+    border-bottom:var(--bw) solid var(--border);
+    opacity:1; transform:none;
+  }
+  html.js-anim [data-anim="bar"]{ opacity:0; transition:opacity .12s linear; }
+  html.js-anim-in [data-anim="bar"]{ opacity:1; }
+
+  .identity-row{
+    display:flex; align-items:center; gap:var(--sp-6);
+    padding:14px 24px; flex-wrap:wrap;
+  }
+  .brand-mark{
+    font-size:26px; line-height:32px; font-weight:800; letter-spacing:0;
+    color:var(--ink); text-decoration:none; white-space:nowrap;
+    padding:8px 4px; border-radius:var(--radius-sm);
+    display:inline-flex; align-items:center; min-height:48px;
+  }
+  .brand-mark:hover{ text-decoration:underline; text-underline-offset:4px; }
+
+  nav.category-nav{ display:flex; gap:4px; flex-wrap:wrap; }
+  .category-nav a{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-height:48px; padding:10px 18px;
+    font-size:16px; font-weight:600; color:var(--ink);
+    text-decoration:none; border:var(--bw) solid transparent; border-radius:var(--radius-sm);
+  }
+  .category-nav a:hover{ border-color:var(--border); background:var(--zone); }
+  .category-nav a[aria-current="page"]{
+    border-color:var(--blue); border-width:var(--bw-strong);
+    font-weight:800; background:var(--surface);
+  }
+  .category-nav a[aria-current="page"] .current-dot{
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--blue); margin-left:8px;
+  }
+  .category-nav a:not([aria-current="page"]) .current-dot{ display:none; }
+
+  .identity-actions{
+    display:flex; align-items:center; gap:var(--sp-3); margin-left:auto;
+  }
+  .search-field{ position:relative; display:flex; align-items:center; }
+  .search-field label{ position:absolute; left:-9999px; }
+  .search-field input{
+    height:48px; min-width:200px; padding:0 16px 0 44px;
+    border:var(--bw) solid var(--border); border-radius:var(--radius-sm);
+    font-size:16px; font-weight:500; background:var(--surface); color:var(--ink);
+  }
+  .search-field input::placeholder{ color:var(--ink-soft); opacity:1; }
+  .search-field .icon-search{ position:absolute; left:14px; pointer-events:none; color:var(--ink); }
+
+  .icon-btn{
+    position:relative; width:48px; height:48px; display:inline-flex;
+    align-items:center; justify-content:center;
+    border:var(--bw) solid var(--border); border-radius:var(--radius-sm);
+    background:var(--surface); cursor:pointer;
+  }
+  .icon-btn:hover{ border-width:var(--bw-strong); background:var(--zone); }
+  .cart-badge{
+    position:absolute; top:-8px; right:-8px; min-width:22px; height:22px;
+    padding:0 5px; border-radius:11px; background:var(--blue); color:var(--on-blue);
+    border:2px solid var(--surface); font-size:12px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;
+  }
+
+  /* ============ 페이지 그리드 ============ */
+  .page{
+    display:grid; grid-template-columns:280px 1fr; gap:32px;
+    max-width:1280px; margin:0 auto; padding:32px 24px 64px;
+    align-items:start;
+  }
+
+  /* ============ 필터 ============ */
+  aside[data-region="filter"]{
+    border:var(--bw) solid var(--border); border-radius:var(--radius);
+    background:var(--surface); padding:24px; position:sticky; top:24px;
+  }
+  .filter-group{ padding:16px 0; border-top:var(--bw) solid var(--border); }
+  .filter-group:first-child{ border-top:none; padding-top:0; }
+  .filter-group h2{ margin:0 0 12px; font-size:15px; line-height:20px; font-weight:700; }
+
+  .filter-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px; }
+  .chip-option{ position:relative; min-height:48px; }
+  .chip-input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; z-index:1; }
+  .chip-face{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    min-height:48px; padding:12px 14px;
+    border:var(--bw) solid var(--border); border-radius:var(--radius-sm);
+    font-size:16px; font-weight:500; color:var(--ink); background:var(--surface);
+  }
+  .chip-input:checked ~ .chip-face{
+    border-color:var(--blue); border-width:var(--bw-strong); font-weight:800;
+    background:var(--zone);
+  }
+  .chip-face .check-icon{ opacity:0; color:var(--blue); flex-shrink:0; }
+  .chip-input:checked ~ .chip-face .check-icon{ opacity:1; }
+
+  .size-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+  .size-option{ position:relative; min-height:48px; }
+  .size-input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; z-index:1; }
+  .size-face{
+    display:flex; align-items:center; justify-content:center; min-height:48px;
+    border:var(--bw) solid var(--border); border-radius:var(--radius-sm);
+    font-size:16px; font-weight:700; font-family:'Inter','Pretendard',sans-serif;
+  }
+  .size-input:checked ~ .size-face{
+    border-color:var(--blue); border-width:var(--bw-strong); background:var(--zone);
+  }
+
+  .swatch-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; }
+  .swatch-option{ position:relative; width:48px; height:48px; }
+  .swatch-input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; z-index:1; }
+  .swatch-face{
+    width:48px; height:48px; border:var(--bw) solid var(--border); border-radius:var(--radius-sm);
+    display:flex; align-items:center; justify-content:center; background:var(--surface);
+  }
+  .swatch-fill{ width:26px; height:26px; border-radius:6px; border:1px solid rgba(17,17,17,.35); }
+  .swatch-check{
+    position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%;
+    background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center;
+    border:2px solid var(--surface); opacity:0;
+  }
+  .swatch-input:checked ~ .swatch-face{ border-color:var(--blue); border-width:var(--bw-strong); }
+  .swatch-input:checked ~ .swatch-check{ opacity:1; }
+
+  .price-field label{ display:block; }
+  .price-range{ width:100%; height:48px; accent-color:var(--blue); cursor:pointer; }
+  .price-bounds{
+    display:flex; justify-content:space-between; margin-top:4px;
+    font-size:14px; font-weight:600; color:var(--ink);
+    font-family:'Inter','Pretendard',sans-serif;
+  }
+
+  .toggle-row{
+    position:relative; display:flex; align-items:center; gap:12px;
+    min-height:48px; padding:8px 4px; cursor:pointer;
+  }
+  .toggle-input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; z-index:1; }
+  .toggle-track{
+    width:52px; height:30px; border:var(--bw) solid var(--border); border-radius:15px;
+    background:var(--surface); position:relative; flex-shrink:0; transition:none;
+  }
+  .toggle-knob{
+    position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:50%;
+    background:var(--ink); display:flex; align-items:center; justify-content:center; color:#fff;
+  }
+  .toggle-knob svg{ width:12px; height:12px; }
+  .toggle-input:checked ~ .toggle-track{ background:var(--green); border-color:var(--green); }
+  .toggle-input:checked ~ .toggle-track .toggle-knob{ transform:translateX(22px); background:var(--surface); color:var(--green); }
+  .toggle-text{ font-size:16px; font-weight:600; }
+  .toggle-state{ font-size:14px; font-weight:700; font-family:'Inter','Pretendard',sans-serif; }
+  .toggle-state .state-on{ display:none; color:var(--green); }
+  .toggle-state .state-off{ display:inline; color:var(--ink-soft); }
+  .toggle-input:checked ~ .toggle-state .state-on{ display:inline; }
+  .toggle-input:checked ~ .toggle-state .state-off{ display:none; }
+
+  /* ============ 결과 헤더 ============ */
+  section[data-region="results"]{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    flex-wrap:wrap; margin-bottom:24px;
+  }
+  .results-heading{ margin:0; font-size:24px; line-height:32px; font-weight:700; }
+  .sort-field{ display:flex; align-items:center; gap:10px; }
+  .sort-field label{ font-size:15px; font-weight:600; }
+  .sort-select-wrap{ position:relative; display:inline-flex; align-items:center; }
+  .sort-select{
+    height:48px; padding:0 40px 0 16px; border:var(--bw) solid var(--border);
+    border-radius:var(--radius-sm); background:var(--surface); color:var(--ink);
+    font-size:16px; font-weight:600; appearance:none; cursor:pointer;
+    font-family:'Inter','Pretendard',sans-serif;
+  }
+  .sort-select-wrap .chevron{ position:absolute; right:14px; pointer-events:none; }
+
+  /* ============ 컬렉션 그리드 ============ */
+  div[data-region="collection"]{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:24px;
+  }
+  article[data-region="item-card"]{
+    border:var(--bw) solid var(--border); border-radius:var(--radius);
+    background:var(--surface); display:flex; flex-direction:column; overflow:hidden;
+    position:relative;
+  }
+  article[data-region="item-card"]:hover,
+  article[data-region="item-card"]:focus-within{ border-width:var(--bw-strong); }
+  html.js-anim article[data-region="item-card"]{ opacity:0; transform:translateY(4px); transition:opacity .16s ease-out, transform .16s ease-out; }
+  html.js-anim-in article[data-region="item-card"]{ opacity:1; transform:translateY(0); }
+
+  .item-photo{
+    aspect-ratio:3/4; width:100%; background:var(--zone);
+    border-bottom:var(--bw) solid var(--border);
+    display:flex; align-items:center; justify-content:center; color:var(--ink);
+    position:relative;
+  }
+  .item-photo svg{ width:56px; height:56px; opacity:.85; }
+  .item-photo .photo-label{
+    position:absolute; bottom:10px; left:10px; font-size:12px; font-weight:700;
+    color:var(--ink-soft); letter-spacing:.02em; font-family:'Inter','Pretendard',sans-serif;
+  }
+
+  .heart-btn{
+    position:absolute; top:12px; right:12px; width:48px; height:48px;
+    border:var(--bw) solid var(--border); border-radius:var(--radius-sm);
+    background:var(--surface); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; z-index:2;
+  }
+  .heart-btn .heart-fill{ display:none; color:var(--danger); }
+  .heart-btn .heart-outline{ display:block; color:var(--ink); }
+  .heart-btn[aria-pressed="true"] .heart-fill{ display:block; }
+  .heart-btn[aria-pressed="true"] .heart-outline{ display:none; }
+  .heart-btn[aria-pressed="true"]{ border-color:var(--danger); border-width:var(--bw-strong); }
+
+  .item-body{ padding:16px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .item-badge-row{ display:flex; flex-wrap:wrap; gap:6px; }
+  .badge{
+    display:inline-flex; align-items:center; gap:6px; padding:5px 10px;
+    border:var(--bw) solid var(--border); border-radius:var(--radius-sm);
+    font-size:14px; font-weight:800; color:var(--ink); background:var(--surface);
+  }
+  .badge svg{ width:15px; height:15px; flex-shrink:0; }
+  .badge-best{ border-color:var(--blue); }
+  .badge-best svg{ color:var(--blue); }
+  .badge-new{ border-color:var(--green); }
+  .badge-new svg{ color:var(--green); }
+  .badge-freeship{ border-color:var(--ink); }
+  .badge-freeship svg{ color:var(--ink); }
+  .badge-lowstock{ border-color:var(--warning); }
+  .badge-lowstock svg{ color:var(--warning); }
+
+  .item-brand{ font-size:15px; font-weight:700; color:var(--ink-soft); }
+  .item-name{
+    font-size:18px; line-height:26px; font-weight:700; color:var(--ink);
+    overflow-wrap:break-word; word-break:keep-all; margin:0;
+  }
+
+  .item-swatches{ display:flex; gap:6px; align-items:center; }
+  .swatch-dot{
+    width:16px; height:16px; border-radius:4px; border:1px solid rgba(17,17,17,.35);
+  }
+
+  .item-price-row{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-top:auto; }
+  .price-original{ font-size:14px; font-weight:600; color:var(--ink-soft); text-decoration:line-through; }
+  .price-sale{ font-size:20px; font-weight:800; color:var(--ink); }
+  .discount-tag{
+    font-size:14px; font-weight:800; color:var(--ink); border:var(--bw) solid var(--blue);
+    border-radius:var(--radius-sm); padding:2px 8px;
+  }
+
+  .item-rating{ display:flex; align-items:center; gap:6px; font-size:15px; font-weight:700; color:var(--ink); }
+  .item-rating svg{ width:16px; height:16px; color:var(--ink); }
+  .item-rating.rating--empty{ color:var(--ink-soft); font-weight:600; }
+
+  /* ============ 페이지네이션 ============ */
+  nav[data-region="action"]{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    flex-wrap:wrap; margin-top:40px;
+  }
+  .page-btn{
+    position:relative; min-width:48px; height:48px; padding:0 14px;
+    border:var(--bw) solid var(--border); border-radius:var(--radius-sm);
+    background:var(--surface); color:var(--ink); font-size:16px; font-weight:700; cursor:pointer;
+    font-family:'Inter','Pretendard',sans-serif;
+  }
+  .page-btn:hover:not(:disabled){ background:var(--zone); border-width:var(--bw-strong); }
+  .page-btn:disabled{ color:var(--ink-soft); cursor:not-allowed; opacity:.5; }
+  .page-btn.is-current{
+    background:var(--blue); color:var(--on-blue); border-color:var(--blue); border-width:var(--bw-strong);
+  }
+  .page-btn.is-current::after{
+    content:""; position:absolute; bottom:-9px; left:50%; transform:translateX(-50%);
+    width:6px; height:6px; border-radius:50%; background:var(--blue);
+  }
+  .page-ellipsis{
+    min-width:48px; height:48px; display:inline-flex; align-items:center; justify-content:center;
+    font-weight:800; color:var(--ink);
+  }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    min-height:48px; padding:14px 20px; border-radius:var(--radius-sm);
+    font-size:16px; font-weight:700; cursor:pointer; border:var(--bw) solid var(--border);
+  }
+  .btn-secondary{ background:var(--surface); color:var(--ink); }
+  .btn-secondary:hover{ background:var(--ink); color:#fff; border-width:var(--bw-strong); }
+  .btn-primary{ background:var(--blue); color:var(--on-blue); border-color:var(--blue); }
+  .btn-primary:hover{ background:var(--surface); color:var(--blue); border-width:var(--bw-strong); }
+  .btn-loadmore{ margin-left:16px; }
+
+  /* ============ 빈 상태 ============ */
+  .empty-preview-label{
+    font-size:14px; font-weight:800; color:var(--ink-soft); letter-spacing:.04em;
+    text-transform:uppercase; margin:56px 0 12px; font-family:'Inter','Pretendard',sans-serif;
+  }
+  section[data-region="empty"]{
+    border:var(--bw) solid var(--border); border-radius:var(--radius);
+    padding:56px 24px; text-align:center; display:flex; flex-direction:column;
+    align-items:center; gap:12px; background:var(--zone);
+  }
+  section[data-region="empty"] .empty-icon{ color:var(--ink); margin-bottom:8px; }
+  section[data-region="empty"] h2{ margin:0; font-size:24px; line-height:32px; font-weight:800; }
+  section[data-region="empty"] p{ margin:0 0 8px; font-size:16px; line-height:26px; color:var(--ink-soft); font-weight:500; }
+
+  /* ============ 푸터 ============ */
+  footer.site-footer{
+    border-top:var(--bw) solid var(--border); padding:24px; text-align:center;
+    font-size:14px; font-weight:700; color:var(--ink-soft); letter-spacing:.02em;
+  }
+
+  /* ============ 반응형 ============ */
+  @media (max-width:1100px){
+    div[data-region="collection"]{ grid-template-columns:repeat(2, 1fr); }
+  }
+  @media (max-width:900px){
+    .page{ grid-template-columns:1fr; }
+    aside[data-region="filter"]{ position:static; }
+    .identity-row{ padding:12px 16px; }
+    .search-field input{ min-width:140px; }
+  }
+  @media (max-width:560px){
+    div[data-region="collection"]{ grid-template-columns:1fr; }
+    section[data-region="results"]{ flex-direction:column; align-items:flex-start; }
+    .container, .page{ padding-left:16px; padding-right:16px; }
+  }
+
+  /* ============ 모션·감속 ============ */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">본문으로 바로가기</a>
+
+<header data-region="identity" data-anim="bar">
+  <div class="identity-row">
+    <a class="brand-mark" href="#">여덟시</a>
+    <nav class="category-nav" aria-label="주요 카테고리">
+      <a href="#" aria-current="page">여성<span class="current-dot" aria-hidden="true"></span></a>
+      <a href="#">남성</a>
+      <a href="#">키즈</a>
+      <a href="#">세일</a>
+    </nav>
+    <div class="identity-actions">
+      <div class="search-field">
+        <label for="search-input">검색</label>
+        <span class="icon-search" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+        </span>
+        <input id="search-input" type="search" placeholder="상품, 브랜드 검색">
+      </div>
+      <button type="button" class="icon-btn" aria-label="장바구니, 담긴 상품 3개">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1.2 11.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="cart-badge num" aria-hidden="true">3</span>
+      </button>
+      <button type="button" class="icon-btn" aria-label="내 계정">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.4-3.6 4.4-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+  <aside data-region="filter" aria-label="상품 필터">
+    <div class="filter-group" data-anim="filter" style="transition-delay:.00s">
+      <h2>카테고리</h2>
+      <ul class="filter-list">
+        <li class="chip-option">
+          <input class="chip-input" type="radio" name="category" id="cat-outer" checked>
+          <label class="chip-face" for="cat-outer">아우터
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </label>
+        </li>
+        <li class="chip-option">
+          <input class="chip-input" type="radio" name="category" id="cat-top">
+          <label class="chip-face" for="cat-top">상의
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </label>
+        </li>
+        <li class="chip-option">
+          <input class="chip-input" type="radio" name="category" id="cat-bottom">
+          <label class="chip-face" for="cat-bottom">하의
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </label>
+        </li>
+        <li class="chip-option">
+          <input class="chip-input" type="radio" name="category" id="cat-dress">
+          <label class="chip-face" for="cat-dress">원피스
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </label>
+        </li>
+        <li class="chip-option">
+          <input class="chip-input" type="radio" name="category" id="cat-shoes">
+          <label class="chip-face" for="cat-shoes">신발
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </label>
+        </li>
+      </ul>
+    </div>
+
+    <div class="filter-group" data-anim="filter" style="transition-delay:.05s">
+      <h2>사이즈</h2>
+      <div class="size-grid">
+        <div class="size-option"><input class="size-input" type="radio" name="size" id="sz-xs"><label class="size-face" for="sz-xs">XS</label></div>
+        <div class="size-option"><input class="size-input" type="radio" name="size" id="sz-s"><label class="size-face" for="sz-s">S</label></div>
+        <div class="size-option"><input class="size-input" type="radio" name="size" id="sz-m" checked><label class="size-face" for="sz-m">M</label></div>
+        <div class="size-option"><input class="size-input" type="radio" name="size" id="sz-l"><label class="size-face" for="sz-l">L</label></div>
+        <div class="size-option"><input class="size-input" type="radio" name="size" id="sz-xl"><label class="size-face" for="sz-xl">XL</label></div>
+      </div>
+    </div>
+
+    <div class="filter-group" data-anim="filter" style="transition-delay:.10s">
+      <h2>색상</h2>
+      <div class="swatch-grid">
+        <div class="swatch-option">
+          <input class="swatch-input" type="radio" name="color" id="cl-black" checked>
+          <label class="swatch-face" for="cl-black"><span class="swatch-fill" style="background:#1A1A1A"></span><span class="visually-hidden">블랙</span></label>
+          <span class="swatch-check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="swatch-option">
+          <input class="swatch-input" type="radio" name="color" id="cl-white">
+          <label class="swatch-face" for="cl-white"><span class="swatch-fill" style="background:#FFFFFF"></span><span class="visually-hidden">화이트</span></label>
+          <span class="swatch-check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="swatch-option">
+          <input class="swatch-input" type="radio" name="color" id="cl-grey">
+          <label class="swatch-face" for="cl-grey"><span class="swatch-fill" style="background:#8E8E8E"></span><span class="visually-hidden">그레이</span></label>
+          <span class="swatch-check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="swatch-option">
+          <input class="swatch-input" type="radio" name="color" id="cl-navy">
+          <label class="swatch-face" for="cl-navy"><span class="swatch-fill" style="background:#1F2A44"></span><span class="visually-hidden">네이비</span></label>
+          <span class="swatch-check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="swatch-option">
+          <input class="swatch-input" type="radio" name="color" id="cl-beige">
+          <label class="swatch-face" for="cl-beige"><span class="swatch-fill" style="background:#D8C9A3"></span><span class="visually-hidden">베이지</span></label>
+          <span class="swatch-check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="swatch-option">
+          <input class="swatch-input" type="radio" name="color" id="cl-khaki">
+          <label class="swatch-face" for="cl-khaki"><span class="swatch-fill" style="background:#6B6B47"></span><span class="visually-hidden">카키</span></label>
+          <span class="swatch-check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="swatch-option">
+          <input class="swatch-input" type="radio" name="color" id="cl-brown">
+          <label class="swatch-face" for="cl-brown"><span class="swatch-fill" style="background:#5B4632"></span><span class="visually-hidden">브라운</span></label>
+          <span class="swatch-check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="swatch-option">
+          <input class="swatch-input" type="radio" name="color" id="cl-wine">
+          <label class="swatch-face" for="cl-wine"><span class="swatch-fill" style="background:#6E1423"></span><span class="visually-hidden">버건디</span></label>
+          <span class="swatch-check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-group price-field" data-anim="filter" style="transition-delay:.15s">
+      <h2><label for="price-range">가격</label></h2>
+      <input id="price-range" class="price-range" type="range" min="0" max="300000" step="10000" value="300000">
+      <div class="price-bounds"><span>₩0</span><span>₩300,000+</span></div>
+    </div>
+
+    <div class="filter-group" data-anim="filter" style="transition-delay:.20s">
+      <label class="toggle-row">
+        <input class="toggle-input" type="checkbox">
+        <span class="toggle-track" aria-hidden="true"><span class="toggle-knob">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span></span>
+        <span class="toggle-text">무료배송만</span>
+        <span class="toggle-state"><span class="state-on">켜짐</span><span class="state-off">꺼짐</span></span>
+      </label>
+      <label class="toggle-row">
+        <input class="toggle-input" type="checkbox" checked>
+        <span class="toggle-track" aria-hidden="true"><span class="toggle-knob">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span></span>
+        <span class="toggle-text">재입고 알림 가능</span>
+        <span class="toggle-state"><span class="state-on">켜짐</span><span class="state-off">꺼짐</span></span>
+      </label>
+    </div>
+  </aside>
+
+  <main id="main-content">
+    <section data-region="results">
+      <h1 class="results-heading">여성 아우터 <span class="num" data-countup="264">264</span>개</h1>
+      <div class="sort-field">
+        <label for="sort-select">정렬</label>
+        <div class="sort-select-wrap">
+          <select id="sort-select" class="sort-select">
+            <option selected>신상품순</option>
+            <option>인기순</option>
+            <option>낮은 가격순</option>
+            <option>리뷰 많은순</option>
+          </select>
+          <span class="chevron" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <div data-region="collection" style="transition-delay:.25s">
+
+      <article data-region="item-card" data-anim="card" style="transition-delay:.00s">
+        <div class="item-photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l-3 3 2 2 1-1v11h8V8l1 1 2-2-3-3-2 2h-4l-2-2z"/></svg>
+          <span class="photo-label">상품 이미지 준비중</span>
+        </div>
+        <button type="button" class="heart-btn" aria-pressed="false" aria-label="찜하기">
+          <svg class="heart-outline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+          <svg class="heart-fill" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+        </button>
+        <div class="item-body">
+          <div class="item-badge-row">
+            <span class="badge badge-best"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.5 9l-4.8 4.4L18 21l-6-3.6L6 21l1.3-7.6L2.5 9l6.6-.74L12 2z"/></svg>베스트</span>
+          </div>
+          <p class="item-brand">여덟시</p>
+          <h3 class="item-name">오버핏 울 블렌드 코트</h3>
+          <div class="item-swatches" aria-label="선택 가능 색상: 블랙, 그레이, 네이비">
+            <span class="swatch-dot" style="background:#1A1A1A"></span>
+            <span class="swatch-dot" style="background:#8E8E8E"></span>
+            <span class="swatch-dot" style="background:#1F2A44"></span>
+          </div>
+          <div class="item-price-row">
+            <span class="price-original num">₩189,000</span>
+            <span class="price-sale num">₩132,300</span>
+            <span class="discount-tag num">30%</span>
+          </div>
+          <div class="item-rating">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.5 9l-4.8 4.4L18 21l-6-3.6L6 21l1.3-7.6L2.5 9l6.6-.74L12 2z"/></svg>
+            <span class="num">4.7</span><span class="num">(1,284)</span>
+          </div>
+        </div>
+      </article>
+
+      <article data-region="item-card" data-anim="card" style="transition-delay:.05s">
+        <div class="item-photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l-3 3 2 2 1-1v11h8V8l1 1 2-2-3-3-2 2h-4l-2-2z"/></svg>
+          <span class="photo-label">상품 이미지 준비중</span>
+        </div>
+        <button type="button" class="heart-btn" aria-pressed="false" aria-label="찜하기">
+          <svg class="heart-outline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+          <svg class="heart-fill" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+        </button>
+        <div class="item-body">
+          <div class="item-badge-row">
+            <span class="badge badge-freeship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="13" height="9"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg>무료배송</span>
+          </div>
+          <p class="item-brand">코튼밀</p>
+          <h3 class="item-name">経량 패딩 베스트</h3>
+          <div class="item-swatches" aria-label="선택 가능 색상: 블랙, 베이지, 카키">
+            <span class="swatch-dot" style="background:#1A1A1A"></span>
+            <span class="swatch-dot" style="background:#D8C9A3"></span>
+            <span class="swatch-dot" style="background:#6B6B47"></span>
+          </div>
+          <div class="item-price-row">
+            <span class="price-original num">₩89,000</span>
+            <span class="price-sale num">₩62,300</span>
+            <span class="discount-tag num">30%</span>
+          </div>
+          <div class="item-rating">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.5 9l-4.8 4.4L18 21l-6-3.6L6 21l1.3-7.6L2.5 9l6.6-.74L12 2z"/></svg>
+            <span class="num">4.5</span><span class="num">(612)</span>
+          </div>
+        </div>
+      </article>
+
+      <article data-region="item-card" data-anim="card" style="transition-delay:.10s">
+        <div class="item-photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l-3 3 2 2 1-1v11h8V8l1 1 2-2-3-3-2 2h-4l-2-2z"/></svg>
+          <span class="photo-label">상품 이미지 준비중</span>
+        </div>
+        <button type="button" class="heart-btn" aria-pressed="true" aria-label="찜하기">
+          <svg class="heart-outline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+          <svg class="heart-fill" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+        </button>
+        <div class="item-body">
+          <div class="item-badge-row">
+            <span class="badge badge-new"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.1L19 9l-5.4 1.9L12 16l-1.6-5.1L5 9l5.4-1.9L12 2z"/></svg>신상</span>
+          </div>
+          <p class="item-brand">여덟시</p>
+          <h3 class="item-name">시그니처 캐시미어 100% 롱 코트 — 이탈리아 원단 · 한정 수량 리오더 불가 · 드라이클리닝 전용</h3>
+          <div class="item-swatches" aria-label="선택 가능 색상: 브라운, 블랙, 버건디">
+            <span class="swatch-dot" style="background:#5B4632"></span>
+            <span class="swatch-dot" style="background:#1A1A1A"></span>
+            <span class="swatch-dot" style="background:#6E1423"></span>
+          </div>
+          <div class="item-price-row">
+            <span class="price-original num">₩1,290,000</span>
+            <span class="price-sale num">₩1,161,000</span>
+            <span class="discount-tag num">10%</span>
+          </div>
+          <div class="item-rating rating--empty" aria-label="평점 없음(신상품)">
+            <span class="num">—</span>
+          </div>
+        </div>
+      </article>
+
+      <article data-region="item-card" data-anim="card" style="transition-delay:.15s">
+        <div class="item-photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l-3 3 2 2 1-1v11h8V8l1 1 2-2-3-3-2 2h-4l-2-2z"/></svg>
+          <span class="photo-label">상품 이미지 준비중</span>
+        </div>
+        <button type="button" class="heart-btn" aria-pressed="false" aria-label="찜하기">
+          <svg class="heart-outline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+          <svg class="heart-fill" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+        </button>
+        <div class="item-body">
+          <div class="item-badge-row">
+            <span class="badge badge-lowstock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 2 20h20L12 3.5z"/><line x1="12" y1="10" x2="12" y2="14.5"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg>품절임박</span>
+          </div>
+          <p class="item-brand">데일리랩</p>
+          <h3 class="item-name">크롭 무스탕 자켓</h3>
+          <div class="item-swatches" aria-label="선택 가능 색상: 브라운, 베이지">
+            <span class="swatch-dot" style="background:#5B4632"></span>
+            <span class="swatch-dot" style="background:#D8C9A3"></span>
+          </div>
+          <div class="item-price-row">
+            <span class="price-original num">₩259,000</span>
+            <span class="price-sale num">₩155,400</span>
+            <span class="discount-tag num">40%</span>
+          </div>
+          <div class="item-rating">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.5 9l-4.8 4.4L18 21l-6-3.6L6 21l1.3-7.6L2.5 9l6.6-.74L12 2z"/></svg>
+            <span class="num">4.2</span><span class="num">(338)</span>
+          </div>
+        </div>
+      </article>
+
+      <article data-region="item-card" data-anim="card" style="transition-delay:.20s">
+        <div class="item-photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l-3 3 2 2 1-1v11h8V8l1 1 2-2-3-3-2 2h-4l-2-2z"/></svg>
+          <span class="photo-label">상품 이미지 준비중</span>
+        </div>
+        <button type="button" class="heart-btn" aria-pressed="false" aria-label="찜하기">
+          <svg class="heart-outline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+          <svg class="heart-fill" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+        </button>
+        <div class="item-body">
+          <div class="item-badge-row">
+            <span class="badge badge-best"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.5 9l-4.8 4.4L18 21l-6-3.6L6 21l1.3-7.6L2.5 9l6.6-.74L12 2z"/></svg>베스트</span>
+          </div>
+          <p class="item-brand">코튼밀</p>
+          <h3 class="item-name">베이직 후드 집업</h3>
+          <div class="item-swatches" aria-label="선택 가능 색상: 그레이, 블랙, 네이비">
+            <span class="swatch-dot" style="background:#8E8E8E"></span>
+            <span class="swatch-dot" style="background:#1A1A1A"></span>
+            <span class="swatch-dot" style="background:#1F2A44"></span>
+          </div>
+          <div class="item-price-row">
+            <span class="price-original num">₩49,000</span>
+            <span class="price-sale num">₩39,200</span>
+            <span class="discount-tag num">20%</span>
+          </div>
+          <div class="item-rating">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.5 9l-4.8 4.4L18 21l-6-3.6L6 21l1.3-7.6L2.5 9l6.6-.74L12 2z"/></svg>
+            <span class="num">4.8</span><span class="num">(2,041)</span>
+          </div>
+        </div>
+      </article>
+
+      <article data-region="item-card" data-anim="card" style="transition-delay:.25s">
+        <div class="item-photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l-3 3 2 2 1-1v11h8V8l1 1 2-2-3-3-2 2h-4l-2-2z"/></svg>
+          <span class="photo-label">상품 이미지 준비중</span>
+        </div>
+        <button type="button" class="heart-btn" aria-pressed="false" aria-label="찜하기">
+          <svg class="heart-outline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+          <svg class="heart-fill" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.3 2 4.8 5.4 4.1c2-.4 4 .5 5.1 2.2C11.6 4.6 13.6 3.7 15.6 4.1c3.4.7 5 4.2 3.4 7.6C20.5 16.4 12 21 12 21z"/></svg>
+        </button>
+        <div class="item-body">
+          <div class="item-badge-row">
+            <span class="badge badge-freeship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="13" height="9"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg>무료배송</span>
+          </div>
+          <p class="item-brand">여덟시</p>
+          <h3 class="item-name">워시드 데님 트러커</h3>
+          <div class="item-swatches" aria-label="선택 가능 색상: 네이비, 블랙">
+            <span class="swatch-dot" style="background:#1F2A44"></span>
+            <span class="swatch-dot" style="background:#1A1A1A"></span>
+          </div>
+          <div class="item-price-row">
+            <span class="price-original num">₩119,000</span>
+            <span class="price-sale num">₩95,200</span>
+            <span class="discount-tag num">20%</span>
+          </div>
+          <div class="item-rating">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.5 9l-4.8 4.4L18 21l-6-3.6L6 21l1.3-7.6L2.5 9l6.6-.74L12 2z"/></svg>
+            <span class="num">4.4</span><span class="num">(517)</span>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <nav data-region="action" aria-label="페이지네이션">
+      <button type="button" class="page-btn" aria-label="이전 페이지" disabled>‹</button>
+      <button type="button" class="page-btn is-current" aria-current="page">1<span class="visually-hidden">, 현재 페이지</span></button>
+      <button type="button" class="page-btn">2</button>
+      <button type="button" class="page-btn">3</button>
+      <span class="page-ellipsis" aria-hidden="true">…</span>
+      <button type="button" class="page-btn">22</button>
+      <button type="button" class="page-btn" aria-label="다음 페이지">›</button>
+      <button type="button" class="btn btn-secondary btn-loadmore">더 보기</button>
+    </nav>
+
+    <p class="empty-preview-label">빈 상태 미리보기 · 결과 0건일 때</p>
+    <section data-region="empty" aria-labelledby="empty-heading">
+      <span class="empty-icon" aria-hidden="true">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/><line x1="8.5" y1="11" x2="13.5" y2="11"/></svg>
+      </span>
+      <h2 id="empty-heading">조건에 맞는 상품이 없어요</h2>
+      <p>사이즈나 색상 조건을 줄여보세요.</p>
+      <button type="button" class="btn btn-primary">필터 초기화</button>
+    </section>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>STYLE 28 · 하이컨트라스트 접근성</p>
+</footer>
+
+<script>
+(function(){
+  var reduce = false;
+  try{ reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+
+  if(!reduce){
+    document.documentElement.classList.add('js-anim');
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        document.documentElement.classList.add('js-anim-in');
+      });
+    });
+
+    var counter = document.querySelector('[data-countup]');
+    if(counter){
+      var target = parseInt(counter.getAttribute('data-countup'), 10) || 0;
+      var start = null, dur = 600;
+      function step(ts){
+        if(start === null) start = ts;
+        var p = Math.min((ts - start) / dur, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        counter.textContent = Math.round(eased * target).toLocaleString('ko-KR');
+        if(p < 1){ requestAnimationFrame(step); }
+        else{ counter.textContent = target.toLocaleString('ko-KR'); }
+      }
+      requestAnimationFrame(step);
+    }
+  }
+
+  var hearts = document.querySelectorAll('.heart-btn');
+  for(var i=0; i<hearts.length; i++){
+    hearts[i].addEventListener('click', function(){
+      var pressed = this.getAttribute('aria-pressed') === 'true';
+      this.setAttribute('aria-pressed', String(!pressed));
+    });
+  }
+})();
+</script>
+</body>
+</html>

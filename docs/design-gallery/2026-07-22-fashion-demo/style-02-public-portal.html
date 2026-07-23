@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>여성 아우터 상품 공시 — 여덟시 공식몰 (STYLE 02 공공포털)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#F5F6F8;
+    --navy:#00447C;
+    --navy-dark:#003060;
+    --th-sky:#E8F1F9;
+    --hover-sky:#EEF5FC;
+    --text:#1A1A1A;
+    --muted:#55606B;
+    --border:#D5DBE1;
+    --stripe:#FAFBFC;
+    --success:#1A7F3C;
+    --danger:#C62828;
+    --pending:#9A6700;
+    --white:#FFFFFF;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    font-size:13px;
+    line-height:1.55;
+    font-variant-numeric: tabular-nums;
+  }
+  h1,h2,h3{ margin:0; font-weight:700; }
+  p{ margin:0; }
+  ul{ list-style:none; margin:0; padding:0; }
+  a{ color:var(--navy); text-decoration:none; }
+  a:hover{ background:var(--hover-sky); color:var(--navy-dark); text-decoration:underline; }
+  button{ font-family:inherit; cursor:pointer; }
+  table{ border-collapse:collapse; width:100%; }
+  img{ max-width:100%; }
+
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+  .skip-link{
+    position:absolute; left:8px; top:-40px; background:var(--navy); color:#fff;
+    padding:8px 12px; z-index:100; border:1px solid var(--navy-dark);
+  }
+  .skip-link:focus{ top:8px; }
+
+  :focus-visible{ outline:2px solid var(--navy); outline-offset:2px; }
+
+  .footnote{
+    font-size:11px; color:var(--muted); line-height:1.6;
+  }
+
+  /* ── 최상단 공시 스트립 ── */
+  .gov-strip{
+    background:var(--navy-dark);
+    color:#EAF0F6;
+    border-bottom:1px solid var(--navy-dark);
+  }
+  .gov-strip-inner{
+    max-width:1280px; margin:0 auto; padding:6px 24px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;
+    font-size:11px;
+  }
+  .gov-strip a{ color:#CFE0F0; }
+  .gov-strip a:hover{ background:transparent; color:#fff; }
+
+  /* ── 정체성 바 ── */
+  .identity-wrap{ background:var(--navy); border-bottom:3px solid var(--navy-dark); }
+  .identity-bar{
+    max-width:1280px; margin:0 auto; padding:14px 24px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+  }
+  .identity-left{ display:flex; align-items:center; gap:28px; flex-wrap:wrap; }
+  .brand-mark{
+    font-size:20px; font-weight:700; color:#fff; letter-spacing:-0.01em; border:none;
+  }
+  .cat-nav{ display:flex; gap:20px; }
+  .cat-nav a{
+    color:#D8E4EF; font-size:14px; font-weight:600; padding:4px 2px;
+    border-bottom:2px solid transparent;
+  }
+  .cat-nav a:hover{ background:transparent; color:#fff; }
+  .cat-nav a[aria-current="page"]{ color:#fff; border-bottom-color:#fff; }
+
+  .identity-right{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .search-field{ display:flex; align-items:center; border:1px solid #D8E4EF; background:#fff; }
+  .search-field input{
+    border:none; padding:6px 10px; font-size:13px; width:180px; font-family:inherit; color:var(--text);
+  }
+  .search-field input:focus{ outline:none; }
+  .search-field input::placeholder{ color:var(--muted); }
+  .search-btn{
+    background:var(--navy-dark); color:#fff; border:none; padding:6px 12px; font-size:12.5px; font-weight:600;
+  }
+  .search-btn:hover{ background:#001F40; }
+  .cart-link{ color:#fff; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; border:1px solid transparent; padding:4px 6px; }
+  .cart-link:hover{ background:rgba(255,255,255,0.12); color:#fff; text-decoration:none; }
+  .cart-badge{
+    background:#fff; color:var(--navy-dark); font-size:11px; font-weight:700;
+    min-width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center;
+    padding:0 4px; border:1px solid var(--navy-dark);
+  }
+  .avatar-box{
+    width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+    background:#fff; color:var(--navy-dark); font-size:11px; font-weight:700; border:1px solid #D8E4EF;
+  }
+
+  /* ── 안내 밴드(banner) ── */
+  .info-band{
+    background:var(--th-sky); border-bottom:1px solid var(--border);
+    padding:12px 24px;
+  }
+  .info-band-inner{ max-width:1280px; margin:0 auto; }
+  .info-band-inner p{ margin-bottom:4px; }
+  .info-band-inner p:last-child{ margin-bottom:0; }
+  .info-band strong{ color:var(--navy-dark); }
+
+  /* ── 레이아웃 ── */
+  .layout{
+    max-width:1280px; margin:0 auto; padding:24px;
+    display:grid; grid-template-columns:260px 1fr; gap:24px; align-items:start;
+  }
+
+  /* ── 필터 패널 ── */
+  .filter-panel{
+    background:#fff; border:1px solid var(--border);
+    padding:0 16px 20px;
+  }
+  .panel-title{
+    font-size:15px; font-weight:700; color:var(--text);
+    border-left:4px solid var(--navy); padding:12px 0 12px 12px; margin:0 -16px 12px;
+  }
+  .filter-group{ border:none; padding:14px 0; margin:0; border-top:1px solid var(--border); }
+  .filter-group:first-of-type{ border-top:none; padding-top:0; }
+  .filter-group legend{
+    font-size:12.5px; font-weight:700; color:var(--text); padding:0; margin-bottom:8px; width:100%;
+  }
+  .cat-list{ display:flex; flex-direction:column; gap:2px; }
+  .cat-item{
+    display:block; padding:6px 8px; font-size:13px; color:var(--text);
+    border-left:3px solid transparent;
+  }
+  .cat-item:hover{ background:var(--hover-sky); color:var(--navy-dark); text-decoration:none; }
+  .cat-item.is-selected{
+    border-left-color:var(--navy); background:var(--th-sky); color:var(--navy-dark); font-weight:700;
+  }
+
+  .chip-row{ display:flex; flex-wrap:wrap; gap:6px; }
+  .chip{
+    background:#fff; border:1px solid var(--border); color:var(--text);
+    font-size:12.5px; padding:6px 10px; min-width:36px;
+  }
+  .chip:hover{ background:var(--hover-sky); border-color:var(--navy); }
+  .chip.is-selected{
+    background:var(--navy); border-color:var(--navy); color:#fff; font-weight:700;
+  }
+
+  .swatch-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; }
+  .swatch-btn{
+    width:100%; aspect-ratio:1/1; background:var(--sw); border:1px solid var(--border);
+    position:relative; padding:0;
+  }
+  .swatch-btn:hover{ border-color:var(--navy); }
+  .swatch-btn.is-selected{ border:2px solid var(--navy); }
+  .swatch-check{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:#fff; text-shadow:none; font-size:14px; font-weight:700; mix-blend-mode:difference;
+  }
+  .selected-note{ font-size:11.5px; color:var(--muted); margin-top:8px; }
+
+  .price-range-label{
+    font-size:12.5px; font-weight:700; color:var(--navy-dark); margin-bottom:8px; font-variant-numeric:tabular-nums;
+  }
+  .price-slider{
+    width:100%; -webkit-appearance:none; appearance:none; height:2px; background:var(--border);
+  }
+  .price-slider::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none; width:14px; height:14px; background:var(--navy);
+    border:1px solid var(--navy-dark); cursor:pointer;
+  }
+  .price-slider::-moz-range-thumb{
+    width:14px; height:14px; background:var(--navy); border:1px solid var(--navy-dark); cursor:pointer;
+  }
+
+  .filter-toggles{ display:flex; flex-direction:column; gap:10px; }
+  .toggle-row{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text); }
+  .toggle-row input{ width:15px; height:15px; accent-color:var(--navy); }
+
+  /* ── 결과 헤더 ── */
+  .results-header{
+    display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:12px;
+    padding-bottom:12px; margin-bottom:16px; border-bottom:2px solid var(--navy);
+  }
+  .page-title{ font-size:20px; font-weight:700; color:var(--text); }
+  .sort-control{ position:relative; display:inline-flex; align-items:center; }
+  .sort-control select{
+    -webkit-appearance:none; appearance:none; background:#fff; border:1px solid var(--border);
+    color:var(--text); font-size:12.5px; font-family:inherit; padding:7px 28px 7px 10px;
+  }
+  .sort-control select:hover{ border-color:var(--navy); }
+  .sort-caret{ position:absolute; right:10px; color:var(--muted); pointer-events:none; font-size:11px; }
+
+  /* ── 상품 카드 그리드 ── */
+  .product-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;
+  }
+  .product-card{
+    background:#fff; border:1px solid var(--border); display:flex; flex-direction:column;
+    position:relative;
+  }
+  .product-card::before{
+    content:"목록 " attr(data-idx);
+    position:absolute; top:0; left:0; background:var(--navy); color:#fff;
+    font-size:10.5px; font-weight:700; padding:2px 8px; letter-spacing:0.02em;
+  }
+  .thumb-fallback{
+    aspect-ratio:3/4; width:100%; background:var(--stripe); border-bottom:1px solid var(--border);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    padding-top:14px;
+  }
+  .thumb-idx{ font-size:11px; color:var(--muted); font-weight:700; letter-spacing:0.04em; }
+  .thumb-txt{ font-size:11.5px; color:var(--muted); text-align:center; line-height:1.5; }
+
+  .card-body{ padding:12px 14px 14px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .card-brand{ font-size:11.5px; color:var(--muted); font-weight:700; }
+  .card-name{
+    font-size:14px; font-weight:700; color:var(--text); line-height:1.4;
+    overflow-wrap:break-word; min-height:20px;
+  }
+  .mini-swatches{ display:flex; gap:5px; }
+  .mini-swatches span{ width:14px; height:14px; background:var(--sw); border:1px solid var(--border); display:inline-block; }
+
+  table.disclosure{ font-size:12.5px; border-top:1px solid var(--border); }
+  table.disclosure tr{ border-bottom:1px solid var(--border); }
+  table.disclosure tr:nth-child(even){ background:var(--stripe); }
+  table.disclosure th{
+    text-align:left; font-weight:600; color:var(--muted); padding:5px 4px 5px 0; width:44%;
+    background:var(--th-sky);
+  }
+  table.disclosure td{ text-align:right; padding:5px 0; font-variant-numeric:tabular-nums; }
+  .strike{ text-decoration:line-through; color:var(--muted); }
+  .price-now{ font-weight:700; color:var(--text); font-size:13.5px; }
+  .chg{ font-weight:700; }
+  .chg.down{ color:var(--success); }
+  .rating-missing{ color:var(--muted); }
+
+  .card-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:6px; }
+  .status-badge{
+    font-size:11px; font-weight:700; padding:3px 8px; border:1px solid; white-space:nowrap;
+  }
+  .badge-best{ color:var(--success); border-color:var(--success); background:#F2F8F4; }
+  .badge-new{ color:var(--pending); border-color:var(--pending); background:#FBF6EC; }
+  .badge-freeship{ color:var(--navy); border-color:var(--navy); background:var(--th-sky); }
+  .badge-lowstock{ color:var(--danger); border-color:var(--danger); background:#FBEDED; }
+
+  .wish-btn{
+    background:#fff; border:1px solid var(--border); color:var(--text); font-size:11.5px; padding:5px 9px;
+    display:flex; align-items:center; gap:4px;
+  }
+  .wish-btn:hover{ border-color:var(--navy); color:var(--navy-dark); }
+
+  /* ── 그리드 하단 각주·다음 행동 ── */
+  .grid-footnote{
+    margin-top:20px; padding-top:14px; border-top:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;
+  }
+  .grid-footnote .footnote{ max-width:60ch; }
+  .next-actions{ display:flex; flex-wrap:wrap; gap:16px; font-size:12.5px; font-weight:600; }
+
+  /* ── 페이지네이션 ── */
+  .pagination{
+    display:flex; align-items:center; gap:6px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+  .page-arrow, .page-num{
+    min-width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center;
+    border:1px solid var(--border); color:var(--text); font-size:12.5px; font-variant-numeric:tabular-nums;
+  }
+  .page-num.is-current{ background:var(--navy); border-color:var(--navy); color:#fff; font-weight:700; }
+  .page-ellipsis{ padding:0 4px; color:var(--muted); }
+  .btn-secondary{
+    margin-left:auto; background:#fff; border:1px solid var(--navy); color:var(--navy-dark);
+    font-size:12.5px; font-weight:700; padding:7px 16px;
+  }
+  .btn-secondary:hover{ background:var(--hover-sky); }
+  .btn-primary{
+    background:var(--navy); border:1px solid var(--navy-dark); color:#fff;
+    font-size:13px; font-weight:700; padding:9px 20px;
+  }
+  .btn-primary:hover{ background:var(--navy-dark); }
+
+  /* ── 빈 상태 예시 ── */
+  .empty-state{
+    margin-top:24px; padding:32px 24px; border:1px dashed var(--border); background:#fff; text-align:center;
+  }
+  .empty-kicker{
+    font-size:11px; font-weight:700; letter-spacing:0.04em; color:var(--muted); margin-bottom:10px;
+  }
+  .empty-headline{ font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px; }
+  .empty-desc{ font-size:13px; color:var(--muted); margin-bottom:16px; }
+
+  /* ── 사이트 푸터 ── */
+  .site-footer{
+    max-width:1280px; margin:0 auto; padding:20px 24px 32px; border-top:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+  }
+  .site-footer p:last-child{ font-size:12px; font-weight:700; color:var(--muted); }
+
+  /* ── 반응형 900px 이하 ── */
+  @media (max-width:900px){
+    .layout{ grid-template-columns:1fr; }
+    .product-grid{ grid-template-columns:repeat(2, 1fr); }
+    .identity-bar{ flex-direction:column; align-items:flex-start; }
+    .search-field input{ width:140px; }
+  }
+  @media (max-width:560px){
+    .product-grid{ grid-template-columns:1fr; }
+    .layout{ padding:16px; gap:16px; }
+    .gov-strip-inner{ flex-direction:column; align-items:flex-start; gap:2px; }
+  }
+
+  /* ── 접근성: 모션 감소 환경(장식적 모션이 애초에 없으므로 즉시 완성 상태 유지) ── */
+  @media (prefers-reduced-motion:reduce){
+    *{ scroll-behavior:auto !important; }
+  }
+
+  /* ── 인쇄 ── */
+  @media print{
+    @page{ margin:14mm; }
+    body{ background:#fff; color:#000; font-size:11pt; }
+    .gov-strip, .identity-wrap, .filter-panel, .search-field, .cart-link, .avatar-box,
+    .wish-btn, .sort-control, .empty-state, .skip-link{ display:none !important; }
+    .info-band{ background:#fff; border:1px solid #000; }
+    .layout{ grid-template-columns:1fr; max-width:100%; padding:0; }
+    .product-grid{ grid-template-columns:repeat(2, 1fr); }
+    .product-card{ break-inside:avoid; border:1px solid #000; }
+    .thumb-fallback{ background:#fff; border-bottom:1px solid #000; }
+    table.disclosure th{ background:#fff; }
+    table.disclosure tr:nth-child(even){ background:#fff; }
+    .status-badge, .badge-best, .badge-new, .badge-freeship, .badge-lowstock{
+      color:#000 !important; border-color:#000 !important; background:#fff !important;
+    }
+    a{ color:#000; text-decoration:underline; }
+    .site-footer::after{
+      content:"인쇄본 · " attr(data-print-date) " · p." counter(page);
+      display:block; font-size:9pt; color:#000; margin-top:8px;
+    }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">본문 바로가기</a>
+
+<header class="gov-strip">
+  <div class="gov-strip-inner">
+    <span>공시 시스템 · 최종 갱신일 2026-07-22 10:00 · 매일 06:00 자동 갱신</span>
+    <span>인쇄 가능 문서 (Ctrl+P / Cmd+P)</span>
+  </div>
+</header>
+
+<header class="identity-wrap">
+  <div data-region="identity" class="identity-bar">
+    <div class="identity-left">
+      <span class="brand-mark">여덟시</span>
+      <nav class="cat-nav" data-region="nav" aria-label="주요 카테고리">
+        <a href="#" aria-current="page">여성</a>
+        <a href="#">남성</a>
+        <a href="#">키즈</a>
+        <a href="#">세일</a>
+      </nav>
+    </div>
+    <div class="identity-right">
+      <label class="search-field">
+        <span class="sr-only">상품 검색</span>
+        <input type="search" placeholder="상품 · 브랜드 검색">
+        <button type="button" class="search-btn">검색</button>
+      </label>
+      <a href="#" class="cart-link">장바구니 <span class="cart-badge">3</span></a>
+      <span class="avatar-box" aria-label="내 계정">회원</span>
+    </div>
+  </div>
+</header>
+
+<div data-region="banner" class="info-band">
+  <div class="info-band-inner">
+    <p><strong>공시 안내</strong> — 이 화면은 여덟시 공식몰 <strong>여성 › 아우터</strong> 상품 목록입니다. 가격·할인율·재고 상태는 집계 시점 자료이며 이후 변동될 수 있습니다.</p>
+    <p class="footnote">※ 집계 기준일 2026-07-22 09:00 · 출처 여덟시(주) 상품관리시스템 · 매일 06:00 갱신 · 다음 갱신 예정 2026-07-23 06:00 · 단위: 원(KRW)</p>
+  </div>
+</div>
+
+<main id="main" class="layout">
+  <aside data-region="filter" class="filter-panel" aria-label="상품 검색 조건">
+    <h2 class="panel-title">검색 조건</h2>
+
+    <fieldset class="filter-group">
+      <legend>카테고리</legend>
+      <ul class="cat-list">
+        <li><a href="#" class="cat-item is-selected" aria-current="true">아우터<span class="sr-only"> (선택됨)</span></a></li>
+        <li><a href="#" class="cat-item">상의</a></li>
+        <li><a href="#" class="cat-item">하의</a></li>
+        <li><a href="#" class="cat-item">원피스</a></li>
+        <li><a href="#" class="cat-item">신발</a></li>
+      </ul>
+    </fieldset>
+
+    <fieldset class="filter-group">
+      <legend>사이즈</legend>
+      <div class="chip-row" role="group" aria-label="사이즈 선택">
+        <button type="button" class="chip">XS</button>
+        <button type="button" class="chip">S</button>
+        <button type="button" class="chip is-selected" aria-pressed="true">M<span class="sr-only"> (선택됨)</span></button>
+        <button type="button" class="chip">L</button>
+        <button type="button" class="chip">XL</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="filter-group">
+      <legend>색상</legend>
+      <div class="swatch-grid" role="group" aria-label="색상 선택">
+        <button type="button" class="swatch-btn is-selected" style="--sw:#1A1A1A" aria-pressed="true"><span class="sr-only">블랙 (선택됨)</span><span class="swatch-check" aria-hidden="true">✓</span></button>
+        <button type="button" class="swatch-btn" style="--sw:#FFFFFF"><span class="sr-only">화이트</span></button>
+        <button type="button" class="swatch-btn" style="--sw:#8D9299"><span class="sr-only">그레이</span></button>
+        <button type="button" class="swatch-btn" style="--sw:#00447C"><span class="sr-only">네이비</span></button>
+        <button type="button" class="swatch-btn" style="--sw:#D8CBB4"><span class="sr-only">베이지</span></button>
+        <button type="button" class="swatch-btn" style="--sw:#A9825B"><span class="sr-only">카멜</span></button>
+        <button type="button" class="swatch-btn" style="--sw:#6B6F4C"><span class="sr-only">카키</span></button>
+        <button type="button" class="swatch-btn" style="--sw:#6E2430"><span class="sr-only">버건디</span></button>
+      </div>
+      <p class="selected-note">선택됨: 블랙</p>
+    </fieldset>
+
+    <fieldset class="filter-group">
+      <legend>가격</legend>
+      <p class="price-range-label">₩0 – ₩300,000+</p>
+      <input type="range" class="price-slider" min="0" max="300000" step="10000" value="300000" aria-label="최대 가격 ₩300,000+">
+    </fieldset>
+
+    <fieldset class="filter-group filter-toggles">
+      <legend class="sr-only">배송·재입고 조건</legend>
+      <label class="toggle-row"><input type="checkbox"> 무료배송만</label>
+      <label class="toggle-row"><input type="checkbox"> 재입고 알림 가능</label>
+    </fieldset>
+  </aside>
+
+  <section class="results-col">
+    <div data-region="results" class="results-header">
+      <h1 class="page-title">여성 아우터 264개</h1>
+      <div class="sort-control">
+        <label for="sortSelect" class="sr-only">정렬 기준</label>
+        <select id="sortSelect">
+          <option selected>신상품순</option>
+          <option>인기순</option>
+          <option>낮은 가격순</option>
+          <option>리뷰 많은순</option>
+        </select>
+        <span class="sort-caret" aria-hidden="true">▾</span>
+      </div>
+    </div>
+
+    <div data-region="collection" class="product-grid">
+
+      <article data-region="item-card" class="product-card" data-idx="01" aria-labelledby="name-1">
+        <div class="thumb-fallback" aria-hidden="true">
+          <span class="thumb-idx">IMG · 01</span>
+          <span class="thumb-txt">상품 이미지<br>미제공</span>
+        </div>
+        <div class="card-body">
+          <p class="card-brand">여덟시</p>
+          <h3 class="card-name" id="name-1">오버핏 울 블렌드 코트</h3>
+          <div class="mini-swatches" aria-label="색상 3종"><span style="--sw:#1A1A1A"></span><span style="--sw:#A9825B"></span><span style="--sw:#4B4F58"></span></div>
+          <table class="disclosure">
+            <caption class="sr-only">오버핏 울 블렌드 코트 가격·평점 정보</caption>
+            <tbody>
+              <tr><th scope="row">원가</th><td class="num strike">₩189,000</td></tr>
+              <tr><th scope="row">판매가</th><td class="num price-now">₩132,300</td></tr>
+              <tr><th scope="row">할인율</th><td class="num"><span class="chg down">▼ 30%</span></td></tr>
+              <tr><th scope="row">평점(리뷰)</th><td class="num">★ 4.7 (1,284)</td></tr>
+            </tbody>
+          </table>
+          <div class="card-foot">
+            <span class="status-badge badge-best">베스트</span>
+            <button type="button" class="wish-btn" aria-pressed="false"><span aria-hidden="true">♡</span> 찜</button>
+          </div>
+        </div>
+      </article>
+
+      <article data-region="item-card" class="product-card" data-idx="02" aria-labelledby="name-2">
+        <div class="thumb-fallback" aria-hidden="true">
+          <span class="thumb-idx">IMG · 02</span>
+          <span class="thumb-txt">상품 이미지<br>미제공</span>
+        </div>
+        <div class="card-body">
+          <p class="card-brand">코튼밀</p>
+          <h3 class="card-name" id="name-2">経량 패딩 베스트</h3>
+          <div class="mini-swatches" aria-label="색상 3종"><span style="--sw:#1A1A1A"></span><span style="--sw:#FFFFFF"></span><span style="--sw:#8D9299"></span></div>
+          <table class="disclosure">
+            <caption class="sr-only">経량 패딩 베스트 가격·평점 정보</caption>
+            <tbody>
+              <tr><th scope="row">원가</th><td class="num strike">₩89,000</td></tr>
+              <tr><th scope="row">판매가</th><td class="num price-now">₩62,300</td></tr>
+              <tr><th scope="row">할인율</th><td class="num"><span class="chg down">▼ 30%</span></td></tr>
+              <tr><th scope="row">평점(리뷰)</th><td class="num">★ 4.5 (612)</td></tr>
+            </tbody>
+          </table>
+          <div class="card-foot">
+            <span class="status-badge badge-freeship">무료배송</span>
+            <button type="button" class="wish-btn" aria-pressed="false"><span aria-hidden="true">♡</span> 찜</button>
+          </div>
+        </div>
+      </article>
+
+      <article data-region="item-card" class="product-card" data-idx="03" aria-labelledby="name-3">
+        <div class="thumb-fallback" aria-hidden="true">
+          <span class="thumb-idx">IMG · 03</span>
+          <span class="thumb-txt">상품 이미지<br>미제공</span>
+        </div>
+        <div class="card-body">
+          <p class="card-brand">여덟시</p>
+          <h3 class="card-name" id="name-3">시그니처 캐시미어 100% 롱 코트 — 이탈리아 원단 · 한정 수량 리오더 불가 · 드라이클리닝 전용</h3>
+          <div class="mini-swatches" aria-label="색상 3종"><span style="--sw:#1A1A1A"></span><span style="--sw:#D8CBB4"></span><span style="--sw:#6E2430"></span></div>
+          <table class="disclosure">
+            <caption class="sr-only">시그니처 캐시미어 100% 롱 코트 가격·평점 정보</caption>
+            <tbody>
+              <tr><th scope="row">원가</th><td class="num strike">₩1,290,000</td></tr>
+              <tr><th scope="row">판매가</th><td class="num price-now">₩1,161,000</td></tr>
+              <tr><th scope="row">할인율</th><td class="num"><span class="chg down">▼ 10%</span></td></tr>
+              <tr><th scope="row">평점(리뷰)</th><td class="num rating-missing">—</td></tr>
+            </tbody>
+          </table>
+          <div class="card-foot">
+            <span class="status-badge badge-new">신상</span>
+            <button type="button" class="wish-btn" aria-pressed="false"><span aria-hidden="true">♡</span> 찜</button>
+          </div>
+        </div>
+      </article>
+
+      <article data-region="item-card" class="product-card" data-idx="04" aria-labelledby="name-4">
+        <div class="thumb-fallback" aria-hidden="true">
+          <span class="thumb-idx">IMG · 04</span>
+          <span class="thumb-txt">상품 이미지<br>미제공</span>
+        </div>
+        <div class="card-body">
+          <p class="card-brand">데일리랩</p>
+          <h3 class="card-name" id="name-4">크롭 무스탕 자켓</h3>
+          <div class="mini-swatches" aria-label="색상 3종"><span style="--sw:#D8CBB4"></span><span style="--sw:#A9825B"></span><span style="--sw:#1A1A1A"></span></div>
+          <table class="disclosure">
+            <caption class="sr-only">크롭 무스탕 자켓 가격·평점 정보</caption>
+            <tbody>
+              <tr><th scope="row">원가</th><td class="num strike">₩259,000</td></tr>
+              <tr><th scope="row">판매가</th><td class="num price-now">₩155,400</td></tr>
+              <tr><th scope="row">할인율</th><td class="num"><span class="chg down">▼ 40%</span></td></tr>
+              <tr><th scope="row">평점(리뷰)</th><td class="num">★ 4.2 (338)</td></tr>
+            </tbody>
+          </table>
+          <div class="card-foot">
+            <span class="status-badge badge-lowstock">품절임박</span>
+            <button type="button" class="wish-btn" aria-pressed="false"><span aria-hidden="true">♡</span> 찜</button>
+          </div>
+        </div>
+      </article>
+
+      <article data-region="item-card" class="product-card" data-idx="05" aria-labelledby="name-5">
+        <div class="thumb-fallback" aria-hidden="true">
+          <span class="thumb-idx">IMG · 05</span>
+          <span class="thumb-txt">상품 이미지<br>미제공</span>
+        </div>
+        <div class="card-body">
+          <p class="card-brand">코튼밀</p>
+          <h3 class="card-name" id="name-5">베이직 후드 집업</h3>
+          <div class="mini-swatches" aria-label="색상 3종"><span style="--sw:#1A1A1A"></span><span style="--sw:#8D9299"></span><span style="--sw:#00447C"></span></div>
+          <table class="disclosure">
+            <caption class="sr-only">베이직 후드 집업 가격·평점 정보</caption>
+            <tbody>
+              <tr><th scope="row">원가</th><td class="num strike">₩49,000</td></tr>
+              <tr><th scope="row">판매가</th><td class="num price-now">₩39,200</td></tr>
+              <tr><th scope="row">할인율</th><td class="num"><span class="chg down">▼ 20%</span></td></tr>
+              <tr><th scope="row">평점(리뷰)</th><td class="num">★ 4.8 (2,041)</td></tr>
+            </tbody>
+          </table>
+          <div class="card-foot">
+            <span class="status-badge badge-best">베스트</span>
+            <button type="button" class="wish-btn" aria-pressed="false"><span aria-hidden="true">♡</span> 찜</button>
+          </div>
+        </div>
+      </article>
+
+      <article data-region="item-card" class="product-card" data-idx="06" aria-labelledby="name-6">
+        <div class="thumb-fallback" aria-hidden="true">
+          <span class="thumb-idx">IMG · 06</span>
+          <span class="thumb-txt">상품 이미지<br>미제공</span>
+        </div>
+        <div class="card-body">
+          <p class="card-brand">여덟시</p>
+          <h3 class="card-name" id="name-6">워시드 데님 트러커</h3>
+          <div class="mini-swatches" aria-label="색상 3종"><span style="--sw:#00447C"></span><span style="--sw:#1A1A1A"></span><span style="--sw:#8D9299"></span></div>
+          <table class="disclosure">
+            <caption class="sr-only">워시드 데님 트러커 가격·평점 정보</caption>
+            <tbody>
+              <tr><th scope="row">원가</th><td class="num strike">₩119,000</td></tr>
+              <tr><th scope="row">판매가</th><td class="num price-now">₩95,200</td></tr>
+              <tr><th scope="row">할인율</th><td class="num"><span class="chg down">▼ 20%</span></td></tr>
+              <tr><th scope="row">평점(리뷰)</th><td class="num">★ 4.4 (517)</td></tr>
+            </tbody>
+          </table>
+          <div class="card-foot">
+            <span class="status-badge badge-freeship">무료배송</span>
+            <button type="button" class="wish-btn" aria-pressed="false"><span aria-hidden="true">♡</span> 찜</button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="grid-footnote">
+      <p class="footnote">※ 출처 여덟시(주) 상품관리시스템 · 집계 기준일 2026-07-22 09:00 · 매일 06:00 갱신 · 다음 갱신 예정 2026-07-23 06:00 · 가격 단위: 원(KRW)</p>
+      <ul class="next-actions">
+        <li><a href="#">전체 목록 보기 +</a></li>
+        <li><a href="#">원자료(CSV) 내려받기</a></li>
+        <li><a href="#">이전 회차 비교</a></li>
+      </ul>
+    </div>
+
+    <nav data-region="action" class="pagination" aria-label="페이지 이동">
+      <a href="#" class="page-arrow" aria-label="이전 페이지">‹</a>
+      <a href="#" class="page-num is-current" aria-current="page">1</a>
+      <a href="#" class="page-num">2</a>
+      <a href="#" class="page-num">3</a>
+      <span class="page-ellipsis">…</span>
+      <a href="#" class="page-num">22</a>
+      <a href="#" class="page-arrow" aria-label="다음 페이지">›</a>
+      <button type="button" class="btn-secondary">더 보기</button>
+    </nav>
+
+    <section data-region="empty" class="empty-state" aria-label="빈 상태 예시">
+      <p class="empty-kicker">상태 예시 · 검색 결과 0건일 때</p>
+      <h2 class="empty-headline">조건에 맞는 상품이 없어요</h2>
+      <p class="empty-desc">사이즈나 색상 조건을 줄여보세요.</p>
+      <button type="button" class="btn-primary">필터 초기화</button>
+    </section>
+  </section>
+</main>
+
+<footer class="site-footer" data-print-date="2026-07-22">
+  <p class="footnote">본 화면은 디자인 스타일 탐색용 데모입니다. 실제 거래 데이터가 아닙니다.</p>
+  <p>STYLE 02 · 공공포털</p>
+</footer>
+
+</body>
+</html>

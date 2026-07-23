@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>여덟시 — 여성 아우터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{
+    --bg:#0A0A12;
+    --surface:rgba(255,255,255,0.03);
+    --surface-hover:rgba(255,255,255,0.055);
+    --hairline:rgba(255,255,255,0.08);
+    --text:#E8E9F2;
+    --text-dim:#8A8DA6;
+    --purple:#7C5CFF;
+    --cyan:#2FD8E8;
+    --pink:#FF5CC8;
+    --warn:#FF6B8A;
+
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px; --sp-16:64px;
+    --fs-xs:12px; --fs-sm:14px; --fs-base:16px; --fs-lg:20px; --fs-xl:24px; --fs-2xl:32px; --fs-3xl:48px;
+
+    --radius-lg:20px; --radius-md:16px; --radius-sm:10px;
+    --font-en:'Inter','Pretendard Variable',Pretendard,-apple-system,sans-serif;
+    --font-kr:'Pretendard Variable',Pretendard,'Inter',-apple-system,sans-serif;
+
+    --ease:cubic-bezier(.16,.8,.3,1);
+  }
+
+  *{ box-sizing:border-box; }
+  html{ background:var(--bg); }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-kr);
+    font-size:var(--fs-base);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{ margin:0; font-family:var(--font-en); letter-spacing:-0.02em; }
+  p{ margin:0; }
+  ul{ list-style:none; margin:0; padding:0; }
+  button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+  a{ color:inherit; text-decoration:none; }
+  input,select{ font:inherit; color:inherit; }
+  .num{ font-family:var(--font-en); font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+
+  ::selection{ background:rgba(124,92,255,0.35); color:var(--text); }
+
+  :focus-visible{
+    outline:2px solid var(--cyan);
+    outline-offset:2px;
+    box-shadow:0 0 0 5px rgba(47,216,232,0.18);
+    border-radius:4px;
+  }
+
+  /* ---------- Aurora background ---------- */
+  .aurora-mesh{
+    position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+    transition:filter .8s linear;
+  }
+  .aurora-mesh .blob{
+    position:absolute;
+    width:56vw; height:56vw; min-width:520px; min-height:520px;
+    border-radius:50%;
+    filter:blur(80px);
+    opacity:0;
+    will-change:transform,opacity;
+  }
+  .blob-purple{
+    top:-14%; left:-12%;
+    background:radial-gradient(circle at 35% 35%, rgba(124,92,255,0.9), rgba(124,92,255,0) 68%);
+    animation:aurora-in .9s var(--ease) forwards, drift-a 26s ease-in-out infinite alternate;
+    animation-delay:0s, .9s;
+  }
+  .blob-cyan{
+    bottom:-18%; right:-10%;
+    background:radial-gradient(circle at 60% 40%, rgba(47,216,232,0.85), rgba(47,216,232,0) 68%);
+    animation:aurora-in .9s var(--ease) forwards, drift-b 32s ease-in-out infinite alternate;
+    animation-delay:.15s, 1.05s;
+  }
+  .blob-pink{
+    top:30%; right:8%;
+    width:42vw; height:42vw; min-width:400px; min-height:400px;
+    background:radial-gradient(circle at 50% 50%, rgba(255,92,200,0.7), rgba(255,92,200,0) 68%);
+    animation:aurora-in .9s var(--ease) forwards, drift-c 24s ease-in-out infinite alternate;
+    animation-delay:.3s, 1.2s;
+  }
+  @keyframes aurora-in{ to{ opacity:.55; } }
+  @keyframes drift-a{ from{ transform:translate(0,0) rotate(0deg); } to{ transform:translate(6%,4%) rotate(10deg); } }
+  @keyframes drift-b{ from{ transform:translate(0,0) rotate(0deg); } to{ transform:translate(-5%,-6%) rotate(-8deg); } }
+  @keyframes drift-c{ from{ transform:translate(0,0) scale(1); } to{ transform:translate(-4%,5%) scale(1.08); } }
+
+  /* ---------- layout shell ---------- */
+  .identity, .layout, .site-footer{ position:relative; z-index:1; }
+
+  .identity{
+    position:sticky; top:0; z-index:20;
+    background:rgba(10,10,18,0.72);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--hairline);
+    opacity:0; transform:translateY(-12px);
+    animation:fade-up .7s var(--ease) forwards;
+    animation-delay:.1s;
+  }
+  .identity-inner{
+    max-width:1280px; margin:0 auto;
+    padding:var(--sp-3) var(--sp-6);
+    display:flex; align-items:center; gap:var(--sp-6);
+  }
+  .logo{
+    font-family:var(--font-en); font-weight:700; font-size:var(--fs-lg);
+    letter-spacing:-0.02em; flex:0 0 auto;
+    background:linear-gradient(90deg,#fff,var(--cyan) 140%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .cat-nav{ display:flex; align-items:center; gap:var(--sp-4); flex:1 1 auto; }
+  .cat-link{
+    font-size:var(--fs-sm); font-weight:500; color:var(--text-dim);
+    padding:var(--sp-2) 0; position:relative; white-space:nowrap;
+    transition:color .2s var(--ease);
+  }
+  .cat-link:hover{ color:var(--text); }
+  .cat-link.is-active{ color:var(--text); font-weight:600; }
+  .cat-link.is-active::after{
+    content:""; position:absolute; left:0; right:0; bottom:-2px; height:2px; border-radius:2px;
+    background:linear-gradient(90deg,var(--purple),var(--cyan));
+  }
+  .cat-sale{ color:var(--warn); }
+  .cat-sale:hover{ color:var(--warn); }
+
+  .identity-actions{ display:flex; align-items:center; gap:var(--sp-3); flex:0 0 auto; }
+  .search-box{
+    display:flex; align-items:center; gap:var(--sp-2);
+    background:var(--surface); border:1px solid var(--hairline); border-radius:999px;
+    padding:var(--sp-2) var(--sp-4);
+    transition:border-color .2s var(--ease), background .2s var(--ease);
+  }
+  .search-box:focus-within{ border-color:rgba(47,216,232,0.5); background:var(--surface-hover); }
+  .search-box svg{ color:var(--text-dim); flex:0 0 auto; }
+  .search-box input{
+    background:none; border:0; outline:0; color:var(--text); width:160px;
+    font-size:var(--fs-sm);
+  }
+  .search-box input::placeholder{ color:var(--text-dim); }
+
+  .icon-btn{
+    position:relative; width:38px; height:38px; border-radius:var(--radius-sm);
+    display:flex; align-items:center; justify-content:center;
+    background:var(--surface); border:1px solid var(--hairline);
+    transition:background .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease);
+  }
+  .icon-btn:hover{ background:var(--surface-hover); border-color:rgba(124,92,255,0.35); transform:translateY(-1px); }
+  .cart-btn .badge{
+    position:absolute; top:-6px; right:-6px;
+    min-width:18px; height:18px; padding:0 4px; border-radius:999px;
+    background:linear-gradient(135deg,var(--purple),var(--cyan));
+    color:#0A0A12; font-size:10px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .avatar{
+    width:38px; height:38px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--surface); border:1px solid var(--hairline); color:var(--text-dim);
+  }
+  .avatar:hover{ color:var(--text); border-color:rgba(255,92,200,0.35); }
+
+  .layout{
+    max-width:1280px; margin:0 auto;
+    padding:var(--sp-8) var(--sp-6) var(--sp-16);
+    display:grid; grid-template-columns:260px 1fr; gap:var(--sp-8);
+    align-items:start;
+  }
+
+  /* ---------- filter panel ---------- */
+  .filter-panel{
+    position:sticky; top:88px;
+    display:flex; flex-direction:column; gap:var(--sp-6);
+    background:var(--surface);
+    border:1px solid var(--hairline);
+    border-radius:var(--radius-lg);
+    padding:var(--sp-6);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);
+    opacity:0; transform:translateY(12px);
+    animation:fade-up .7s var(--ease) forwards; animation-delay:.22s;
+  }
+  .filter-group{ display:flex; flex-direction:column; gap:var(--sp-3); }
+  .filter-group + .filter-group{ padding-top:var(--sp-4); border-top:1px solid var(--hairline); }
+  .filter-group h3{
+    font-family:var(--font-kr); font-size:var(--fs-xs); font-weight:600;
+    letter-spacing:.04em; text-transform:uppercase; color:var(--text-dim);
+  }
+  .filter-list{ display:flex; flex-direction:column; gap:var(--sp-1); }
+  .filter-item{
+    text-align:left; padding:var(--sp-2) var(--sp-3); border-radius:var(--radius-sm);
+    font-size:var(--fs-sm); color:var(--text-dim);
+    border:1px solid transparent;
+    transition:background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+  }
+  .filter-item:hover{ color:var(--text); background:var(--surface-hover); }
+  .filter-item.is-selected{
+    color:var(--text); font-weight:600; background:var(--surface-hover);
+    border-color:rgba(124,92,255,0.4);
+    box-shadow:inset 0 0 0 1px rgba(124,92,255,0.12);
+  }
+
+  .chip-row{ display:flex; flex-wrap:wrap; gap:var(--sp-2); }
+  .chip{
+    min-width:38px; padding:var(--sp-2) var(--sp-3); border-radius:var(--radius-sm);
+    border:1px solid var(--hairline); font-size:var(--fs-sm); color:var(--text-dim);
+    text-align:center;
+    transition:border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease);
+  }
+  .chip:hover{ color:var(--text); border-color:rgba(255,255,255,0.2); }
+  .chip.is-selected{
+    color:var(--text); font-weight:600; background:var(--surface-hover);
+    border-color:transparent;
+    position:relative;
+  }
+  .chip.is-selected::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:linear-gradient(120deg,var(--purple),var(--cyan));
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+  }
+
+  .swatch-row{ display:flex; flex-wrap:wrap; gap:var(--sp-2); }
+  .swatch{
+    width:26px; height:26px; border-radius:50%; position:relative; flex:0 0 auto;
+    border:1px solid var(--hairline);
+    transition:transform .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  .swatch:hover{ transform:translateY(-2px); }
+  .swatch.is-selected{ box-shadow:0 0 0 2px var(--bg), 0 0 0 4px var(--cyan); }
+
+  .price-range{
+    -webkit-appearance:none; appearance:none; width:100%; height:4px; border-radius:2px;
+    background:linear-gradient(90deg,var(--purple),var(--cyan));
+    outline:none;
+  }
+  .price-range::-webkit-slider-thumb{
+    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+    background:var(--text); border:2px solid var(--cyan); cursor:pointer;
+    box-shadow:0 0 8px rgba(47,216,232,0.6);
+  }
+  .price-range::-moz-range-thumb{
+    width:16px; height:16px; border-radius:50%;
+    background:var(--text); border:2px solid var(--cyan); cursor:pointer;
+  }
+  .price-labels{ display:flex; justify-content:space-between; font-size:var(--fs-xs); color:var(--text-dim); }
+
+  .toggle-row{
+    display:flex; align-items:center; justify-content:space-between; gap:var(--sp-3);
+    font-size:var(--fs-sm); color:var(--text);
+  }
+  .switch{
+    -webkit-appearance:none; appearance:none;
+    width:38px; height:22px; border-radius:999px; position:relative; flex:0 0 auto;
+    background:rgba(255,255,255,0.1); border:1px solid var(--hairline); cursor:pointer;
+    transition:background .2s var(--ease);
+  }
+  .switch::after{
+    content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
+    background:var(--text-dim); transition:transform .2s var(--ease), background .2s var(--ease);
+  }
+  .switch:checked{ background:rgba(124,92,255,0.3); border-color:rgba(124,92,255,0.5); }
+  .switch:checked::after{ transform:translateX(16px); background:var(--cyan); }
+
+  /* ---------- main column ---------- */
+  .main-col{ display:flex; flex-direction:column; gap:var(--sp-6); min-width:0; }
+
+  .results-header{
+    display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4);
+    opacity:0; transform:translateY(12px);
+    animation:fade-up .7s var(--ease) forwards; animation-delay:.3s;
+  }
+  .result-count{ font-size:var(--fs-lg); color:var(--text); }
+  .result-count strong{ font-family:var(--font-en); font-variant-numeric:tabular-nums; }
+
+  .sort-control{ position:relative; }
+  .sort-trigger{
+    display:flex; align-items:center; gap:var(--sp-2);
+    padding:var(--sp-2) var(--sp-4); border-radius:var(--radius-sm);
+    border:1px solid var(--hairline); background:var(--surface);
+    font-size:var(--fs-sm); color:var(--text);
+    transition:border-color .2s var(--ease), background .2s var(--ease);
+  }
+  .sort-trigger:hover{ border-color:rgba(47,216,232,0.4); background:var(--surface-hover); }
+  .sort-trigger .chevron{ color:var(--text-dim); font-size:11px; transition:transform .2s var(--ease); }
+  .sort-trigger[aria-expanded="true"] .chevron{ transform:rotate(180deg); }
+  .sort-menu{
+    position:absolute; top:calc(100% + 8px); right:0; z-index:15;
+    min-width:160px; padding:var(--sp-2);
+    background:#12121c; border:1px solid var(--hairline); border-radius:var(--radius-sm);
+    box-shadow:0 12px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .sort-menu[hidden]{ display:none; }
+  .sort-option{
+    text-align:left; padding:var(--sp-2) var(--sp-3); border-radius:8px;
+    font-size:var(--fs-sm); color:var(--text-dim);
+  }
+  .sort-option:hover{ background:var(--surface-hover); color:var(--text); }
+  .sort-option.is-selected{ color:var(--text); font-weight:600; }
+
+  /* ---------- collection grid ---------- */
+  .collection-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--sp-6);
+  }
+  .item-card{
+    position:relative; border-radius:var(--radius-lg); overflow:hidden;
+    background:linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    display:flex; flex-direction:column;
+    opacity:0; transform:translateY(12px);
+    animation:fade-up .7s var(--ease) forwards;
+    transition:box-shadow .25s ease, transform .25s ease;
+  }
+  .collection-grid .item-card:nth-child(1){ animation-delay:.38s; }
+  .collection-grid .item-card:nth-child(2){ animation-delay:.44s; }
+  .collection-grid .item-card:nth-child(3){ animation-delay:.50s; }
+  .collection-grid .item-card:nth-child(4){ animation-delay:.56s; }
+  .collection-grid .item-card:nth-child(5){ animation-delay:.62s; }
+  .collection-grid .item-card:nth-child(6){ animation-delay:.68s; }
+
+  .item-card::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:linear-gradient(135deg, var(--purple), var(--cyan) 55%, var(--pink));
+    opacity:.25; pointer-events:none;
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    transition:opacity .25s ease;
+  }
+  .item-card:hover{ transform:translateY(-4px); box-shadow:0 18px 44px -18px rgba(124,92,255,0.35); }
+  .item-card:hover::before{ opacity:.75; }
+
+  .thumb{
+    position:relative; aspect-ratio:3/4; overflow:hidden;
+    background:
+      linear-gradient(160deg, rgba(124,92,255,0.22), rgba(47,216,232,0.14) 55%, rgba(255,92,200,0.18)),
+      linear-gradient(0deg, rgba(10,10,18,0.35), rgba(10,10,18,0.35));
+    display:flex; align-items:center; justify-content:center;
+  }
+  .thumb::after{
+    content:attr(data-initial);
+    font-family:var(--font-en); font-weight:700; font-size:88px;
+    color:rgba(232,233,242,0.14); letter-spacing:-0.03em;
+  }
+  .thumb .heart{
+    position:absolute; top:var(--sp-3); right:var(--sp-3);
+    width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(10,10,18,0.45); border:1px solid rgba(255,255,255,0.14);
+    color:var(--text); backdrop-filter:blur(6px);
+    transition:background .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .thumb .heart:hover{ transform:scale(1.08); border-color:rgba(255,92,200,0.5); }
+  .thumb .heart svg{ transition:fill .2s ease, stroke .2s ease; }
+  .thumb .heart[aria-pressed="true"] svg{ fill:var(--pink); stroke:var(--pink); }
+  .thumb .heart[aria-pressed="true"]{ background:rgba(255,92,200,0.14); }
+
+  .thumb .badge-status{
+    position:absolute; top:var(--sp-3); left:var(--sp-3);
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 10px; border-radius:999px;
+    font-size:11px; font-weight:600; color:var(--text);
+    background:rgba(10,10,18,0.55); border:1px solid var(--hairline);
+    backdrop-filter:blur(8px);
+  }
+  .badge-status .dot{ width:7px; height:7px; border-radius:50%; flex:0 0 auto; }
+  .badge-status.st-best .dot{ background:var(--purple); box-shadow:0 0 8px var(--purple); }
+  .badge-status.st-new .dot{ background:var(--pink); box-shadow:0 0 8px var(--pink); }
+  .badge-status.st-ship .dot{ background:var(--cyan); box-shadow:0 0 8px var(--cyan); }
+  .badge-status.st-low .dot{ background:var(--warn); box-shadow:0 0 8px var(--warn); }
+
+  .card-body{ padding:var(--sp-4); display:flex; flex-direction:column; gap:var(--sp-2); flex:1; }
+  .brand{ font-size:var(--fs-xs); color:var(--text-dim); font-weight:600; letter-spacing:.02em; }
+  .product-name{
+    font-family:var(--font-kr); font-size:var(--fs-sm); font-weight:500; color:var(--text);
+    line-height:1.45; word-break:keep-all; overflow-wrap:anywhere;
+    min-height:2.9em;
+  }
+  .swatch-mini-row{ display:flex; gap:6px; }
+  .swatch-mini{ width:14px; height:14px; border-radius:50%; border:1px solid var(--hairline); }
+
+  .price-row{
+    display:flex; align-items:baseline; gap:var(--sp-2); flex-wrap:wrap;
+    margin-top:auto;
+  }
+  .price-orig{
+    font-family:var(--font-en); font-size:var(--fs-xs); color:var(--text-dim);
+    text-decoration:line-through; text-decoration-color:rgba(138,141,166,0.6);
+  }
+  .discount{ font-family:var(--font-en); font-size:var(--fs-sm); font-weight:700; color:var(--warn); }
+  .price-sale{
+    font-family:var(--font-en); font-size:var(--fs-lg); font-weight:700; color:var(--text);
+    letter-spacing:-0.02em;
+  }
+  .meta-row{ display:flex; align-items:center; justify-content:space-between; font-size:var(--fs-xs); color:var(--text-dim); }
+  .rating{ display:flex; align-items:center; gap:4px; }
+  .rating .star{ color:var(--cyan); }
+  .rating.is-empty{ color:var(--text-dim); }
+
+  /* ---------- pagination ---------- */
+  .pagination{
+    display:flex; align-items:center; justify-content:center; gap:var(--sp-2); flex-wrap:wrap;
+    padding-top:var(--sp-4);
+    opacity:0; transform:translateY(12px);
+    animation:fade-up .7s var(--ease) forwards; animation-delay:.78s;
+  }
+  .page-btn{
+    min-width:36px; height:36px; padding:0 10px; border-radius:var(--radius-sm);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-en); font-size:var(--fs-sm); color:var(--text-dim);
+    border:1px solid transparent;
+    transition:background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .page-btn:hover{ background:var(--surface-hover); color:var(--text); }
+  .page-btn.is-current{
+    color:var(--text); font-weight:700; background:var(--surface-hover);
+    position:relative; border-color:transparent;
+  }
+  .page-btn.is-current::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:linear-gradient(135deg,var(--purple),var(--cyan));
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+  }
+  .page-ellipsis{ color:var(--text-dim); padding:0 4px; font-family:var(--font-en); }
+
+  .btn{
+    height:40px; padding:0 var(--sp-6); border-radius:var(--radius-sm);
+    font-size:var(--fs-sm); font-weight:600; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    transition:transform .2s ease, box-shadow .25s ease, border-color .2s ease, background .2s ease;
+  }
+  .btn-secondary{
+    margin-left:var(--sp-3);
+    background:var(--surface); color:var(--text); border:1px solid var(--hairline);
+    position:relative;
+  }
+  .btn-secondary::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:linear-gradient(135deg,var(--purple),var(--cyan),var(--pink));
+    opacity:.3; pointer-events:none;
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    transition:opacity .3s ease;
+  }
+  .btn-secondary:hover{ transform:translateY(-1px); box-shadow:0 10px 28px -14px rgba(47,216,232,0.4); }
+  .btn-secondary:hover::before{ opacity:.8; }
+
+  .btn-primary{
+    background:rgba(255,255,255,0.05); color:var(--text); border:1px solid transparent;
+    position:relative; background-size:200% 100%; background-position:0% 0%;
+  }
+  .btn-primary::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:linear-gradient(90deg,var(--purple),var(--cyan),var(--purple));
+    background-size:200% 100%; background-position:0% 0%;
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    transition:background-position .4s ease;
+  }
+  .btn-primary:hover::before{ background-position:100% 0%; }
+  .btn-primary:hover{ box-shadow:0 12px 30px -14px rgba(124,92,255,0.45); }
+
+  /* ---------- empty state (demo panel) ---------- */
+  .empty-demo{
+    margin-top:var(--sp-8);
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:var(--sp-3);
+    padding:var(--sp-16) var(--sp-6);
+    border:1px dashed var(--hairline); border-radius:var(--radius-lg);
+    opacity:0; transform:translateY(12px);
+    animation:fade-up .7s var(--ease) forwards; animation-delay:.84s;
+  }
+  .state-tag{
+    font-family:var(--font-en); font-size:10px; font-weight:700; letter-spacing:.12em;
+    color:var(--text-dim); text-transform:uppercase;
+    padding:4px 10px; border-radius:999px; border:1px solid var(--hairline);
+  }
+  .empty-icon{
+    width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:var(--surface); border:1px solid var(--hairline); color:var(--text-dim);
+    margin-bottom:var(--sp-2);
+  }
+  .empty-demo h3{ font-family:var(--font-kr); font-size:var(--fs-lg); font-weight:600; color:var(--text); }
+  .empty-demo p{ font-size:var(--fs-sm); color:var(--text-dim); max-width:320px; }
+  .empty-demo .btn-primary{ margin-top:var(--sp-2); }
+
+  /* ---------- footer ---------- */
+  .site-footer{
+    text-align:center; padding:var(--sp-8) var(--sp-6) var(--sp-12);
+    font-family:var(--font-en); font-size:var(--fs-xs); color:var(--text-dim);
+    letter-spacing:.04em; border-top:1px solid var(--hairline);
+  }
+
+  @keyframes fade-up{ to{ opacity:1; transform:translateY(0); } }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .layout{ grid-template-columns:1fr; padding:var(--sp-6) var(--sp-4) var(--sp-12); }
+    .filter-panel{ position:static; }
+    .collection-grid{ grid-template-columns:repeat(2, 1fr); gap:var(--sp-4); }
+    .search-box input{ width:100px; }
+    .cat-nav{ gap:var(--sp-3); }
+    .identity-inner{ padding:var(--sp-3) var(--sp-4); gap:var(--sp-3); }
+  }
+  @media (max-width:520px){
+    .collection-grid{ grid-template-columns:1fr 1fr; gap:var(--sp-3); }
+    .search-box{ display:none; }
+    .results-header{ flex-wrap:wrap; gap:var(--sp-2); }
+    .thumb::after{ font-size:56px; }
+  }
+  @media (max-width:380px){
+    .collection-grid{ grid-template-columns:1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.001ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.001ms !important;
+      animation-delay:0s !important;
+    }
+    .aurora-mesh .blob{ opacity:.5 !important; animation:none !important; transform:none !important; }
+    .aurora-mesh{ filter:none !important; transform:none !important; }
+    .identity, .filter-panel, .results-header, .item-card, .pagination, .empty-demo{
+      opacity:1 !important; transform:none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="aurora-mesh" aria-hidden="true" id="auroraMesh">
+    <span class="blob blob-purple"></span>
+    <span class="blob blob-cyan"></span>
+    <span class="blob blob-pink"></span>
+  </div>
+
+  <header class="identity" data-region="identity">
+    <div class="identity-inner">
+      <a class="logo" href="#" aria-label="여덟시 홈으로">여덟시</a>
+      <nav class="cat-nav" aria-label="카테고리">
+        <a href="#" class="cat-link is-active" aria-current="page">여성</a>
+        <a href="#" class="cat-link">남성</a>
+        <a href="#" class="cat-link">키즈</a>
+        <a href="#" class="cat-link cat-sale">세일</a>
+      </nav>
+      <div class="identity-actions">
+        <label class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="search" placeholder="상품, 브랜드 검색" aria-label="상품 검색">
+        </label>
+        <button class="icon-btn cart-btn" aria-label="장바구니, 담긴 상품 3개">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span class="badge num">3</span>
+        </button>
+        <button class="avatar" aria-label="내 계정 메뉴">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="filter-panel" data-region="filter" aria-label="상품 필터">
+      <div class="filter-group">
+        <h3>카테고리</h3>
+        <ul class="filter-list">
+          <li><button class="filter-item is-selected" aria-pressed="true">아우터</button></li>
+          <li><button class="filter-item">상의</button></li>
+          <li><button class="filter-item">하의</button></li>
+          <li><button class="filter-item">원피스</button></li>
+          <li><button class="filter-item">신발</button></li>
+        </ul>
+      </div>
+
+      <div class="filter-group">
+        <h3>사이즈</h3>
+        <div class="chip-row">
+          <button class="chip">XS</button>
+          <button class="chip">S</button>
+          <button class="chip is-selected" aria-pressed="true">M</button>
+          <button class="chip">L</button>
+          <button class="chip">XL</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h3>색상</h3>
+        <div class="swatch-row">
+          <button class="swatch is-selected" style="background:#15151c" aria-label="블랙, 선택됨" aria-pressed="true"></button>
+          <button class="swatch" style="background:#f3f2ee" aria-label="화이트"></button>
+          <button class="swatch" style="background:#8a8d93" aria-label="그레이"></button>
+          <button class="swatch" style="background:#1f2a44" aria-label="네이비"></button>
+          <button class="swatch" style="background:#d8c3a1" aria-label="베이지"></button>
+          <button class="swatch" style="background:#b17a4a" aria-label="카멜"></button>
+          <button class="swatch" style="background:#5c5f45" aria-label="올리브"></button>
+          <button class="swatch" style="background:#6d2233" aria-label="버건디"></button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h3>가격</h3>
+        <input type="range" class="price-range" min="0" max="300000" step="10000" value="300000" aria-label="최대 가격">
+        <div class="price-labels num"><span>₩0</span><span>₩300,000+</span></div>
+      </div>
+
+      <div class="filter-group toggle-group">
+        <label class="toggle-row">
+          <span>무료배송만</span>
+          <input type="checkbox" class="switch" aria-label="무료배송만 보기">
+        </label>
+        <label class="toggle-row">
+          <span>재입고 알림 가능</span>
+          <input type="checkbox" class="switch" aria-label="재입고 알림 가능 상품만 보기">
+        </label>
+      </div>
+    </aside>
+
+    <main class="main-col">
+      <div class="results-header" data-region="results">
+        <p class="result-count">여성 아우터 <strong class="num">264</strong>개</p>
+        <div class="sort-control">
+          <button class="sort-trigger" id="sortTrigger" aria-haspopup="listbox" aria-expanded="false">
+            <span id="sortLabel">신상품순</span><span class="chevron">▾</span>
+          </button>
+          <ul class="sort-menu" id="sortMenu" hidden role="listbox">
+            <li role="option"><button class="sort-option is-selected">신상품순</button></li>
+            <li role="option"><button class="sort-option">인기순</button></li>
+            <li role="option"><button class="sort-option">낮은 가격순</button></li>
+            <li role="option"><button class="sort-option">리뷰 많은순</button></li>
+          </ul>
+        </div>
+      </div>
+
+      <section class="collection-grid" data-region="collection">
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" data-initial="8">
+            <span class="badge-status st-best"><span class="dot"></span>베스트</span>
+            <button class="heart" aria-label="찜하기" aria-pressed="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+            </button>
+          </div>
+          <div class="card-body">
+            <p class="brand">여덟시</p>
+            <p class="product-name">오버핏 울 블렌드 코트</p>
+            <div class="swatch-mini-row">
+              <span class="swatch-mini" style="background:#15151c"></span>
+              <span class="swatch-mini" style="background:#1f2a44"></span>
+              <span class="swatch-mini" style="background:#d8c3a1"></span>
+            </div>
+            <div class="price-row">
+              <span class="price-orig num">₩189,000</span>
+              <span class="discount num">30%</span>
+              <span class="price-sale num">₩132,300</span>
+            </div>
+            <div class="meta-row">
+              <span class="rating"><span class="star">★</span><span class="num">4.7 (1,284)</span></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" data-initial="C">
+            <span class="badge-status st-ship"><span class="dot"></span>무료배송</span>
+            <button class="heart" aria-label="찜하기" aria-pressed="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+            </button>
+          </div>
+          <div class="card-body">
+            <p class="brand">코튼밀</p>
+            <p class="product-name">経량 패딩 베스트</p>
+            <div class="swatch-mini-row">
+              <span class="swatch-mini" style="background:#15151c"></span>
+              <span class="swatch-mini" style="background:#8a8d93"></span>
+              <span class="swatch-mini" style="background:#5c5f45"></span>
+            </div>
+            <div class="price-row">
+              <span class="price-orig num">₩89,000</span>
+              <span class="discount num">30%</span>
+              <span class="price-sale num">₩62,300</span>
+            </div>
+            <div class="meta-row">
+              <span class="rating"><span class="star">★</span><span class="num">4.5 (612)</span></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" data-initial="8">
+            <span class="badge-status st-new"><span class="dot"></span>신상</span>
+            <button class="heart" aria-label="찜하기" aria-pressed="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+            </button>
+          </div>
+          <div class="card-body">
+            <p class="brand">여덟시</p>
+            <p class="product-name">시그니처 캐시미어 100% 롱 코트 — 이탈리아 원단 · 한정 수량 리오더 불가 · 드라이클리닝 전용</p>
+            <div class="swatch-mini-row">
+              <span class="swatch-mini" style="background:#15151c"></span>
+              <span class="swatch-mini" style="background:#d8c3a1"></span>
+              <span class="swatch-mini" style="background:#6d2233"></span>
+            </div>
+            <div class="price-row">
+              <span class="price-orig num">₩1,290,000</span>
+              <span class="discount num">10%</span>
+              <span class="price-sale num">₩1,161,000</span>
+            </div>
+            <div class="meta-row">
+              <span class="rating is-empty" aria-label="평점 없음">—</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" data-initial="D">
+            <span class="badge-status st-low"><span class="dot"></span>품절임박</span>
+            <button class="heart" aria-label="찜하기" aria-pressed="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+            </button>
+          </div>
+          <div class="card-body">
+            <p class="brand">데일리랩</p>
+            <p class="product-name">크롭 무스탕 자켓</p>
+            <div class="swatch-mini-row">
+              <span class="swatch-mini" style="background:#b17a4a"></span>
+              <span class="swatch-mini" style="background:#15151c"></span>
+              <span class="swatch-mini" style="background:#d8c3a1"></span>
+            </div>
+            <div class="price-row">
+              <span class="price-orig num">₩259,000</span>
+              <span class="discount num">40%</span>
+              <span class="price-sale num">₩155,400</span>
+            </div>
+            <div class="meta-row">
+              <span class="rating"><span class="star">★</span><span class="num">4.2 (338)</span></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" data-initial="C">
+            <span class="badge-status st-best"><span class="dot"></span>베스트</span>
+            <button class="heart" aria-label="찜하기" aria-pressed="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+            </button>
+          </div>
+          <div class="card-body">
+            <p class="brand">코튼밀</p>
+            <p class="product-name">베이직 후드 집업</p>
+            <div class="swatch-mini-row">
+              <span class="swatch-mini" style="background:#15151c"></span>
+              <span class="swatch-mini" style="background:#8a8d93"></span>
+              <span class="swatch-mini" style="background:#1f2a44"></span>
+            </div>
+            <div class="price-row">
+              <span class="price-orig num">₩49,000</span>
+              <span class="discount num">20%</span>
+              <span class="price-sale num">₩39,200</span>
+            </div>
+            <div class="meta-row">
+              <span class="rating"><span class="star">★</span><span class="num">4.8 (2,041)</span></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb" data-initial="8">
+            <span class="badge-status st-ship"><span class="dot"></span>무료배송</span>
+            <button class="heart" aria-label="찜하기" aria-pressed="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+            </button>
+          </div>
+          <div class="card-body">
+            <p class="brand">여덟시</p>
+            <p class="product-name">워시드 데님 트러커</p>
+            <div class="swatch-mini-row">
+              <span class="swatch-mini" style="background:#1f2a44"></span>
+              <span class="swatch-mini" style="background:#8a8d93"></span>
+              <span class="swatch-mini" style="background:#15151c"></span>
+            </div>
+            <div class="price-row">
+              <span class="price-orig num">₩119,000</span>
+              <span class="discount num">20%</span>
+              <span class="price-sale num">₩95,200</span>
+            </div>
+            <div class="meta-row">
+              <span class="rating"><span class="star">★</span><span class="num">4.4 (517)</span></span>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+      <nav class="pagination" data-region="action" aria-label="페이지 이동">
+        <button class="page-btn prev" aria-label="이전 페이지">‹</button>
+        <button class="page-btn is-current num" aria-current="page">1</button>
+        <button class="page-btn num">2</button>
+        <button class="page-btn num">3</button>
+        <span class="page-ellipsis">…</span>
+        <button class="page-btn num">22</button>
+        <button class="page-btn next" aria-label="다음 페이지">›</button>
+        <button class="btn btn-secondary">더 보기</button>
+      </nav>
+
+      <section class="empty-demo" data-region="empty" aria-label="검색 결과 없음 상태 예시">
+        <span class="state-tag">EMPTY STATE</span>
+        <div class="empty-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8.5" y1="11" x2="13.5" y2="11"></line></svg>
+        </div>
+        <h3>조건에 맞는 상품이 없어요</h3>
+        <p>사이즈나 색상 조건을 줄여보세요.</p>
+        <button class="btn btn-primary">필터 초기화</button>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer">STYLE 13 · 오로라 그라디언트</footer>
+
+<script>
+(function(){
+  "use strict";
+  try{
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var mesh = document.getElementById("auroraMesh");
+
+    // 마우스 추종 패럴럭스 — 은은하게, 지연 추종. 실패해도 CSS 애니메이션은 그대로 유지된다.
+    if(mesh && !reduceMotion){
+      var targetX = 0, targetY = 0, curX = 0, curY = 0;
+      var maxOffset = 20;
+      window.addEventListener("mousemove", function(e){
+        var wx = window.innerWidth || 1, wy = window.innerHeight || 1;
+        targetX = ((e.clientX / wx) - 0.5) * 2 * maxOffset;
+        targetY = ((e.clientY / wy) - 0.5) * 2 * maxOffset;
+      }, { passive:true });
+
+      function raf(){
+        curX += (targetX - curX) * 0.06;
+        curY += (targetY - curY) * 0.06;
+        mesh.style.transform = "translate(" + curX.toFixed(1) + "px," + curY.toFixed(1) + "px)";
+        window.requestAnimationFrame(raf);
+      }
+      window.requestAnimationFrame(raf);
+
+      // 스크롤 진행도 → 배경 오로라 hue 서서히 이동 (보라 → 시안)
+      var docEl = document.documentElement;
+      window.addEventListener("scroll", function(){
+        var max = (docEl.scrollHeight - window.innerHeight) || 1;
+        var progress = Math.min(1, Math.max(0, window.scrollY / max));
+        mesh.style.filter = "hue-rotate(" + (progress * 40).toFixed(1) + "deg)";
+      }, { passive:true });
+    }
+
+    // 정렬 드롭다운 토글
+    var trigger = document.getElementById("sortTrigger");
+    var menu = document.getElementById("sortMenu");
+    var label = document.getElementById("sortLabel");
+    if(trigger && menu && label){
+      trigger.addEventListener("click", function(){
+        var open = menu.hasAttribute("hidden");
+        if(open){ menu.removeAttribute("hidden"); trigger.setAttribute("aria-expanded","true"); }
+        else{ menu.setAttribute("hidden",""); trigger.setAttribute("aria-expanded","false"); }
+      });
+      Array.prototype.forEach.call(menu.querySelectorAll(".sort-option"), function(opt){
+        opt.addEventListener("click", function(){
+          Array.prototype.forEach.call(menu.querySelectorAll(".sort-option"), function(o){ o.classList.remove("is-selected"); });
+          opt.classList.add("is-selected");
+          label.textContent = opt.textContent;
+          menu.setAttribute("hidden","");
+          trigger.setAttribute("aria-expanded","false");
+        });
+      });
+      document.addEventListener("click", function(e){
+        if(!trigger.contains(e.target) && !menu.contains(e.target)){
+          menu.setAttribute("hidden","");
+          trigger.setAttribute("aria-expanded","false");
+        }
+      });
+    }
+
+    // 찜(하트) 토글
+    Array.prototype.forEach.call(document.querySelectorAll(".heart"), function(btn){
+      btn.addEventListener("click", function(){
+        var pressed = btn.getAttribute("aria-pressed") === "true";
+        btn.setAttribute("aria-pressed", pressed ? "false" : "true");
+      });
+    });
+
+    // 필터 칩·카테고리 단순 토글(연출용 — 실제 데이터 연동 없음)
+    Array.prototype.forEach.call(document.querySelectorAll(".chip"), function(chip){
+      chip.addEventListener("click", function(){
+        var group = chip.parentElement;
+        Array.prototype.forEach.call(group.querySelectorAll(".chip"), function(c){ c.classList.remove("is-selected"); c.removeAttribute("aria-pressed"); });
+        chip.classList.add("is-selected");
+        chip.setAttribute("aria-pressed","true");
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".swatch"), function(sw){
+      sw.addEventListener("click", function(){
+        Array.prototype.forEach.call(document.querySelectorAll(".swatch"), function(s){ s.classList.remove("is-selected"); s.removeAttribute("aria-pressed"); });
+        sw.classList.add("is-selected");
+        sw.setAttribute("aria-pressed","true");
+      });
+    });
+  }catch(err){
+    /* JS 실패해도 HTML/CSS만으로 완전한 화면 — 콘솔 경고만 남김 */
+    if(window.console && console.warn){ console.warn("aurora deco script error:", err); }
+  }
+})();
+</script>
+</body>
+</html>
