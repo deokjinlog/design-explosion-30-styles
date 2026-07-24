@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>핀그리드 · 정산 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#F4F5F7;
+    --surface:#FFFFFF;
+    --border:#DFE1E6;
+    --border-strong:#C1C7D0;
+    --navy:#0052CC;
+    --navy-hover:#0747A6;
+    --navy-active:#043584;
+    --link:#0065FF;
+    --text-strong:#172B4D;
+    --text-body:#42526E;
+    --text-muted:#6B778C;
+    --text-disabled:#97A0AF;
+    --subtle-bg:#FAFBFC;
+    --selected-row:#DEEBFF;
+    --sidebar-active:#DEEBFF;
+    --success:#00875A; --success-bg:#E3FCEF; --success-text:#006644;
+    --progress:#0052CC; --progress-bg:#DEEBFF;
+    --warning:#FF8B00; --warning-bg:#FFFAE6; --warning-text:#A54800;
+    --danger:#DE350B; --danger-bg:#FFEBE6; --danger-text:#BF2600;
+    --neutral:#42526E; --neutral-bg:#F4F5F7;
+    --chart-1:#0052CC; --chart-2:#4C9AFF; --chart-3:#B3D4FF; --chart-neutral:#97A0AF;
+    --sidebar-w:240px;
+    --topbar-h:56px;
+    --shadow-card: 0 1px 1px rgba(9,30,66,.08);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--canvas);
+    color:var(--text-body);
+    font-family:'Pretendard','Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    font-feature-settings:'tnum' 1;
+  }
+  .num, .tabular{ font-family:'Inter','Pretendard',sans-serif; font-variant-numeric:tabular-nums; font-feature-settings:'tnum' 1; }
+
+  a{ color:var(--link); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+  button{ font-family:inherit; }
+
+  :focus-visible{ outline:2px solid var(--navy); outline-offset:1px; }
+
+  /* ===== App shell ===== */
+  .app{ display:flex; min-height:100vh; }
+
+  /* ---- Sidebar ---- */
+  .sidebar{
+    width:var(--sidebar-w);
+    flex:0 0 var(--sidebar-w);
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+    transition:flex-basis .18s ease, width .18s ease;
+  }
+  .sidebar-brand{
+    height:var(--topbar-h);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:0 16px;
+    border-bottom:1px solid var(--border);
+    flex:0 0 auto;
+  }
+  .brand-mark{
+    width:24px; height:24px; border-radius:4px;
+    background:var(--navy);
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:600; font-size:12px; font-family:'Inter',sans-serif;
+    flex:0 0 auto;
+  }
+  .brand-name{ font-weight:600; font-size:15px; color:var(--text-strong); white-space:nowrap; overflow:hidden; }
+
+  .sidebar-toggle{
+    margin-left:auto;
+    width:24px; height:24px;
+    border:none; background:transparent; color:var(--text-muted);
+    border-radius:3px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    flex:0 0 auto;
+  }
+  .sidebar-toggle:hover{ background:var(--neutral-bg); color:var(--text-strong); }
+
+  .sidebar-nav{ padding:8px; flex:1 1 auto; }
+  .nav-group-label{
+    font-size:11px; font-weight:600; letter-spacing:.5px; text-transform:uppercase;
+    color:var(--text-muted); padding:12px 12px 6px;
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:10px;
+    padding:8px 12px;
+    margin:1px 0;
+    border-radius:3px;
+    color:var(--text-body);
+    font-size:14px; font-weight:500;
+    cursor:pointer;
+    position:relative;
+    border-left:3px solid transparent;
+    white-space:nowrap;
+  }
+  .nav-item svg{ flex:0 0 auto; width:18px; height:18px; color:var(--text-muted); }
+  .nav-item:hover{ background:var(--neutral-bg); text-decoration:none; }
+  .nav-item.active{
+    background:var(--sidebar-active);
+    border-left-color:var(--navy);
+    color:var(--navy);
+    font-weight:600;
+  }
+  .nav-item.active svg{ color:var(--navy); }
+  .nav-item.active .nav-indicator{
+    position:absolute; left:-3px; top:0; bottom:0; width:3px; background:var(--navy);
+    animation:indicatorSlide .22s ease-out .7s both;
+  }
+  .nav-label{ overflow:hidden; text-overflow:ellipsis; }
+
+  .sidebar-footer{
+    border-top:1px solid var(--border);
+    padding:12px 16px;
+    display:flex; align-items:center; gap:10px;
+    flex:0 0 auto;
+  }
+  .user-avatar{
+    width:28px; height:28px; border-radius:50%;
+    background:var(--navy-active); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:600; flex:0 0 auto;
+    font-family:'Inter',sans-serif;
+  }
+  .user-meta{ overflow:hidden; }
+  .user-name{ font-size:13px; font-weight:600; color:var(--text-strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-role{ font-size:12px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* collapsed state (manual toggle) */
+  .sidebar.collapsed{ flex-basis:56px; width:56px; }
+  .sidebar.collapsed .brand-name,
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed .nav-group-label,
+  .sidebar.collapsed .user-meta{ display:none; }
+  .sidebar.collapsed .sidebar-toggle{ margin-left:0; }
+  .sidebar.collapsed .nav-item{ justify-content:center; padding:8px 0; }
+  .sidebar.collapsed .sidebar-brand{ justify-content:center; padding:0; }
+  .sidebar.collapsed .sidebar-footer{ justify-content:center; padding:12px 0; }
+
+  /* ---- Main column ---- */
+  .main{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; }
+
+  .topbar{
+    height:var(--topbar-h);
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center;
+    padding:0 24px;
+    gap:16px;
+    position:sticky; top:0; z-index:5;
+    flex-wrap:wrap;
+  }
+  .topbar h1{
+    font-size:20px; line-height:24px; font-weight:600; color:var(--text-strong);
+    margin:0; white-space:nowrap;
+  }
+  .topbar-toolbar{ display:flex; align-items:center; gap:12px; margin-left:auto; flex-wrap:wrap; }
+
+  .period-tabs{ display:flex; align-items:center; background:var(--neutral-bg); border-radius:4px; padding:2px; gap:2px; }
+  .period-tab{
+    border:none; background:transparent; cursor:pointer;
+    font-size:13px; font-weight:500; color:var(--text-body);
+    padding:6px 12px; border-radius:3px;
+  }
+  .period-tab:hover{ background:var(--surface); }
+  .period-tab.active{ background:var(--surface); color:var(--navy); font-weight:600; box-shadow:var(--shadow-card); }
+
+  .select-field{
+    display:flex; align-items:center; gap:6px;
+    border:1px solid var(--border); background:var(--surface);
+    border-radius:3px; padding:7px 10px; font-size:13px; color:var(--text-body);
+    cursor:pointer; position:relative; white-space:nowrap;
+  }
+  .select-field:hover{ border-color:var(--border-strong); background:var(--subtle-bg); }
+  .select-field svg{ width:12px; height:12px; color:var(--text-muted); }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:6px;
+    height:36px; padding:0 14px;
+    font-size:13px; font-weight:600;
+    border-radius:3px; border:1px solid transparent;
+    cursor:pointer; white-space:nowrap;
+  }
+  .btn-primary{ background:var(--navy); color:#fff; }
+  .btn-primary:hover{ background:var(--navy-hover); }
+  .btn-primary:active{ background:var(--navy-active); }
+  .btn-secondary{ background:var(--surface); color:var(--text-strong); border-color:var(--border); }
+  .btn-secondary:hover{ border-color:var(--border-strong); background:var(--subtle-bg); }
+  .btn-subtle{ background:transparent; color:var(--text-body); border-color:transparent; }
+  .btn-subtle:hover{ background:var(--neutral-bg); }
+  .btn svg{ width:14px; height:14px; }
+
+  .content{ padding:20px 24px 48px; max-width:1400px; }
+
+  /* ---- Banner ---- */
+  .banner{
+    display:flex; align-items:center; gap:10px;
+    background:var(--progress-bg); border:1px solid #B3D4FF;
+    border-radius:4px; padding:10px 16px;
+    font-size:13px; color:var(--text-strong);
+    margin-bottom:20px;
+  }
+  .banner svg{ width:16px; height:16px; color:var(--navy); flex:0 0 auto; }
+  .banner b{ font-weight:600; color:var(--navy); }
+
+  /* ---- Section heading ---- */
+  .section-title{
+    font-size:13px; font-weight:600; letter-spacing:.3px; color:var(--text-strong);
+    margin:0 0 10px; display:flex; align-items:baseline; gap:8px;
+  }
+  .section-title .hint{ font-size:12px; font-weight:400; color:var(--text-muted); }
+
+  /* ---- KPI ---- */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
+  .kpi-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:4px;
+    box-shadow:var(--shadow-card);
+    padding:16px;
+    display:flex; flex-direction:column; gap:8px;
+    min-width:0;
+    opacity:0; transform:translateY(4px);
+    animation:kpiIn .16s ease-out forwards;
+  }
+  .kpi-card:nth-child(1){ animation-delay:.10s; }
+  .kpi-card:nth-child(2){ animation-delay:.14s; }
+  .kpi-card:nth-child(3){ animation-delay:.18s; }
+  .kpi-card:nth-child(4){ animation-delay:.22s; }
+  .kpi-label{
+    font-size:11px; font-weight:600; letter-spacing:.5px; text-transform:uppercase;
+    color:var(--text-muted);
+  }
+  .kpi-value-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:10px; }
+  .kpi-value{
+    font-family:'Inter','Pretendard',sans-serif;
+    font-weight:600; font-variant-numeric:tabular-nums; font-feature-settings:'tnum' 1;
+    color:var(--text-strong);
+    font-size:clamp(18px,2vw,26px);
+    line-height:1.2;
+    overflow-wrap:break-word;
+    min-width:0;
+  }
+  .kpi-spark{ flex:0 0 auto; width:72px; height:26px; }
+  .kpi-delta{ font-size:13px; font-weight:600; display:flex; align-items:center; gap:4px; }
+  .kpi-delta.up{ color:var(--success); }
+  .kpi-delta.down{ color:var(--danger); }
+  .kpi-delta.flat{ color:var(--text-muted); font-weight:500; }
+  .kpi-delta .vs{ color:var(--text-muted); font-weight:400; margin-left:2px; }
+
+  /* ---- Dashboard grid: trend + side column ---- */
+  .dash-grid{ display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:20px; align-items:stretch; }
+  .side-col{ display:flex; flex-direction:column; gap:16px; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:4px;
+    box-shadow:var(--shadow-card);
+    padding:16px;
+    min-width:0;
+  }
+  .card-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:4px; }
+  .card-title{ font-size:16px; line-height:20px; font-weight:600; color:var(--text-strong); }
+  .card-sub{ font-size:12px; color:var(--text-muted); margin-bottom:12px; }
+
+  .trend-legend{ display:flex; gap:16px; font-size:12px; color:var(--text-muted); margin-bottom:8px; }
+  .trend-legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .legend-dot{ width:8px; height:8px; border-radius:2px; background:var(--chart-1); display:inline-block; }
+
+  .trend-chart{ width:100%; height:auto; display:block; }
+  .trend-line{
+    fill:none; stroke:var(--chart-1); stroke-width:2; stroke-linejoin:round; stroke-linecap:round;
+    stroke-dasharray:900; stroke-dashoffset:900;
+    animation:drawLine .32s ease-out .35s forwards;
+  }
+  .trend-area{ fill:rgba(0,82,204,.07); }
+  .trend-gridline{ stroke:var(--border); stroke-width:1; }
+  .trend-axis-label{ font-size:10px; fill:var(--text-muted); font-family:'Inter',sans-serif; }
+  .trend-marker{ fill:var(--surface); stroke:var(--chart-1); stroke-width:2; }
+  .trend-marker.min{ stroke:var(--danger); }
+  .trend-callout{ font-size:11px; font-weight:600; font-family:'Inter','Pretendard',sans-serif; }
+  .trend-callout.max{ fill:var(--navy); }
+  .trend-callout.min{ fill:var(--danger); }
+
+  /* ---- Donut (chart-part) ---- */
+  .donut-wrap{ display:flex; align-items:center; gap:16px; }
+  .donut-svg{ flex:0 0 auto; }
+  .donut-center-label{ font-size:18px; font-weight:600; fill:var(--text-strong); font-family:'Inter',sans-serif; }
+  .donut-center-sub{ font-size:10px; fill:var(--text-muted); }
+  .donut-legend{ display:flex; flex-direction:column; gap:8px; flex:1 1 auto; min-width:0; }
+  .donut-legend-item{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-body); }
+  .donut-swatch{ width:10px; height:10px; border-radius:2px; flex:0 0 auto; }
+  .donut-legend-item b{ margin-left:auto; color:var(--text-strong); font-weight:600; font-family:'Inter',sans-serif; }
+
+  /* ---- Goal ---- */
+  .goal-figures{ display:flex; align-items:baseline; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+  .goal-current{ font-size:22px; font-weight:600; color:var(--text-strong); font-family:'Inter',sans-serif; }
+  .goal-target{ font-size:14px; color:var(--text-muted); font-family:'Inter',sans-serif; }
+  .goal-bar-track{ width:100%; height:8px; background:var(--neutral-bg); border-radius:4px; overflow:hidden; margin-bottom:8px; }
+  .goal-bar-fill{
+    height:100%; background:var(--chart-1); border-radius:4px;
+    width:0%;
+    animation:goalFill .4s ease-out .35s forwards;
+  }
+  .goal-foot{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); }
+  .goal-pct{ font-weight:600; color:var(--navy); font-family:'Inter',sans-serif; }
+
+  /* ---- Table + empty row ---- */
+  .lower-grid{ display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:start; }
+
+  .table-card{ background:var(--surface); border:1px solid var(--border); border-radius:4px; box-shadow:var(--shadow-card); overflow:hidden; }
+  .table-card-head{ display:flex; align-items:center; justify-content:space-between; padding:16px 16px 12px; border-bottom:1px solid var(--border); gap:8px; flex-wrap:wrap; }
+  .table-scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:640px; }
+  thead th{
+    text-align:left; font-size:11px; font-weight:600; letter-spacing:.5px; text-transform:uppercase;
+    color:var(--text-body); background:var(--subtle-bg);
+    padding:10px 16px; border-bottom:1px solid var(--border);
+    white-space:nowrap; cursor:pointer; user-select:none;
+  }
+  thead th:hover{ color:var(--text-strong); }
+  thead th.sorted{ color:var(--navy); }
+  thead th .sort-icon{ display:inline-block; margin-left:4px; font-size:10px; opacity:.5; }
+  thead th.sorted .sort-icon{ opacity:1; }
+  thead th.num, td.num{ text-align:right; }
+  tbody tr{
+    border-bottom:1px solid var(--border);
+    transition:background-color .1s ease;
+    animation:rowSwap .18s ease-out both;
+  }
+  tbody tr:nth-child(1){ animation-delay:.45s; }
+  tbody tr:nth-child(2){ animation-delay:.47s; }
+  tbody tr:nth-child(3){ animation-delay:.49s; }
+  tbody tr:nth-child(4){ animation-delay:.51s; }
+  tbody tr:nth-child(5){ animation-delay:.53s; }
+  tbody tr:nth-child(6){ animation-delay:.55s; }
+  tbody tr:last-child{ border-bottom:none; }
+  tbody tr:hover{ background:var(--subtle-bg); }
+  tbody tr.selected{ background:var(--selected-row); box-shadow:inset 2px 0 0 var(--navy); }
+  td{ padding:9px 16px; font-size:13px; color:var(--text-body); vertical-align:middle; min-height:36px; }
+  td.merchant-cell{ max-width:320px; }
+  .merchant-name{ color:var(--text-strong); font-weight:500; line-height:1.4; overflow-wrap:break-word; }
+  .merchant-name.long{ font-weight:600; }
+  .merchant-tag{ display:block; font-size:12px; color:var(--text-muted); font-weight:400; margin-top:2px; }
+  .missing{ color:var(--text-muted); font-family:'Inter',sans-serif; }
+
+  .row-actions{ display:inline-flex; gap:4px; opacity:0; transition:opacity .1s ease; margin-left:8px; vertical-align:middle; }
+  tr:hover .row-actions{ opacity:1; }
+  .row-action-btn{
+    width:24px; height:24px; min-width:32px; min-height:32px; display:inline-flex;
+    align-items:center; justify-content:center; border:none; background:transparent;
+    color:var(--text-muted); border-radius:3px; cursor:pointer;
+  }
+  .row-action-btn:hover{ background:var(--border); color:var(--text-strong); }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 8px; border-radius:3px;
+    font-size:12px; font-weight:600;
+    white-space:nowrap;
+  }
+  .badge svg{ width:11px; height:11px; }
+  .badge-success{ color:var(--success-text); background:var(--success-bg); }
+  .badge-progress{ color:var(--progress); background:var(--progress-bg); }
+  .badge-warning{ color:var(--warning-text); background:var(--warning-bg); }
+  .badge-danger{ color:var(--danger-text); background:var(--danger-bg); }
+
+  /* ---- Empty state ---- */
+  .empty-card{ display:flex; flex-direction:column; align-items:flex-start; gap:8px; min-height:100%; }
+  .empty-icon{
+    width:40px; height:40px; border-radius:4px; background:var(--success-bg); color:var(--success);
+    display:flex; align-items:center; justify-content:center; margin-bottom:4px;
+  }
+  .empty-icon svg{ width:20px; height:20px; }
+  .empty-headline{ font-size:15px; font-weight:600; color:var(--text-strong); }
+  .empty-desc{ font-size:13px; color:var(--text-muted); line-height:1.5; }
+  .empty-card .btn{ margin-top:8px; }
+
+  /* ---- Footer ---- */
+  .app-footer{
+    padding:16px 24px 32px; font-size:12px; color:var(--text-body);
+    border-top:1px solid var(--border); margin-top:8px;
+  }
+
+  /* ===== Keyframes ===== */
+  @keyframes kpiIn{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:translateY(0);} }
+  @keyframes drawLine{ to{ stroke-dashoffset:0; } }
+  @keyframes goalFill{ to{ width:68%; } }
+  @keyframes indicatorSlide{ from{ transform:scaleY(0); transform-origin:top; } to{ transform:scaleY(1); transform-origin:top; } }
+  @keyframes rowSwap{ from{ background-color:#EBECF0; } to{ background-color:transparent; } }
+
+  /* ===== Reduced motion ===== */
+  @media (prefers-reduced-motion: reduce){
+    .kpi-card{ animation:none !important; opacity:1 !important; transform:none !important; }
+    .trend-line{ animation:none !important; stroke-dashoffset:0 !important; }
+    .goal-bar-fill{ animation:none !important; width:68% !important; }
+    .nav-item.active .nav-indicator{ animation:none !important; transform:none !important; }
+    tbody tr{ animation:none !important; }
+    *{ transition-duration:.01ms !important; }
+  }
+
+  /* ===== Responsive ≤1100px ===== */
+  @media (max-width:1100px){
+    .sidebar{ flex-basis:56px; width:56px; }
+    .sidebar .brand-name,
+    .sidebar .nav-label,
+    .sidebar .nav-group-label,
+    .sidebar .user-meta{ display:none; }
+    .sidebar .sidebar-brand{ justify-content:center; padding:0; }
+    .sidebar .nav-item{ justify-content:center; padding:8px 0; }
+    .sidebar .sidebar-footer{ justify-content:center; padding:12px 0; }
+    .sidebar .sidebar-toggle{ display:none; }
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+    .dash-grid{ grid-template-columns:1fr; }
+    .lower-grid{ grid-template-columns:1fr; }
+    .topbar{ height:auto; padding:10px 16px; }
+    .topbar-toolbar{ margin-left:0; width:100%; }
+  }
+  @media (max-width:640px){
+    .kpi-grid{ grid-template-columns:1fr; }
+    .content{ padding:16px 16px 40px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= SIDEBAR / nav ================= -->
+  <aside class="sidebar" data-region="nav" aria-label="주 메뉴">
+    <div class="sidebar-brand">
+      <span class="brand-mark">F</span>
+      <span class="brand-name">핀그리드</span>
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="사이드바 접기/펼치기" title="사이드바 접기/펼치기">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M4 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">메인</div>
+      <a class="nav-item active" href="#" aria-current="page">
+        <span class="nav-indicator" aria-hidden="true"></span>
+        <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span class="nav-label">대시보드</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M3 7h11l-3-3M17 13H6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="nav-label">거래</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 8h14M7 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="nav-label">정산</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M3 8l1-4h12l1 4M3 8v8h14V8M3 8h14M7 12h2M11 12h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="nav-label">가맹점</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 13V9M10 13V6M13.5 13v-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="nav-label">리포트</span>
+      </a>
+      <div class="nav-group-label">시스템</div>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.4" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5.1 5.1l1.4 1.4M13.5 13.5l1.4 1.4M14.9 5.1l-1.4 1.4M6.5 13.5l-1.4 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="nav-label">설정</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="user-avatar">김</span>
+      <div class="user-meta">
+        <div class="user-name">김운영</div>
+        <div class="user-role">정산팀</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <div class="main">
+
+    <!-- ===== Topbar: identity + filter + action ===== -->
+    <header class="topbar" data-region="identity">
+      <h1>정산 대시보드</h1>
+      <div class="topbar-toolbar">
+        <div class="period-tabs" data-region="filter" role="tablist" aria-label="기간 선택">
+          <button class="period-tab" role="tab" aria-selected="false">오늘</button>
+          <button class="period-tab" role="tab" aria-selected="false">7일</button>
+          <button class="period-tab active" role="tab" aria-selected="true">30일</button>
+          <button class="period-tab" role="tab" aria-selected="false">90일</button>
+        </div>
+        <button class="select-field" id="channelSelect" aria-haspopup="listbox" aria-expanded="false">
+          <span id="channelSelectLabel">전체 채널</span>
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5l3.5 3 3.5-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div data-region="action">
+          <button class="btn btn-primary" id="exportBtn">
+            <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5v7M4 5.5L7 8.5l3-3M2 11h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            내보내기
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ===== Banner ===== -->
+      <div class="banner" data-region="banner">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.2l2 1.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span><b>10월 21일 정산 예정</b> — ₩1,284,900,000 · 영업일 기준 D-1</span>
+      </div>
+
+      <!-- ===== KPI ===== -->
+      <section data-region="kpi" aria-label="핵심 지표">
+        <div class="kpi-grid">
+
+          <div class="kpi-card">
+            <div class="kpi-label">총 거래액(GMV)</div>
+            <div class="kpi-value-row">
+              <div class="kpi-value">₩1,284,732,050,000</div>
+              <svg class="kpi-spark" viewBox="0 0 100 32" fill="none"><path d="M3.0,29.0 L13.4,25.3 L23.9,27.1 L34.3,21.6 L44.8,17.9 L55.2,19.7 L65.7,14.1 L76.1,8.6 L86.6,10.4 L97.0,3.0" stroke="#00875A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="kpi-delta up">▲ +8.3%<span class="vs">전주 대비</span></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">결제 건수</div>
+            <div class="kpi-value-row">
+              <div class="kpi-value">12,847,192건</div>
+              <svg class="kpi-spark" viewBox="0 0 100 32" fill="none"><path d="M3.0,29.0 L13.4,27.1 L23.9,28.0 L34.3,22.3 L44.8,24.2 L55.2,17.4 L65.7,13.6 L76.1,15.5 L86.6,7.8 L97.0,3.0" stroke="#00875A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="kpi-delta up">▲ +12.1%<span class="vs">전주 대비</span></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">승인율</div>
+            <div class="kpi-value-row">
+              <div class="kpi-value">94.7%</div>
+              <svg class="kpi-spark" viewBox="0 0 100 32" fill="none"><path d="M3.0,3.0 L13.4,7.3 L23.9,5.9 L34.3,11.7 L44.8,14.6 L55.2,17.4 L65.7,16.0 L76.1,23.2 L86.6,26.1 L97.0,29.0" stroke="#DE350B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="kpi-delta down">▼ −1.2%p<span class="vs">전주 대비</span></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">정산 대기액</div>
+            <div class="kpi-value-row">
+              <div class="kpi-value">₩312,048,900,000</div>
+              <svg class="kpi-spark" viewBox="0 0 100 32" fill="none"><path d="M3.0,20.3 L13.4,11.7 L23.9,29.0 L34.3,20.3 L44.8,3.0 L55.2,20.3 L65.7,11.7 L76.1,29.0 L86.6,20.3 L97.0,20.3" stroke="#97A0AF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="kpi-delta flat">— <span class="vs">신규 지표 · 전주 데이터 없음</span></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===== chart-trend + side column (chart-part, goal) ===== -->
+      <div class="dash-grid">
+
+        <div class="card" data-region="chart-trend">
+          <div class="card-head">
+            <div>
+              <div class="card-title">일별 거래액 추이</div>
+              <div class="card-sub">최근 30일 · 단위: 억</div>
+            </div>
+          </div>
+          <div class="trend-legend">
+            <span><span class="legend-dot"></span>일별 거래액</span>
+          </div>
+          <svg class="trend-chart" viewBox="0 0 720 232" preserveAspectRatio="xMidYMid meet" role="img" aria-label="최근 30일 일별 거래액 추이. 최고 10월 14일 58.2억, 최저 10월 2일 31.7억.">
+            <!-- gridlines -->
+            <line class="trend-gridline" x1="6" y1="202" x2="714" y2="202"/>
+            <line class="trend-gridline" x1="6" y1="152.2" x2="714" y2="152.2" stroke-dasharray="2 3"/>
+            <line class="trend-gridline" x1="6" y1="102.3" x2="714" y2="102.3" stroke-dasharray="2 3"/>
+            <line class="trend-gridline" x1="6" y1="52.5" x2="714" y2="52.5" stroke-dasharray="2 3"/>
+            <text class="trend-axis-label" x="0" y="205.5">0</text>
+            <text class="trend-axis-label" x="0" y="155.7">20억</text>
+            <text class="trend-axis-label" x="0" y="105.8">40억</text>
+            <text class="trend-axis-label" x="0" y="56">60억</text>
+
+            <!-- area + line -->
+            <path class="trend-area" d="M6.0,102.5 L30.4,123.0 L54.8,101.8 L79.2,98.9 L103.7,84.6 L128.1,81.8 L152.5,101.5 L176.9,113.5 L201.3,102.9 L225.7,106.7 L250.1,98.9 L274.6,89.2 L299.0,94.8 L323.4,56.9 L347.8,102.3 L372.2,100.4 L396.6,102.9 L421.0,91.6 L445.4,83.2 L469.9,95.2 L494.3,103.2 L518.7,101.3 L543.1,104.5 L567.5,104.2 L591.9,84.2 L616.3,92.6 L640.8,93.5 L665.2,117.3 L689.6,98.4 L714.0,99.2 L714.0,202.0 L6.0,202.0 Z"/>
+            <path class="trend-line" d="M6.0,102.5 L30.4,123.0 L54.8,101.8 L79.2,98.9 L103.7,84.6 L128.1,81.8 L152.5,101.5 L176.9,113.5 L201.3,102.9 L225.7,106.7 L250.1,98.9 L274.6,89.2 L299.0,94.8 L323.4,56.9 L347.8,102.3 L372.2,100.4 L396.6,102.9 L421.0,91.6 L445.4,83.2 L469.9,95.2 L494.3,103.2 L518.7,101.3 L543.1,104.5 L567.5,104.2 L591.9,84.2 L616.3,92.6 L640.8,93.5 L665.2,117.3 L689.6,98.4 L714.0,99.2"/>
+
+            <!-- max marker (10/14) -->
+            <circle class="trend-marker max" cx="323.4" cy="56.9" r="3.5"/>
+            <text class="trend-callout max" x="323.4" y="42" text-anchor="middle">최고 ₩58.2억 (10/14)</text>
+
+            <!-- min marker (10/02) -->
+            <circle class="trend-marker min" cx="30.4" cy="123.0" r="3.5"/>
+            <text class="trend-callout min" x="30.4" y="140" text-anchor="start">최저 ₩31.7억 (10/02)</text>
+
+            <!-- x axis day labels -->
+            <text class="trend-axis-label" x="6" y="218" text-anchor="start">10/01</text>
+            <text class="trend-axis-label" x="176.9" y="218" text-anchor="middle">10/08</text>
+            <text class="trend-axis-label" x="347.8" y="218" text-anchor="middle">10/15</text>
+            <text class="trend-axis-label" x="518.7" y="218" text-anchor="middle">10/22</text>
+            <text class="trend-axis-label" x="714" y="218" text-anchor="end">10/30</text>
+          </svg>
+        </div>
+
+        <div class="side-col">
+          <div class="card" data-region="chart-part">
+            <div class="card-head">
+              <div class="card-title">결제수단 구성비</div>
+            </div>
+            <div class="donut-wrap">
+              <svg class="donut-svg" width="112" height="112" viewBox="0 0 140 140">
+                <circle cx="70" cy="70" r="60" fill="none" stroke="#F4F5F7" stroke-width="16"/>
+                <circle cx="70" cy="70" r="60" fill="none" stroke="#0052CC" stroke-width="16"
+                  stroke-dasharray="196.04 180.96" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
+                <circle cx="70" cy="70" r="60" fill="none" stroke="#4C9AFF" stroke-width="16"
+                  stroke-dasharray="90.48 286.51" stroke-dashoffset="-196.04" transform="rotate(-90 70 70)"/>
+                <circle cx="70" cy="70" r="60" fill="none" stroke="#B3D4FF" stroke-width="16"
+                  stroke-dasharray="67.86 309.13" stroke-dashoffset="-286.51" transform="rotate(-90 70 70)"/>
+                <circle cx="70" cy="70" r="60" fill="none" stroke="#97A0AF" stroke-width="16"
+                  stroke-dasharray="22.62 354.37" stroke-dashoffset="-354.37" transform="rotate(-90 70 70)"/>
+                <text class="donut-center-label" x="70" y="68" text-anchor="middle">52%</text>
+                <text class="donut-center-sub" x="70" y="82" text-anchor="middle">카드 비중</text>
+              </svg>
+              <div class="donut-legend">
+                <div class="donut-legend-item"><span class="donut-swatch" style="background:#0052CC"></span>카드<b>52%</b></div>
+                <div class="donut-legend-item"><span class="donut-swatch" style="background:#4C9AFF"></span>계좌이체<b>24%</b></div>
+                <div class="donut-legend-item"><span class="donut-swatch" style="background:#B3D4FF"></span>간편결제<b>18%</b></div>
+                <div class="donut-legend-item"><span class="donut-swatch" style="background:#97A0AF"></span>기타<b>6%</b></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" data-region="goal">
+            <div class="card-head">
+              <div class="card-title">4분기 정산액 목표</div>
+            </div>
+            <div class="goal-figures">
+              <span class="goal-current">₩3.4조</span>
+              <span class="goal-target">/ ₩5조</span>
+            </div>
+            <div class="goal-bar-track">
+              <div class="goal-bar-fill"></div>
+            </div>
+            <div class="goal-foot">
+              <span>달성 <span class="goal-pct">68%</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== table + empty ===== -->
+      <div class="lower-grid">
+
+        <div class="table-card" data-region="table">
+          <div class="table-card-head">
+            <div>
+              <div class="card-title">가맹점별 정산 현황</div>
+              <div class="card-sub">전체 6건</div>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table id="merchantTable">
+              <thead>
+                <tr>
+                  <th data-key="name" data-type="text">가맹점<span class="sort-icon">↕</span></th>
+                  <th class="num" data-key="amount" data-type="num">거래액<span class="sort-icon">↕</span></th>
+                  <th class="num" data-key="count" data-type="num">건수<span class="sort-icon">↕</span></th>
+                  <th class="num" data-key="rate" data-type="num">승인율<span class="sort-icon">↕</span></th>
+                  <th data-key="status" data-type="text">상태<span class="sort-icon">↕</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-amount="48203000000" data-count="482030" data-rate="96.2" data-name="(주)새벽마켓">
+                  <td class="merchant-cell"><span class="merchant-name">(주)새벽마켓</span></td>
+                  <td class="num tabular">₩48,203,000,000</td>
+                  <td class="num tabular">482,030</td>
+                  <td class="num tabular">96.2%</td>
+                  <td><span class="badge badge-success"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>완료</span><span class="row-actions"><button class="row-action-btn" aria-label="편집" title="편집"><svg viewBox="0 0 14 14" width="13" height="13" fill="none"><path d="M9.5 2.5l2 2-6.5 6.5L2.5 12l1-2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button><button class="row-action-btn" aria-label="더보기" title="더보기">⋯</button></span></td>
+                </tr>
+                <tr data-amount="31209000000" data-count="288110" data-rate="91.4" data-name="글로벌 커머스 인터내셔널 유한회사">
+                  <td class="merchant-cell">
+                    <span class="merchant-name long">글로벌 커머스 인터내셔널 유한회사</span>
+                    <span class="merchant-tag">— 해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</span>
+                  </td>
+                  <td class="num tabular">₩31,209,000,000</td>
+                  <td class="num tabular">288,110</td>
+                  <td class="num tabular">91.4%</td>
+                  <td><span class="badge badge-progress"><svg viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M6 3.2v3l1.8 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>대기</span><span class="row-actions"><button class="row-action-btn" aria-label="편집" title="편집"><svg viewBox="0 0 14 14" width="13" height="13" fill="none"><path d="M9.5 2.5l2 2-6.5 6.5L2.5 12l1-2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button><button class="row-action-btn" aria-label="더보기" title="더보기">⋯</button></span></td>
+                </tr>
+                <tr data-amount="894000000" data-count="8940" data-rate="88.0" data-name="김철수 스토어">
+                  <td class="merchant-cell"><span class="merchant-name">김철수 스토어</span></td>
+                  <td class="num tabular">₩894,000,000</td>
+                  <td class="num tabular">8,940</td>
+                  <td class="num tabular">88.0%</td>
+                  <td><span class="badge badge-warning"><svg viewBox="0 0 12 12" fill="none"><rect x="3" y="2.5" width="2" height="7" fill="currentColor"/><rect x="7" y="2.5" width="2" height="7" fill="currentColor"/></svg>보류</span><span class="row-actions"><button class="row-action-btn" aria-label="편집" title="편집"><svg viewBox="0 0 14 14" width="13" height="13" fill="none"><path d="M9.5 2.5l2 2-6.5 6.5L2.5 12l1-2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button><button class="row-action-btn" aria-label="더보기" title="더보기">⋯</button></span></td>
+                </tr>
+                <tr data-amount="12048300000" data-count="-1" data-rate="94.7" data-name="데일리박스">
+                  <td class="merchant-cell"><span class="merchant-name">데일리박스</span></td>
+                  <td class="num tabular">₩12,048,300,000</td>
+                  <td class="num tabular missing" title="집계중">—</td>
+                  <td class="num tabular">94.7%</td>
+                  <td><span class="badge badge-success"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>완료</span><span class="row-actions"><button class="row-action-btn" aria-label="편집" title="편집"><svg viewBox="0 0 14 14" width="13" height="13" fill="none"><path d="M9.5 2.5l2 2-6.5 6.5L2.5 12l1-2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button><button class="row-action-btn" aria-label="더보기" title="더보기">⋯</button></span></td>
+                </tr>
+                <tr data-amount="6201500000" data-count="61205" data-rate="79.3" data-name="페이앤고">
+                  <td class="merchant-cell"><span class="merchant-name">페이앤고</span></td>
+                  <td class="num tabular">₩6,201,500,000</td>
+                  <td class="num tabular">61,205</td>
+                  <td class="num tabular">79.3%</td>
+                  <td><span class="badge badge-danger"><svg viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>실패</span><span class="row-actions"><button class="row-action-btn" aria-label="편집" title="편집"><svg viewBox="0 0 14 14" width="13" height="13" fill="none"><path d="M9.5 2.5l2 2-6.5 6.5L2.5 12l1-2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button><button class="row-action-btn" aria-label="더보기" title="더보기">⋯</button></span></td>
+                </tr>
+                <tr data-amount="2900000" data-count="290" data-rate="100.0" data-name="미니샵 코리아">
+                  <td class="merchant-cell"><span class="merchant-name">미니샵 코리아</span></td>
+                  <td class="num tabular">₩2,900,000</td>
+                  <td class="num tabular">290</td>
+                  <td class="num tabular">100.0%</td>
+                  <td><span class="badge badge-success"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>완료</span><span class="row-actions"><button class="row-action-btn" aria-label="편집" title="편집"><svg viewBox="0 0 14 14" width="13" height="13" fill="none"><path d="M9.5 2.5l2 2-6.5 6.5L2.5 12l1-2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button><button class="row-action-btn" aria-label="더보기" title="더보기">⋯</button></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card empty-card" data-region="empty">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4v5c0 5-3.5 7.8-8 9-4.5-1.2-8-4-8-9V7l8-4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="empty-headline">표시할 이상거래가 없어요</div>
+          <div class="empty-desc">최근 30일간 감지된 이상거래가 없습니다.</div>
+          <button class="btn btn-secondary">탐지 규칙 보기</button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <footer class="app-footer">STYLE 23 · 엔터프라이즈 B2B</footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Sidebar collapse toggle (manual, progressive enhancement only)
+  var sidebar = document.querySelector('.sidebar');
+  var toggle = document.getElementById('sidebarToggle');
+  if (toggle && sidebar) {
+    toggle.addEventListener('click', function(){
+      sidebar.classList.toggle('collapsed');
+    });
+  }
+
+  // Period tabs — visual active state only (dataset fixed to 30일 view)
+  var tabs = document.querySelectorAll('.period-tab');
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(o){ o.classList.remove('active'); o.setAttribute('aria-selected','false'); });
+      t.classList.add('active');
+      t.setAttribute('aria-selected','true');
+    });
+  });
+
+  // Channel select — decorative open/close only
+  var channelBtn = document.getElementById('channelSelect');
+  if (channelBtn) {
+    channelBtn.addEventListener('click', function(){
+      var expanded = channelBtn.getAttribute('aria-expanded') === 'true';
+      channelBtn.setAttribute('aria-expanded', String(!expanded));
+    });
+  }
+
+  // Table row selection
+  var rows = document.querySelectorAll('#merchantTable tbody tr');
+  rows.forEach(function(r){
+    r.addEventListener('click', function(e){
+      if (e.target.closest('.row-action-btn')) return;
+      var already = r.classList.contains('selected');
+      rows.forEach(function(o){ o.classList.remove('selected'); });
+      if (!already) r.classList.add('selected');
+    });
+  });
+
+  // Sortable column headers
+  var ths = document.querySelectorAll('#merchantTable thead th');
+  var tbody = document.querySelector('#merchantTable tbody');
+  ths.forEach(function(th){
+    var dir = 0; // 0 none, 1 asc, -1 desc
+    th.addEventListener('click', function(){
+      ths.forEach(function(o){ if(o!==th){ o.classList.remove('sorted'); o.querySelector('.sort-icon').textContent='↕'; } });
+      dir = dir === 1 ? -1 : 1;
+      th.classList.add('sorted');
+      th.querySelector('.sort-icon').textContent = dir === 1 ? '▲' : '▼';
+      var key = th.getAttribute('data-key');
+      var type = th.getAttribute('data-type');
+      var list = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+      list.sort(function(a,b){
+        var av, bv;
+        if (key === 'name') { av = a.getAttribute('data-name'); bv = b.getAttribute('data-name'); return dir * av.localeCompare(bv,'ko'); }
+        if (key === 'amount') { av = parseFloat(a.getAttribute('data-amount')); bv = parseFloat(b.getAttribute('data-amount')); return dir * (av-bv); }
+        if (key === 'count') { av = parseFloat(a.getAttribute('data-count')); bv = parseFloat(b.getAttribute('data-count')); return dir * (av-bv); }
+        if (key === 'rate') { av = parseFloat(a.getAttribute('data-rate')); bv = parseFloat(b.getAttribute('data-rate')); return dir * (av-bv); }
+        if (key === 'status') { av = a.querySelector('.badge').textContent.trim(); bv = b.querySelector('.badge').textContent.trim(); return dir * av.localeCompare(bv,'ko'); }
+        return 0;
+      });
+      list.forEach(function(row){ tbody.appendChild(row); });
+    });
+  });
+})();
+</script>
+</body>
+</html>

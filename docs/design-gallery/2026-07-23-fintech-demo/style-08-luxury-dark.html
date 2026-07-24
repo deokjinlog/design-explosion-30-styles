@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>
+(function () {
+  try {
+    if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('js-anim');
+    }
+  } catch (e) {}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>정산 대시보드 · 핀그리드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E0D0B;
+    --panel:#171512;
+    --panel-alt:#1C1915;
+    --gold:#C9A96A;
+    --gold-bright:#E5CFA3;
+    --ivory:#EDE8DF;
+    --muted:#8A8477;
+    --negative:#B0665C;
+    --success:#6E8567;
+    --bronze:#8f7548;
+    --hairline:rgba(201,169,106,.25);
+    --hairline-soft:rgba(201,169,106,.14);
+    --sheen:rgba(201,169,106,.06);
+    --radius:2px;
+    --dur:350ms;
+    --ease:cubic-bezier(.16,.6,.3,1);
+    --serif:'Cormorant Garamond','Pretendard',serif;
+    --sans:'Pretendard','Apple SD Gothic Neo',sans-serif;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--ivory);
+    font-family:var(--sans);
+    font-size:14px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  h1,h2,h3,p,ul,figure{ margin:0; padding:0; }
+  ul{ list-style:none; }
+  a{ color:inherit; text-decoration:none; }
+  button,select{ font-family:inherit; font-size:inherit; color:inherit; }
+  img,svg{ display:block; max-width:100%; }
+  .num{
+    font-family:var(--serif);
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1;
+  }
+
+  /* ================= layout ================= */
+  .app{
+    display:grid;
+    grid-template-columns:256px 1fr;
+    min-height:100vh;
+  }
+  .sidebar{
+    background:var(--panel);
+    border-right:1px solid var(--hairline-soft);
+    display:flex;
+    flex-direction:column;
+    padding:28px 20px;
+    gap:32px;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand-mark{
+    width:32px; height:32px;
+    border:1px solid var(--hairline);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-weight:500; font-size:15px;
+    color:var(--gold); flex:none;
+  }
+  .brand-name{ font-size:16px; font-weight:600; letter-spacing:.02em; color:var(--ivory); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .nav-menu{ display:flex; flex-direction:column; gap:2px; flex:1; }
+  .nav-item{
+    position:relative;
+    display:flex; align-items:center; gap:10px;
+    padding:10px 10px 10px 14px;
+    font-size:13px; letter-spacing:.03em; color:var(--muted);
+    border-left:1px solid transparent;
+    transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+    white-space:nowrap; overflow:hidden;
+  }
+  .nav-item .nav-initial{ display:none; font-family:var(--serif); color:var(--gold); font-size:14px; }
+  .nav-item:hover{ color:var(--ivory); background:var(--panel-alt); border-left-color:var(--hairline); }
+  .nav-item:focus-visible{ outline:1px solid var(--gold); outline-offset:-1px; }
+  .nav-item.is-active{ color:var(--ivory); border-left-color:var(--gold); background:var(--panel-alt); }
+
+  .nav-user{ border-top:1px solid var(--hairline-soft); padding-top:16px; }
+  .nav-user-role{ font-size:12px; color:var(--muted); letter-spacing:.04em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+
+  .main{ display:flex; flex-direction:column; min-width:0; padding:28px 32px 40px; gap:24px; }
+
+  .topbar{ display:flex; align-items:baseline; }
+  .page-title{
+    position:relative; display:inline-block;
+    font-size:24px; font-weight:600; letter-spacing:-.01em; color:var(--ivory);
+    padding-bottom:12px;
+  }
+  .title-hairline{
+    position:absolute; left:0; bottom:0; height:1px; width:100%;
+    background:var(--gold); opacity:.55; transform:scaleX(1); transform-origin:left;
+  }
+
+  .filterbar{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .period-tabs{ display:flex; border:1px solid var(--hairline-soft); }
+  .tab{
+    background:transparent; border:none; border-right:1px solid var(--hairline-soft);
+    padding:9px 16px; font-size:12px; letter-spacing:.06em; color:var(--muted);
+    cursor:pointer; transition:color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+  }
+  .tab:last-child{ border-right:none; }
+  .tab:hover{ color:var(--ivory); background:var(--panel-alt); }
+  .tab:focus-visible{ outline:1px solid var(--gold); outline-offset:-2px; }
+  .tab.is-active{ color:var(--gold); background:var(--panel); }
+  .tab:active{ color:var(--gold-bright); }
+
+  .channel-select{ position:relative; }
+  .channel-select select{
+    appearance:none;
+    background:var(--panel);
+    border:1px solid var(--hairline-soft);
+    color:var(--ivory);
+    padding:9px 32px 9px 14px;
+    font-size:12px; letter-spacing:.03em;
+    cursor:pointer;
+    transition:border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+  }
+  .channel-select::after{
+    content:'▾'; position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    color:var(--gold); font-size:10px; pointer-events:none;
+  }
+  .channel-select select:hover{ border-color:var(--hairline); background:var(--panel-alt); }
+  .channel-select select:focus-visible{ outline:1px solid var(--gold); outline-offset:1px; }
+
+  .btn{
+    border:1px solid var(--hairline);
+    background:transparent;
+    color:var(--gold);
+    padding:9px 20px;
+    font-size:12px; letter-spacing:.08em;
+    cursor:pointer;
+    transition:background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+    margin-left:auto;
+  }
+  .btn:hover{ background:var(--panel-alt); border-color:var(--gold); }
+  .btn:active{ color:var(--gold-bright); border-color:var(--gold-bright); }
+  .btn:focus-visible{ outline:1px solid var(--gold); outline-offset:2px; }
+  .btn:disabled{ color:var(--muted); border-color:var(--hairline-soft); cursor:not-allowed; background:transparent; }
+  .btn--ghost{
+    margin-left:0; border-color:var(--hairline-soft); color:var(--ivory);
+  }
+  .btn--ghost:hover{ border-color:var(--gold); color:var(--gold); }
+
+  /* ================= panels (shared surface) ================= */
+  .panel, .kpi-card, .banner{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--hairline-soft);
+    padding:24px;
+    overflow:hidden;
+  }
+  .panel::after, .kpi-card::after, .banner::after{
+    content:'';
+    position:absolute; left:0; right:0; top:0; height:72px;
+    background:linear-gradient(180deg,var(--sheen),transparent);
+    pointer-events:none;
+  }
+  .panel-hairline, .kpi-hairline{
+    position:absolute; left:0; top:0; height:1px; width:100%;
+    background:var(--gold); opacity:.5; transform:scaleX(1); transform-origin:left;
+  }
+  .panel-title{ font-size:14px; font-weight:600; letter-spacing:.02em; color:var(--ivory); margin-bottom:20px; }
+
+  /* ================= banner ================= */
+  .banner{ padding:16px 24px; border-left:2px solid var(--gold); }
+  .banner p{ font-size:13px; color:var(--ivory); letter-spacing:.01em; }
+  .banner-amount{ color:var(--gold); font-size:15px; font-weight:500; }
+
+  /* ================= KPI ================= */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .kpi-card{ padding:20px; display:flex; flex-direction:column; gap:12px;
+    transition:background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  .kpi-card:hover{ background:var(--panel-alt); border-color:var(--hairline); }
+  .kpi-label{ font-size:11px; letter-spacing:.12em; color:var(--muted); }
+  .kpi-value{
+    font-weight:500; color:var(--ivory); line-height:1.05;
+    font-size:clamp(32px,3.6vw,50px);
+    letter-spacing:-.01em;
+  }
+  .kpi-value--long{ font-size:clamp(22px,2.3vw,34px); }
+  .kpi-delta{ display:flex; align-items:center; gap:6px; font-size:13px; }
+  .kpi-arrow{ font-size:11px; }
+  .kpi-delta-val{ font-size:14px; font-weight:500; color:var(--ivory); }
+  .kpi-delta--up .kpi-arrow{ color:var(--success); }
+  .kpi-delta--down .kpi-arrow{ color:var(--negative); }
+  .kpi-delta--flat .kpi-arrow{ color:var(--muted); font-size:13px; }
+  .kpi-spark{ display:flex; align-items:center; gap:8px; margin-top:auto; padding-top:4px; }
+  .spark{ width:64px; height:24px; overflow:visible; }
+  .spark path{ fill:none; stroke-width:1.4; stroke-linecap:round; stroke-linejoin:round; }
+  .spark--up path{ stroke:var(--success); }
+  .spark--down path{ stroke:var(--negative); }
+  .spark--flat path{ stroke:var(--muted); }
+  .kpi-spark-label{ font-size:11px; letter-spacing:.06em; color:var(--muted); }
+
+  /* ================= content grid ================= */
+  .content-grid{ display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:start; }
+  .side-col{ display:flex; flex-direction:column; gap:16px; }
+
+  /* trend chart */
+  .trend-svg{ width:100%; height:auto; }
+  .gridlines line{ stroke:var(--hairline-soft); stroke-width:1; }
+  .axis-label{ font-size:10px; fill:var(--muted); text-anchor:end; font-family:var(--sans); }
+  .axis-unit{ font-size:10px; fill:var(--muted); font-family:var(--sans); }
+  .x-ticks text{ font-size:10px; fill:var(--muted); font-family:var(--sans); text-anchor:middle; }
+  .area-fill{ fill:var(--gold); opacity:.08; transform-box:fill-box; transform-origin:bottom; transform:scaleY(1); }
+  .line-stroke{ fill:none; stroke:var(--gold); stroke-width:1.6; stroke-linejoin:round; stroke-linecap:round; stroke-dasharray:100; stroke-dashoffset:0; }
+  .pt-hit{ pointer-events:all; }
+  .pt-dot{ fill:var(--gold); opacity:.85; }
+  .pt-max .pt-dot{ fill:var(--gold-bright); r:3.2; }
+  .pt-min .pt-dot{ fill:var(--ivory); opacity:.7; }
+  .pt-tip{ opacity:0; transition:opacity var(--dur) var(--ease); pointer-events:none; }
+  .pt-tip rect{ fill:var(--panel); stroke:var(--hairline-soft); stroke-width:1; }
+  .pt-tip text{ font-family:var(--serif); font-style:italic; font-size:11px; fill:var(--ivory); font-weight:500; }
+  .pt:hover .pt-tip{ opacity:1; }
+  .pt-tip.always{ opacity:1; }
+  .pt-tip.always rect{ fill:var(--panel-alt); stroke:var(--hairline); }
+  .pt-tip.always text{ fill:var(--gold-bright); font-size:12px; }
+
+  /* donut */
+  .donut-wrap{ display:flex; justify-content:center; margin-bottom:16px; }
+  .donut-svg{ width:150px; height:150px; }
+  .donut-track{ fill:none; stroke:var(--hairline-soft); stroke-width:18; }
+  .donut-seg{ fill:none; stroke-width:18; transform:rotate(-90deg); transform-origin:center; }
+  .donut-seg--card{ stroke:var(--gold); }
+  .donut-seg--transfer{ stroke:var(--ivory); opacity:.55; }
+  .donut-seg--easypay{ stroke:var(--bronze); }
+  .donut-seg--etc{ stroke:var(--muted); }
+  .donut-center-val{ font-family:var(--serif); font-size:22px; font-weight:500; fill:var(--ivory); }
+  .donut-center-label{ font-size:11px; fill:var(--muted); font-family:var(--sans); letter-spacing:.06em; }
+  .legend{ display:flex; flex-direction:column; gap:8px; }
+  .legend li{ display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ivory); }
+  .swatch{ width:9px; height:9px; flex:none; }
+  .swatch--card{ background:var(--gold); }
+  .swatch--transfer{ background:var(--ivory); opacity:.55; }
+  .swatch--easypay{ background:var(--bronze); }
+  .swatch--etc{ background:var(--muted); }
+  .legend-pct{ margin-left:auto; font-size:13px; color:var(--muted); }
+
+  /* goal */
+  .goal-amounts{ font-size:15px; color:var(--ivory); margin-bottom:16px; }
+  .goal-slash{ color:var(--muted); margin:0 4px; font-family:var(--sans); }
+  .goal-track{ height:6px; background:rgba(138,132,119,.18); position:relative; margin-bottom:14px; }
+  .goal-fill{
+    position:absolute; left:0; top:0; bottom:0;
+    width:68%; background:var(--gold);
+    transform:scaleX(1); transform-origin:left;
+  }
+  .goal-fill::after{
+    content:''; position:absolute; inset:0 0 auto 0; height:3px;
+    background:linear-gradient(180deg,rgba(229,207,163,.5),transparent);
+  }
+  .goal-pct{ font-size:40px; font-weight:500; color:var(--ivory); line-height:1; }
+  .goal-caption{ font-size:11px; letter-spacing:.12em; color:var(--muted); margin-top:4px; }
+
+  /* ================= table ================= */
+  .table-scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:680px; }
+  thead th{
+    text-align:left; font-size:11px; letter-spacing:.1em; color:var(--muted);
+    font-weight:500; padding:0 12px 12px; border-bottom:1px solid var(--hairline);
+  }
+  th.num-col, td.num-col{ text-align:right; }
+  tbody td{
+    padding:14px 12px; font-size:13px; color:var(--ivory);
+    border-bottom:1px solid var(--hairline-soft);
+    vertical-align:top;
+  }
+  tbody tr{ position:relative; transition:background-color var(--dur) var(--ease); }
+  tbody tr::after{
+    content:''; position:absolute; left:0; right:0; bottom:-1px; height:1px;
+    background:var(--gold); transform:scaleX(0); transform-origin:left;
+    transition:transform var(--dur) var(--ease);
+  }
+  tbody tr:hover{ background:var(--panel-alt); }
+  tbody tr:hover::after{ transform:scaleX(1); }
+  td.cell-long{ max-width:340px; white-space:normal; line-height:1.5; }
+  td.num{ font-size:14px; }
+  td.missing{ color:var(--muted); font-family:var(--sans); }
+
+  .status{ display:inline-flex; align-items:center; gap:7px; font-size:11px; letter-spacing:.1em; color:var(--ivory); }
+  .status .dot{ width:6px; height:6px; flex:none; border-radius:50%; }
+  .status--done .dot{ background:var(--success); }
+  .status--wait .dot{ background:var(--gold); }
+  .status--hold .dot{ background:var(--muted); }
+  .status--fail .dot{ background:var(--negative); }
+
+  /* ================= empty state ================= */
+  .empty-panel{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:40px 24px; gap:10px; }
+  .empty-icon{ width:44px; height:44px; margin-bottom:8px; }
+  .empty-icon circle{ fill:none; stroke:var(--hairline); stroke-width:1; }
+  .empty-icon path{ fill:none; stroke:var(--gold); stroke-width:1.4; stroke-linecap:round; stroke-linejoin:round; }
+  .empty-headline{ font-size:16px; font-weight:600; color:var(--ivory); }
+  .empty-desc{ font-size:13px; color:var(--muted); max-width:360px; }
+  .empty-panel .btn{ margin-top:10px; margin-left:0; }
+
+  .footer{ text-align:center; font-size:11px; letter-spacing:.14em; color:var(--muted); padding-top:16px; border-top:1px solid var(--hairline-soft); margin-top:8px; }
+
+  /* ================= hero reveal (JS-driven, safe default = final state) ================= */
+  .js-anim .title-hairline{ animation:drawline 700ms var(--ease) 0ms both; }
+  .js-anim .kpi-hairline{ animation:drawline 700ms var(--ease) both; }
+  .js-anim .kpi-card:nth-child(1) .kpi-hairline{ animation-delay:60ms; }
+  .js-anim .kpi-card:nth-child(2) .kpi-hairline{ animation-delay:140ms; }
+  .js-anim .kpi-card:nth-child(3) .kpi-hairline{ animation-delay:220ms; }
+  .js-anim .kpi-card:nth-child(4) .kpi-hairline{ animation-delay:300ms; }
+  .js-anim .panel-hairline{ animation:drawline 700ms var(--ease) both; }
+  .js-anim .chart-trend .panel-hairline{ animation-delay:380ms; }
+  .js-anim .chart-part .panel-hairline{ animation-delay:460ms; }
+  .js-anim .goal .panel-hairline{ animation-delay:540ms; }
+  .js-anim .table-panel .panel-hairline{ animation-delay:600ms; }
+  .js-anim .empty-panel .panel-hairline{ animation-delay:660ms; }
+  @keyframes drawline{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+
+  .js-anim .kpi-card{ animation:kpiFade 600ms var(--ease) both; }
+  .js-anim .kpi-card:nth-child(1){ animation-delay:600ms; }
+  .js-anim .kpi-card:nth-child(2){ animation-delay:700ms; }
+  .js-anim .kpi-card:nth-child(3){ animation-delay:800ms; }
+  .js-anim .kpi-card:nth-child(4){ animation-delay:900ms; }
+  @keyframes kpiFade{ from{ opacity:0; } to{ opacity:1; } }
+
+  .js-anim .line-stroke{ animation:lineDraw 700ms var(--ease) 1200ms both; }
+  @keyframes lineDraw{ from{ stroke-dashoffset:100; } to{ stroke-dashoffset:0; } }
+  .js-anim .area-fill{ animation:areaGrow 700ms var(--ease) 1200ms both; }
+  @keyframes areaGrow{ from{ transform:scaleY(0); } to{ transform:scaleY(1); } }
+
+  .js-anim .donut-seg--card{ animation:segCard 700ms var(--ease) 1200ms both; }
+  @keyframes segCard{ from{ stroke-dashoffset:196.035; } to{ stroke-dashoffset:0; } }
+  .js-anim .donut-seg--transfer{ animation:segTransfer 700ms var(--ease) 1280ms both; }
+  @keyframes segTransfer{ from{ stroke-dashoffset:-105.557; } to{ stroke-dashoffset:-196.035; } }
+  .js-anim .donut-seg--easypay{ animation:segEasypay 700ms var(--ease) 1360ms both; }
+  @keyframes segEasypay{ from{ stroke-dashoffset:-218.655; } to{ stroke-dashoffset:-286.513; } }
+  .js-anim .donut-seg--etc{ animation:segEtc 700ms var(--ease) 1440ms both; }
+  @keyframes segEtc{ from{ stroke-dashoffset:-331.753; } to{ stroke-dashoffset:-354.372; } }
+
+  .js-anim .goal-fill{ animation:goalGrow 700ms var(--ease) 1200ms both; }
+  @keyframes goalGrow{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+
+  .js-anim .pt-max .pt-dot{ animation:peakLight 600ms var(--ease) 2000ms both; }
+  @keyframes peakLight{ from{ fill:var(--gold); } to{ fill:var(--gold-bright); } }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{ animation:none !important; transition:none !important; }
+  }
+
+  /* ================= responsive ================= */
+  @media (max-width:1100px){
+    .app{ grid-template-columns:1fr; }
+    .sidebar{ flex-direction:row; align-items:center; padding:14px 20px; gap:20px; border-right:none; border-bottom:1px solid var(--hairline-soft); overflow-x:auto; }
+    .brand-name{ max-width:64px; }
+    .nav-menu{ flex-direction:row; gap:4px; flex:none; }
+    .nav-item{ padding:8px 10px; max-width:56px; }
+    .nav-item .nav-label{ display:none; }
+    .nav-item .nav-initial{ display:inline; }
+    .nav-user{ display:none; }
+    .main{ padding:20px; }
+    .content-grid{ grid-template-columns:1fr; }
+  }
+  @media (max-width:900px){
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:640px){
+    .kpi-grid{ grid-template-columns:1fr; }
+    .filterbar{ gap:10px; }
+    .btn{ margin-left:0; }
+    .period-tabs{ order:1; }
+    .channel-select{ order:2; }
+    .btn{ order:3; width:100%; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar" data-region="nav">
+    <div class="brand">
+      <span class="brand-mark">FG</span>
+      <span class="brand-name">핀그리드</span>
+    </div>
+    <nav class="nav-menu">
+      <a href="#" class="nav-item is-active" aria-label="대시보드" aria-current="page"><span class="nav-label">대시보드</span><span class="nav-initial" aria-hidden="true">대</span></a>
+      <a href="#" class="nav-item" aria-label="거래"><span class="nav-label">거래</span><span class="nav-initial" aria-hidden="true">거</span></a>
+      <a href="#" class="nav-item" aria-label="정산"><span class="nav-label">정산</span><span class="nav-initial" aria-hidden="true">정</span></a>
+      <a href="#" class="nav-item" aria-label="가맹점"><span class="nav-label">가맹점</span><span class="nav-initial" aria-hidden="true">가</span></a>
+      <a href="#" class="nav-item" aria-label="리포트"><span class="nav-label">리포트</span><span class="nav-initial" aria-hidden="true">리</span></a>
+      <a href="#" class="nav-item" aria-label="설정"><span class="nav-label">설정</span><span class="nav-initial" aria-hidden="true">설</span></a>
+    </nav>
+    <div class="nav-user">
+      <span class="nav-user-role">김운영 · 정산팀</span>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <header class="topbar" data-region="identity">
+      <h1 class="page-title">정산 대시보드<span class="title-hairline" aria-hidden="true"></span></h1>
+    </header>
+
+    <div class="filterbar" data-region="filter">
+      <div class="period-tabs" role="tablist" aria-label="기간 선택">
+        <button class="tab" type="button" role="tab" aria-selected="false">오늘</button>
+        <button class="tab" type="button" role="tab" aria-selected="false">7일</button>
+        <button class="tab is-active" type="button" role="tab" aria-selected="true">30일</button>
+        <button class="tab" type="button" role="tab" aria-selected="false">90일</button>
+      </div>
+      <div class="channel-select">
+        <select aria-label="채널 필터">
+          <option>전체 채널 ▾</option>
+          <option>카드</option>
+          <option>계좌이체</option>
+          <option>간편결제</option>
+        </select>
+      </div>
+      <button class="btn" type="button">내보내기</button>
+    </div>
+
+    <section class="banner" data-region="banner">
+      <p>10월 21일 정산 예정 — <span class="num banner-amount">₩1,284,900,000</span> · 영업일 기준 D-1</p>
+    </section>
+
+    <section class="kpi-grid" data-region="kpi">
+      <article class="kpi-card">
+        <span class="kpi-hairline" aria-hidden="true"></span>
+        <div class="kpi-label">총 거래액(GMV)</div>
+        <div class="kpi-value kpi-value--long num">₩1,284,732,050,000</div>
+        <div class="kpi-delta kpi-delta--up">
+          <span class="kpi-arrow">▲</span><span class="kpi-delta-val num">+8.3%</span>
+        </div>
+        <div class="kpi-spark">
+          <svg class="spark spark--up" viewBox="0 0 64 24" pathLength="100" aria-hidden="true">
+            <path d="M2,18 L12,15 L22,16 L32,11 L42,9 L52,6 L62,4"/>
+          </svg>
+          <span class="kpi-spark-label">상승 ↗</span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <span class="kpi-hairline" aria-hidden="true"></span>
+        <div class="kpi-label">결제 건수</div>
+        <div class="kpi-value num">12,847,192건</div>
+        <div class="kpi-delta kpi-delta--up">
+          <span class="kpi-arrow">▲</span><span class="kpi-delta-val num">+12.1%</span>
+        </div>
+        <div class="kpi-spark">
+          <svg class="spark spark--up" viewBox="0 0 64 24" pathLength="100" aria-hidden="true">
+            <path d="M2,18 L12,15 L22,16 L32,11 L42,9 L52,6 L62,4"/>
+          </svg>
+          <span class="kpi-spark-label">상승 ↗</span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <span class="kpi-hairline" aria-hidden="true"></span>
+        <div class="kpi-label">승인율</div>
+        <div class="kpi-value num">94.7%</div>
+        <div class="kpi-delta kpi-delta--down">
+          <span class="kpi-arrow">▼</span><span class="kpi-delta-val num">−1.2%p</span>
+        </div>
+        <div class="kpi-spark">
+          <svg class="spark spark--down" viewBox="0 0 64 24" pathLength="100" aria-hidden="true">
+            <path d="M2,6 L12,8 L22,7 L32,11 L42,13 L52,16 L62,19"/>
+          </svg>
+          <span class="kpi-spark-label">하락 ↘</span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <span class="kpi-hairline" aria-hidden="true"></span>
+        <div class="kpi-label">정산 대기액</div>
+        <div class="kpi-value kpi-value--long num">₩312,048,900,000</div>
+        <div class="kpi-delta kpi-delta--flat">
+          <span class="kpi-arrow">—</span>
+        </div>
+        <div class="kpi-spark">
+          <svg class="spark spark--flat" viewBox="0 0 64 24" pathLength="100" aria-hidden="true">
+            <path d="M2,12 L12,11 L22,13 L32,12 L42,10 L52,12 L62,11"/>
+          </svg>
+          <span class="kpi-spark-label">평탄</span>
+        </div>
+      </article>
+    </section>
+
+    <div class="content-grid">
+
+      <section class="panel chart-trend" data-region="chart-trend">
+        <span class="panel-hairline" aria-hidden="true"></span>
+        <h2 class="panel-title">일별 거래액 추이 (최근 30일)</h2>
+        <svg class="trend-svg" viewBox="0 0 920 260" role="img" aria-label="일별 거래액 추이, 최근 30일, 단위 억. 최고 58.2억 10월 14일, 최저 31.7억 10월 2일">
+          <text class="axis-unit" x="40" y="16">억</text>
+          <g class="gridlines">
+            <line x1="40" y1="230.00" x2="880" y2="230.00"/>
+            <text class="axis-label" x="34" y="233.5">0</text>
+            <line x1="40" y1="172.86" x2="880" y2="172.86"/>
+            <text class="axis-label" x="34" y="176.36">20</text>
+            <line x1="40" y1="115.71" x2="880" y2="115.71"/>
+            <text class="axis-label" x="34" y="119.21">40</text>
+            <line x1="40" y1="58.57" x2="880" y2="58.57"/>
+            <text class="axis-label" x="34" y="62.07">60</text>
+          </g>
+          <g class="x-ticks">
+            <text x="40" y="250" text-anchor="start">10/01</text>
+            <text x="300.7" y="250">10/10</text>
+            <text x="590.3" y="250">10/20</text>
+            <text x="880" y="250" text-anchor="end">10/30</text>
+          </g>
+
+          <path class="area-fill" d="M 40.0,131.4 L 69.0,139.4 L 97.9,126.6 L 126.9,116.3 L 155.9,109.7 L 184.8,102.6 L 213.8,112.0 L 242.8,118.9 L 271.7,105.7 L 300.7,95.1 L 329.7,99.1 L 358.6,88.3 L 387.6,77.4 L 416.6,63.7 L 445.5,72.6 L 474.5,85.1 L 503.4,92.0 L 532.4,96.0 L 561.4,103.7 L 590.3,93.4 L 619.3,83.4 L 648.3,88.6 L 677.2,98.3 L 706.2,102.3 L 735.2,90.3 L 764.1,79.7 L 793.1,86.6 L 822.1,94.6 L 851.0,98.9 L 880.0,106.6 L 880.0,230 L 40.0,230 Z"/>
+          <path class="line-stroke" pathLength="100" d="M 40.0,131.4 L 69.0,139.4 L 97.9,126.6 L 126.9,116.3 L 155.9,109.7 L 184.8,102.6 L 213.8,112.0 L 242.8,118.9 L 271.7,105.7 L 300.7,95.1 L 329.7,99.1 L 358.6,88.3 L 387.6,77.4 L 416.6,63.7 L 445.5,72.6 L 474.5,85.1 L 503.4,92.0 L 532.4,96.0 L 561.4,103.7 L 590.3,93.4 L 619.3,83.4 L 648.3,88.6 L 677.2,98.3 L 706.2,102.3 L 735.2,90.3 L 764.1,79.7 L 793.1,86.6 L 822.1,94.6 L 851.0,98.9 L 880.0,106.6"/>
+
+          <g class="points">
+            <g class="pt"><circle class="pt-hit" cx="40.0" cy="131.4" r="12" fill="transparent"/><circle class="pt-dot" cx="40.0" cy="131.4" r="2.3"/><g class="pt-tip" transform="translate(40.0,117.4)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">34.5억 · 10/01</text></g></g>
+            <g class="pt pt-min"><circle class="pt-hit" cx="69.0" cy="139.4" r="12" fill="transparent"/><circle class="pt-dot" cx="69.0" cy="139.4" r="3"/><g class="pt-tip always" transform="translate(69.0,158.0)"><rect x="-38" y="-4" width="76" height="20" rx="2"/><text x="0" y="10" text-anchor="middle">최저 ₩31.7억 (10/02)</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="97.9" cy="126.6" r="12" fill="transparent"/><circle class="pt-dot" cx="97.9" cy="126.6" r="2.3"/><g class="pt-tip" transform="translate(97.9,112.6)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">36.2억 · 10/03</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="126.9" cy="116.3" r="12" fill="transparent"/><circle class="pt-dot" cx="126.9" cy="116.3" r="2.3"/><g class="pt-tip" transform="translate(126.9,102.3)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">39.8억 · 10/04</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="155.9" cy="109.7" r="12" fill="transparent"/><circle class="pt-dot" cx="155.9" cy="109.7" r="2.3"/><g class="pt-tip" transform="translate(155.9,95.7)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">42.1억 · 10/05</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="184.8" cy="102.6" r="12" fill="transparent"/><circle class="pt-dot" cx="184.8" cy="102.6" r="2.3"/><g class="pt-tip" transform="translate(184.8,88.6)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">44.6억 · 10/06</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="213.8" cy="112.0" r="12" fill="transparent"/><circle class="pt-dot" cx="213.8" cy="112.0" r="2.3"/><g class="pt-tip" transform="translate(213.8,98.0)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">41.3억 · 10/07</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="242.8" cy="118.9" r="12" fill="transparent"/><circle class="pt-dot" cx="242.8" cy="118.9" r="2.3"/><g class="pt-tip" transform="translate(242.8,104.9)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">38.9억 · 10/08</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="271.7" cy="105.7" r="12" fill="transparent"/><circle class="pt-dot" cx="271.7" cy="105.7" r="2.3"/><g class="pt-tip" transform="translate(271.7,91.7)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">43.5억 · 10/09</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="300.7" cy="95.1" r="12" fill="transparent"/><circle class="pt-dot" cx="300.7" cy="95.1" r="2.3"/><g class="pt-tip" transform="translate(300.7,81.1)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">47.2억 · 10/10</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="329.7" cy="99.1" r="12" fill="transparent"/><circle class="pt-dot" cx="329.7" cy="99.1" r="2.3"/><g class="pt-tip" transform="translate(329.7,85.1)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">45.8억 · 10/11</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="358.6" cy="88.3" r="12" fill="transparent"/><circle class="pt-dot" cx="358.6" cy="88.3" r="2.3"/><g class="pt-tip" transform="translate(358.6,74.3)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">49.6억 · 10/12</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="387.6" cy="77.4" r="12" fill="transparent"/><circle class="pt-dot" cx="387.6" cy="77.4" r="2.3"/><g class="pt-tip" transform="translate(387.6,63.4)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">53.4억 · 10/13</text></g></g>
+            <g class="pt pt-max"><circle class="pt-hit" cx="416.6" cy="63.7" r="12" fill="transparent"/><circle class="pt-dot" cx="416.6" cy="63.7" r="3.4"/><g class="pt-tip always" transform="translate(416.6,38.0)"><rect x="-38" y="-16" width="76" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">최고 ₩58.2억 (10/14)</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="445.5" cy="72.6" r="12" fill="transparent"/><circle class="pt-dot" cx="445.5" cy="72.6" r="2.3"/><g class="pt-tip" transform="translate(445.5,58.6)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">55.1억 · 10/15</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="474.5" cy="85.1" r="12" fill="transparent"/><circle class="pt-dot" cx="474.5" cy="85.1" r="2.3"/><g class="pt-tip" transform="translate(474.5,71.1)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">50.7억 · 10/16</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="503.4" cy="92.0" r="12" fill="transparent"/><circle class="pt-dot" cx="503.4" cy="92.0" r="2.3"/><g class="pt-tip" transform="translate(503.4,78.0)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">48.3억 · 10/17</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="532.4" cy="96.0" r="12" fill="transparent"/><circle class="pt-dot" cx="532.4" cy="96.0" r="2.3"/><g class="pt-tip" transform="translate(532.4,82.0)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">46.9억 · 10/18</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="561.4" cy="103.7" r="12" fill="transparent"/><circle class="pt-dot" cx="561.4" cy="103.7" r="2.3"/><g class="pt-tip" transform="translate(561.4,89.7)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">44.2억 · 10/19</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="590.3" cy="93.4" r="12" fill="transparent"/><circle class="pt-dot" cx="590.3" cy="93.4" r="2.3"/><g class="pt-tip" transform="translate(590.3,79.4)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">47.8억 · 10/20</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="619.3" cy="83.4" r="12" fill="transparent"/><circle class="pt-dot" cx="619.3" cy="83.4" r="2.3"/><g class="pt-tip" transform="translate(619.3,69.4)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">51.3억 · 10/21</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="648.3" cy="88.6" r="12" fill="transparent"/><circle class="pt-dot" cx="648.3" cy="88.6" r="2.3"/><g class="pt-tip" transform="translate(648.3,74.6)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">49.5억 · 10/22</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="677.2" cy="98.3" r="12" fill="transparent"/><circle class="pt-dot" cx="677.2" cy="98.3" r="2.3"/><g class="pt-tip" transform="translate(677.2,84.3)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">46.1억 · 10/23</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="706.2" cy="102.3" r="12" fill="transparent"/><circle class="pt-dot" cx="706.2" cy="102.3" r="2.3"/><g class="pt-tip" transform="translate(706.2,88.3)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">44.7억 · 10/24</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="735.2" cy="90.3" r="12" fill="transparent"/><circle class="pt-dot" cx="735.2" cy="90.3" r="2.3"/><g class="pt-tip" transform="translate(735.2,76.3)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">48.9억 · 10/25</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="764.1" cy="79.7" r="12" fill="transparent"/><circle class="pt-dot" cx="764.1" cy="79.7" r="2.3"/><g class="pt-tip" transform="translate(764.1,65.7)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">52.6억 · 10/26</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="793.1" cy="86.6" r="12" fill="transparent"/><circle class="pt-dot" cx="793.1" cy="86.6" r="2.3"/><g class="pt-tip" transform="translate(793.1,72.6)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">50.2억 · 10/27</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="822.1" cy="94.6" r="12" fill="transparent"/><circle class="pt-dot" cx="822.1" cy="94.6" r="2.3"/><g class="pt-tip" transform="translate(822.1,80.6)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">47.4억 · 10/28</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="851.0" cy="98.9" r="12" fill="transparent"/><circle class="pt-dot" cx="851.0" cy="98.9" r="2.3"/><g class="pt-tip" transform="translate(851.0,84.9)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">45.9억 · 10/29</text></g></g>
+            <g class="pt"><circle class="pt-hit" cx="880.0" cy="106.6" r="12" fill="transparent"/><circle class="pt-dot" cx="880.0" cy="106.6" r="2.3"/><g class="pt-tip" transform="translate(858.0,92.6)"><rect x="-30" y="-16" width="60" height="20" rx="2"/><text x="0" y="-2" text-anchor="middle">43.2억 · 10/30</text></g></g>
+          </g>
+        </svg>
+      </section>
+
+      <div class="side-col">
+
+        <section class="panel chart-part" data-region="chart-part">
+          <span class="panel-hairline" aria-hidden="true"></span>
+          <h2 class="panel-title">결제수단 구성비</h2>
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 160 160" role="img" aria-label="결제수단 구성비: 카드 52%, 계좌이체 24%, 간편결제 18%, 기타 6%">
+              <circle class="donut-track" cx="80" cy="80" r="60"/>
+              <circle class="donut-seg donut-seg--card" cx="80" cy="80" r="60" stroke-dasharray="196.035 376.991" stroke-dashoffset="0"/>
+              <circle class="donut-seg donut-seg--transfer" cx="80" cy="80" r="60" stroke-dasharray="90.478 376.991" stroke-dashoffset="-196.035"/>
+              <circle class="donut-seg donut-seg--easypay" cx="80" cy="80" r="60" stroke-dasharray="67.858 376.991" stroke-dashoffset="-286.513"/>
+              <circle class="donut-seg donut-seg--etc" cx="80" cy="80" r="60" stroke-dasharray="22.619 376.991" stroke-dashoffset="-354.372"/>
+              <text class="donut-center-val num" x="80" y="76" text-anchor="middle">52%</text>
+              <text class="donut-center-label" x="80" y="94" text-anchor="middle">카드</text>
+            </svg>
+          </div>
+          <ul class="legend">
+            <li><span class="swatch swatch--card" aria-hidden="true"></span>카드<span class="legend-pct num">52%</span></li>
+            <li><span class="swatch swatch--transfer" aria-hidden="true"></span>계좌이체<span class="legend-pct num">24%</span></li>
+            <li><span class="swatch swatch--easypay" aria-hidden="true"></span>간편결제<span class="legend-pct num">18%</span></li>
+            <li><span class="swatch swatch--etc" aria-hidden="true"></span>기타<span class="legend-pct num">6%</span></li>
+          </ul>
+        </section>
+
+        <section class="panel goal" data-region="goal">
+          <span class="panel-hairline" aria-hidden="true"></span>
+          <h2 class="panel-title">4분기 정산액 목표</h2>
+          <div class="goal-amounts num">₩3.4조 <span class="goal-slash">/</span> ₩5조</div>
+          <div class="goal-track"><div class="goal-fill"></div></div>
+          <div class="goal-pct num">68%</div>
+          <div class="goal-caption">달성</div>
+        </section>
+
+      </div>
+    </div>
+
+    <section class="panel table-panel" data-region="table">
+      <span class="panel-hairline" aria-hidden="true"></span>
+      <h2 class="panel-title">가맹점별 정산 현황</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>가맹점</th>
+              <th class="num-col">거래액</th>
+              <th class="num-col">건수</th>
+              <th class="num-col">승인율</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>(주)새벽마켓</td>
+              <td class="num-col num">₩48,203,000,000</td>
+              <td class="num-col num">482,030</td>
+              <td class="num-col num">96.2%</td>
+              <td><span class="status status--done"><span class="dot" aria-hidden="true"></span>완료</span></td>
+            </tr>
+            <tr>
+              <td class="cell-long">글로벌 커머스 인터내셔널 유한회사 — 해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</td>
+              <td class="num-col num">₩31,209,000,000</td>
+              <td class="num-col num">288,110</td>
+              <td class="num-col num">91.4%</td>
+              <td><span class="status status--wait"><span class="dot" aria-hidden="true"></span>대기</span></td>
+            </tr>
+            <tr>
+              <td>김철수 스토어</td>
+              <td class="num-col num">₩894,000,000</td>
+              <td class="num-col num">8,940</td>
+              <td class="num-col num">88.0%</td>
+              <td><span class="status status--hold"><span class="dot" aria-hidden="true"></span>보류</span></td>
+            </tr>
+            <tr>
+              <td>데일리박스</td>
+              <td class="num-col num">₩12,048,300,000</td>
+              <td class="num-col num missing">—</td>
+              <td class="num-col num">94.7%</td>
+              <td><span class="status status--done"><span class="dot" aria-hidden="true"></span>완료</span></td>
+            </tr>
+            <tr>
+              <td>페이앤고</td>
+              <td class="num-col num">₩6,201,500,000</td>
+              <td class="num-col num">61,205</td>
+              <td class="num-col num">79.3%</td>
+              <td><span class="status status--fail"><span class="dot" aria-hidden="true"></span>실패</span></td>
+            </tr>
+            <tr>
+              <td>미니샵 코리아</td>
+              <td class="num-col num">₩2,900,000</td>
+              <td class="num-col num">290</td>
+              <td class="num-col num">100.0%</td>
+              <td><span class="status status--done"><span class="dot" aria-hidden="true"></span>완료</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel empty-panel" data-region="empty">
+      <span class="panel-hairline" aria-hidden="true"></span>
+      <svg class="empty-icon" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="18"/>
+        <path d="M16,24 L21,29 L32,17"/>
+      </svg>
+      <h2 class="empty-headline">표시할 이상거래가 없어요</h2>
+      <p class="empty-desc">최근 30일간 감지된 이상거래가 없습니다.</p>
+      <button class="btn btn--ghost" type="button">탐지 규칙 보기</button>
+    </section>
+
+    <footer class="footer">STYLE 08 · 럭셔리 다크</footer>
+
+  </div>
+</div>
+</body>
+</html>

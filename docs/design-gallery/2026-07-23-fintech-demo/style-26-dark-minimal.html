@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>핀그리드 · 정산 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;620;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E0E11;
+    --surface:#131317;
+    --surface-raised:#17171C;
+    --surface-hover:#1C1C22;
+    --border:#232326;
+    --border-strong:#2E2E33;
+    --text-primary:#EDEDEF;
+    --text-secondary:#A0A0A8;
+    --text-tertiary:#6E6E76;
+    --accent:#8B8BF5;
+    --success:#4E9A76;
+    --warning:#C7A15A;
+    --danger:#C96A6A;
+    --r-card:10px;
+    --r-control:8px;
+    --r-avatar:6px;
+    --sidebar-w:240px;
+    --sidebar-w-collapsed:64px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background:var(--bg);
+    color:var(--text-primary);
+    font-family:'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    font-size:14px;
+    line-height:1.55;
+  }
+
+  .num{
+    font-family:'Inter','Pretendard',sans-serif;
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1;
+  }
+
+  h1,h2,h3{ margin:0; font-weight:600; }
+
+  a{ color:inherit; text-decoration:none; }
+
+  button{
+    font-family:inherit;
+    cursor:pointer;
+    color:inherit;
+  }
+
+  ::selection{ background:rgba(139,139,245,.35); color:var(--text-primary); }
+
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+    border-radius:4px;
+  }
+
+  /* ================= layout shell ================= */
+  .shell{
+    display:flex;
+    min-height:100vh;
+    align-items:stretch;
+  }
+
+  /* ================= sidebar (data-region=nav) ================= */
+  .sidebar{
+    width:var(--sidebar-w);
+    flex:0 0 var(--sidebar-w);
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    padding:24px 16px;
+    gap:32px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 8px;
+  }
+  .brand-mark{
+    width:28px; height:28px;
+    border-radius:var(--r-avatar);
+    background:var(--surface-raised);
+    border:1px solid var(--border-strong);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Inter',sans-serif;
+    font-weight:620;
+    font-size:12px;
+    color:var(--accent);
+    flex:0 0 auto;
+  }
+  .brand-name{
+    font-family:'Inter','Pretendard',sans-serif;
+    font-weight:620;
+    font-size:15px;
+    letter-spacing:-0.01em;
+    white-space:nowrap;
+  }
+
+  .nav-list{ display:flex; flex-direction:column; gap:2px; list-style:none; margin:0; padding:0; }
+  .nav-item{
+    display:flex; align-items:center; gap:12px;
+    padding:9px 10px;
+    border-radius:var(--r-control);
+    color:var(--text-tertiary);
+    font-size:14px;
+    position:relative;
+    animation:navFade 260ms ease-out both;
+  }
+  .nav-item svg{ flex:0 0 auto; opacity:.85; }
+  .nav-item .nav-label{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .nav-item:hover{ background:var(--surface-hover); color:var(--text-secondary); }
+  .nav-item.active{
+    color:var(--text-primary);
+    background:var(--surface-hover);
+  }
+  .nav-item.active::before{
+    content:"";
+    position:absolute;
+    left:-16px; top:8px; bottom:8px;
+    width:2px;
+    background:var(--accent);
+    border-radius:2px;
+  }
+  .nav-item:nth-child(1){ animation-delay:100ms; }
+  .nav-item:nth-child(2){ animation-delay:120ms; }
+  .nav-item:nth-child(3){ animation-delay:140ms; }
+  .nav-item:nth-child(4){ animation-delay:160ms; }
+  .nav-item:nth-child(5){ animation-delay:180ms; }
+  .nav-item:nth-child(6){ animation-delay:200ms; }
+
+  .sidebar-spacer{ flex:1; }
+
+  .sidebar-user{
+    display:flex; align-items:center; gap:10px;
+    padding:10px;
+    border-top:1px solid var(--border);
+    padding-top:16px;
+  }
+  .user-avatar{
+    width:30px; height:30px;
+    border-radius:var(--r-avatar);
+    background:var(--surface-raised);
+    border:1px solid var(--border-strong);
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:600;
+    color:var(--text-secondary);
+    flex:0 0 auto;
+  }
+  .user-info{ display:flex; flex-direction:column; overflow:hidden; }
+  .user-name{ font-size:13px; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-role{ font-size:12px; color:var(--text-tertiary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* ================= main ================= */
+  .main{
+    flex:1;
+    min-width:0;
+    padding:28px 32px 48px;
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+    max-width:1280px;
+  }
+
+  /* topbar */
+  .topbar{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+    animation:fadeUp 260ms ease-out both;
+    animation-delay:60ms;
+  }
+  .topbar-title{
+    font-family:'Inter','Pretendard',sans-serif;
+    font-size:20px;
+    line-height:28px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .topbar-sub{
+    margin-top:4px;
+    font-size:13px;
+    color:var(--text-tertiary);
+  }
+  .topbar-right{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .tabs{
+    display:flex;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-control);
+    padding:3px;
+    gap:2px;
+  }
+  .tab-btn{
+    border:none;
+    background:transparent;
+    color:var(--text-tertiary);
+    font-size:13px;
+    padding:6px 12px;
+    border-radius:6px;
+    transition:background 120ms ease, color 120ms ease;
+  }
+  .tab-btn:hover{ color:var(--text-secondary); }
+  .tab-btn.active{
+    background:var(--surface-hover);
+    color:var(--text-primary);
+    border:1px solid var(--border-strong);
+  }
+
+  .dropdown-btn{
+    display:flex; align-items:center; gap:6px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text-secondary);
+    font-size:13px;
+    padding:8px 12px;
+    border-radius:var(--r-control);
+    height:36px;
+    transition:border-color 150ms ease;
+  }
+  .dropdown-btn:hover{ border-color:var(--border-strong); }
+  .dropdown-btn .chevron{ color:var(--text-tertiary); font-size:11px; }
+
+  .btn-primary{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--accent);
+    color:#0E0E11;
+    border:1px solid var(--accent);
+    font-size:13px;
+    font-weight:600;
+    padding:8px 16px;
+    height:36px;
+    border-radius:var(--r-control);
+    transition:filter 120ms ease, transform 80ms ease;
+  }
+  .btn-primary:hover{ filter:brightness(1.08); }
+  .btn-primary:active{ filter:brightness(0.96); transform:scale(.98); }
+
+  .btn-secondary{
+    display:inline-flex; align-items:center; gap:8px;
+    background:transparent;
+    color:var(--text-secondary);
+    border:1px solid var(--border-strong);
+    font-size:13px;
+    font-weight:500;
+    padding:8px 16px;
+    height:36px;
+    border-radius:var(--r-control);
+    transition:background 120ms ease, color 120ms ease, border-color 120ms ease;
+  }
+  .btn-secondary:hover{ background:var(--surface-hover); color:var(--text-primary); border-color:var(--border-strong); }
+
+  /* banner */
+  .banner{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-left:2px solid var(--accent);
+    border-radius:var(--r-card);
+    padding:14px 18px;
+    font-size:13px;
+    color:var(--text-secondary);
+    animation:fadeUp 260ms ease-out both;
+    animation-delay:120ms;
+  }
+  .banner-dot{
+    width:6px; height:6px; border-radius:2px;
+    background:var(--accent);
+    flex:0 0 auto;
+  }
+  .banner strong{ color:var(--text-primary); font-weight:600; }
+
+  /* section headers */
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    padding:20px 24px;
+  }
+  .panel-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .panel-head h2{
+    font-size:15px;
+    line-height:22px;
+    font-weight:600;
+    color:var(--text-primary);
+  }
+  .panel-head .muted{ color:var(--text-tertiary); font-weight:400; font-size:13px; }
+
+  /* ================= KPI ================= */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    animation:fadeUp 260ms ease-out both;
+    animation-delay:180ms;
+  }
+  .kpi-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    min-width:0;
+    animation:kpiIn 220ms ease-out both;
+  }
+  .kpi-grid .kpi-card:nth-child(1){ animation-delay:250ms; }
+  .kpi-grid .kpi-card:nth-child(2){ animation-delay:310ms; }
+  .kpi-grid .kpi-card:nth-child(3){ animation-delay:370ms; }
+  .kpi-grid .kpi-card:nth-child(4){ animation-delay:430ms; }
+
+  .kpi-label{
+    font-family:'Inter','Pretendard',sans-serif;
+    font-size:12px;
+    line-height:16px;
+    font-weight:500;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--text-tertiary);
+  }
+  .kpi-value{
+    font-size:26px;
+    line-height:32px;
+    font-weight:620;
+    letter-spacing:-0.02em;
+    color:var(--text-primary);
+    word-break:break-all;
+    overflow-wrap:anywhere;
+  }
+  .kpi-foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .delta{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    font-size:13px;
+    font-weight:600;
+  }
+  .delta svg{ flex:0 0 auto; }
+  .delta-up{ color:var(--success); }
+  .delta-down{ color:var(--danger); }
+  .delta-flat{ color:var(--text-tertiary); font-weight:500; }
+  .sparkline{ flex:0 0 auto; opacity:.9; }
+  .sparkline .spark-line{ fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  .spark-up{ stroke:var(--success); }
+  .spark-down{ stroke:var(--danger); }
+  .spark-flat{ stroke:var(--text-tertiary); }
+
+  /* ================= charts row ================= */
+  .charts-row{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:16px;
+    align-items:stretch;
+    animation:fadeUp 260ms ease-out both;
+    animation-delay:260ms;
+  }
+
+  .trend-chart-wrap{ width:100%; overflow:hidden; }
+  .trend-chart-wrap svg{ width:100%; height:auto; display:block; }
+
+  .axis-label{
+    font-family:'Inter',sans-serif;
+    font-size:10px;
+    fill:var(--text-tertiary);
+  }
+  .grid-line{ stroke:var(--border); stroke-width:1; }
+  .trend-area{ fill:var(--accent); opacity:.10; }
+  .trend-line{
+    fill:none;
+    stroke:var(--accent);
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    stroke-dasharray:1200;
+    stroke-dashoffset:0;
+    animation:drawline 700ms 450ms ease-out both;
+  }
+  .trend-dot{ fill:var(--bg); stroke-width:2; }
+  .trend-dot.max{ stroke:var(--accent); }
+  .trend-dot.min{ stroke:var(--text-tertiary); }
+  .trend-note{
+    font-family:'Inter','Pretendard',sans-serif;
+    font-size:11px;
+    fill:var(--text-secondary);
+  }
+
+  .donut-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+  }
+  .donut-figure{ position:relative; width:148px; height:148px; }
+  .donut-figure svg{ width:100%; height:100%; }
+  .donut-ring-bg{ fill:none; stroke:var(--border); stroke-width:18; }
+  .donut-seg{ fill:none; stroke-width:18; }
+  .donut-center{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:2px;
+  }
+  .donut-center-label{ font-size:11px; color:var(--text-tertiary); }
+  .donut-center-value{
+    font-family:'Inter',sans-serif;
+    font-size:20px; font-weight:620; letter-spacing:-0.02em;
+    color:var(--text-primary);
+  }
+  .legend{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; width:100%; }
+  .legend li{
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:13px; color:var(--text-secondary);
+  }
+  .legend .lg-left{ display:flex; align-items:center; gap:8px; min-width:0; }
+  .legend .dot{ width:8px; height:8px; border-radius:2px; flex:0 0 auto; }
+  .legend strong{ color:var(--text-primary); font-weight:600; }
+  .dot-1{ background:var(--accent); }
+  .dot-2{ background:var(--accent); opacity:.62; }
+  .dot-3{ background:var(--accent); opacity:.35; }
+  .dot-4{ background:var(--border-strong); }
+
+  /* ================= goal ================= */
+  .goal-panel{
+    animation:fadeUp 260ms ease-out both;
+    animation-delay:300ms;
+  }
+  .goal-top{
+    display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;
+  }
+  .goal-percent{
+    font-family:'Inter',sans-serif;
+    font-size:20px; font-weight:620; color:var(--accent); letter-spacing:-0.02em;
+  }
+  .goal-bar-track{
+    height:8px;
+    background:var(--surface-raised);
+    border:1px solid var(--border);
+    border-radius:99px;
+    overflow:hidden;
+  }
+  .goal-bar-fill{
+    height:100%;
+    width:68%;
+    background:var(--accent);
+    border-radius:99px;
+  }
+  .goal-figures{
+    margin-top:10px;
+    display:flex; align-items:baseline; gap:6px;
+    font-size:15px;
+  }
+  .goal-figures .goal-current{ font-weight:620; color:var(--text-primary); }
+  .goal-figures .muted{ color:var(--text-tertiary); font-size:13px; }
+
+  /* ================= table ================= */
+  .table-panel{
+    animation:fadeUp 260ms ease-out both;
+    animation-delay:340ms;
+  }
+  .table-scroll{ overflow-x:auto; }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:640px;
+  }
+  thead th{
+    text-align:left;
+    font-family:'Inter','Pretendard',sans-serif;
+    font-size:12px;
+    font-weight:500;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--text-tertiary);
+    padding:0 12px 10px;
+    border-bottom:1px solid var(--border-strong);
+    white-space:nowrap;
+  }
+  thead th.num-col{ text-align:right; }
+  tbody td{
+    padding:14px 12px;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+    color:var(--text-secondary);
+    vertical-align:top;
+  }
+  tbody td.num-col{ text-align:right; color:var(--text-primary); }
+  tbody tr{
+    animation:rowFade 320ms ease-out both;
+  }
+  tbody tr:nth-child(1){ animation-delay:600ms; }
+  tbody tr:nth-child(2){ animation-delay:624ms; }
+  tbody tr:nth-child(3){ animation-delay:648ms; }
+  tbody tr:nth-child(4){ animation-delay:672ms; }
+  tbody tr:nth-child(5){ animation-delay:696ms; }
+  tbody tr:nth-child(6){ animation-delay:720ms; }
+  tbody tr:hover td{ background:var(--surface-hover); }
+  tbody tr:last-child td{ border-bottom:none; }
+  td.merchant-cell{
+    color:var(--text-primary);
+    font-weight:500;
+    max-width:340px;
+  }
+  td.cell-long{
+    line-height:1.55;
+    word-break:keep-all;
+    overflow-wrap:anywhere;
+  }
+  td.cell-missing{ color:var(--text-tertiary); }
+
+  .status{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .status .dot{ width:7px; height:7px; border-radius:2px; flex:0 0 auto; }
+  .status-done{ color:var(--success); }
+  .status-done .dot{ background:var(--success); }
+  .status-wait{ color:var(--accent); }
+  .status-wait .dot{ background:var(--accent); }
+  .status-hold{ color:var(--warning); }
+  .status-hold .dot{ background:var(--warning); }
+  .status-fail{ color:var(--danger); }
+  .status-fail .dot{ background:var(--danger); }
+
+  /* ================= empty state ================= */
+  .empty-panel{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+    animation:fadeUp 260ms ease-out both;
+    animation-delay:380ms;
+  }
+  .empty-icon{
+    width:36px; height:36px;
+    border-radius:var(--r-avatar);
+    border:1px solid var(--border-strong);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--text-tertiary);
+    margin-bottom:4px;
+  }
+  .empty-panel h2{ font-size:15px; }
+  .empty-panel p{ margin:0; font-size:13px; color:var(--text-tertiary); max-width:44ch; }
+  .empty-panel .btn-secondary{ margin-top:8px; }
+
+  /* ================= footer ================= */
+  .page-footer{
+    margin-top:8px;
+    padding:16px 0 4px;
+    font-family:'Inter',sans-serif;
+    font-size:11px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--text-tertiary);
+    border-top:1px solid var(--border);
+  }
+
+  /* ================= keyframes ================= */
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(6px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @keyframes kpiIn{
+    from{ opacity:0; transform:translateY(6px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @keyframes navFade{
+    from{ color:var(--text-tertiary); }
+    to{ color:var(--text-tertiary); }
+  }
+  @keyframes drawline{
+    from{ stroke-dashoffset:1200; }
+    to{ stroke-dashoffset:0; }
+  }
+  @keyframes rowFade{
+    from{ opacity:0; }
+    to{ opacity:1; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation:none !important;
+      transition:none !important;
+    }
+  }
+
+  /* ================= responsive ================= */
+  @media (max-width:1100px){
+    .sidebar{
+      width:var(--sidebar-w-collapsed);
+      flex-basis:var(--sidebar-w-collapsed);
+      padding:20px 12px;
+    }
+    .brand-name, .nav-label, .user-info{ display:none; }
+    .nav-item{ justify-content:center; }
+    .nav-item.active::before{ left:-12px; }
+    .charts-row{ grid-template-columns:1fr; }
+  }
+
+  @media (max-width:900px){
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+    .main{ padding:24px 16px 40px; }
+  }
+
+  @media (max-width:560px){
+    .kpi-grid{ grid-template-columns:1fr; }
+    .topbar{ flex-direction:column; align-items:stretch; }
+    .topbar-right{ justify-content:space-between; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar" data-region="nav" aria-label="주 내비게이션">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">FG</span>
+      <span class="brand-name">핀그리드</span>
+    </div>
+
+    <nav aria-label="메뉴">
+      <ul class="nav-list">
+        <li>
+          <a href="#" class="nav-item active" aria-current="page">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="6" height="6" rx="1" stroke="currentColor"/><rect x="8.5" y="1.5" width="6" height="6" rx="1" stroke="currentColor"/><rect x="1.5" y="8.5" width="6" height="6" rx="1" stroke="currentColor"/><rect x="8.5" y="8.5" width="6" height="6" rx="1" stroke="currentColor"/></svg>
+            <span class="nav-label">대시보드</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="nav-label">거래</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor"/><path d="M1.5 6.5h13" stroke="currentColor"/></svg>
+            <span class="nav-label">정산</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 6l6-4 6 4v7a1 1 0 01-1 1H3a1 1 0 01-1-1V6z" stroke="currentColor" stroke-linejoin="round"/></svg>
+            <span class="nav-label">가맹점</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 2h7l3 3v9a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-linejoin="round"/><path d="M5 8h6M5 10.5h6" stroke="currentColor" stroke-linecap="round"/></svg>
+            <span class="nav-label">리포트</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="2.2" stroke="currentColor"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4" stroke="currentColor" stroke-linecap="round"/></svg>
+            <span class="nav-label">설정</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-user">
+      <span class="user-avatar" aria-hidden="true">김</span>
+      <div class="user-info">
+        <span class="user-name">김운영</span>
+        <span class="user-role">정산팀</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <div data-region="identity">
+        <h1 class="topbar-title">정산 대시보드</h1>
+        <p class="topbar-sub">핀그리드 · B2B 결제·정산 분석 · 최근 30일 기준</p>
+      </div>
+
+      <div class="topbar-right">
+        <div class="tabs" data-region="filter" role="tablist" aria-label="기간 선택">
+          <button class="tab-btn" role="tab" aria-selected="false">오늘</button>
+          <button class="tab-btn" role="tab" aria-selected="false">7일</button>
+          <button class="tab-btn active" role="tab" aria-selected="true">30일</button>
+          <button class="tab-btn" role="tab" aria-selected="false">90일</button>
+        </div>
+
+        <div data-region="filter">
+          <button class="dropdown-btn" aria-haspopup="listbox">
+            전체 채널
+            <span class="chevron" aria-hidden="true">▾</span>
+          </button>
+        </div>
+
+        <div data-region="action">
+          <button class="btn-primary">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1.5v8M4 6.5l3 3 3-3M2 11.5h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            내보내기
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="banner" data-region="banner" role="status">
+      <span class="banner-dot" aria-hidden="true"></span>
+      <p>10월 21일 정산 예정 — <strong class="num">₩1,284,900,000</strong> · 영업일 기준 D-1</p>
+    </div>
+
+    <section class="kpi-grid" data-region="kpi" aria-label="핵심 지표">
+      <article class="kpi-card">
+        <span class="kpi-label">총 거래액(GMV)</span>
+        <div class="kpi-value num">₩1,284,732,050,000</div>
+        <div class="kpi-foot">
+          <span class="delta delta-up">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M5 1l4 4H1z" fill="currentColor"/></svg>
+            <span class="num">+8.3%</span>
+          </span>
+          <svg class="sparkline" width="120" height="32" viewBox="0 0 120 32" aria-hidden="true">
+            <polyline class="spark-line spark-up" points="2.0,14.8 12.5,13.9 23.1,13.0 33.6,13.5 44.2,12.2 54.7,10.9 65.3,10.0 75.8,8.7 86.4,9.3 96.9,7.8 107.5,6.5 118.0,5.7"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <span class="kpi-label">결제 건수</span>
+        <div class="kpi-value num">12,847,192건</div>
+        <div class="kpi-foot">
+          <span class="delta delta-up">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M5 1l4 4H1z" fill="currentColor"/></svg>
+            <span class="num">+12.1%</span>
+          </span>
+          <svg class="sparkline" width="120" height="32" viewBox="0 0 120 32" aria-hidden="true">
+            <polyline class="spark-line spark-up" points="2.0,14.6 12.5,14.1 23.1,13.3 33.6,13.6 44.2,12.6 54.7,11.5 65.3,10.8 75.8,9.5 86.4,9.0 96.9,8.0 107.5,6.9 118.0,5.7"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <span class="kpi-label">승인율</span>
+        <div class="kpi-value num">94.7%</div>
+        <div class="kpi-foot">
+          <span class="delta delta-down">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M5 9L1 5h8z" fill="currentColor"/></svg>
+            <span class="num">−1.2%p</span>
+          </span>
+          <svg class="sparkline" width="120" height="32" viewBox="0 0 120 32" aria-hidden="true">
+            <polyline class="spark-line spark-down" points="2.0,5.7 12.5,5.8 23.1,5.9 33.6,6.0 44.2,6.0 54.7,6.1 65.3,6.2 75.8,6.3 86.4,6.3 96.9,6.4 107.5,6.4 118.0,6.5"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <span class="kpi-label">정산 대기액</span>
+        <div class="kpi-value num">₩312,048,900,000</div>
+        <div class="kpi-foot">
+          <span class="delta delta-flat">—</span>
+          <svg class="sparkline" width="120" height="32" viewBox="0 0 120 32" aria-hidden="true">
+            <polyline class="spark-line spark-flat" points="2.0,6.2 12.5,5.9 23.1,6.4 33.6,6.2 44.2,5.7 54.7,6.2 65.3,5.9 75.8,6.2 86.4,6.4 96.9,6.2 107.5,5.9 118.0,6.2"/>
+          </svg>
+        </div>
+      </article>
+    </section>
+
+    <div class="charts-row">
+      <section class="panel" data-region="chart-trend">
+        <div class="panel-head">
+          <h2>일별 거래액 추이 <span class="muted">(최근 30일)</span></h2>
+        </div>
+        <div class="trend-chart-wrap">
+          <svg viewBox="0 0 720 210" role="img" aria-label="일별 거래액 추이 차트, 최근 30일, 최고 10월 14일 58.2억, 최저 10월 2일 31.7억">
+            <g transform="translate(28,6)">
+              <line class="grid-line" x1="0" y1="180" x2="680" y2="180"/>
+              <line class="grid-line" x1="0" y1="124.62" x2="680" y2="124.62"/>
+              <line class="grid-line" x1="0" y1="69.23" x2="680" y2="69.23"/>
+              <line class="grid-line" x1="0" y1="13.85" x2="680" y2="13.85"/>
+              <text class="axis-label" x="-8" y="183" text-anchor="end">0</text>
+              <text class="axis-label" x="-8" y="128" text-anchor="end">20억</text>
+              <text class="axis-label" x="-8" y="72" text-anchor="end">40억</text>
+              <text class="axis-label" x="-8" y="17" text-anchor="end">60억</text>
+
+              <path class="trend-area" d="M0.0,180 L0.0,73.66 L23.45,92.22 L46.9,85.29 L70.34,78.09 L93.79,68.95 L117.24,76.15 L140.69,62.86 L164.14,55.38 L187.59,60.37 L211.03,47.63 L234.48,56.49 L257.93,43.48 L281.38,35.72 L304.83,18.83 L328.28,28.52 L351.72,40.98 L375.17,50.12 L398.62,45.69 L422.07,37.94 L445.52,49.57 L468.97,55.94 L492.41,64.8 L515.86,58.43 L539.31,52.06 L562.76,42.09 L586.21,54.55 L609.66,61.75 L633.1,57.88 L656.55,48.18 L680.0,52.89 L680.0,180 Z"/>
+              <path class="trend-line" d="M0.0,73.66 L23.45,92.22 L46.9,85.29 L70.34,78.09 L93.79,68.95 L117.24,76.15 L140.69,62.86 L164.14,55.38 L187.59,60.37 L211.03,47.63 L234.48,56.49 L257.93,43.48 L281.38,35.72 L304.83,18.83 L328.28,28.52 L351.72,40.98 L375.17,50.12 L398.62,45.69 L422.07,37.94 L445.52,49.57 L468.97,55.94 L492.41,64.8 L515.86,58.43 L539.31,52.06 L562.76,42.09 L586.21,54.55 L609.66,61.75 L633.1,57.88 L656.55,48.18 L680.0,52.89"/>
+
+              <circle class="trend-dot max" cx="304.83" cy="18.83" r="3.5"/>
+              <text class="trend-note" x="304.83" y="10" text-anchor="middle">최고 ₩58.2억 (10/14)</text>
+
+              <circle class="trend-dot min" cx="23.45" cy="92.22" r="3.5"/>
+              <text class="trend-note" x="23.45" y="106" text-anchor="start">최저 ₩31.7억 (10/02)</text>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <section class="panel" data-region="chart-part">
+        <div class="panel-head">
+          <h2>결제수단 구성비</h2>
+        </div>
+        <div class="donut-wrap">
+          <div class="donut-figure">
+            <svg viewBox="0 0 180 180" role="img" aria-label="결제수단 구성비: 카드 52%, 계좌이체 24%, 간편결제 18%, 기타 6%">
+              <circle class="donut-ring-bg" cx="90" cy="90" r="70"/>
+              <circle class="donut-seg" cx="90" cy="90" r="70" stroke="var(--accent)"
+                stroke-dasharray="228.71 211.12" stroke-dashoffset="0"
+                transform="rotate(-90 90 90)"/>
+              <circle class="donut-seg" cx="90" cy="90" r="70" stroke="var(--accent)" opacity=".62"
+                stroke-dasharray="105.56 334.27" stroke-dashoffset="-228.71"
+                transform="rotate(-90 90 90)"/>
+              <circle class="donut-seg" cx="90" cy="90" r="70" stroke="var(--accent)" opacity=".35"
+                stroke-dasharray="79.17 360.65" stroke-dashoffset="-334.27"
+                transform="rotate(-90 90 90)"/>
+              <circle class="donut-seg" cx="90" cy="90" r="70" stroke="var(--border-strong)"
+                stroke-dasharray="26.39 413.43" stroke-dashoffset="-413.43"
+                transform="rotate(-90 90 90)"/>
+            </svg>
+            <div class="donut-center">
+              <span class="donut-center-label">카드</span>
+              <span class="donut-center-value num">52%</span>
+            </div>
+          </div>
+          <ul class="legend">
+            <li><span class="lg-left"><span class="dot dot-1" aria-hidden="true"></span>카드</span><strong class="num">52%</strong></li>
+            <li><span class="lg-left"><span class="dot dot-2" aria-hidden="true"></span>계좌이체</span><strong class="num">24%</strong></li>
+            <li><span class="lg-left"><span class="dot dot-3" aria-hidden="true"></span>간편결제</span><strong class="num">18%</strong></li>
+            <li><span class="lg-left"><span class="dot dot-4" aria-hidden="true"></span>기타</span><strong class="num">6%</strong></li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel goal-panel" data-region="goal">
+      <div class="goal-top">
+        <h2>4분기 정산액 목표</h2>
+        <span class="goal-percent num">68%</span>
+      </div>
+      <div class="goal-bar-track" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-label="4분기 정산액 목표 달성률 68%">
+        <div class="goal-bar-fill"></div>
+      </div>
+      <div class="goal-figures">
+        <span class="goal-current num">₩3.4조</span>
+        <span class="muted num">/ ₩5조</span>
+      </div>
+    </section>
+
+    <section class="panel table-panel" data-region="table">
+      <div class="panel-head">
+        <h2>가맹점별 정산 현황</h2>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>가맹점</th>
+              <th class="num-col">거래액</th>
+              <th class="num-col">건수</th>
+              <th class="num-col">승인율</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="merchant-cell">(주)새벽마켓</td>
+              <td class="num-col num">₩48,203,000,000</td>
+              <td class="num-col num">482,030</td>
+              <td class="num-col num">96.2%</td>
+              <td><span class="status status-done"><span class="dot" aria-hidden="true"></span>완료</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-cell cell-long">글로벌 커머스 인터내셔널 유한회사 — 해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</td>
+              <td class="num-col num">₩31,209,000,000</td>
+              <td class="num-col num">288,110</td>
+              <td class="num-col num">91.4%</td>
+              <td><span class="status status-wait"><span class="dot" aria-hidden="true"></span>대기</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-cell">김철수 스토어</td>
+              <td class="num-col num">₩894,000,000</td>
+              <td class="num-col num">8,940</td>
+              <td class="num-col num">88.0%</td>
+              <td><span class="status status-hold"><span class="dot" aria-hidden="true"></span>보류</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-cell">데일리박스</td>
+              <td class="num-col num">₩12,048,300,000</td>
+              <td class="num-col num cell-missing">—</td>
+              <td class="num-col num">94.7%</td>
+              <td><span class="status status-done"><span class="dot" aria-hidden="true"></span>완료</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-cell">페이앤고</td>
+              <td class="num-col num">₩6,201,500,000</td>
+              <td class="num-col num">61,205</td>
+              <td class="num-col num">79.3%</td>
+              <td><span class="status status-fail"><span class="dot" aria-hidden="true"></span>실패</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-cell">미니샵 코리아</td>
+              <td class="num-col num">₩2,900,000</td>
+              <td class="num-col num">290</td>
+              <td class="num-col num">100.0%</td>
+              <td><span class="status status-done"><span class="dot" aria-hidden="true"></span>완료</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel empty-panel" data-region="empty">
+      <span class="empty-icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l6.5 11.3a1 1 0 01-.87 1.5H2.37a1 1 0 01-.87-1.5L8 1.5z" stroke="currentColor" stroke-linejoin="round"/><path d="M8 6.2v3.3M8 11.8h.01" stroke="currentColor" stroke-linecap="round"/></svg>
+      </span>
+      <h2>표시할 이상거래가 없어요</h2>
+      <p>최근 30일간 감지된 이상거래가 없습니다.</p>
+      <button class="btn-secondary" data-region="action">탐지 규칙 보기</button>
+    </section>
+
+    <footer class="page-footer">STYLE 26 · 다크 프로 미니멀</footer>
+  </main>
+</div>
+</body>
+</html>

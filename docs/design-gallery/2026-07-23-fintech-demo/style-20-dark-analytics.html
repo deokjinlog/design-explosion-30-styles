@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>핀그리드 · 정산 대시보드</title>
+<meta name="description" content="핀그리드 정산 대시보드 — 다크 애널리틱스 스타일 시안">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg-page:#0d1117;
+    --bg-card:#161b22;
+    --bg-card-hover:#1c2230;
+    --bg-track:#21262d;
+    --border:#30363d;
+    --border-hover:#58a6ff;
+    --text:#c9d1d9;
+    --muted:#8b949e;
+    --series-teal:#2dd4bf;
+    --series-blue:#58a6ff;
+    --series-purple:#bc8cff;
+    --series-magenta:#f778ba;
+    --ok:#3fb950;
+    --warn:#d29922;
+    --err:#db6d28;
+    --danger:#f85149;
+    --radius:6px;
+    --sidebar-w:224px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg-page);
+    color:var(--text);
+    font-family:'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size:13px;
+    line-height:1.35;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:inherit; text-decoration:none; }
+  button{ font-family:inherit; }
+  ul{ list-style:none; margin:0; padding:0; }
+  h1,h2,h3,p{ margin:0; }
+  img,svg{ display:block; max-width:100%; }
+
+  .num, .kpi-value, .kpi-delta, td.num, .widget-meta, .gauge-value, .donut-center-value,
+  .badge, .chart-tooltip, .axis-label, .annot-text, .legend-pct, .sidebar-user .user-name {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* ===== focus ===== */
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible, .widget:focus-visible, .kpi-card:focus-visible{
+    outline:2px solid var(--border-hover);
+    outline-offset:2px;
+    border-radius:4px;
+  }
+
+  /* ===== shell layout ===== */
+  .shell{
+    display:grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    min-height:100vh;
+  }
+
+  /* ---- sidebar (nav) ---- */
+  .sidebar{
+    background:var(--bg-page);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    padding:20px 16px;
+    gap:24px;
+  }
+  .brand{
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .brand::before{
+    content:"";
+    width:8px; height:8px;
+    background:var(--series-teal);
+    border-radius:2px;
+    flex:none;
+  }
+  .sidebar nav ul{ display:flex; flex-direction:column; gap:2px; }
+  .sidebar nav a{
+    display:block;
+    padding:8px 10px;
+    border-radius:6px;
+    font-size:13px;
+    color:var(--muted);
+    border-left:2px solid transparent;
+  }
+  .sidebar nav a:hover{ background:var(--bg-card); color:var(--text); }
+  .sidebar nav a.active{
+    background:var(--bg-card);
+    color:var(--text);
+    border-left:2px solid var(--series-teal);
+    font-weight:600;
+  }
+  .sidebar-user{
+    margin-top:auto;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding-top:16px;
+    border-top:1px solid var(--border);
+  }
+  .sidebar-user .avatar{
+    width:28px; height:28px;
+    border-radius:6px;
+    background:var(--bg-track);
+    border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:600; color:var(--series-blue);
+    flex:none;
+  }
+  .sidebar-user .user-name{ font-size:12px; color:var(--text); font-weight:600; }
+  .sidebar-user .user-role{ font-size:11px; color:var(--muted); }
+
+  /* ---- main ---- */
+  .main{
+    padding:20px 24px 32px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    max-width:1680px;
+    width:100%;
+  }
+
+  /* ---- topbar (identity + filter) ---- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    padding-bottom:4px;
+  }
+  .topbar-left{ display:flex; align-items:center; gap:12px; }
+  .topbar-left h1{ font-size:18px; font-weight:700; letter-spacing:-0.01em; color:var(--text); }
+  .live-indicator{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:11px; font-weight:600; letter-spacing:0.04em;
+    color:var(--ok);
+    border:1px solid var(--border);
+    background:var(--bg-card);
+    padding:4px 8px;
+    border-radius:999px;
+  }
+  .live-dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--ok);
+    animation: livePulse 1.2s ease-in-out infinite;
+  }
+  @keyframes livePulse{ 0%{opacity:1;} 50%{opacity:0.55;} 100%{opacity:1;} }
+
+  .topbar-right{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+  .period-tabs{
+    display:flex; gap:2px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:2px;
+  }
+  .period-tabs button{
+    border:none; background:transparent; color:var(--muted);
+    font-size:12px; padding:6px 12px; border-radius:5px; cursor:pointer;
+    transition: background-color .12s, color .12s;
+  }
+  .period-tabs button:hover{ color:var(--text); }
+  .period-tabs button.active{ background:var(--bg-track); color:var(--series-blue); font-weight:600; }
+
+  .dropdown-trigger, .btn{
+    height:32px;
+    display:inline-flex; align-items:center; gap:6px;
+    padding:0 12px;
+    font-size:12px;
+    border-radius:6px;
+    border:1px solid var(--border);
+    background:var(--bg-card);
+    color:var(--text);
+    cursor:pointer;
+    transition: border-color .12s, background-color .12s;
+  }
+  .dropdown-trigger:hover, .btn:hover{ border-color:var(--border-hover); }
+  .dropdown-trigger:active, .btn:active{ transform:translateY(1px); }
+  .dropdown-trigger .chev{ color:var(--muted); font-size:10px; }
+
+  .btn-primary{
+    background:var(--series-blue);
+    border-color:var(--series-blue);
+    color:#0b1420;
+    font-weight:700;
+  }
+  .btn-primary:hover{ background:#79b8ff; border-color:#79b8ff; }
+
+  .btn-ghost{ background:transparent; }
+
+  /* ---- banner ---- */
+  .banner{
+    display:flex; align-items:center; gap:10px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-left:3px solid var(--series-blue);
+    border-radius:var(--radius);
+    padding:10px 14px;
+    font-size:13px;
+    color:var(--text);
+  }
+  .banner-icon{ color:var(--series-blue); font-size:10px; flex:none; }
+  .banner strong{ color:var(--text); font-weight:700; }
+
+  /* ===== reveal stagger ===== */
+  .reveal{
+    animation: fadeInUp .45s ease-out both;
+    animation-delay: calc(var(--i, 0) * 40ms);
+  }
+  @keyframes fadeInUp{
+    from{ opacity:0; transform:translateY(4px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  /* ===== dashboard grid ===== */
+  .dashboard-grid{
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:12px;
+  }
+
+  .widget, .kpi-card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    position:relative;
+    transition: border-color .12s, background-color .12s;
+  }
+  .widget:hover, .kpi-card:hover{
+    border-color:var(--border-hover);
+    background:var(--bg-card-hover);
+  }
+
+  .widget-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px;
+    border-bottom:1px solid var(--border);
+    gap:8px;
+  }
+  .widget-label{
+    font-size:11px; text-transform:uppercase; letter-spacing:0.04em;
+    color:var(--muted); font-weight:700;
+  }
+  .widget-meta{ font-size:11px; color:var(--muted); }
+  .widget-body{ padding:14px; }
+
+  /* ---- KPI cards ---- */
+  .kpi-grid{ grid-column: span 12; display:grid; grid-template-columns:repeat(12,1fr); gap:12px; }
+  .kpi-card{ grid-column: span 3; padding:12px 14px; overflow:hidden; }
+  .kpi-card-head{
+    display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:8px;
+  }
+  .kpi-label{
+    font-size:11px; text-transform:uppercase; letter-spacing:0.04em;
+    color:var(--muted); font-weight:700;
+  }
+  .kpi-value-wrap{ position:relative; min-height:30px; }
+  .kpi-value{
+    font-size:clamp(16px,1.7vw,22px);
+    font-weight:700;
+    color:var(--text);
+    letter-spacing:-0.01em;
+    overflow-wrap:anywhere;
+    line-height:1.15;
+  }
+  .kpi-overlay{
+    position:absolute; inset:0;
+    background:var(--bg-card);
+    font-size:clamp(16px,1.7vw,22px);
+    font-weight:700;
+    color:var(--text);
+    letter-spacing:-0.01em;
+    line-height:1.15;
+    opacity:1;
+    transition:opacity .25s ease-out;
+  }
+  .kpi-card:hover .kpi-overlay{ background:var(--bg-card-hover); }
+  .kpi-delta{
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:12px; font-weight:600; margin-top:6px;
+  }
+  .kpi-delta.up{ color:var(--ok); }
+  .kpi-delta.down{ color:var(--danger); }
+  .kpi-delta.flat{ color:var(--muted); }
+  .kpi-spark{ margin-top:8px; width:100%; height:34px; overflow:visible; }
+  .spark-line{
+    fill:none; stroke-width:1.5;
+    stroke-dasharray:220; stroke-dashoffset:220;
+    animation: sparkDraw .7s ease-out both;
+    animation-delay: calc(var(--i,0) * 40ms + .15s);
+  }
+  @keyframes sparkDraw{ to{ stroke-dashoffset:0; } }
+  .spark-dot{ }
+
+  /* ---- widgets row (trend / donut / goal) ---- */
+  .widget-trend{ grid-column: span 6; }
+  .widget-donut{ grid-column: span 3; }
+  .widget-goal{ grid-column: span 3; }
+
+  .trend-svg{ width:100%; height:auto; display:block; }
+  .grid-line{ stroke:var(--border); stroke-width:1; opacity:.6; }
+  .axis-label{ font-size:9.5px; fill:var(--muted); }
+  .date-label{ font-size:9.5px; fill:var(--muted); }
+  .trend-line{
+    fill:none; stroke:var(--series-teal); stroke-width:1.6;
+    stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:2000; stroke-dashoffset:2000;
+    animation: lineDraw .8s .15s ease-out both;
+  }
+  @keyframes lineDraw{ to{ stroke-dashoffset:0; } }
+  .trend-area{
+    animation: areaGrow .7s .25s ease-out both;
+  }
+  @keyframes areaGrow{
+    from{ clip-path: inset(100% 0 0 0); }
+    to{ clip-path: inset(0% 0 0 0); }
+  }
+  .annot-dot{ fill:var(--series-teal); stroke:var(--bg-card); stroke-width:2; }
+  .annot-text{ font-size:10.5px; fill:var(--text); font-weight:600; }
+  .annot-text.min{ fill:var(--muted); font-weight:500; }
+
+  .chart-wrap{ position:relative; }
+  .crosshair-line{
+    stroke:var(--series-blue); stroke-width:1; stroke-dasharray:3 3;
+    opacity:0; pointer-events:none;
+  }
+  .crosshair-dot{ fill:var(--series-blue); opacity:0; pointer-events:none; }
+  .hover-capture{ fill:transparent; cursor:crosshair; }
+  .chart-tooltip{
+    position:absolute;
+    background:#0d1117;
+    border:1px solid var(--border-hover);
+    border-radius:5px;
+    padding:5px 8px;
+    font-size:11px;
+    color:var(--text);
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .1s;
+    white-space:nowrap;
+    transform:translate(-50%,-115%);
+    z-index:5;
+  }
+  .chart-tooltip strong{ color:var(--series-teal); }
+
+  /* ---- donut ---- */
+  .donut-wrap{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .donut-svg{ width:104px; height:104px; flex:none; }
+  .donut-seg{
+    fill:none; stroke-width:13;
+    transform-origin: 60px 60px;
+    stroke-dasharray:0 100;
+    animation: donutSweep .5s ease-out both;
+  }
+  @keyframes donutSweep{
+    from{ stroke-dasharray:0 100; }
+  }
+  .donut-center-value{ font-size:19px; font-weight:700; fill:var(--text); }
+  .donut-center-label{ font-size:9px; fill:var(--muted); }
+  .legend{ display:flex; flex-direction:column; gap:6px; flex:1; min-width:110px; }
+  .legend-item{ display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text); }
+  .legend-dot{ width:8px; height:8px; border-radius:2px; flex:none; }
+  .legend-pct{ margin-left:auto; font-weight:600; color:var(--muted); }
+
+  /* ---- goal gauge ---- */
+  .gauge-wrap{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .gauge-svg{ width:100%; max-width:170px; height:auto; }
+  .gauge-track{ fill:none; stroke:var(--bg-track); stroke-width:11; stroke-linecap:round; }
+  .gauge-value-arc{
+    fill:none; stroke:var(--ok); stroke-width:11; stroke-linecap:round;
+    stroke-dasharray:68 100;
+    animation: gaugeSweep .9s .2s ease-out both;
+  }
+  @keyframes gaugeSweep{ from{ stroke-dasharray:0 100; } }
+  .gauge-value{ font-size:24px; font-weight:700; fill:var(--text); }
+  .gauge-sub{ font-size:10.5px; fill:var(--muted); }
+  .gauge-status{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:11px; font-weight:700; color:var(--ok);
+  }
+  .gauge-status .dot{ width:6px; height:6px; border-radius:50%; background:var(--ok); flex:none; }
+  .gauge-tooltip{
+    position:absolute; left:50%; top:6px; transform:translateX(-50%);
+    background:#0d1117; border:1px solid var(--border-hover); border-radius:5px;
+    padding:5px 9px; font-size:11px; color:var(--text);
+    opacity:0; pointer-events:none; transition:opacity .12s; white-space:nowrap; z-index:5;
+  }
+  .widget-goal:hover .gauge-tooltip, .widget-goal:focus-within .gauge-tooltip{ opacity:1; }
+
+  /* ---- table ---- */
+  .widget-table{ grid-column: span 12; }
+  .table-scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:640px; }
+  caption{ text-align:left; padding:0 0 2px; }
+  thead th{
+    text-align:left;
+    font-size:11px; text-transform:uppercase; letter-spacing:0.04em;
+    color:var(--muted); font-weight:700;
+    padding:8px 14px;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  thead th.num{ text-align:right; }
+  tbody td{
+    padding:11px 14px;
+    border-bottom:1px solid var(--border);
+    color:var(--text);
+    vertical-align:middle;
+  }
+  tbody td.num{ text-align:right; }
+  tbody td.merchant{ max-width:340px; }
+  tbody tr{ position:relative; transition: background-color .12s; }
+  tbody tr:hover{ background:var(--bg-card-hover); }
+  tbody tr[data-status="complete"]:hover{ box-shadow: inset 3px 0 0 0 var(--ok); }
+  tbody tr[data-status="pending"]:hover{ box-shadow: inset 3px 0 0 0 var(--warn); }
+  tbody tr[data-status="hold"]:hover{ box-shadow: inset 3px 0 0 0 var(--err); }
+  tbody tr[data-status="failed"]:hover{ box-shadow: inset 3px 0 0 0 var(--danger); }
+  tbody tr:last-child td{ border-bottom:none; }
+  .merchant-name{ font-weight:500; }
+  .merchant-name.long{ display:block; line-height:1.4; }
+  .missing{ color:var(--muted); }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:11px; font-weight:700;
+    padding:3px 9px; border-radius:999px;
+    white-space:nowrap;
+  }
+  .badge .icon{ font-size:9px; line-height:1; }
+  .badge.status-complete{ background:rgba(63,185,80,.14); color:var(--ok); }
+  .badge.status-pending{ background:rgba(210,153,34,.14); color:var(--warn); }
+  .badge.status-hold{ background:rgba(219,109,40,.14); color:var(--err); }
+  .badge.status-failed{ background:rgba(248,81,73,.14); color:var(--danger); animation: badgePulse 1.5s ease-in-out infinite; }
+  @keyframes badgePulse{ 0%{opacity:1;} 50%{opacity:.6;} 100%{opacity:1;} }
+
+  /* ---- empty state ---- */
+  .widget-empty{ grid-column: span 12; }
+  .empty-state{
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    gap:8px; padding:36px 20px;
+  }
+  .empty-icon{
+    width:40px; height:40px; border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--bg-track);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ok); flex:none;
+  }
+  .empty-headline{ font-size:15px; font-weight:700; color:var(--text); }
+  .empty-desc{ font-size:12.5px; color:var(--muted); max-width:360px; }
+
+  /* ---- footer ---- */
+  .app-footer{
+    margin-top:8px; padding-top:14px; border-top:1px solid var(--border);
+    text-align:center; font-size:11px; color:var(--muted); letter-spacing:0.03em;
+  }
+
+  /* ===== responsive ===== */
+  @media (max-width:1100px){
+    .shell{ grid-template-columns:1fr; }
+    .sidebar{
+      flex-direction:row;
+      align-items:center;
+      flex-wrap:wrap;
+      border-right:none;
+      border-bottom:1px solid var(--border);
+      padding:10px 16px;
+      gap:14px;
+      position:static;
+    }
+    .sidebar nav ul{ flex-direction:row; flex-wrap:wrap; gap:2px; }
+    .sidebar nav a{ padding:6px 10px; }
+    .sidebar-user{ margin-top:0; margin-left:auto; padding-top:0; border-top:none; }
+    .kpi-card{ grid-column: span 6; }
+    .widget-trend{ grid-column: span 12; }
+    .widget-donut{ grid-column: span 6; }
+    .widget-goal{ grid-column: span 6; }
+  }
+
+  @media (max-width:700px){
+    .main{ padding:16px 14px 24px; }
+    .kpi-card{ grid-column: span 12; }
+    .widget-donut{ grid-column: span 12; }
+    .widget-goal{ grid-column: span 12; }
+    .topbar{ flex-direction:column; align-items:flex-start; }
+    .topbar-right{ width:100%; }
+  }
+
+  /* ===== reduced motion ===== */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.01ms !important;
+      scroll-behavior:auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+<a class="visually-hidden-skip" href="#main-content" style="position:absolute;left:-9999px;top:0;">본문으로 건너뛰기</a>
+<div class="shell">
+
+  <aside class="sidebar" data-region="nav" aria-label="주 내비게이션">
+    <div class="brand">핀그리드</div>
+    <nav>
+      <ul>
+        <li><a href="#" class="active" aria-current="page">대시보드</a></li>
+        <li><a href="#">거래</a></li>
+        <li><a href="#">정산</a></li>
+        <li><a href="#">가맹점</a></li>
+        <li><a href="#">리포트</a></li>
+        <li><a href="#">설정</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar" aria-hidden="true">김운</div>
+      <div class="user-meta">
+        <div class="user-name">김운영</div>
+        <div class="user-role">정산팀</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main" id="main-content">
+
+    <header class="topbar" data-region="identity">
+      <div class="topbar-left">
+        <h1>정산 대시보드</h1>
+        <span class="live-indicator"><span class="live-dot" aria-hidden="true"></span>LIVE</span>
+      </div>
+      <div class="topbar-right" data-region="filter">
+        <div class="period-tabs" role="tablist" aria-label="조회 기간 선택">
+          <button role="tab" aria-selected="false">오늘</button>
+          <button role="tab" aria-selected="false">7일</button>
+          <button role="tab" aria-selected="true" class="active">30일</button>
+          <button role="tab" aria-selected="false">90일</button>
+        </div>
+        <button class="dropdown-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="채널 필터: 전체 채널 (옵션: 카드, 계좌이체, 간편결제)">
+          전체 채널 <span class="chev" aria-hidden="true">▾</span>
+        </button>
+        <button class="btn btn-primary">내보내기</button>
+      </div>
+    </header>
+
+    <section class="banner reveal" style="--i:0" data-region="banner">
+      <span class="banner-icon" aria-hidden="true">●</span>
+      <p>10월 21일 정산 예정 — <strong>₩1,284,900,000</strong> · 영업일 기준 D-1</p>
+    </section>
+
+    <section class="kpi-grid" data-region="kpi" aria-label="핵심 지표">
+
+      <article class="kpi-card reveal" style="--i:1">
+        <div class="kpi-card-head">
+          <span class="kpi-label">총 거래액(GMV)</span>
+        </div>
+        <div class="kpi-value-wrap">
+          <div class="kpi-value" data-format="currency" data-value="1284732050000">₩1,284,732,050,000</div>
+        </div>
+        <div class="kpi-delta up" aria-label="전주 대비 8.3% 상승">▲ +8.3%</div>
+        <svg class="kpi-spark" viewBox="0 0 120 40" preserveAspectRatio="none" role="img" aria-label="최근 추이: 상승">
+          <polyline class="spark-line" style="--i:1" stroke="var(--series-teal)" points="4,32 20,29 36,26 52,23 68,18 84,14 100,10 116,6"/>
+          <circle class="spark-dot" cx="116" cy="6" r="2.6" fill="var(--ok)"/>
+        </svg>
+      </article>
+
+      <article class="kpi-card reveal" style="--i:2">
+        <div class="kpi-card-head">
+          <span class="kpi-label">결제 건수</span>
+        </div>
+        <div class="kpi-value-wrap">
+          <div class="kpi-value" data-format="count" data-value="12847192">12,847,192건</div>
+        </div>
+        <div class="kpi-delta up" aria-label="전주 대비 12.1% 상승">▲ +12.1%</div>
+        <svg class="kpi-spark" viewBox="0 0 120 40" preserveAspectRatio="none" role="img" aria-label="최근 추이: 상승">
+          <polyline class="spark-line" style="--i:2" stroke="var(--series-blue)" points="4,33 20,30 36,28 52,24 68,20 84,16 100,11 116,7"/>
+          <circle class="spark-dot" cx="116" cy="7" r="2.6" fill="var(--ok)"/>
+        </svg>
+      </article>
+
+      <article class="kpi-card reveal" style="--i:3">
+        <div class="kpi-card-head">
+          <span class="kpi-label">승인율</span>
+        </div>
+        <div class="kpi-value-wrap">
+          <div class="kpi-value" data-format="percent" data-value="94.7">94.7%</div>
+        </div>
+        <div class="kpi-delta down" aria-label="전주 대비 1.2 퍼센트포인트 하락">▼ −1.2%p</div>
+        <svg class="kpi-spark" viewBox="0 0 120 40" preserveAspectRatio="none" role="img" aria-label="최근 추이: 하락">
+          <polyline class="spark-line" style="--i:3" stroke="var(--series-purple)" points="4,10 20,12 36,14 52,17 68,19 84,23 100,27 116,31"/>
+          <circle class="spark-dot" cx="116" cy="31" r="2.6" fill="var(--danger)"/>
+        </svg>
+      </article>
+
+      <article class="kpi-card reveal" style="--i:4">
+        <div class="kpi-card-head">
+          <span class="kpi-label">정산 대기액</span>
+        </div>
+        <div class="kpi-value-wrap">
+          <div class="kpi-value" data-format="currency" data-value="312048900000">₩312,048,900,000</div>
+        </div>
+        <div class="kpi-delta flat" aria-label="전주 대비 비교 데이터 없음 (신규 지표)">—</div>
+        <svg class="kpi-spark" viewBox="0 0 120 40" preserveAspectRatio="none" role="img" aria-label="최근 추이: 평탄">
+          <polyline class="spark-line" style="--i:4" stroke="var(--series-magenta)" points="4,20 20,19 36,21 52,20 68,22 84,19 100,21 116,20"/>
+          <circle class="spark-dot" cx="116" cy="20" r="2.6" fill="var(--muted)"/>
+        </svg>
+      </article>
+
+    </section>
+
+    <section class="dashboard-grid">
+
+      <div class="widget widget-trend reveal" style="--i:5" data-region="chart-trend">
+        <div class="widget-head">
+          <span class="widget-label">일별 거래액 추이 (최근 30일)</span>
+          <span class="widget-meta">16:42:07 갱신</span>
+        </div>
+        <div class="widget-body chart-wrap">
+          <svg class="trend-svg" viewBox="0 0 640 240" role="img" aria-label="일별 거래액 추이 30일 차트. 최고 58.2억 10월 14일, 최저 31.7억 10월 2일.">
+            <defs>
+              <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.16"/>
+                <stop offset="100%" stop-color="#2dd4bf" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+
+            <line class="grid-line" x1="40" y1="200" x2="620" y2="200"/>
+            <line class="grid-line" x1="40" y1="141.5" x2="620" y2="141.5"/>
+            <line class="grid-line" x1="40" y1="83.1" x2="620" y2="83.1"/>
+            <line class="grid-line" x1="40" y1="24.6" x2="620" y2="24.6"/>
+            <text class="axis-label" x="34" y="203" text-anchor="end">0</text>
+            <text class="axis-label" x="34" y="144.5" text-anchor="end">20억</text>
+            <text class="axis-label" x="34" y="86.1" text-anchor="end">40억</text>
+            <text class="axis-label" x="34" y="27.6" text-anchor="end">60억</text>
+
+            <path class="trend-area" fill="url(#trendFill)" stroke="none"
+              d="M40,87.8 L60,107.4 L80,100.0 L100,83.7 L120,76.9 L140,81.6 L160,67.6 L180,72.3 L200,62.0 L220,68.8 L240,55.0 L260,47.1 L280,36.9 L300,29.9 L320,41.9 L340,51.8 L360,58.8 L380,66.7 L400,73.7 L420,63.2 L440,55.6 L460,62.3 L480,69.6 L500,74.6 L520,66.4 L540,59.1 L560,64.1 L580,72.0 L600,79.6 L620,69.6 L620,200 L40,200 Z"/>
+
+            <path class="trend-line"
+              d="M40,87.8 L60,107.4 L80,100.0 L100,83.7 L120,76.9 L140,81.6 L160,67.6 L180,72.3 L200,62.0 L220,68.8 L240,55.0 L260,47.1 L280,36.9 L300,29.9 L320,41.9 L340,51.8 L360,58.8 L380,66.7 L400,73.7 L420,63.2 L440,55.6 L460,62.3 L480,69.6 L500,74.6 L520,66.4 L540,59.1 L560,64.1 L580,72.0 L600,79.6 L620,69.6"/>
+
+            <circle class="annot-dot" cx="300" cy="29.9" r="3.2"/>
+            <text class="annot-text" x="300" y="18" text-anchor="middle">최고 ₩58.2억 (10/14)</text>
+
+            <circle class="annot-dot" cx="60" cy="107.4" r="3.2" fill="var(--series-blue)"/>
+            <text class="annot-text min" x="66" y="124" text-anchor="start">최저 ₩31.7억 (10/02)</text>
+
+            <text class="date-label" x="40" y="218" text-anchor="start">10/01</text>
+            <text class="date-label" x="180" y="218" text-anchor="middle">10/08</text>
+            <text class="date-label" x="320" y="218" text-anchor="middle">10/15</text>
+            <text class="date-label" x="460" y="218" text-anchor="middle">10/22</text>
+            <text class="date-label" x="620" y="218" text-anchor="end">10/30</text>
+
+            <line class="crosshair-line" id="crosshairLine" x1="0" y1="10" x2="0" y2="200"/>
+            <circle class="crosshair-dot" id="crosshairDot" r="3.4"/>
+            <rect class="hover-capture" id="hoverCapture" x="40" y="0" width="580" height="200"/>
+          </svg>
+          <div class="chart-tooltip" id="chartTooltip"></div>
+        </div>
+      </div>
+
+      <div class="widget widget-donut reveal" style="--i:6" data-region="chart-part">
+        <div class="widget-head">
+          <span class="widget-label">결제수단 구성비</span>
+          <span class="widget-meta">16:42:07 갱신</span>
+        </div>
+        <div class="widget-body donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 120 120" role="img" aria-label="결제수단 구성비: 카드 52%, 계좌이체 24%, 간편결제 18%, 기타 6%">
+            <circle cx="60" cy="60" r="47" fill="none" stroke="var(--bg-track)" stroke-width="13"/>
+            <circle class="donut-seg" cx="60" cy="60" r="47" pathLength="100"
+              stroke="var(--series-teal)" stroke-dasharray="52 100" stroke-dashoffset="0"
+              transform="rotate(-90 60 60)" style="animation-delay:.25s"/>
+            <circle class="donut-seg" cx="60" cy="60" r="47" pathLength="100"
+              stroke="var(--series-blue)" stroke-dasharray="24 100" stroke-dashoffset="-52"
+              transform="rotate(-90 60 60)" style="animation-delay:.4s"/>
+            <circle class="donut-seg" cx="60" cy="60" r="47" pathLength="100"
+              stroke="var(--series-purple)" stroke-dasharray="18 100" stroke-dashoffset="-76"
+              transform="rotate(-90 60 60)" style="animation-delay:.55s"/>
+            <circle class="donut-seg" cx="60" cy="60" r="47" pathLength="100"
+              stroke="var(--series-magenta)" stroke-dasharray="6 100" stroke-dashoffset="-94"
+              transform="rotate(-90 60 60)" style="animation-delay:.7s"/>
+            <text class="donut-center-value" x="60" y="57" text-anchor="middle">52%</text>
+            <text class="donut-center-label" x="60" y="71" text-anchor="middle">카드 최다</text>
+          </svg>
+          <ul class="legend">
+            <li class="legend-item"><span class="legend-dot" style="background:var(--series-teal)"></span>카드<span class="legend-pct">52%</span></li>
+            <li class="legend-item"><span class="legend-dot" style="background:var(--series-blue)"></span>계좌이체<span class="legend-pct">24%</span></li>
+            <li class="legend-item"><span class="legend-dot" style="background:var(--series-purple)"></span>간편결제<span class="legend-pct">18%</span></li>
+            <li class="legend-item"><span class="legend-dot" style="background:var(--series-magenta)"></span>기타<span class="legend-pct">6%</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="widget widget-goal reveal" style="--i:7" data-region="goal" tabindex="0">
+        <div class="widget-head">
+          <span class="widget-label">4분기 정산액 목표</span>
+          <span class="widget-meta">16:42:07 갱신</span>
+        </div>
+        <div class="widget-body gauge-wrap">
+          <div class="gauge-tooltip">정상 진행 · 잔여 ₩1.6조</div>
+          <svg class="gauge-svg" viewBox="0 0 200 118" role="img" aria-label="4분기 정산액 목표 ₩3.4조 / ₩5조, 68% 달성, 정상 진행">
+            <path class="gauge-track" d="M20,100 A80,80 0 0 1 180,100"/>
+            <path class="gauge-value-arc" pathLength="100" d="M20,100 A80,80 0 0 1 180,100"/>
+            <text class="gauge-value" x="100" y="88" text-anchor="middle">68%</text>
+            <text class="gauge-sub" x="100" y="106" text-anchor="middle">₩3.4조 / ₩5조</text>
+          </svg>
+          <span class="gauge-status"><span class="dot" aria-hidden="true"></span>정상 진행</span>
+        </div>
+      </div>
+
+      <div class="widget widget-table reveal" style="--i:8" data-region="table">
+        <div class="widget-head">
+          <span class="widget-label">가맹점별 정산 현황</span>
+          <span class="widget-meta">16:42:07 갱신</span>
+        </div>
+        <div class="widget-body table-scroll">
+          <table>
+            <caption class="visually-hidden" style="position:absolute;left:-9999px;">가맹점별 정산 현황 표</caption>
+            <thead>
+              <tr>
+                <th scope="col">가맹점</th>
+                <th scope="col" class="num">거래액</th>
+                <th scope="col" class="num">건수</th>
+                <th scope="col" class="num">승인율</th>
+                <th scope="col">상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-status="complete">
+                <td>(주)새벽마켓</td>
+                <td class="num">₩48,203,000,000</td>
+                <td class="num">482,030</td>
+                <td class="num">96.2%</td>
+                <td><span class="badge status-complete"><span class="icon" aria-hidden="true">●</span>완료</span></td>
+              </tr>
+              <tr data-status="pending">
+                <td class="merchant"><span class="merchant-name long">글로벌 커머스 인터내셔널 유한회사 — 해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</span></td>
+                <td class="num">₩31,209,000,000</td>
+                <td class="num">288,110</td>
+                <td class="num">91.4%</td>
+                <td><span class="badge status-pending"><span class="icon" aria-hidden="true">▲</span>대기</span></td>
+              </tr>
+              <tr data-status="hold">
+                <td>김철수 스토어</td>
+                <td class="num">₩894,000,000</td>
+                <td class="num">8,940</td>
+                <td class="num">88.0%</td>
+                <td><span class="badge status-hold"><span class="icon" aria-hidden="true">■</span>보류</span></td>
+              </tr>
+              <tr data-status="complete">
+                <td>데일리박스</td>
+                <td class="num">₩12,048,300,000</td>
+                <td class="num missing" aria-label="집계 중, 결측">—</td>
+                <td class="num">94.7%</td>
+                <td><span class="badge status-complete"><span class="icon" aria-hidden="true">●</span>완료</span></td>
+              </tr>
+              <tr data-status="failed">
+                <td>페이앤고</td>
+                <td class="num">₩6,201,500,000</td>
+                <td class="num">61,205</td>
+                <td class="num">79.3%</td>
+                <td><span class="badge status-failed"><span class="icon" aria-hidden="true">✕</span>실패</span></td>
+              </tr>
+              <tr data-status="complete">
+                <td>미니샵 코리아</td>
+                <td class="num">₩2,900,000</td>
+                <td class="num">290</td>
+                <td class="num">100.0%</td>
+                <td><span class="badge status-complete"><span class="icon" aria-hidden="true">●</span>완료</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="widget widget-empty reveal" style="--i:9" data-region="empty">
+        <div class="widget-head">
+          <span class="widget-label">이상거래 탐지</span>
+          <span class="widget-meta">16:42:07 갱신</span>
+        </div>
+        <div class="empty-state">
+          <span class="empty-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>
+          </span>
+          <p class="empty-headline">표시할 이상거래가 없어요</p>
+          <p class="empty-desc">최근 30일간 감지된 이상거래가 없습니다.</p>
+          <button class="btn btn-ghost" data-region="action">탐지 규칙 보기</button>
+        </div>
+      </div>
+
+    </section>
+
+    <footer class="app-footer">STYLE 20 · 다크 애널리틱스</footer>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- KPI count-up (overlay clone; underlying value is always the correct final text) ---- */
+  if(!reduceMotion){
+    var kpiValues = document.querySelectorAll('.kpi-value');
+    kpiValues.forEach(function(el, idx){
+      try{
+        var finalText = el.textContent;
+        var target = parseFloat(el.getAttribute('data-value'));
+        var format = el.getAttribute('data-format');
+        if(isNaN(target)) return;
+
+        var wrap = el.parentElement;
+        wrap.style.position = 'relative';
+        var overlay = document.createElement('div');
+        overlay.className = 'kpi-overlay';
+        overlay.setAttribute('aria-hidden','true');
+        wrap.appendChild(overlay);
+
+        function fmt(v){
+          if(format === 'currency'){
+            return '₩' + Math.round(v).toLocaleString('ko-KR');
+          } else if(format === 'count'){
+            return Math.round(v).toLocaleString('ko-KR') + '건';
+          } else if(format === 'percent'){
+            return v.toFixed(1) + '%';
+          }
+          return String(Math.round(v));
+        }
+
+        var duration = 700;
+        var delay = idx * 40;
+        var start = null;
+
+        function easeOutExpo(t){ return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
+
+        function step(ts){
+          if(start === null) start = ts;
+          var elapsed = ts - start - delay;
+          if(elapsed < 0){ requestAnimationFrame(step); return; }
+          var t = Math.min(elapsed / duration, 1);
+          var eased = easeOutExpo(t);
+          overlay.textContent = fmt(target * eased);
+          if(t < 1){
+            requestAnimationFrame(step);
+          } else {
+            overlay.textContent = finalText;
+            overlay.style.opacity = '0';
+            setTimeout(function(){ if(overlay.parentElement) overlay.remove(); }, 260);
+          }
+        }
+        overlay.textContent = fmt(0);
+        requestAnimationFrame(step);
+      }catch(e){ /* JS 실패해도 기존 최종 값이 이미 표시되어 있으므로 화면은 그대로 유지된다 */ }
+    });
+  }
+
+  /* ---- trend chart crosshair ---- */
+  try{
+    var svg = document.querySelector('.trend-svg');
+    var capture = document.getElementById('hoverCapture');
+    var line = document.getElementById('crosshairLine');
+    var dot = document.getElementById('crosshairDot');
+    var tooltip = document.getElementById('chartTooltip');
+    var wrap = document.querySelector('.chart-wrap');
+
+    var days = [
+      {x:40,y:87.8,v:'38.4',d:'10/01'},{x:60,y:107.4,v:'31.7',d:'10/02'},{x:80,y:100.0,v:'34.2',d:'10/03'},
+      {x:100,y:83.7,v:'39.8',d:'10/04'},{x:120,y:76.9,v:'42.1',d:'10/05'},{x:140,y:81.6,v:'40.5',d:'10/06'},
+      {x:160,y:67.6,v:'45.3',d:'10/07'},{x:180,y:72.3,v:'43.7',d:'10/08'},{x:200,y:62.0,v:'47.2',d:'10/09'},
+      {x:220,y:68.8,v:'44.9',d:'10/10'},{x:240,y:55.0,v:'49.6',d:'10/11'},{x:260,y:47.1,v:'52.3',d:'10/12'},
+      {x:280,y:36.9,v:'55.8',d:'10/13'},{x:300,y:29.9,v:'58.2',d:'10/14'},{x:320,y:41.9,v:'54.1',d:'10/15'},
+      {x:340,y:51.8,v:'50.7',d:'10/16'},{x:360,y:58.8,v:'48.3',d:'10/17'},{x:380,y:66.7,v:'45.6',d:'10/18'},
+      {x:400,y:73.7,v:'43.2',d:'10/19'},{x:420,y:63.2,v:'46.8',d:'10/20'},{x:440,y:55.6,v:'49.4',d:'10/21'},
+      {x:460,y:62.3,v:'47.1',d:'10/22'},{x:480,y:69.6,v:'44.6',d:'10/23'},{x:500,y:74.6,v:'42.9',d:'10/24'},
+      {x:520,y:66.4,v:'45.7',d:'10/25'},{x:540,y:59.1,v:'48.2',d:'10/26'},{x:560,y:64.1,v:'46.5',d:'10/27'},
+      {x:580,y:72.0,v:'43.8',d:'10/28'},{x:600,y:79.6,v:'41.2',d:'10/29'},{x:620,y:69.6,v:'44.6',d:'10/30'}
+    ];
+
+    if(svg && capture && line && dot && tooltip && wrap){
+      function nearest(px){
+        var best = days[0], bd = Infinity;
+        for(var i=0;i<days.length;i++){
+          var d = Math.abs(days[i].x - px);
+          if(d < bd){ bd = d; best = days[i]; }
+        }
+        return best;
+      }
+      function toSvgX(clientX){
+        var rect = svg.getBoundingClientRect();
+        var ratio = 640 / rect.width;
+        return (clientX - rect.left) * ratio;
+      }
+      capture.addEventListener('mousemove', function(ev){
+        var svgX = toSvgX(ev.clientX);
+        var pt = nearest(svgX);
+        line.setAttribute('x1', pt.x); line.setAttribute('x2', pt.x);
+        dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y);
+        line.style.opacity = '1'; dot.style.opacity = '1';
+        var rect = svg.getBoundingClientRect();
+        var leftPx = (pt.x / 640) * rect.width;
+        var topPx = (pt.y / 240) * rect.height;
+        tooltip.style.left = leftPx + 'px';
+        tooltip.style.top = topPx + 'px';
+        tooltip.innerHTML = pt.d + ' &middot; <strong>₩' + pt.v + '억</strong>';
+        tooltip.style.opacity = '1';
+      });
+      capture.addEventListener('mouseleave', function(){
+        line.style.opacity = '0'; dot.style.opacity = '0'; tooltip.style.opacity = '0';
+      });
+    }
+  }catch(e){ /* 크로스헤어는 연출 전용 — 실패해도 정적 차트는 그대로 표시된다 */ }
+})();
+</script>
+</body>
+</html>

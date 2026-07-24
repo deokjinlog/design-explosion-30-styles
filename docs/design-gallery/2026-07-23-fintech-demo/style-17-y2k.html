@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>핀그리드 · 정산 대시보드 — Y2K 베이퍼웨이브</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     RESET
+  ============================================================ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  img, svg { display: block; max-width: 100%; }
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  ul { list-style: none; }
+  table { border-collapse: collapse; width: 100%; }
+  a { color: inherit; }
+
+  /* ============================================================
+     TOKENS
+  ============================================================ */
+  @property --holo-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+  :root {
+    --bg-top: #1A0B2E;
+    --bg-mid: #2D0B45;
+    --bg-bottom: #0B0221;
+
+    --magenta: #FF2FB9;
+    --cyan: #22E1FF;
+    --purple: #A24BFF;
+    --lime-cyan: #66FFE3;
+    --neon-pink: #FF6EC7;
+
+    --danger: #FF3B6B;
+    --success: #3BFFB0;
+    --warning: #22E1FF;   /* 대기 = cyan(진행중) */
+    --hold: #A24BFF;      /* 보류 = purple */
+
+    --card-bg: rgba(45,11,69,0.60);
+    --card-border-0: rgba(255,255,255,0.03);
+    --hairline: rgba(255,255,255,0.10);
+
+    --text: #ECEFFB;
+    --text-muted: #B9B0E0;
+    --text-faint: #8F86BE;
+
+    --chrome-1: #FFFFFF;
+    --chrome-2: #C7D6EA;
+    --chrome-3: #6B7A99;
+    --chrome-4: #EFF6FF;
+    --chrome-5: #9FB4CC;
+    --chrome-6: #E7EEF7;
+
+    --r-lg: 14px;
+    --r-md: 10px;
+    --r-sm: 7px;
+
+    --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+    --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-12: 48px; --sp-16: 64px;
+
+    --font-kr: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    --font-disp: 'Orbitron', 'Pretendard', sans-serif;
+  }
+
+  html, body { background: var(--bg-bottom); }
+  body {
+    font-family: var(--font-kr);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.55;
+    font-size: 14px;
+    position: relative;
+    overflow-x: hidden;
+    background-color: var(--bg-bottom);
+    background-image:
+      radial-gradient(ellipse 120% 55% at 50% -8%, rgba(162,75,255,0.38), transparent 60%),
+      radial-gradient(ellipse 90% 45% at 8% 105%, rgba(255,47,185,0.20), transparent 62%),
+      linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 55%, var(--bg-bottom) 100%);
+    background-attachment: fixed;
+  }
+  ::selection { background: rgba(255,47,185,0.35); color: #fff; }
+
+  .tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+  /* ============================================================
+     FOCUS
+  ============================================================ */
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* ============================================================
+     BACKGROUND FX — 지평선 그리드 · 스캔라인 · 별
+  ============================================================ */
+  .fx-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* --- perspective grid horizon --- */
+  .grid-plane {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 240vw;
+    height: 62vh;
+    transform: translateX(-50%) perspective(280px) rotateX(62deg);
+    transform-origin: bottom center;
+    background-image:
+      repeating-linear-gradient(to right, rgba(255,47,185,0.65) 0 2px, transparent 2px 74px),
+      repeating-linear-gradient(to top, rgba(34,225,255,0.55) 0 2px, transparent 2px 56px);
+    -webkit-mask-image: linear-gradient(to top, #000 0%, #000 42%, transparent 100%);
+    mask-image: linear-gradient(to top, #000 0%, #000 42%, transparent 100%);
+    opacity: 0;
+    animation: gridRise 0.9s ease-out 0s forwards;
+  }
+  @keyframes gridRise {
+    from { opacity: 0; height: 0; }
+    to   { opacity: 0.6; height: 62vh; }
+  }
+  .grid-tint {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(34,225,255,0.16) 0%, rgba(162,75,255,0.10) 45%, rgba(255,47,185,0.18) 100%);
+    mix-blend-mode: color-dodge;
+    opacity: 0.5;
+  }
+  .horizon-glow {
+    position: absolute; left: 0; right: 0; top: 34vh; height: 160px;
+    background: radial-gradient(ellipse 70% 100% at center, rgba(255,110,199,0.42), rgba(255,47,185,0) 72%);
+    filter: blur(3px);
+    opacity: 0;
+    animation: sunGlowIn 1s ease-out 1.4s forwards;
+  }
+  @keyframes sunGlowIn { to { opacity: 1; } }
+
+  /* --- stars --- */
+  .star {
+    position: absolute;
+    color: var(--lime-cyan);
+    font-size: 13px;
+    opacity: 0;
+    text-shadow: 0 0 8px currentColor;
+    animation: starIn 0.4s ease-out forwards, twinkle 2.6s ease-in-out infinite;
+  }
+  .star.c { color: var(--neon-pink); }
+  .star.p { color: var(--cyan); }
+  @keyframes starIn { to { opacity: var(--peak, 0.9); } }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.25; transform: scale(0.85); }
+    50%      { opacity: var(--peak, 0.9); transform: scale(1.1); }
+  }
+
+  /* --- scanlines (always static, opacity-capped) --- */
+  .scanlines {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none;
+    background-image: repeating-linear-gradient(to bottom, rgba(255,255,255,0.07) 0px, rgba(255,255,255,0.07) 1px, transparent 1px, transparent 3px);
+    opacity: 0.55; /* combined with 0.07 base ≈ .04 effective, +body areas overridden lower */
+    mix-blend-mode: overlay;
+  }
+  .scanlines.shift { animation: scanShift 6s linear infinite; }
+  @keyframes scanShift { from { background-position: 0 0; } to { background-position: 0 240px; } }
+
+  /* ============================================================
+     CHROME TEXT
+  ============================================================ */
+  .chrome-text {
+    font-weight: 800;
+    background-image: linear-gradient(100deg,
+      var(--chrome-1) 0%, var(--chrome-2) 18%, var(--chrome-3) 40%,
+      var(--chrome-4) 58%, var(--chrome-5) 78%, var(--chrome-6) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 1px 0 #2A3450;
+    filter: drop-shadow(0 0 10px rgba(255,110,199,0.25));
+  }
+  /* brightened variant — 데이터 숫자 전용, 4.5:1 이상 확보 */
+  .chrome-num {
+    font-family: var(--font-disp);
+    font-weight: 800;
+    display: inline-block;
+    transform: skewX(-6deg);
+    background-image: linear-gradient(100deg,
+      #FFFFFF 0%, #E6EDFB 14%, #9AAAC8 34%, #FFFFFF 52%,
+      #D3DDF0 72%, #F5F8FD 90%, #FFFFFF 130%);
+    background-size: 220% 100%;
+    background-position: 0% 0%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 1px 0 #2A3450;
+    transition: background-position 0.5s ease;
+    filter: drop-shadow(0 0 8px rgba(34,225,255,0.25));
+  }
+
+  /* ============================================================
+     APP LAYOUT
+  ============================================================ */
+  .app { position: relative; z-index: 1; display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  /* ============================================================
+     SIDEBAR / NAV
+  ============================================================ */
+  .sidebar {
+    border-right: 1px solid var(--hairline);
+    padding: var(--sp-6) var(--sp-4);
+    display: flex; flex-direction: column; gap: var(--sp-8);
+    background: rgba(11,2,33,0.35);
+    backdrop-filter: blur(2px);
+    position: relative;
+  }
+  .brand { display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-2); }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    background: linear-gradient(160deg, #E7EEF7 0%, #B8C6DA 40%, #5C6B87 55%, #B8C6DA 78%, #E7EEF7 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-disp); font-weight: 900; font-size: 15px; color: #1A0B2E;
+    box-shadow: 0 0 16px rgba(255,110,199,0.35), inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  .brand-name { font-weight: 800; font-size: 17px; letter-spacing: -0.01em; }
+  .brand-badge {
+    margin-left: auto; width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    background: conic-gradient(from 0deg, var(--magenta), var(--cyan), var(--purple), var(--lime-cyan), var(--magenta));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; box-shadow: 0 0 10px rgba(255,47,185,0.5);
+  }
+
+  .nav-list { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .nav-item {
+    position: relative;
+    display: flex; align-items: center; gap: var(--sp-3);
+    padding: 10px var(--sp-3);
+    border-radius: var(--r-sm);
+    color: var(--text-muted);
+    font-size: 14px; font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+    width: 100%; text-align: left;
+  }
+  .nav-item svg { flex-shrink: 0; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+  .nav-item.is-active {
+    background: rgba(162,75,255,0.16);
+    color: var(--text);
+    box-shadow: inset 0 0 0 1px rgba(255,47,185,0.35);
+  }
+  .nav-item.is-active::before {
+    content: ""; position: absolute; left: -1px; top: 6px; bottom: 6px; width: 3px; border-radius: 2px;
+    background: linear-gradient(180deg, var(--magenta), var(--cyan));
+    box-shadow: 0 0 8px var(--magenta);
+  }
+  .nav-item.is-active svg { stroke: var(--cyan); }
+  .nav-label { white-space: nowrap; }
+
+  .sidebar-user {
+    display: flex; align-items: center; gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-2); padding-top: var(--sp-4);
+    border-top: 1px solid var(--hairline);
+  }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    background: conic-gradient(from 120deg, var(--magenta), var(--cyan), var(--purple), var(--magenta));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-disp); font-weight: 700; font-size: 13px; color: #0B0221;
+    border: 1px solid rgba(255,255,255,0.35);
+  }
+  .user-meta { display: flex; flex-direction: column; gap: 1px; overflow: hidden; }
+  .user-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+  .user-role { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+  /* ============================================================
+     MAIN
+  ============================================================ */
+  .main { padding: var(--sp-8) var(--sp-10) var(--sp-12); display: flex; flex-direction: column; gap: var(--sp-6); min-width: 0; }
+
+  /* ============================================================
+     TOPBAR
+  ============================================================ */
+  .topbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--sp-4); }
+  .title-wrap { overflow: hidden; }
+  .page-title {
+    font-size: 24px; letter-spacing: -0.01em;
+    clip-path: inset(0 0 0% 0);
+    animation: titleReveal 0.6s ease-out 0.3s both;
+    position: relative;
+  }
+  @keyframes titleReveal { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0% 0); } }
+  .title-sweep {
+    position: absolute; inset: -4px -8px;
+    background: linear-gradient(100deg, transparent 34%, rgba(255,255,255,0.85) 48%, transparent 62%);
+    mix-blend-mode: overlay;
+    transform: translateX(-130%);
+    animation: sweepOnce 0.6s ease-out 0.95s forwards;
+    pointer-events: none;
+  }
+  @keyframes sweepOnce { to { transform: translateX(130%); } }
+
+  .topbar-right { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+
+  .tab-group { display: flex; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid var(--hairline); border-radius: var(--r-sm); padding: 3px; gap: 2px; }
+  .tab { padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); transition: background 0.2s ease, color 0.2s ease; }
+  .tab:hover { color: var(--text); }
+  .tab.is-active {
+    background: linear-gradient(180deg, #E7EEF7 0%, #B8C6DA 45%, #5C6B87 55%, #C7D3E4 100%);
+    color: #14081F; font-weight: 800;
+    box-shadow: 0 0 14px rgba(255,110,199,0.35);
+  }
+
+  .dropdown-trigger {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: var(--r-sm);
+    background: rgba(255,255,255,0.04); border: 1px solid var(--hairline);
+    font-size: 13px; font-weight: 600; color: var(--text);
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .dropdown-trigger:hover { border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.07); }
+
+  .btn-chrome {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 18px; border-radius: var(--r-sm);
+    font-size: 13px; font-weight: 800; letter-spacing: 0.01em;
+    color: #14081F;
+    background: linear-gradient(180deg, #E7EEF7 0%, #B8C6DA 42%, #5C6B87 56%, #B8C6DA 80%, #E7EEF7 100%);
+    border: 1px solid rgba(255,255,255,0.55);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 16px rgba(0,0,0,0.4), 0 0 18px rgba(255,110,199,0.3);
+    transition: filter 0.2s ease, box-shadow 0.2s ease;
+  }
+  .btn-chrome:hover { filter: brightness(1.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 4px 18px rgba(0,0,0,0.4), 0 0 26px rgba(34,225,255,0.4); }
+  .btn-chrome:active {
+    background: linear-gradient(0deg, #E7EEF7 0%, #B8C6DA 42%, #5C6B87 56%, #B8C6DA 80%, #E7EEF7 100%);
+    animation: glitchShift 0.08s steps(2, jump-none);
+  }
+  @keyframes glitchShift { 0% { transform: translate(0,0); } 50% { transform: translate(-2px,1px); } 100% { transform: translate(0,0); } }
+
+  .btn-ghost {
+    padding: 8px 14px; border-radius: var(--r-sm);
+    font-size: 13px; font-weight: 700; color: var(--cyan);
+    border: 1px solid rgba(34,225,255,0.35);
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .btn-ghost:hover { background: rgba(34,225,255,0.08); border-color: rgba(34,225,255,0.65); }
+
+  /* ============================================================
+     CARD BASE — 홀로그램 보더 + 네온 글로우 + 크롬 브래킷
+  ============================================================ */
+  .card {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: var(--r-lg);
+    border: 1px solid var(--card-border-0);
+    box-shadow: 0 0 24px rgba(255,47,185,0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+    padding: var(--sp-5) var(--sp-6);
+    isolation: isolate;
+    transition: box-shadow 0.25s ease;
+  }
+  .card::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: conic-gradient(from var(--holo-angle, 0deg), var(--magenta), var(--cyan), var(--purple), var(--lime-cyan), var(--magenta));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none; z-index: -1;
+    opacity: 0.85;
+  }
+  .card:hover, .card:focus-within { box-shadow: 0 0 32px rgba(34,225,255,0.35), inset 0 1px 0 rgba(255,255,255,0.16); }
+  .card:hover::before, .card:focus-within::before { animation: holoSpin 1.2s linear; }
+  @keyframes holoSpin { from { --holo-angle: 0deg; } to { --holo-angle: 360deg; } }
+
+  .card::after {
+    content: "⌐"; position: absolute; top: 4px; left: 8px;
+    font-size: 14px; color: rgba(255,255,255,0.4); pointer-events: none;
+    text-shadow: 0 0 6px rgba(34,225,255,0.6);
+  }
+
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-4); }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.01em; }
+  .card-sub { font-size: 12px; color: var(--text-muted); }
+
+  .holo-sticker {
+    position: absolute; top: -10px; right: 14px; width: 34px; height: 34px; border-radius: 50%;
+    background: conic-gradient(from 40deg, var(--magenta), var(--cyan), var(--lime-cyan), var(--purple), var(--magenta));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; transform: rotate(-8deg);
+    box-shadow: 0 0 14px rgba(255,47,185,0.55), 0 0 0 2px rgba(255,255,255,0.5) inset;
+  }
+
+  /* ============================================================
+     BANNER
+  ============================================================ */
+  .banner {
+    position: relative;
+    display: flex; align-items: center; gap: var(--sp-3);
+    padding: 13px var(--sp-5); border-radius: var(--r-md);
+    background: linear-gradient(90deg, rgba(255,47,185,0.12), rgba(34,225,255,0.08));
+    border: 1px solid rgba(255,47,185,0.30);
+  }
+  .banner::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: linear-gradient(90deg, var(--magenta), var(--cyan), var(--purple));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity: 0.5; pointer-events: none;
+  }
+  .banner-icon {
+    width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+    background: rgba(34,225,255,0.14);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .banner-text { font-size: 13.5px; color: var(--text); }
+  .banner-text b { font-weight: 700; }
+  .banner-text .muted { color: var(--text-muted); }
+
+  /* ============================================================
+     KPI GRID
+  ============================================================ */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-5); }
+  .kpi-card {
+    display: flex; flex-direction: column; gap: var(--sp-3);
+    opacity: 0; transform: translateY(24px) scale(0.97);
+    animation: kpiPop 0.4s ease-out forwards;
+  }
+  .kpi-card:nth-child(1) { animation-delay: 0.9s; }
+  .kpi-card:nth-child(2) { animation-delay: 1.02s; }
+  .kpi-card:nth-child(3) { animation-delay: 1.14s; }
+  .kpi-card:nth-child(4) { animation-delay: 1.26s; }
+  @keyframes kpiPop {
+    0%   { opacity: 0; transform: translateY(24px) scale(0.97); }
+    60%  { opacity: 1; transform: translateY(-3px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .kpi-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .kpi-value { font-size: clamp(19px, 1.5vw + 11px, 28px); line-height: 1.15; overflow-wrap: anywhere; }
+  .kpi-value.is-dense { font-size: clamp(16px, 1.1vw + 9px, 21px); }
+  .kpi-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-top: auto; }
+  .kpi-delta { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 800; }
+  .kpi-delta.up { color: var(--success); text-shadow: 0 0 8px rgba(59,255,176,0.5); }
+  .kpi-delta.down { color: var(--danger); text-shadow: 0 0 8px rgba(255,59,107,0.5); }
+  .kpi-delta.flat { color: var(--text-faint); font-weight: 700; }
+  .kpi-spark { width: 92px; height: 30px; flex-shrink: 0; }
+
+  .kpi-card:hover .kpi-value.chrome-num { background-position: -60% 0%; }
+
+  /* ============================================================
+     CHARTS ROW
+  ============================================================ */
+  .charts-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: var(--sp-5); align-items: stretch; }
+
+  .trend-svg-wrap:hover .trend-line { filter: drop-shadow(0 0 3px var(--cyan)) drop-shadow(0 0 9px var(--magenta)); animation: trendGlowPulse 0.7s ease-in-out; }
+  @keyframes trendGlowPulse {
+    0%, 100% { filter: drop-shadow(0 0 3px var(--cyan)) drop-shadow(0 0 9px var(--magenta)); }
+    50%      { filter: drop-shadow(0 0 7px var(--magenta)) drop-shadow(0 0 14px var(--cyan)); }
+  }
+  .trend-area { clip-path: inset(100% 0 0 0); animation: areaReveal 0.9s ease-out 1.05s forwards; }
+  @keyframes areaReveal { to { clip-path: inset(0% 0 0 0); } }
+  .trend-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: drawLine 0.9s ease-out 0.95s forwards; }
+  @keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+  .trend-annotations { display: flex; gap: var(--sp-3); margin-top: var(--sp-3); flex-wrap: wrap; }
+  .anno-chip {
+    position: relative;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 700;
+    background: rgba(255,255,255,0.04); color: var(--text-muted);
+  }
+  .anno-chip.max { box-shadow: 0 0 0 1px rgba(34,225,255,0.4), 0 0 10px rgba(34,225,255,0.25); }
+  .anno-chip.min { box-shadow: 0 0 0 1px rgba(255,47,185,0.4), 0 0 10px rgba(255,47,185,0.25); }
+  .anno-chip .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .anno-chip.max .dot { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+  .anno-chip.min .dot { background: var(--magenta); box-shadow: 0 0 6px var(--magenta); }
+
+  /* ============================================================
+     DONUT
+  ============================================================ */
+  .donut-wrap { display: flex; align-items: center; gap: var(--sp-5); flex-wrap: wrap; }
+  .donut-svg { width: 128px; height: 128px; flex-shrink: 0; }
+  .donut-ring { stroke-dasharray: 100; opacity: 0; animation: donutReveal 0.7s ease-out forwards; }
+  @keyframes donutReveal { from { opacity: 0; } to { opacity: 1; } }
+  .donut-legend { display: flex; flex-direction: column; gap: 9px; flex: 1; min-width: 130px; }
+  .legend-row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); font-size: 13px; }
+  .legend-key { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
+  .legend-swatch { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+  .legend-val { font-weight: 800; color: var(--text); }
+
+  /* ============================================================
+     SECONDARY ROW
+  ============================================================ */
+  .secondary-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-5); align-items: stretch; }
+
+  /* GOAL */
+  .goal-figures { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--sp-3); flex-wrap: wrap; gap: var(--sp-2); }
+  .goal-current { font-size: 22px; }
+  .goal-target { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+  .goal-bar-track { height: 13px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.08); }
+  .goal-bar-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--magenta), var(--purple), var(--cyan));
+    background-size: 200% 100%;
+    width: 0%;
+    animation: goalFill 0.9s ease-out 0.9s forwards, goalShimmer 5s linear infinite;
+    box-shadow: 0 0 14px rgba(34,225,255,0.5);
+  }
+  @keyframes goalFill { to { width: 68%; } }
+  @keyframes goalShimmer { from { background-position: 0% 0; } to { background-position: 200% 0; } }
+  .goal-pct { display: flex; align-items: center; justify-content: space-between; margin-top: var(--sp-3); font-size: 13px; color: var(--text-muted); }
+  .goal-pct b { color: var(--text); font-size: 15px; font-weight: 800; }
+
+  /* EMPTY */
+  .empty-body { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: var(--sp-2); padding: var(--sp-6) var(--sp-4) var(--sp-4); flex: 1; }
+  .empty-icon {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--hairline);
+    display: flex; align-items: center; justify-content: center; margin-bottom: var(--sp-2);
+    box-shadow: 0 0 16px rgba(59,255,176,0.25);
+  }
+  .empty-headline { font-size: 15px; font-weight: 700; color: var(--text); }
+  .empty-desc { font-size: 13px; color: var(--text-muted); max-width: 32ch; }
+  .empty-cta {
+    margin-top: var(--sp-3); font-size: 13px; font-weight: 700; color: var(--cyan);
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: var(--r-sm);
+    border: 1px solid rgba(34,225,255,0.35);
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .empty-cta:hover { background: rgba(34,225,255,0.09); border-color: rgba(34,225,255,0.7); }
+
+  /* ============================================================
+     TABLE
+  ============================================================ */
+  .table-scroll { overflow-x: auto; margin: 0 calc(var(--sp-6) * -1) calc(var(--sp-5) * -1); padding: 0 var(--sp-6) var(--sp-5); }
+  .data-table { min-width: 720px; }
+  .data-table th {
+    text-align: left; font-size: 12px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 0 var(--sp-3) var(--sp-3);
+    border-bottom: 1px solid var(--hairline);
+    white-space: nowrap;
+  }
+  .th-inner { display: inline-flex; align-items: center; gap: 5px; }
+  .data-table th.is-sorted { color: var(--text); }
+  .data-table th.is-sorted svg { stroke: var(--cyan); }
+  .data-table td { padding: var(--sp-3); border-bottom: 1px solid var(--hairline); font-size: 13.5px; vertical-align: top; color: var(--text); }
+  .data-table tbody tr { position: relative; transition: background 0.2s ease; }
+  .data-table tbody tr:hover { background: rgba(162,75,255,0.12); }
+  .data-table tbody tr:hover::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+    background: linear-gradient(180deg, var(--magenta), var(--cyan));
+    box-shadow: 0 0 8px var(--magenta);
+  }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .merchant-name { color: var(--text); font-weight: 600; max-width: 320px; line-height: 1.45; word-break: keep-all; overflow-wrap: break-word; }
+  .col-num { font-variant-numeric: tabular-nums; color: var(--text); white-space: nowrap; }
+  .col-num.is-missing { color: var(--text-faint); }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px 4px 8px; border-radius: 999px;
+    font-size: 12px; font-weight: 800; white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .status-badge svg { flex-shrink: 0; }
+  .status-badge.status-done   { color: var(--success); background: rgba(59,255,176,0.12); border-color: rgba(59,255,176,0.32); text-shadow: 0 0 6px rgba(59,255,176,0.4); }
+  .status-badge.status-pending{ color: var(--warning); background: rgba(34,225,255,0.12); border-color: rgba(34,225,255,0.32); text-shadow: 0 0 6px rgba(34,225,255,0.4); }
+  .status-badge.status-hold   { color: var(--hold); background: rgba(162,75,255,0.14); border-color: rgba(162,75,255,0.36); text-shadow: 0 0 6px rgba(162,75,255,0.4); }
+  .status-badge.status-failed { color: var(--danger); background: rgba(255,59,107,0.13); border-color: rgba(255,59,107,0.34); text-shadow: 0 0 6px rgba(255,59,107,0.4); }
+
+  /* ============================================================
+     FOOTER
+  ============================================================ */
+  .app-footer {
+    margin-top: var(--sp-4); padding-top: var(--sp-5);
+    border-top: 1px solid var(--hairline);
+    font-size: 12px; color: var(--text-faint); letter-spacing: 0.03em;
+  }
+
+  /* ============================================================
+     RESPONSIVE
+  ============================================================ */
+  @media (max-width: 1100px) {
+    .app { grid-template-columns: 72px 1fr; }
+    .sidebar { padding: var(--sp-5) var(--sp-2); align-items: center; }
+    .brand-name, .brand-badge, .nav-label, .user-meta { display: none; }
+    .brand { justify-content: center; padding: 0; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .sidebar-user { justify-content: center; }
+    .main { padding: var(--sp-6) var(--sp-5) var(--sp-10); }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+    .secondary-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .page-title { font-size: 20px; }
+    .topbar-right { width: 100%; }
+    .donut-wrap { flex-direction: column; align-items: flex-start; }
+  }
+
+  /* ============================================================
+     REDUCED MOTION — 최종 상태 즉시 표시
+  ============================================================ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+    .grid-plane { opacity: 0.6 !important; height: 62vh !important; }
+    .horizon-glow { opacity: 1 !important; }
+    .star { opacity: 0.6 !important; transform: none !important; }
+    .scanlines.shift { animation: none !important; }
+    .page-title { clip-path: inset(0 0 0% 0) !important; }
+    .title-sweep { display: none !important; }
+    .kpi-card { opacity: 1 !important; transform: none !important; }
+    .trend-area { clip-path: inset(0% 0 0 0) !important; }
+    .trend-line { stroke-dashoffset: 0 !important; }
+    .donut-ring { opacity: 1 !important; }
+    .goal-bar-fill { width: 68% !important; }
+    .card::before { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="fx-layer" aria-hidden="true">
+  <div class="grid-plane"></div>
+  <div class="grid-tint"></div>
+  <div class="horizon-glow"></div>
+  <span class="star" style="top:8%; left:72%; --peak:0.9; animation-delay:1.5s, 1.9s;">✦</span>
+  <span class="star c" style="top:14%; left:88%; --peak:0.85; animation-delay:1.65s, 2.2s;">✧</span>
+  <span class="star p" style="top:22%; left:64%; --peak:0.8; animation-delay:1.8s, 2.6s;">✦</span>
+  <span class="star" style="top:70%; left:6%; --peak:0.85; animation-delay:1.55s, 2.0s;">✧</span>
+  <span class="star c" style="top:80%; left:14%; --peak:0.75; animation-delay:1.7s, 2.4s;">✦</span>
+  <span class="star p" style="top:60%; left:3%; --peak:0.8; animation-delay:1.9s, 2.8s;">✧</span>
+</div>
+<div class="scanlines shift" aria-hidden="true"></div>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR / NAV ============ -->
+  <aside class="sidebar" data-region="nav" aria-label="주 메뉴">
+    <div class="brand">
+      <div class="brand-mark">F</div>
+      <span class="brand-name chrome-text">핀그리드</span>
+      <span class="brand-badge" aria-hidden="true">★</span>
+    </div>
+    <ul class="nav-list">
+      <li><a href="#" class="nav-item is-active" aria-current="page">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <span class="nav-label">대시보드</span>
+      </a></li>
+      <li><a href="#" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l4-4 4 4M8 5v14M20 15l-4 4-4-4M16 19V5"/></svg>
+        <span class="nav-label">거래</span>
+      </a></li>
+      <li><a href="#" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        <span class="nav-label">정산</span>
+      </a></li>
+      <li><a href="#" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5Z"/></svg>
+        <span class="nav-label">가맹점</span>
+      </a></li>
+      <li><a href="#" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 12h6M9 16h6M9 8h3"/></svg>
+        <span class="nav-label">리포트</span>
+      </a></li>
+      <li><a href="#" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.9 19.36a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.54 15a1.7 1.7 0 0 0-1.56-1.04H2.9a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.54 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.54a1.7 1.7 0 0 0 1.04-1.56V2.9a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15.1 4.54a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.46 9c.11.63.5 1.17 1.04 1.46l.09.05a2 2 0 1 1 0 4Z"/></svg>
+        <span class="nav-label">설정</span>
+      </a></li>
+    </ul>
+    <div class="sidebar-user">
+      <div class="avatar">김</div>
+      <div class="user-meta">
+        <span class="user-name">김운영</span>
+        <span class="user-role">정산팀</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="title-wrap" data-region="identity">
+        <h1 class="page-title chrome-text">정산 대시보드<span class="title-sweep" aria-hidden="true"></span></h1>
+      </div>
+      <div class="topbar-right" data-region="filter">
+        <div class="tab-group" role="tablist" aria-label="조회 기간">
+          <button class="tab" role="tab" aria-selected="false">오늘</button>
+          <button class="tab" role="tab" aria-selected="false">7일</button>
+          <button class="tab is-active" role="tab" aria-selected="true">30일</button>
+          <button class="tab" role="tab" aria-selected="false">90일</button>
+        </div>
+        <button class="dropdown-trigger" aria-haspopup="listbox">
+          전체 채널
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+      <div data-region="action">
+        <button class="btn-chrome">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 11l5 5 5-5M4 21h16"/></svg>
+          내보내기
+        </button>
+      </div>
+    </div>
+
+    <!-- BANNER -->
+    <div class="banner" data-region="banner">
+      <span class="banner-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22E1FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      </span>
+      <p class="banner-text"><b class="tnum">10월 21일</b> 정산 예정 — <b class="tnum">₩1,284,900,000</b> <span class="muted">· 영업일 기준 D-1</span></p>
+    </div>
+
+    <!-- KPI -->
+    <section class="kpi-grid" data-region="kpi" aria-label="핵심 지표">
+      <div class="card kpi-card">
+        <span class="kpi-label">총 거래액(GMV)</span>
+        <span class="kpi-value is-dense chrome-num tnum">₩1,284,732,050,000</span>
+        <div class="kpi-foot">
+          <span class="kpi-delta up tnum">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            +8.3%
+          </span>
+          <svg class="kpi-spark" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+            <defs><linearGradient id="sparkUp" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#A24BFF"/><stop offset="100%" stop-color="#22E1FF"/></linearGradient></defs>
+            <polyline points="0,27 14,25 28,22 42,20 56,15 70,12 84,8 100,5" fill="none" stroke="url(#sparkUp)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="card kpi-card">
+        <span class="kpi-label">결제 건수</span>
+        <span class="kpi-value chrome-num tnum">12,847,192건</span>
+        <div class="kpi-foot">
+          <span class="kpi-delta up tnum">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            +12.1%
+          </span>
+          <svg class="kpi-spark" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,29 14,26 28,24 42,19 56,17 70,13 84,9 100,4" fill="none" stroke="url(#sparkUp)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="card kpi-card">
+        <span class="kpi-label">승인율</span>
+        <span class="kpi-value chrome-num tnum">94.7%</span>
+        <div class="kpi-foot">
+          <span class="kpi-delta down tnum">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            −1.2%p
+          </span>
+          <svg class="kpi-spark" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,7 14,9 28,8 42,12 56,14 70,17 84,19 100,23" fill="none" stroke="#FF3B6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="card kpi-card">
+        <span class="kpi-label">정산 대기액</span>
+        <span class="kpi-value is-dense chrome-num tnum">₩312,048,900,000</span>
+        <div class="kpi-foot">
+          <span class="kpi-delta flat" aria-label="증감 데이터 없음">—</span>
+          <svg class="kpi-spark" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,16 14,15 28,17 42,16 56,15 70,16 84,15 100,16" fill="none" stroke="#8F86BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHARTS ROW -->
+    <section class="charts-row">
+      <div class="card trend-svg-wrap" data-region="chart-trend">
+        <div class="card-head">
+          <span class="card-title">일별 거래액 추이 (최근 30일)</span>
+          <span class="card-sub">단위: 억</span>
+        </div>
+        <svg viewBox="0 0 700 230" width="100%" height="200" preserveAspectRatio="none" role="img" aria-label="일별 거래액 추이 라인 차트, 최근 30일, 단위 억">
+          <defs>
+            <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#A24BFF"/>
+              <stop offset="50%" stop-color="#22E1FF"/>
+              <stop offset="100%" stop-color="#FF2FB9"/>
+            </linearGradient>
+            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#22E1FF" stop-opacity="0.32"/>
+              <stop offset="100%" stop-color="#22E1FF" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line x1="20" y1="200" x2="680" y2="200" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+          <path class="trend-area" d="M20,136.9 L42.8,167.5 L65.5,156.3 L88.3,141.7 L111,127.1 L133.8,117.4 L156.6,132.0 L179.3,107.7 L202.1,98.0 L224.9,112.6 L247.6,88.3 L270.4,78.6 L293.1,64.0 L315.9,38.7 L338.6,54.3 L361.4,78.6 L384.2,93.1 L406.9,83.4 L429.7,68.9 L452.4,59.1 L475.2,73.7 L498.0,64.0 L520.7,49.4 L543.5,54.3 L566.2,44.6 L589.0,59.1 L611.7,49.4 L634.5,39.7 L657.2,49.4 L680,44.6 L680,200 L20,200 Z" fill="url(#areaGrad)"/>
+          <path class="trend-line" pathLength="1" d="M20,136.9 L42.8,167.5 L65.5,156.3 L88.3,141.7 L111,127.1 L133.8,117.4 L156.6,132.0 L179.3,107.7 L202.1,98.0 L224.9,112.6 L247.6,88.3 L270.4,78.6 L293.1,64.0 L315.9,38.7 L338.6,54.3 L361.4,78.6 L384.2,93.1 L406.9,83.4 L429.7,68.9 L452.4,59.1 L475.2,73.7 L498.0,64.0 L520.7,49.4 L543.5,54.3 L566.2,44.6 L589.0,59.1 L611.7,49.4 L634.5,39.7 L657.2,49.4 L680,44.6" fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="315.9" cy="38.7" r="4.5" fill="#0B0221" stroke="#22E1FF" stroke-width="2"/>
+          <circle cx="42.8" cy="167.5" r="4.5" fill="#0B0221" stroke="#FF2FB9" stroke-width="2"/>
+        </svg>
+        <div class="trend-annotations">
+          <span class="anno-chip max"><span class="dot"></span>최고 <b class="chrome-num tnum" style="font-size:13px">₩58.2억</b> (10/14)</span>
+          <span class="anno-chip min"><span class="dot"></span>최저 <b class="chrome-num tnum" style="font-size:13px">₩31.7억</b> (10/02)</span>
+        </div>
+      </div>
+
+      <div class="card" data-region="chart-part">
+        <div class="card-head">
+          <span class="card-title">결제수단 구성비</span>
+        </div>
+        <div class="donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 120 120" role="img" aria-label="결제수단 구성비 도넛 차트">
+            <g transform="rotate(-90 60 60)">
+              <circle class="donut-ring" cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="14" pathLength="100"/>
+              <circle class="donut-ring" cx="60" cy="60" r="48" fill="none" stroke="#FF2FB9" stroke-width="14" pathLength="100" stroke-dasharray="52 48" stroke-dashoffset="0" style="animation-delay:0.95s"/>
+              <circle class="donut-ring" cx="60" cy="60" r="48" fill="none" stroke="#22E1FF" stroke-width="14" pathLength="100" stroke-dasharray="24 76" stroke-dashoffset="-52" style="animation-delay:1.05s"/>
+              <circle class="donut-ring" cx="60" cy="60" r="48" fill="none" stroke="#A24BFF" stroke-width="14" pathLength="100" stroke-dasharray="18 82" stroke-dashoffset="-76" style="animation-delay:1.15s"/>
+              <circle class="donut-ring" cx="60" cy="60" r="48" fill="none" stroke="#7C8AA6" stroke-width="14" pathLength="100" stroke-dasharray="6 94" stroke-dashoffset="-94" style="animation-delay:1.25s"/>
+            </g>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-row"><span class="legend-key"><span class="legend-swatch" style="background:#FF2FB9"></span>카드</span><span class="legend-val tnum">52%</span></div>
+            <div class="legend-row"><span class="legend-key"><span class="legend-swatch" style="background:#22E1FF"></span>계좌이체</span><span class="legend-val tnum">24%</span></div>
+            <div class="legend-row"><span class="legend-key"><span class="legend-swatch" style="background:#A24BFF"></span>간편결제</span><span class="legend-val tnum">18%</span></div>
+            <div class="legend-row"><span class="legend-key"><span class="legend-swatch" style="background:#7C8AA6"></span>기타</span><span class="legend-val tnum">6%</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECONDARY ROW -->
+    <section class="secondary-row">
+      <div class="card" data-region="goal">
+        <div class="card-head"><span class="card-title">4분기 정산액 목표</span></div>
+        <div class="goal-figures">
+          <span class="goal-current chrome-num tnum">₩3.4조</span>
+          <span class="goal-target tnum">/ ₩5조</span>
+        </div>
+        <div class="goal-bar-track" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-label="4분기 정산액 목표 달성률, 단위 조">
+          <div class="goal-bar-fill"></div>
+        </div>
+        <div class="goal-pct"><span>달성률</span><b class="tnum">68%</b></div>
+      </div>
+
+      <div class="card" data-region="empty">
+        <div class="card-head"><span class="card-title">이상거래 탐지</span></div>
+        <div class="empty-body">
+          <span class="empty-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8F86BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg>
+          </span>
+          <p class="empty-headline">표시할 이상거래가 없어요</p>
+          <p class="empty-desc">최근 30일간 감지된 이상거래가 없습니다.</p>
+          <a href="#" class="empty-cta">탐지 규칙 보기
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABLE -->
+    <section class="card" data-region="table" style="position:relative;">
+      <span class="holo-sticker" aria-hidden="true">✦</span>
+      <div class="card-head">
+        <span class="card-title">가맹점별 정산 현황</span>
+        <span class="card-sub">최근 30일 기준</span>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>가맹점</th>
+              <th class="is-sorted"><span class="th-inner">거래액
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </span></th>
+              <th>건수</th>
+              <th>승인율</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="merchant-name">(주)새벽마켓</td>
+              <td class="col-num">₩48,203,000,000</td>
+              <td class="col-num">482,030</td>
+              <td class="col-num">96.2%</td>
+              <td><span class="status-badge status-done"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>완료</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-name">글로벌 커머스 인터내셔널 유한회사 — 해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</td>
+              <td class="col-num">₩31,209,000,000</td>
+              <td class="col-num">288,110</td>
+              <td class="col-num">91.4%</td>
+              <td><span class="status-badge status-pending"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>대기</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-name">김철수 스토어</td>
+              <td class="col-num">₩894,000,000</td>
+              <td class="col-num">8,940</td>
+              <td class="col-num">88.0%</td>
+              <td><span class="status-badge status-hold"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>보류</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-name">데일리박스</td>
+              <td class="col-num">₩12,048,300,000</td>
+              <td class="col-num is-missing">—</td>
+              <td class="col-num">94.7%</td>
+              <td><span class="status-badge status-done"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>완료</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-name">페이앤고</td>
+              <td class="col-num">₩6,201,500,000</td>
+              <td class="col-num">61,205</td>
+              <td class="col-num">79.3%</td>
+              <td><span class="status-badge status-failed"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>실패</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-name">미니샵 코리아</td>
+              <td class="col-num">₩2,900,000</td>
+              <td class="col-num">290</td>
+              <td class="col-num">100.0%</td>
+              <td><span class="status-badge status-done"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>완료</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="app-footer">STYLE 17 · Y2K 베이퍼웨이브</footer>
+  </div>
+</div>
+
+<script>
+(function () {
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+  // 장식용 마우스 시차 — 실패해도 위 CSS 애니메이션만으로 완성 화면 유지
+  var grid = document.querySelector('.grid-plane');
+  if (!grid) return;
+  var ticking = false, tx = 0, ty = 0;
+  window.addEventListener('mousemove', function (e) {
+    tx = (e.clientX / window.innerWidth - 0.5) * 10;
+    ty = (e.clientY / window.innerHeight - 0.5) * 6;
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(function () {
+        grid.style.transform = 'translateX(calc(-50% + ' + tx.toFixed(1) + 'px)) perspective(280px) rotateX(' + (62 + ty).toFixed(1) + 'deg)';
+        ticking = false;
+      });
+    }
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>

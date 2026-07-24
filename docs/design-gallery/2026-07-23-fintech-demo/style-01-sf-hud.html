@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>핀그리드 정산 대시보드 · STYLE 01 SF HUD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap">
+<style>
+/* ============ RESET ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+img,svg{display:block;max-width:100%;}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;}
+a{color:inherit;text-decoration:none;}
+table{border-collapse:collapse;width:100%;}
+ul{list-style:none;}
+
+/* ============ TOKENS ============ */
+:root{
+  --void:#030509;
+  --core:#08101E;
+  --panel:#0a1420;
+  --panel-alt:#0c1826;
+  --line:#0f2230;
+  --cyan:#00E5FF;
+  --cyan-dim:#0A6E82;
+  --cyan-soft:rgba(0,229,255,.14);
+  --magenta:#FF2D78;
+  --magenta-soft:rgba(255,45,120,.16);
+  --amber:#FFB62E;
+  --amber-soft:rgba(255,182,46,.14);
+  --text:#C9EEF7;
+  --text-dim:#5D8FA3;
+  --text-faint:#3C5C6B;
+
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px; --sp-16:64px;
+
+  --fs-2xs:11px; --fs-xs:12px; --fs-sm:13px; --fs-base:14px; --fs-md:16px;
+  --fs-lg:20px; --fs-xl:24px; --fs-2xl:28px; --fs-3xl:34px; --fs-4xl:42px;
+
+  --font-display:'Orbitron', sans-serif;
+  --font-mono:'Share Tech Mono', monospace;
+  --font-body:'Pretendard', -apple-system, sans-serif;
+
+  --dur-fast:.15s; --dur-base:.25s; --dur-slow:.4s;
+}
+
+/* ============ BASE ============ */
+html,body{height:100%;}
+body{
+  font-family:var(--font-body);
+  color:var(--text);
+  background:
+    radial-gradient(ellipse 900px 700px at 22% 18%, var(--core) 0%, transparent 60%),
+    radial-gradient(ellipse 1100px 900px at 82% 78%, #061019 0%, transparent 55%),
+    radial-gradient(ellipse 1600px 1200px at 50% 40%, var(--core) 0%, var(--void) 72%);
+  background-color:var(--void);
+  min-height:100vh;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+  letter-spacing:.01em;
+  overflow-x:hidden;
+}
+::selection{background:var(--cyan);color:#01131a;}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+
+/* ============ AMBIENT OVERLAYS ============ */
+.scanline-overlay{
+  position:fixed; inset:0; z-index:80; pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom, rgba(0,229,255,.05) 0px, rgba(0,229,255,.05) 1px,
+    transparent 1px, transparent 3px
+  );
+  mix-blend-mode:screen;
+}
+.scan-sweep{
+  position:fixed; left:0; right:0; height:120px; z-index:81; pointer-events:none;
+  top:-120px;
+  background:linear-gradient(to bottom, transparent, rgba(0,229,255,.05) 45%, rgba(0,229,255,.09) 50%, rgba(0,229,255,.05) 55%, transparent);
+  animation: scanSweep 8s linear infinite;
+}
+@keyframes scanSweep{
+  0%{ transform:translateY(0); }
+  100%{ transform:translateY(calc(100vh + 120px)); }
+}
+.vignette{
+  position:fixed; inset:0; z-index:79; pointer-events:none;
+  background:radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(0,0,0,.6) 100%);
+}
+.grain-frame{
+  position:fixed; inset:6px; z-index:82; pointer-events:none;
+  border:1px solid rgba(0,229,255,.08);
+}
+
+/* ============ LAYOUT SHELL ============ */
+.app-shell{
+  position:relative; z-index:1;
+  display:grid;
+  grid-template-columns:220px 1fr;
+  min-height:100vh;
+}
+
+/* ---- SIDEBAR / nav ---- */
+.sidebar{
+  background:linear-gradient(180deg, var(--panel-alt) 0%, #061019 100%);
+  border-right:1px solid rgba(0,229,255,.16);
+  display:flex; flex-direction:column;
+  padding:var(--sp-6) var(--sp-4);
+  gap:var(--sp-8);
+  position:relative;
+}
+.sidebar::after{
+  content:""; position:absolute; top:0; right:-1px; width:1px; height:100%;
+  background:linear-gradient(180deg, transparent, var(--cyan) 40%, var(--cyan-dim) 60%, transparent);
+  opacity:.6;
+}
+.brand{
+  display:flex; align-items:center; gap:var(--sp-2);
+}
+.brand-mark{
+  width:28px;height:28px;
+  border:2px solid var(--cyan);
+  clip-path:polygon(30% 0,100% 0,100% 70%,70% 100%,0 100%,0 30%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display); font-weight:900; font-size:12px; color:var(--cyan);
+  box-shadow:0 0 12px rgba(0,229,255,.45), inset 0 0 8px rgba(0,229,255,.2);
+  flex:none;
+}
+.brand-title{
+  font-family:var(--font-display); font-weight:900; font-size:16px; letter-spacing:.14em;
+  color:var(--text);
+  text-shadow:0 0 10px rgba(0,229,255,.55);
+  animation: titleGlitch .18s linear .3s both;
+}
+@keyframes titleGlitch{
+  0%{ transform:translate(0,0); text-shadow:0 0 0 rgba(0,229,255,0); opacity:0; }
+  35%{ transform:translate(-2px,1px); text-shadow:-2px 0 var(--magenta), 2px 0 var(--cyan); opacity:1; }
+  55%{ transform:translate(2px,-1px); text-shadow:2px 0 var(--magenta), -2px 0 var(--cyan); }
+  100%{ transform:translate(0,0); text-shadow:0 0 10px rgba(0,229,255,.55); opacity:1; }
+}
+
+.nav-menu{ display:flex; flex-direction:column; gap:var(--sp-1); flex:1; }
+.nav-label{
+  font-family:var(--font-mono); font-size:var(--fs-2xs); letter-spacing:.18em; color:var(--text-faint);
+  margin-bottom:var(--sp-2); text-transform:uppercase;
+}
+.nav-link{
+  display:flex; align-items:center; gap:var(--sp-3);
+  padding:var(--sp-2) var(--sp-3);
+  font-size:var(--fs-base); color:var(--text-dim);
+  border-left:2px solid transparent;
+  transition:color var(--dur-base), border-color var(--dur-base), background var(--dur-base);
+  white-space:nowrap; overflow:hidden;
+}
+.nav-link .nav-dot{
+  width:6px;height:6px;flex:none;
+  border:1px solid currentColor;
+  transform:rotate(45deg);
+}
+.nav-link .nav-text{overflow:hidden;text-overflow:ellipsis;}
+.nav-link:hover{ color:var(--text); background:rgba(0,229,255,.06); }
+.nav-link.is-active{
+  color:var(--cyan); border-left-color:var(--cyan);
+  background:linear-gradient(90deg, rgba(0,229,255,.12), transparent);
+  text-shadow:0 0 8px rgba(0,229,255,.4);
+}
+.nav-link.is-active .nav-dot{ background:var(--cyan); box-shadow:0 0 6px var(--cyan); }
+
+.nav-user{
+  border-top:1px solid rgba(0,229,255,.14);
+  padding-top:var(--sp-4);
+  display:flex; align-items:center; gap:var(--sp-2);
+}
+.nav-user-badge{
+  width:30px;height:30px; flex:none;
+  border:1px solid var(--cyan-dim);
+  clip-path:polygon(20% 0,100% 0,100% 80%,80% 100%,0 100%,0 20%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono); font-size:11px; color:var(--cyan);
+  background:rgba(0,229,255,.06);
+}
+.nav-user-text{font-size:var(--fs-xs); color:var(--text-dim); line-height:1.4; overflow:hidden; white-space:nowrap;}
+.nav-user-text strong{color:var(--text); font-weight:600;}
+
+/* ============ MAIN ============ */
+.main{ display:flex; flex-direction:column; min-width:0; }
+
+/* ---- TOPBAR / identity ---- */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4);
+  padding:var(--sp-4) var(--sp-8);
+  border-bottom:1px solid rgba(0,229,255,.14);
+  position:relative;
+}
+.topbar-left{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.boot-typeline{
+  overflow:hidden; white-space:nowrap; width:22ch; opacity:0;
+  font-family:var(--font-mono); font-size:var(--fs-xs); letter-spacing:.08em;
+  color:var(--cyan); border-right:2px solid var(--cyan);
+  animation: bootType 1s steps(22,end) 0s 1 both;
+  position:absolute; top:var(--sp-2); left:var(--sp-8);
+}
+@keyframes bootType{
+  0%{ width:0; opacity:1; }
+  55%{ width:22ch; opacity:1; }
+  100%{ width:22ch; opacity:0; }
+}
+.page-title{
+  font-family:var(--font-display); font-weight:900; font-size:var(--fs-xl);
+  letter-spacing:.1em; color:var(--text);
+  text-shadow:0 0 10px rgba(0,229,255,.35);
+}
+.page-sub{ font-size:var(--fs-xs); color:var(--text-dim); letter-spacing:.03em; }
+
+.topbar-right{ display:flex; align-items:center; gap:var(--sp-6); flex-wrap:wrap; justify-content:flex-end; }
+.hud-readout{ display:flex; flex-direction:column; align-items:flex-end; gap:1px; font-family:var(--font-mono); }
+.hud-readout .r-label{ font-size:var(--fs-2xs); color:var(--text-faint); letter-spacing:.14em; }
+.hud-readout .r-value{ font-size:var(--fs-sm); color:var(--cyan); }
+.status-badge{
+  display:inline-flex; align-items:center; gap:var(--sp-2);
+  padding:6px var(--sp-3);
+  border:1px solid var(--cyan-dim);
+  font-family:var(--font-mono); font-size:var(--fs-xs); letter-spacing:.08em; color:var(--cyan);
+  clip-path:polygon(8px 0,100% 0,100% 100%,calc(100% - 8px) 100%,0 100%,0 8px);
+  opacity:1; animation: statusIn .4s ease-out 1.4s both;
+}
+@keyframes statusIn{ 0%{opacity:0; transform:translateY(-4px);} 100%{opacity:1; transform:translateY(0);} }
+.status-badge .dot{
+  width:7px;height:7px; border-radius:0; background:var(--cyan);
+  box-shadow:0 0 6px var(--cyan);
+  animation: dotPulse 1.4s ease-in-out infinite;
+}
+@keyframes dotPulse{ 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+/* ---- FILTER ROW ---- */
+.filter-row{
+  display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); flex-wrap:wrap;
+  padding:var(--sp-4) var(--sp-8);
+  border-bottom:1px solid rgba(0,229,255,.08);
+}
+.tab-group{ display:inline-flex; gap:var(--sp-1); border:1px solid rgba(0,229,255,.18); padding:3px; }
+.tab-btn{
+  padding:6px var(--sp-4); font-size:var(--fs-sm); color:var(--text-dim);
+  transition:color var(--dur-base), background var(--dur-base);
+}
+.tab-btn:hover{ color:var(--text); }
+.tab-btn.is-active{
+  background:var(--cyan); color:#00131a; font-weight:700;
+  box-shadow:0 0 14px rgba(0,229,255,.5);
+}
+.filter-cluster{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; }
+.select-btn{
+  display:inline-flex; align-items:center; gap:var(--sp-2);
+  padding:7px var(--sp-4); font-size:var(--fs-sm); color:var(--text);
+  border:1px solid rgba(0,229,255,.22); background:rgba(0,229,255,.04);
+  transition:border-color var(--dur-base), background var(--dur-base);
+}
+.select-btn:hover{ border-color:var(--cyan); background:rgba(0,229,255,.08); }
+.select-btn .car{ color:var(--cyan); font-size:10px; }
+
+.btn-primary{
+  display:inline-flex; align-items:center; gap:var(--sp-2);
+  padding:8px var(--sp-6); font-size:var(--fs-sm); font-weight:700; letter-spacing:.04em;
+  color:#00131a; background:linear-gradient(180deg, var(--cyan), #00b8cf);
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+  box-shadow:0 0 16px rgba(0,229,255,.4);
+  transition:transform var(--dur-fast), box-shadow var(--dur-base), filter var(--dur-base);
+}
+.btn-primary:hover{ filter:brightness(1.1); box-shadow:0 0 24px rgba(0,229,255,.6); }
+.btn-primary:active{ transform:translateY(1px) scale(.99); }
+.btn-primary:disabled{ opacity:.35; box-shadow:none; cursor:not-allowed; filter:none; }
+
+/* ---- BANNER ---- */
+.banner{
+  margin:var(--sp-6) var(--sp-8) 0;
+  padding:var(--sp-3) var(--sp-6);
+  border:1px solid var(--amber);
+  background:linear-gradient(90deg, var(--amber-soft), transparent 70%);
+  clip-path:polygon(12px 0,100% 0,100% 100%,calc(100% - 12px) 100%,0 100%,0 12px);
+  display:flex; align-items:center; gap:var(--sp-3);
+  font-size:var(--fs-sm); color:var(--text);
+}
+.banner .b-icon{
+  flex:none; width:18px;height:18px;
+  border:2px solid var(--amber); transform:rotate(45deg);
+  display:flex; align-items:center; justify-content:center;
+}
+.banner .b-icon::before{ content:"!"; transform:rotate(-45deg); font-family:var(--font-display); font-size:11px; color:var(--amber); font-weight:900; }
+.banner strong{ color:var(--amber); font-family:var(--font-mono); font-weight:400; }
+
+/* ---- SECTION HEADS ---- */
+.panel-head{
+  display:flex; align-items:baseline; justify-content:space-between; gap:var(--sp-3);
+  margin-bottom:var(--sp-4);
+}
+.panel-title{
+  font-family:var(--font-display); font-size:var(--fs-md); font-weight:700; letter-spacing:.08em;
+  color:var(--text); text-transform:uppercase;
+}
+.panel-note{ font-size:var(--fs-2xs); color:var(--text-faint); font-family:var(--font-mono); }
+
+/* ============ HUD FRAME (corner brackets) ============ */
+.hud-frame{
+  position:relative;
+  background:linear-gradient(160deg, rgba(0,229,255,.05), rgba(0,10,20,.5) 60%);
+  border:1px solid rgba(0,229,255,.14);
+  padding:var(--sp-4);
+  clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);
+  transition:box-shadow var(--dur-base), border-color var(--dur-base);
+}
+.hud-frame:hover{ border-color:rgba(0,229,255,.32); box-shadow:0 0 24px rgba(0,229,255,.14); }
+.frame-corner{ position:absolute; width:12px; height:12px; pointer-events:none; transition:transform var(--dur-base), filter var(--dur-base); }
+.frame-corner.tl{ top:5px; left:5px; border-top:2px solid var(--cyan); border-left:2px solid var(--cyan); }
+.frame-corner.tr{ top:5px; right:5px; border-top:2px solid var(--cyan); border-right:2px solid var(--cyan); }
+.frame-corner.bl{ bottom:5px; left:5px; border-bottom:2px solid var(--cyan); border-left:2px solid var(--cyan); }
+.frame-corner.br{ bottom:5px; right:5px; border-bottom:2px solid var(--cyan); border-right:2px solid var(--cyan); }
+.hud-frame:hover .frame-corner.tl{ transform:translate(-3px,-3px); filter:drop-shadow(0 0 4px var(--cyan)); }
+.hud-frame:hover .frame-corner.tr{ transform:translate(3px,-3px); filter:drop-shadow(0 0 4px var(--cyan)); }
+.hud-frame:hover .frame-corner.bl{ transform:translate(-3px,3px); filter:drop-shadow(0 0 4px var(--cyan)); }
+.hud-frame:hover .frame-corner.br{ transform:translate(3px,3px); filter:drop-shadow(0 0 4px var(--cyan)); }
+
+/* ============ KPI ============ */
+.kpi-grid{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:var(--sp-4);
+  padding:var(--sp-6) var(--sp-8) 0;
+}
+.kpi-card{
+  padding-left:calc(var(--sp-4) + 6px);
+  opacity:1;
+  animation: kpiIn .5s ease-out both;
+  animation-delay:calc(.5s + var(--d) * .09s);
+}
+@keyframes kpiIn{ 0%{ opacity:0; transform:translateY(6px); } 100%{ opacity:1; transform:translateY(0); } }
+.kpi-bar{
+  position:absolute; left:0; top:16px; bottom:16px; width:3px;
+  background:var(--kc, var(--cyan));
+  box-shadow:0 0 8px var(--kc, var(--cyan));
+}
+.kpi-gauge{ width:96px; height:44px; margin-bottom:var(--sp-2); }
+.gauge-track{ fill:none; stroke:rgba(93,143,163,.25); stroke-width:3; stroke-linecap:round; }
+.gauge-fill{
+  fill:none; stroke:var(--kc, var(--cyan)); stroke-width:3; stroke-linecap:round;
+  filter:drop-shadow(0 0 4px var(--kc, var(--cyan)));
+  stroke-dasharray:var(--len) 999;
+  stroke-dashoffset:0;
+  animation: gaugeReveal .7s cubic-bezier(.22,.9,.32,1) both;
+  animation-delay:calc(.65s + var(--d) * .09s);
+}
+@keyframes gaugeReveal{
+  0%{ stroke-dashoffset:var(--len); }
+  78%{ stroke-dashoffset:calc(var(--len) * -0.04); }
+  100%{ stroke-dashoffset:0; }
+}
+.gauge-tick{ stroke:rgba(93,143,163,.4); stroke-width:2; }
+.kpi-label{ font-size:var(--fs-xs); color:var(--text-dim); letter-spacing:.03em; margin-bottom:6px; }
+.kpi-value{ font-family:var(--font-mono); line-height:1.1; color:var(--text); overflow-wrap:anywhere; }
+.kpi-value.fs-cur{ font-size:var(--fs-2xl); }
+.kpi-value.fs-num{ font-size:var(--fs-3xl); }
+.kpi-delta{
+  display:flex; align-items:center; gap:6px; margin-top:var(--sp-2);
+  font-family:var(--font-mono); font-size:var(--fs-sm);
+}
+.kpi-delta.is-up{ color:var(--cyan); }
+.kpi-delta.is-down{ color:var(--magenta); }
+.kpi-delta.is-down .arrow, .kpi-delta.is-down strong{
+  animation: warnPulseText 1.4s ease-in-out infinite;
+}
+@keyframes warnPulseText{ 0%,100%{ text-shadow:0 0 6px rgba(255,45,120,.7); } 50%{ text-shadow:0 0 0 rgba(255,45,120,0); } }
+.kpi-delta.is-flat{ color:var(--text-faint); }
+.kpi-delta-note{ font-family:var(--font-body); color:var(--text-faint); font-size:var(--fs-2xs); }
+.kpi-spark{ width:100%; height:26px; margin-top:var(--sp-3); }
+.kpi-spark polyline{ fill:none; stroke-width:1.6; }
+
+/* ============ CHARTS ============ */
+.charts-row{
+  display:grid; grid-template-columns:2fr 1fr; gap:var(--sp-4);
+  padding:var(--sp-6) var(--sp-8) 0; align-items:stretch;
+}
+.charts-side{ display:flex; flex-direction:column; gap:var(--sp-4); }
+
+/* trend */
+.trend-svg{ width:100%; height:auto; overflow:visible; }
+.trend-grid line{ stroke:rgba(93,143,163,.14); stroke-width:1; }
+.trend-axis-label{ font-family:var(--font-mono); font-size:9px; fill:var(--text-faint); }
+.trend-area{ fill:url(#trendFill); opacity:1; animation: trendFade .6s ease-out .95s both; }
+.trend-line{
+  fill:none; stroke:var(--cyan); stroke-width:2;
+  filter:drop-shadow(0 0 5px rgba(0,229,255,.6));
+  stroke-dasharray:var(--tlen); stroke-dashoffset:0;
+  animation: trendDraw 1s cubic-bezier(.3,.9,.3,1) .85s both;
+}
+@keyframes trendDraw{ 0%{ stroke-dashoffset:var(--tlen); } 100%{ stroke-dashoffset:0; } }
+@keyframes trendFade{ 0%{ opacity:0; } 100%{ opacity:1; } }
+.trend-pt{ opacity:1; }
+.trend-pt-dot{ fill:var(--void); stroke:var(--cyan); stroke-width:1.6; r:2.6; transition:r var(--dur-fast); }
+.trend-hit{ fill:transparent; }
+.trend-hit:hover + .trend-pt-dot, .trend-pt:hover .trend-pt-dot{ r:4.5; }
+.trend-cross{ stroke:rgba(0,229,255,.5); stroke-width:1; stroke-dasharray:2 2; opacity:0; pointer-events:none; }
+.trend-tip{ opacity:0; pointer-events:none; }
+.trend-tip rect{ fill:#04121a; stroke:var(--cyan-dim); }
+.trend-tip text{ font-family:var(--font-mono); font-size:10px; fill:var(--cyan); }
+.trend-pt:hover .trend-cross,.trend-pt:hover .trend-tip{ opacity:1; }
+.trend-mark{ fill:var(--magenta); r:3.2; filter:drop-shadow(0 0 4px var(--magenta)); }
+.trend-caption{
+  display:flex; gap:var(--sp-6); margin-top:var(--sp-3); flex-wrap:wrap;
+  font-family:var(--font-mono); font-size:var(--fs-xs); color:var(--text-dim);
+}
+.trend-caption b{ color:var(--cyan); font-weight:400; }
+.trend-caption .neg{ color:var(--magenta); }
+
+/* donut */
+.donut-wrap{ display:flex; align-items:center; gap:var(--sp-4); }
+.donut-svg{ width:112px; height:112px; flex:none; }
+.donut-seg{ fill:none; stroke-width:16; stroke-dasharray:var(--slen) 999; transform:rotate(-90deg); transform-origin:60px 60px;
+  stroke-dashoffset:var(--soff);
+  opacity:1; animation: donutIn .5s ease-out both;
+}
+@keyframes donutIn{ 0%{ opacity:0; transform:rotate(-90deg) scale(.85); } 100%{ opacity:1; transform:rotate(-90deg) scale(1); } }
+.donut-center-pct{ font-family:var(--font-mono); font-size:15px; fill:var(--text); }
+.donut-legend{ display:flex; flex-direction:column; gap:var(--sp-2); flex:1; min-width:0; }
+.legend-row{ display:flex; align-items:center; gap:var(--sp-2); font-size:var(--fs-sm); }
+.legend-swatch{ width:10px; height:10px; flex:none; }
+.legend-name{ flex:1; color:var(--text-dim); }
+.legend-pct{ font-family:var(--font-mono); color:var(--text); }
+
+/* goal ring (hero) */
+.goal-panel{ display:flex; align-items:center; gap:var(--sp-6); justify-content:center; flex:1; }
+.goal-ring-wrap{ position:relative; width:150px; height:150px; flex:none; }
+.goal-svg{ width:100%; height:100%; }
+.goal-track{ fill:none; stroke:rgba(93,143,163,.18); stroke-width:8; }
+.goal-fill{
+  fill:none; stroke:var(--cyan); stroke-width:8; stroke-linecap:round;
+  filter:drop-shadow(0 0 8px rgba(0,229,255,.6));
+  transform:rotate(-90deg); transform-origin:75px 75px;
+  stroke-dasharray:var(--glen) 999; stroke-dashoffset:0;
+  animation: gaugeReveal 1s cubic-bezier(.22,.9,.3,1) 1.05s both;
+}
+.goal-sweep{
+  fill:none; stroke:url(#ringGrad); stroke-width:4; stroke-linecap:round;
+  transform-origin:75px 75px;
+  stroke-dasharray:70 339;
+}
+.goal-sweep-boot{ animation: sweepBoot .85s ease-out 1.2s 1 both; }
+@keyframes sweepBoot{ 0%{ transform:rotate(0deg); opacity:1; } 100%{ transform:rotate(360deg); opacity:1; } }
+.goal-sweep-ambient{ animation: sweepAmbient 12s linear 2.05s infinite; opacity:.55; }
+@keyframes sweepAmbient{ 0%{ transform:rotate(0deg); } 100%{ transform:rotate(360deg); } }
+.goal-center{
+  position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center;
+}
+.goal-pct{ font-family:var(--font-mono); font-size:var(--fs-2xl); color:var(--cyan); text-shadow:0 0 10px rgba(0,229,255,.5); }
+.goal-frac{ font-size:var(--fs-2xs); color:var(--text-dim); margin-top:2px; font-family:var(--font-mono); }
+.goal-meta{ display:flex; flex-direction:column; gap:6px; }
+.goal-meta-label{ font-size:var(--fs-xs); color:var(--text-dim); }
+.goal-meta-value{ font-family:var(--font-mono); font-size:var(--fs-md); color:var(--text); }
+
+/* ============ TABLE ============ */
+.table-wrap{ padding:var(--sp-6) var(--sp-8) 0; }
+.table-scroll{ overflow-x:auto; }
+.hud-table{ min-width:760px; font-size:var(--fs-sm); }
+.hud-table caption{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+.hud-table thead th{
+  text-align:left; padding:var(--sp-2) var(--sp-3); font-size:var(--fs-2xs);
+  letter-spacing:.1em; color:var(--text-dim); text-transform:uppercase;
+  border-bottom:1px solid rgba(0,229,255,.28);
+  font-family:var(--font-mono); font-weight:400;
+}
+.hud-table thead th.num, .hud-table tbody td.num{ text-align:right; }
+.hud-table tbody tr{
+  border-bottom:1px solid rgba(93,143,163,.14);
+  position:relative;
+  opacity:1; animation: rowIn .4s ease-out both;
+}
+.hud-table tbody tr:nth-child(1){ animation-delay:.05s; }
+.hud-table tbody tr:nth-child(2){ animation-delay:.1s; }
+.hud-table tbody tr:nth-child(3){ animation-delay:.15s; }
+.hud-table tbody tr:nth-child(4){ animation-delay:.2s; }
+.hud-table tbody tr:nth-child(5){ animation-delay:.25s; }
+.hud-table tbody tr:nth-child(6){ animation-delay:.3s; }
+@keyframes rowIn{ 0%{ opacity:0; } 100%{ opacity:1; } }
+.hud-table tbody td{ padding:var(--sp-3); vertical-align:top; color:var(--text); }
+.hud-table tbody tr{ transition:background var(--dur-base); }
+.hud-table tbody tr:hover{ background:rgba(0,229,255,.05); }
+.hud-table tbody tr::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:0;
+  background:var(--cyan); box-shadow:0 0 8px var(--cyan);
+  transition:width var(--dur-base);
+}
+.hud-table tbody tr:hover::before{ width:3px; }
+.merchant-name{ max-width:280px; white-space:normal; word-break:keep-all; line-height:1.4; }
+.merchant-name .m-tag{ display:block; font-size:var(--fs-2xs); color:var(--text-faint); margin-top:2px; }
+.num{ font-family:var(--font-mono); }
+.mono-dash{ font-family:var(--font-mono); color:var(--text-faint); }
+
+.status-tag{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:3px 10px; border:1px solid currentColor;
+  font-family:var(--font-mono); font-size:var(--fs-2xs); letter-spacing:.06em; text-transform:uppercase;
+}
+.status-tag::before{ content:""; width:5px; height:5px; background:currentColor; }
+.status-tag.complete{ color:var(--cyan); }
+.status-tag.pending{ color:var(--amber); }
+.status-tag.hold{ color:var(--text-dim); }
+.status-tag.failed{ color:var(--magenta); animation: failPulse 1.4s ease-in-out infinite; }
+@keyframes failPulse{ 0%,100%{ box-shadow:0 0 0 rgba(255,45,120,0); } 50%{ box-shadow:0 0 10px rgba(255,45,120,.5); } }
+
+/* ============ EMPTY STATE ============ */
+.empty-wrap{ padding:var(--sp-6) var(--sp-8) 0; }
+.empty-panel{
+  display:flex; align-items:center; gap:var(--sp-6); flex-wrap:wrap;
+  justify-content:space-between;
+}
+.empty-left{ display:flex; align-items:center; gap:var(--sp-4); }
+.empty-ring{ width:56px; height:56px; flex:none; }
+.empty-ring circle{ fill:none; stroke:var(--cyan-dim); stroke-width:3; }
+.empty-ring path{ stroke:var(--cyan); stroke-width:3; fill:none; filter:drop-shadow(0 0 4px var(--cyan)); }
+.empty-headline{ font-size:var(--fs-md); color:var(--text); font-weight:600; }
+.empty-desc{ font-size:var(--fs-sm); color:var(--text-dim); margin-top:4px; }
+.btn-ghost{
+  padding:8px var(--sp-6); font-size:var(--fs-sm); color:var(--cyan);
+  border:1px solid var(--cyan-dim);
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+  transition:background var(--dur-base), border-color var(--dur-base);
+}
+.btn-ghost:hover{ background:rgba(0,229,255,.08); border-color:var(--cyan); }
+
+/* ============ FOOTER ============ */
+.site-footer{
+  margin-top:var(--sp-12);
+  padding:var(--sp-6) var(--sp-8);
+  border-top:1px solid rgba(0,229,255,.12);
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--sp-2);
+  font-family:var(--font-mono); font-size:var(--fs-2xs); color:var(--text-faint); letter-spacing:.1em;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1100px){
+  .app-shell{ grid-template-columns:64px 1fr; }
+  .sidebar{ padding:var(--sp-4) var(--sp-2); align-items:center; }
+  .brand-title, .nav-text, .nav-label, .nav-user-text{ display:none; }
+  .brand{ justify-content:center; }
+  .nav-link{ justify-content:center; padding:var(--sp-3); }
+  .nav-user{ justify-content:center; border-top:none; }
+  .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+  .charts-row{ grid-template-columns:1fr; }
+  .topbar{ padding:var(--sp-4); }
+  .filter-row, .banner, .kpi-grid, .charts-row, .table-wrap, .empty-wrap, .site-footer{ padding-left:var(--sp-4); padding-right:var(--sp-4); }
+}
+@media (max-width:640px){
+  .kpi-grid{ grid-template-columns:1fr; }
+  .topbar{ flex-direction:column; align-items:flex-start; gap:var(--sp-3); }
+  .topbar-right{ justify-content:flex-start; }
+  .filter-row{ flex-direction:column; align-items:flex-start; }
+  .donut-wrap{ flex-direction:column; }
+  .goal-panel{ flex-direction:column; text-align:center; }
+  .kpi-value.fs-cur{ font-size:var(--fs-xl); }
+  .kpi-value.fs-num{ font-size:var(--fs-2xl); }
+}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation:none !important; transition:none !important; }
+  .scanline-overlay,.scan-sweep{ display:none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="scanline-overlay" aria-hidden="true"></div>
+<div class="scan-sweep" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain-frame" aria-hidden="true"></div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR / NAV ============ -->
+  <aside class="sidebar" data-region="nav" aria-label="주 내비게이션">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">FG</span>
+      <span class="brand-title">핀그리드</span>
+    </div>
+    <nav class="nav-menu">
+      <p class="nav-label">MODULES</p>
+      <a class="nav-link is-active" href="#" aria-current="page"><span class="nav-dot"></span><span class="nav-text">대시보드</span></a>
+      <a class="nav-link" href="#"><span class="nav-dot"></span><span class="nav-text">거래</span></a>
+      <a class="nav-link" href="#"><span class="nav-dot"></span><span class="nav-text">정산</span></a>
+      <a class="nav-link" href="#"><span class="nav-dot"></span><span class="nav-text">가맹점</span></a>
+      <a class="nav-link" href="#"><span class="nav-dot"></span><span class="nav-text">리포트</span></a>
+      <a class="nav-link" href="#"><span class="nav-dot"></span><span class="nav-text">설정</span></a>
+    </nav>
+    <div class="nav-user">
+      <span class="nav-user-badge" aria-hidden="true">김</span>
+      <span class="nav-user-text"><strong>김운영</strong> · 정산팀</span>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <!-- ============ TOPBAR / identity + filter ============ -->
+    <header class="topbar" data-region="identity">
+      <div class="topbar-left">
+        <span class="boot-typeline" aria-hidden="true">SYSTEM INITIALIZING...</span>
+        <h1 class="page-title">정산 대시보드</h1>
+        <p class="page-sub">FinGrid Settlement Control · 최근 30일 기준</p>
+      </div>
+      <div class="topbar-right">
+        <div class="hud-readout">
+          <span class="r-label">SEQ</span>
+          <span class="r-value">FG-30D-0472</span>
+        </div>
+        <div class="hud-readout">
+          <span class="r-label">MISSION T+</span>
+          <span class="r-value" id="hud-mission">00:00:00</span>
+        </div>
+        <div class="hud-readout">
+          <span class="r-label">LOCAL</span>
+          <span class="r-value" id="hud-clock">09:41:07 KST</span>
+        </div>
+        <span class="status-badge"><span class="dot" aria-hidden="true"></span>ALL SYSTEMS ONLINE</span>
+      </div>
+    </header>
+
+    <div class="filter-row" data-region="filter">
+      <div class="tab-group" role="group" aria-label="기간 필터">
+        <button class="tab-btn" type="button" aria-pressed="false">오늘</button>
+        <button class="tab-btn" type="button" aria-pressed="false">7일</button>
+        <button class="tab-btn is-active" type="button" aria-pressed="true">30일</button>
+        <button class="tab-btn" type="button" aria-pressed="false">90일</button>
+      </div>
+      <div class="filter-cluster">
+        <button class="select-btn" type="button" aria-haspopup="listbox">전체 채널<span class="car" aria-hidden="true">▾</span></button>
+        <button class="btn-primary" type="button" data-region="action">내보내기</button>
+      </div>
+    </div>
+
+    <!-- ============ BANNER ============ -->
+    <div class="banner" data-region="banner" role="status">
+      <span class="b-icon" aria-hidden="true"></span>
+      <span>10월 21일 정산 예정 — <strong>₩1,284,900,000</strong> · 영업일 기준 D-1</span>
+    </div>
+
+    <!-- ============ KPI ============ -->
+    <section class="kpi-grid" data-region="kpi" aria-label="핵심 지표">
+
+      <article class="hud-frame kpi-card" style="--d:0; --kc:var(--cyan);">
+        <span class="frame-corner tl"></span><span class="frame-corner tr"></span>
+        <span class="frame-corner bl"></span><span class="frame-corner br"></span>
+        <div class="kpi-bar" aria-hidden="true"></div>
+        <svg class="kpi-gauge" viewBox="0 0 100 50" aria-hidden="true">
+          <path class="gauge-track" d="M10,45 A40,40 0 0 1 90,45"/>
+          <line class="gauge-tick" x1="30" y1="18" x2="28" y2="12"/>
+          <line class="gauge-tick" x1="50" y1="5" x2="50" y2="0"/>
+          <line class="gauge-tick" x1="70" y1="18" x2="72" y2="12"/>
+          <path class="gauge-fill" style="--len:87.96" d="M10,45 A40,40 0 0 1 90,45"/>
+        </svg>
+        <p class="kpi-label">총 거래액(GMV)</p>
+        <p class="kpi-value fs-cur">₩1,284,732,050,000</p>
+        <p class="kpi-delta is-up"><span class="arrow">▲</span><strong>+8.3%</strong><span class="kpi-delta-note">전주 대비</span></p>
+        <svg class="kpi-spark" viewBox="0 0 60 22" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="0,18 10,15 20,16 30,11 40,9 50,5 60,2" style="stroke:var(--cyan)"/>
+        </svg>
+      </article>
+
+      <article class="hud-frame kpi-card" style="--d:1; --kc:var(--cyan);">
+        <span class="frame-corner tl"></span><span class="frame-corner tr"></span>
+        <span class="frame-corner bl"></span><span class="frame-corner br"></span>
+        <div class="kpi-bar" aria-hidden="true"></div>
+        <svg class="kpi-gauge" viewBox="0 0 100 50" aria-hidden="true">
+          <path class="gauge-track" d="M10,45 A40,40 0 0 1 90,45"/>
+          <line class="gauge-tick" x1="30" y1="18" x2="28" y2="12"/>
+          <line class="gauge-tick" x1="50" y1="5" x2="50" y2="0"/>
+          <line class="gauge-tick" x1="70" y1="18" x2="72" y2="12"/>
+          <path class="gauge-fill" style="--len:100.53" d="M10,45 A40,40 0 0 1 90,45"/>
+        </svg>
+        <p class="kpi-label">결제 건수</p>
+        <p class="kpi-value fs-num">12,847,192건</p>
+        <p class="kpi-delta is-up"><span class="arrow">▲</span><strong>+12.1%</strong><span class="kpi-delta-note">전주 대비</span></p>
+        <svg class="kpi-spark" viewBox="0 0 60 22" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="0,17 10,16 20,12 30,13 40,8 50,6 60,3" style="stroke:var(--cyan)"/>
+        </svg>
+      </article>
+
+      <article class="hud-frame kpi-card" style="--d:2; --kc:var(--magenta);">
+        <span class="frame-corner tl"></span><span class="frame-corner tr"></span>
+        <span class="frame-corner bl"></span><span class="frame-corner br"></span>
+        <div class="kpi-bar" aria-hidden="true"></div>
+        <svg class="kpi-gauge" viewBox="0 0 100 50" aria-hidden="true">
+          <path class="gauge-track" d="M10,45 A40,40 0 0 1 90,45"/>
+          <line class="gauge-tick" x1="30" y1="18" x2="28" y2="12"/>
+          <line class="gauge-tick" x1="50" y1="5" x2="50" y2="0"/>
+          <line class="gauge-tick" x1="70" y1="18" x2="72" y2="12"/>
+          <path class="gauge-fill" style="--len:43.98" d="M10,45 A40,40 0 0 1 90,45"/>
+        </svg>
+        <p class="kpi-label">승인율</p>
+        <p class="kpi-value fs-num">94.7%</p>
+        <p class="kpi-delta is-down"><span class="arrow">▼</span><strong>−1.2%p</strong><span class="kpi-delta-note">전주 대비</span></p>
+        <svg class="kpi-spark" viewBox="0 0 60 22" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="0,3 10,5 20,4 30,8 40,10 50,14 60,17" style="stroke:var(--magenta)"/>
+        </svg>
+      </article>
+
+      <article class="hud-frame kpi-card" style="--d:3; --kc:var(--text-dim);">
+        <span class="frame-corner tl"></span><span class="frame-corner tr"></span>
+        <span class="frame-corner bl"></span><span class="frame-corner br"></span>
+        <div class="kpi-bar" aria-hidden="true"></div>
+        <svg class="kpi-gauge" viewBox="0 0 100 50" aria-hidden="true">
+          <path class="gauge-track" d="M10,45 A40,40 0 0 1 90,45"/>
+          <line class="gauge-tick" x1="30" y1="18" x2="28" y2="12"/>
+          <line class="gauge-tick" x1="50" y1="5" x2="50" y2="0"/>
+          <line class="gauge-tick" x1="70" y1="18" x2="72" y2="12"/>
+          <path class="gauge-fill" style="--len:62.83" d="M10,45 A40,40 0 0 1 90,45"/>
+        </svg>
+        <p class="kpi-label">정산 대기액</p>
+        <p class="kpi-value fs-cur">₩312,048,900,000</p>
+        <p class="kpi-delta is-flat"><span class="arrow">—</span><span class="kpi-delta-note">전주 대비 · 신규 지표</span></p>
+        <svg class="kpi-spark" viewBox="0 0 60 22" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="0,10 10,9 20,11 30,10 40,10 50,9 60,10" style="stroke:var(--text-dim)"/>
+        </svg>
+      </article>
+
+    </section>
+
+    <!-- ============ CHARTS ============ -->
+    <section class="charts-row" aria-label="추이 및 구성비">
+
+      <div class="hud-frame" data-region="chart-trend">
+        <span class="frame-corner tl"></span><span class="frame-corner tr"></span>
+        <span class="frame-corner bl"></span><span class="frame-corner br"></span>
+        <div class="panel-head">
+          <h2 class="panel-title">일별 거래액 추이 <span style="color:var(--text-faint); font-weight:400;">(최근 30일)</span></h2>
+          <span class="panel-note">UNIT · ₩億</span>
+        </div>
+        <svg class="trend-svg" viewBox="0 0 600 210" role="img"
+          aria-label="일별 거래액 추이, 최근 30일. 최고 10월 14일 58.2억, 최저 10월 2일 31.7억.">
+          <defs>
+            <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00E5FF" stop-opacity=".28"/>
+              <stop offset="100%" stop-color="#00E5FF" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <g class="trend-grid" aria-hidden="true">
+            <line x1="6" y1="20" x2="600" y2="20"/>
+            <line x1="6" y1="110" x2="600" y2="110"/>
+            <line x1="6" y1="200" x2="600" y2="200"/>
+          </g>
+          <text class="trend-axis-label" x="0" y="203">0</text>
+          <text class="trend-axis-label" x="0" y="113">30억</text>
+          <text class="trend-axis-label" x="0" y="23">60억</text>
+
+          <polygon class="trend-area" points="10,200 10,93.6 30,112.2 50,102.5 70,89.0 90,95.9 110,82.9 130,89.8 150,76.8 170,85.9 190,70.4 210,78.4 230,66.5 250,54.3 270,38.8 290,49.6 310,62.4 330,73.2 350,69.3 370,79.2 390,84.0 410,76.2 430,71.8 450,81.5 470,90.6 490,84.5 510,77.6 530,67.4 550,75.1 570,82.0 590,88.4 590,200"/>
+          <polyline class="trend-line" style="--tlen:900"
+            points="10,93.6 30,112.2 50,102.5 70,89.0 90,95.9 110,82.9 130,89.8 150,76.8 170,85.9 190,70.4 210,78.4 230,66.5 250,54.3 270,38.8 290,49.6 310,62.4 330,73.2 350,69.3 370,79.2 390,84.0 410,76.2 430,71.8 450,81.5 470,90.6 490,84.5 510,77.6 530,67.4 550,75.1 570,82.0 590,88.4"/>
+
+          <g class="trend-pt" tabindex="0">
+            <circle class="trend-hit" cx="270" cy="38.8" r="12"/>
+            <circle class="trend-mark" cx="270" cy="38.8"/>
+            <line class="trend-cross" x1="270" y1="8" x2="270" y2="200"/>
+            <line class="trend-cross" x1="16" y1="38.8" x2="590" y2="38.8"/>
+            <g class="trend-tip" transform="translate(214,10)">
+              <rect x="0" y="0" width="112" height="20" rx="0"/>
+              <text x="6" y="14">10/14 · ₩58.2억</text>
+            </g>
+          </g>
+          <g class="trend-pt" tabindex="0">
+            <circle class="trend-hit" cx="30" cy="112.2" r="12"/>
+            <circle class="trend-pt-dot" cx="30" cy="112.2"/>
+            <line class="trend-cross" x1="30" y1="8" x2="30" y2="200"/>
+            <line class="trend-cross" x1="16" y1="112.2" x2="590" y2="112.2"/>
+            <g class="trend-tip" transform="translate(36,120)">
+              <rect x="0" y="0" width="108" height="20" rx="0"/>
+              <text x="6" y="14">10/02 · ₩31.7억</text>
+            </g>
+          </g>
+        </svg>
+        <p class="trend-caption">
+          <span>최고 <b>₩58.2억</b> (10/14)</span>
+          <span>최저 <span class="neg">₩31.7억</span> (10/02)</span>
+        </p>
+      </div>
+
+      <div class="charts-side">
+        <div class="hud-frame" data-region="chart-part">
+          <span class="frame-corner tl"></span><span class="frame-corner tr"></span>
+          <span class="frame-corner bl"></span><span class="frame-corner br"></span>
+          <div class="panel-head">
+            <h2 class="panel-title">결제수단 구성비</h2>
+          </div>
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 120 120" role="img" aria-label="결제수단 구성비. 카드 52퍼센트, 계좌이체 24퍼센트, 간편결제 18퍼센트, 기타 6퍼센트.">
+              <circle cx="60" cy="60" r="53.8" fill="none" stroke="rgba(93,143,163,.18)" stroke-width="16"/>
+              <circle class="donut-seg" cx="60" cy="60" r="53.8" stroke="var(--cyan)" style="--slen:196.0; --soff:0; animation-delay:.4s;"/>
+              <circle class="donut-seg" cx="60" cy="60" r="53.8" stroke="var(--amber)" style="--slen:90.5; --soff:-196.0; animation-delay:.5s;"/>
+              <circle class="donut-seg" cx="60" cy="60" r="53.8" stroke="var(--magenta)" style="--slen:67.9; --soff:-286.5; animation-delay:.6s;"/>
+              <circle class="donut-seg" cx="60" cy="60" r="53.8" stroke="var(--text-dim)" style="--slen:22.6; --soff:-354.4; animation-delay:.7s;"/>
+              <text class="donut-center-pct" x="60" y="65" text-anchor="middle">52%</text>
+            </svg>
+            <ul class="donut-legend">
+              <li class="legend-row"><span class="legend-swatch" style="background:var(--cyan)"></span><span class="legend-name">카드</span><span class="legend-pct">52%</span></li>
+              <li class="legend-row"><span class="legend-swatch" style="background:var(--amber)"></span><span class="legend-name">계좌이체</span><span class="legend-pct">24%</span></li>
+              <li class="legend-row"><span class="legend-swatch" style="background:var(--magenta)"></span><span class="legend-name">간편결제</span><span class="legend-pct">18%</span></li>
+              <li class="legend-row"><span class="legend-swatch" style="background:var(--text-dim)"></span><span class="legend-name">기타</span><span class="legend-pct">6%</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="hud-frame goal-panel" data-region="goal">
+          <span class="frame-corner tl"></span><span class="frame-corner tr"></span>
+          <span class="frame-corner bl"></span><span class="frame-corner br"></span>
+          <div class="goal-ring-wrap">
+            <svg class="goal-svg" viewBox="0 0 150 150" role="img" aria-label="4분기 정산액 목표 3.4조 중 5조, 달성률 68퍼센트">
+              <defs>
+                <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#00E5FF"/>
+                  <stop offset="100%" stop-color="#0A6E82" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <circle class="goal-track" cx="75" cy="75" r="54"/>
+              <circle class="goal-fill" style="--glen:230.72" cx="75" cy="75" r="54"/>
+              <circle class="goal-sweep goal-sweep-boot" cx="75" cy="75" r="66"/>
+              <circle class="goal-sweep goal-sweep-ambient" cx="75" cy="75" r="66"/>
+            </svg>
+            <div class="goal-center">
+              <span class="goal-pct">68%</span>
+              <span class="goal-frac">달성</span>
+            </div>
+          </div>
+          <div class="goal-meta">
+            <p class="goal-meta-label">4분기 정산액 목표</p>
+            <p class="goal-meta-value">₩3.4조 / ₩5조</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TABLE ============ -->
+    <section class="table-wrap" aria-label="가맹점별 정산 현황">
+      <div class="hud-frame" data-region="table">
+        <span class="frame-corner tl"></span><span class="frame-corner tr"></span>
+        <span class="frame-corner bl"></span><span class="frame-corner br"></span>
+        <div class="panel-head">
+          <h2 class="panel-title">가맹점별 정산 현황</h2>
+          <span class="panel-note">6 OF 1,842 RECORDS</span>
+        </div>
+        <div class="table-scroll">
+          <table class="hud-table">
+            <caption>가맹점별 정산 현황: 가맹점, 거래액, 건수, 승인율, 상태</caption>
+            <thead>
+              <tr>
+                <th scope="col">가맹점</th>
+                <th scope="col" class="num">거래액</th>
+                <th scope="col" class="num">건수</th>
+                <th scope="col" class="num">승인율</th>
+                <th scope="col">상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="merchant-name">(주)새벽마켓</td>
+                <td class="num">₩48,203,000,000</td>
+                <td class="num">482,030</td>
+                <td class="num">96.2%</td>
+                <td><span class="status-tag complete">완료</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-name">글로벌 커머스 인터내셔널 유한회사 — 해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</td>
+                <td class="num">₩31,209,000,000</td>
+                <td class="num">288,110</td>
+                <td class="num">91.4%</td>
+                <td><span class="status-tag pending">대기</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-name">김철수 스토어</td>
+                <td class="num">₩894,000,000</td>
+                <td class="num">8,940</td>
+                <td class="num">88.0%</td>
+                <td><span class="status-tag hold">보류</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-name">데일리박스</td>
+                <td class="num">₩12,048,300,000</td>
+                <td class="num mono-dash">—</td>
+                <td class="num">94.7%</td>
+                <td><span class="status-tag complete">완료</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-name">페이앤고</td>
+                <td class="num">₩6,201,500,000</td>
+                <td class="num">61,205</td>
+                <td class="num">79.3%</td>
+                <td><span class="status-tag failed">실패</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-name">미니샵 코리아</td>
+                <td class="num">₩2,900,000</td>
+                <td class="num">290</td>
+                <td class="num">100.0%</td>
+                <td><span class="status-tag complete">완료</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EMPTY STATE ============ -->
+    <section class="empty-wrap" aria-label="이상거래 탐지">
+      <div class="hud-frame empty-panel" data-region="empty">
+        <span class="frame-corner tl"></span><span class="frame-corner tr"></span>
+        <span class="frame-corner bl"></span><span class="frame-corner br"></span>
+        <div class="empty-left">
+          <svg class="empty-ring" viewBox="0 0 56 56" aria-hidden="true">
+            <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(0,229,255,.18)" stroke-width="3"/>
+            <path d="M17,29 L24,36 L39,19" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div>
+            <p class="empty-headline">표시할 이상거래가 없어요</p>
+            <p class="empty-desc">최근 30일간 감지된 이상거래가 없습니다.</p>
+          </div>
+        </div>
+        <button class="btn-ghost" type="button">탐지 규칙 보기</button>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <span>FINGRID SETTLEMENT CONSOLE // BUILD 2026.07.23</span>
+      <span>STYLE 01 · SF HUD</span>
+    </footer>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var reduceMotion = false;
+  try{
+    reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }catch(e){ reduceMotion = false; }
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function tickClock(){
+    var el = document.getElementById('hud-clock');
+    if(!el) return;
+    var d = new Date();
+    el.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + ' KST';
+  }
+
+  var missionStart = Date.now();
+  function tickMission(){
+    var el = document.getElementById('hud-mission');
+    if(!el) return;
+    var s = Math.floor((Date.now() - missionStart) / 1000);
+    var hh = pad(Math.floor(s / 3600));
+    var mm = pad(Math.floor((s % 3600) / 60));
+    var ss = pad(s % 60);
+    el.textContent = hh + ':' + mm + ':' + ss;
+  }
+
+  try{
+    tickClock();
+    tickMission();
+    if(!reduceMotion){
+      setInterval(tickClock, 1000);
+      setInterval(tickMission, 1000);
+    }
+  }catch(e){ /* JS 실패해도 정적 표시(HTML 기본값)가 남는다 */ }
+})();
+</script>
+
+</body>
+</html>

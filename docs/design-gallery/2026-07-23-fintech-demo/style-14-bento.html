@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>정산 대시보드 · 핀그리드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#F4F4F5;
+    --card:#FFFFFF;
+    --card-tint:#FAFAFA;
+    --text:#18181B;
+    --muted:#71717A;
+    --point:#6366F1;
+    --point-text:#4F46E5;
+    --point-soft:#EEF2FF;
+    --point-2:#818CF8;
+    --point-3:#4338CA;
+    --neutral-soft:#D4D4D8;
+    --good-dot:#10B981;
+    --good-text:#047857;
+    --good-soft:#DCFCE7;
+    --bad-dot:#EF4444;
+    --bad-text:#B91C1C;
+    --bad-soft:#FEE2E2;
+    --warn-dot:#F59E0B;
+    --warn-text:#92400E;
+    --warn-soft:#FEF3C7;
+    --hold-dot:#71717A;
+    --hold-text:#3F3F46;
+    --hold-soft:#F4F4F5;
+    --border-hair:rgba(24,24,27,.07);
+    --shadow-rest:0 1px 3px rgba(0,0,0,.06);
+    --shadow-hover:0 8px 24px rgba(0,0,0,.10);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  .num{ font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1; }
+
+  a{ color:inherit; text-decoration:none; }
+  button{ font-family:inherit; cursor:pointer; }
+
+  /* ---------- app shell ---------- */
+  .app{ display:flex; min-height:100vh; align-items:stretch; }
+
+  /* ---------- sidebar (nav) ---------- */
+  .sidebar{
+    width:232px; flex-shrink:0;
+    background:var(--card);
+    display:flex; flex-direction:column;
+    padding:24px 16px;
+    gap:24px;
+    box-shadow: 1px 0 0 var(--border-hair);
+    position:sticky; top:0; height:100vh;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; padding:0 8px; }
+  .brand-mark{
+    width:32px; height:32px; border-radius:9px;
+    background:var(--point); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:15px; flex-shrink:0;
+  }
+  .brand-name{ font-weight:800; font-size:16px; letter-spacing:-0.01em; }
+
+  .nav-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; flex:1; }
+  .nav-item{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 10px; border-radius:10px;
+    color:var(--muted); font-size:14px; font-weight:500;
+    transition:background .15s ease-out;
+  }
+  .nav-item .dot{ width:7px; height:7px; border-radius:50%; background:var(--neutral-soft); flex-shrink:0; transition:background .15s ease-out; }
+  .nav-item .chevron{ margin-left:auto; opacity:0; transform:translateX(0); transition:transform .18s ease-out, opacity .18s ease-out; font-size:13px; color:var(--muted); }
+  .nav-item:hover{ background:var(--bg); color:var(--text); }
+  .nav-item:hover .chevron{ opacity:1; transform:translateX(4px); }
+  .nav-item:focus-visible{ outline:2px solid var(--point); outline-offset:2px; background:var(--bg); }
+  .nav-item.active{ background:var(--point-soft); color:var(--point-text); font-weight:700; }
+  .nav-item.active .dot{ background:var(--point); }
+
+  .sidebar-user{
+    display:flex; align-items:center; gap:10px;
+    padding:12px 10px 4px; border-top:1px solid var(--border-hair);
+    font-size:13px; color:var(--muted);
+  }
+  .user-avatar{
+    width:28px; height:28px; border-radius:9px; background:var(--hold-soft);
+    color:var(--hold-text); display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:12px; flex-shrink:0;
+  }
+  .user-name b{ color:var(--text); font-weight:700; }
+
+  /* ---------- main ---------- */
+  .main{ flex:1; min-width:0; padding:28px 32px 48px; max-width:1560px; }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    flex-wrap:wrap; margin-bottom:16px;
+  }
+  .topbar h1{ font-size:24px; font-weight:800; letter-spacing:-0.02em; margin:0; }
+
+  .filters{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .tabs{ display:flex; background:var(--card); border-radius:12px; padding:4px; gap:2px; box-shadow:var(--shadow-rest); }
+  .tab{
+    border:none; background:transparent; padding:7px 14px; border-radius:9px;
+    font-size:13px; font-weight:600; color:var(--muted);
+    transition:background .15s ease-out, color .15s ease-out;
+  }
+  .tab[aria-selected="true"]{ background:var(--point); color:#fff; }
+  .tab:hover:not([aria-selected="true"]){ background:var(--bg); color:var(--text); }
+  .tab:focus-visible{ outline:2px solid var(--point); outline-offset:2px; }
+
+  .select-wrap{ position:relative; }
+  .select-wrap select{
+    appearance:none; -webkit-appearance:none;
+    background:var(--card); color:var(--text);
+    border:1px solid var(--border-hair); border-radius:10px;
+    padding:8px 30px 8px 14px; font-size:13px; font-weight:600;
+    box-shadow:var(--shadow-rest); font-family:inherit;
+  }
+  .select-wrap select:focus-visible{ outline:2px solid var(--point); outline-offset:2px; }
+  .select-wrap::after{
+    content:"▾"; position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    font-size:11px; color:var(--muted); pointer-events:none;
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:6px;
+    border-radius:10px; font-size:13px; font-weight:700;
+    padding:9px 16px; height:36px; border:1px solid transparent;
+    transition:transform .15s ease-out, box-shadow .15s ease-out, background .15s ease-out;
+  }
+  .btn-primary{ background:var(--text); color:#fff; box-shadow:var(--shadow-rest); }
+  .btn-primary:hover{ background:#000; box-shadow:var(--shadow-hover); transform:translateY(-1px); }
+  .btn-primary:active{ transform:translateY(0); box-shadow:var(--shadow-rest); }
+  .btn-primary:focus-visible{ outline:2px solid var(--point); outline-offset:2px; }
+  .btn-ghost{ background:var(--card); color:var(--text); border-color:var(--border-hair); }
+  .btn-ghost:hover{ background:var(--bg); }
+  .btn-ghost:focus-visible{ outline:2px solid var(--point); outline-offset:2px; }
+
+  /* ---------- banner ---------- */
+  .banner{
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background:var(--point-soft); border-radius:16px; padding:14px 20px;
+    margin-bottom:16px; font-size:14px; color:var(--point-text); font-weight:600;
+  }
+  .banner .banner-dot{ width:8px; height:8px; border-radius:50%; background:var(--point); flex-shrink:0; }
+  .banner .banner-strong{ color:var(--text); font-weight:800; }
+  .banner .banner-tag{
+    margin-left:auto; font-size:12px; font-weight:700; color:var(--point-text);
+    background:#fff; padding:3px 10px; border-radius:999px;
+  }
+
+  /* ---------- bento grid ---------- */
+  .bento{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    grid-auto-rows:minmax(96px, auto);
+    gap:16px;
+    grid-template-areas:
+      "hero   hero   apprK  countK"
+      "hero   hero   pendK  pendK"
+      "trend  trend  trend  donut"
+      "trend  trend  trend  goal"
+      "table  table  table  empty"
+      "table  table  table  empty";
+  }
+  .area-hero{ grid-area:hero; }
+  .area-apprK{ grid-area:apprK; }
+  .area-countK{ grid-area:countK; }
+  .area-pendK{ grid-area:pendK; }
+  .area-trend{ grid-area:trend; }
+  .area-donut{ grid-area:donut; }
+  .area-goal{ grid-area:goal; }
+  .area-table{ grid-area:table; }
+  .area-empty{ grid-area:empty; }
+
+  .card{
+    background:var(--card);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow-rest);
+    display:flex; flex-direction:column;
+    transition:transform .2s ease-out, box-shadow .2s ease-out;
+    opacity:0; transform:translateY(12px);
+  }
+  .card.revealed{ opacity:1; transform:translateY(0); }
+  .card:hover{ transform:translateY(-4px); box-shadow:var(--shadow-hover); }
+  .card.revealed:hover{ transform:translateY(-4px); }
+  .card:focus-visible{ outline:2px solid var(--point); outline-offset:2px; }
+
+  .card-label{
+    font-size:13px; font-weight:600; letter-spacing:.03em; color:var(--muted);
+    margin:0 0 10px;
+  }
+  .card-value{ font-weight:800; letter-spacing:-0.01em; line-height:1.15; margin:0; }
+  .card-delta{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; margin-top:8px; }
+  .card-delta .arrow{ opacity:.55; transition:opacity .2s ease-out; }
+  .card:hover .card-delta .arrow{ opacity:1; }
+  .delta-up{ color:var(--good-text); }
+  .delta-down{ color:var(--bad-text); }
+  .delta-flat{ color:var(--muted); }
+  .card-caption{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+  /* hero KPI */
+  .area-hero{ background:var(--card-tint); }
+  .area-hero .card-value{ font-size:clamp(26px, 3vw, 40px); }
+  .hero-spark{ margin-top:auto; padding-top:18px; }
+
+  .area-apprK .card-value,
+  .area-countK .card-value{ font-size:clamp(20px, 2.4vw, 28px); }
+  .area-pendK .card-value{ font-size:clamp(20px, 2.2vw, 26px); }
+
+  .mini-spark{ margin-top:auto; padding-top:12px; }
+  .mini-spark svg{ width:100%; height:32px; display:block; }
+  .spark-line{
+    fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+    pathLength:100; stroke-dasharray:100; stroke-dashoffset:0;
+  }
+  .spark-up{ stroke:var(--good-dot); }
+  .spark-down{ stroke:var(--bad-dot); }
+  .spark-flat{ stroke:var(--hold-dot); stroke-dasharray:3 3; }
+  .card:hover .spark-line{ stroke-width:2.75; }
+
+  /* pending KPI (wide) */
+  .area-pendK{ flex-direction:row; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .pendK-main{ display:flex; flex-direction:column; }
+  .pendK-delta-block{ text-align:right; }
+  .pendK-note{ font-size:11px; color:var(--muted); margin-top:4px; }
+
+  /* trend chart */
+  .area-trend .chart-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
+  .area-trend .card-label{ margin-bottom:0; }
+  .chart-unit{ font-size:11px; color:var(--muted); font-weight:500; }
+  .trend-svg-wrap{ width:100%; }
+  .trend-svg{ width:100%; height:auto; display:block; }
+  .trend-area{ fill:url(#trendFill); opacity:0; transition:opacity .5s ease-out .1s; }
+  .card.revealed .trend-area{ opacity:1; }
+  .trend-line{ fill:none; stroke:var(--point); stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+  .grid-line{ stroke:var(--border-hair); stroke-width:1; }
+  .axis-label{ font-size:9px; fill:var(--muted); font-family:inherit; }
+  .mark-dot{ transition:r .15s ease-out; }
+  .mark-max{ fill:var(--point); }
+  .mark-min{ fill:var(--hold-dot); }
+  .mark-label{ font-size:10.5px; font-weight:700; fill:var(--text); font-family:inherit; }
+  .mark-label-sub{ font-size:9px; fill:var(--muted); font-family:inherit; }
+  .trend-line:hover ~ .mark-dot{ r:5; }
+
+  /* donut */
+  .area-donut{ align-items:center; }
+  .donut-wrap{ display:flex; align-items:center; gap:14px; margin-top:auto; }
+  .donut-svg{ width:88px; height:88px; flex-shrink:0; }
+  .donut-seg{ transition:stroke-width .15s ease-out, opacity .15s ease-out; cursor:default; }
+  .donut-seg:hover{ stroke-width:20; opacity:.92; }
+  .donut-legend{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; font-size:12px; flex:1; min-width:0; }
+  .donut-legend li{ display:flex; align-items:center; gap:7px; color:var(--text); }
+  .donut-legend .sw{ width:8px; height:8px; border-radius:2px; flex-shrink:0; }
+  .donut-legend .pct{ margin-left:auto; font-weight:700; }
+
+  /* goal */
+  .area-goal{ justify-content:center; }
+  .goal-value{ font-size:13px; font-weight:700; color:var(--text); margin-bottom:10px; }
+  .goal-bar-track{ width:100%; height:10px; border-radius:999px; background:var(--bg); overflow:hidden; }
+  .goal-bar-fill{
+    height:100%; border-radius:999px; background:var(--point); width:68%;
+    transition:filter .15s ease-out;
+  }
+  .goal-bar-track:hover .goal-bar-fill{ filter:brightness(1.08); }
+  .goal-pct{ margin-top:8px; font-size:20px; font-weight:800; color:var(--point-text); }
+
+  /* table */
+  .area-table{ padding:20px 20px 16px; }
+  .table-head-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .table-scroll{ overflow-x:auto; margin:0 -20px; padding:0 20px; }
+  table{ width:100%; border-collapse:collapse; min-width:640px; font-size:13px; }
+  thead th{
+    text-align:left; font-size:11px; font-weight:700; color:var(--muted);
+    letter-spacing:.04em; padding:0 12px 10px; border-bottom:1px solid var(--border-hair);
+    white-space:nowrap;
+  }
+  thead th.num-col{ text-align:right; }
+  tbody td{ padding:13px 12px; border-bottom:1px solid var(--border-hair); vertical-align:middle; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr{ transition:background .15s ease-out; }
+  tbody tr:hover{ background:var(--card-tint); }
+  td.num-col{ text-align:right; }
+  td.merchant-cell{ max-width:280px; overflow-wrap:break-word; word-break:keep-all; line-height:1.4; }
+  td.merchant-cell .merchant-flag{ display:block; font-size:11px; color:var(--muted); font-weight:500; margin-top:2px; }
+  td.missing{ color:var(--muted); }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700;
+    padding:4px 10px; border-radius:999px; white-space:nowrap;
+  }
+  .badge .dot{ width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .badge-done{ background:var(--good-soft); color:var(--good-text); }
+  .badge-done .dot{ background:var(--good-dot); }
+  .badge-wait{ background:var(--warn-soft); color:var(--warn-text); }
+  .badge-wait .dot{ background:var(--warn-dot); }
+  .badge-hold{ background:var(--hold-soft); color:var(--hold-text); }
+  .badge-hold .dot{ background:var(--hold-dot); }
+  .badge-fail{ background:var(--bad-soft); color:var(--bad-text); }
+  .badge-fail .dot{ background:var(--bad-dot); }
+
+  /* empty state */
+  .area-empty{ align-items:center; justify-content:center; text-align:center; gap:10px; }
+  .empty-icon{ width:40px; height:40px; border-radius:12px; background:var(--good-soft); color:var(--good-text); display:flex; align-items:center; justify-content:center; margin-bottom:4px; }
+  .empty-title{ font-size:14px; font-weight:800; margin:0; }
+  .empty-desc{ font-size:12px; color:var(--muted); margin:0; line-height:1.5; }
+  .empty-cta{ margin-top:10px; }
+
+  /* footer */
+  .footer{ margin-top:24px; font-size:12px; color:var(--muted); text-align:center; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1100px){
+    .sidebar{ width:76px; align-items:center; padding:24px 10px; }
+    .brand-name, .nav-item .label, .nav-item .chevron, .sidebar-user .user-name{ display:none; }
+    .brand{ justify-content:center; padding:0; }
+    .nav-item{ justify-content:center; padding:12px; }
+    .nav-item .dot{ width:8px; height:8px; }
+    .sidebar-user{ justify-content:center; }
+    .main{ padding:24px 20px 40px; }
+  }
+
+  @media (max-width:900px){
+    .bento{
+      grid-template-columns:repeat(2, 1fr);
+      grid-template-areas:
+        "hero   hero"
+        "hero   hero"
+        "apprK  countK"
+        "pendK  pendK"
+        "trend  trend"
+        "trend  trend"
+        "donut  goal"
+        "table  table"
+        "table  table"
+        "table  table"
+        "empty  empty";
+    }
+    .area-pendK{ flex-direction:column; align-items:flex-start; }
+    .pendK-delta-block{ text-align:left; }
+  }
+
+  @media (max-width:640px){
+    .main{ padding:20px 14px 32px; }
+    .topbar h1{ font-size:20px; }
+    .card{ padding:18px; }
+    .area-table{ padding:16px 16px 14px; }
+    .banner{ padding:12px 16px; font-size:13px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; }
+    .card{ opacity:1 !important; transform:none !important; transition:box-shadow .15s ease-out !important; }
+    .card:hover{ transform:none !important; }
+    .trend-area{ opacity:1 !important; transition:none !important; }
+    .card-delta .arrow{ opacity:1; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar" data-region="nav" aria-label="주 메뉴">
+    <div class="brand" data-region="brand">
+      <span class="brand-mark" aria-hidden="true">F</span>
+      <span class="brand-name">핀그리드</span>
+    </div>
+    <ul class="nav-list">
+      <li><a href="#" class="nav-item active" aria-current="page" title="대시보드"><span class="dot"></span><span class="label">대시보드</span><span class="chevron">›</span></a></li>
+      <li><a href="#" class="nav-item" title="거래"><span class="dot"></span><span class="label">거래</span><span class="chevron">›</span></a></li>
+      <li><a href="#" class="nav-item" title="정산"><span class="dot"></span><span class="label">정산</span><span class="chevron">›</span></a></li>
+      <li><a href="#" class="nav-item" title="가맹점"><span class="dot"></span><span class="label">가맹점</span><span class="chevron">›</span></a></li>
+      <li><a href="#" class="nav-item" title="리포트"><span class="dot"></span><span class="label">리포트</span><span class="chevron">›</span></a></li>
+      <li><a href="#" class="nav-item" title="설정"><span class="dot"></span><span class="label">설정</span><span class="chevron">›</span></a></li>
+    </ul>
+    <div class="sidebar-user">
+      <span class="user-avatar" aria-hidden="true">김</span>
+      <span class="user-name">김운영 · <b>정산팀</b></span>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar" data-region="identity">
+      <h1>정산 대시보드</h1>
+      <div class="filters" data-region="filter">
+        <div class="tabs" role="tablist" aria-label="조회 기간">
+          <button class="tab" role="tab" aria-selected="false">오늘</button>
+          <button class="tab" role="tab" aria-selected="false">7일</button>
+          <button class="tab" role="tab" aria-selected="true">30일</button>
+          <button class="tab" role="tab" aria-selected="false">90일</button>
+        </div>
+        <div class="select-wrap">
+          <select aria-label="채널 필터">
+            <option>전체 채널</option>
+            <option>카드</option>
+            <option>계좌이체</option>
+            <option>간편결제</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" data-region="action">내보내기</button>
+      </div>
+    </header>
+
+    <div class="banner" data-region="banner">
+      <span class="banner-dot" aria-hidden="true"></span>
+      <span>10월 21일 정산 예정 — <span class="banner-strong">₩1,284,900,000</span></span>
+      <span class="banner-tag">영업일 기준 D-1</span>
+    </div>
+
+    <section class="bento" aria-label="정산 요약 지표">
+
+      <section data-region="kpi" style="display:contents">
+
+        <article class="card area-hero" tabindex="0">
+          <p class="card-label">총 거래액(GMV)</p>
+          <p class="card-value num" data-countup data-target="1284732050000" data-prefix="₩">₩1,284,732,050,000</p>
+          <div class="card-delta delta-up">
+            <span class="arrow" aria-hidden="true">▲</span><span>+8.3%</span>
+          </div>
+          <p class="card-caption">전주 대비</p>
+          <div class="hero-spark mini-spark" aria-hidden="true">
+            <svg viewBox="0 0 240 40" preserveAspectRatio="none">
+              <title>최근 추이: 상승</title>
+              <polyline class="spark-line spark-up" points="0,32 30,29 60,25 90,27 120,20 150,17 180,12 210,9 240,5"/>
+            </svg>
+          </div>
+        </article>
+
+        <article class="card area-apprK" tabindex="0">
+          <p class="card-label">승인율</p>
+          <p class="card-value num" data-countup data-target="94.7" data-decimals="1" data-suffix="%">94.7%</p>
+          <div class="card-delta delta-down">
+            <span class="arrow" aria-hidden="true">▼</span><span>−1.2%p</span>
+          </div>
+          <p class="card-caption">전주 대비</p>
+          <div class="mini-spark" aria-hidden="true">
+            <svg viewBox="0 0 120 32" preserveAspectRatio="none">
+              <title>최근 추이: 하락</title>
+              <polyline class="spark-line spark-down" points="0,6 30,10 60,14 90,20 120,26"/>
+            </svg>
+          </div>
+        </article>
+
+        <article class="card area-countK" tabindex="0">
+          <p class="card-label">결제 건수</p>
+          <p class="card-value num" data-countup data-target="12847192" data-suffix="건">12,847,192건</p>
+          <div class="card-delta delta-up">
+            <span class="arrow" aria-hidden="true">▲</span><span>+12.1%</span>
+          </div>
+          <p class="card-caption">전주 대비</p>
+          <div class="mini-spark" aria-hidden="true">
+            <svg viewBox="0 0 120 32" preserveAspectRatio="none">
+              <title>최근 추이: 상승</title>
+              <polyline class="spark-line spark-up" points="0,26 30,22 60,18 90,12 120,6"/>
+            </svg>
+          </div>
+        </article>
+
+        <article class="card area-pendK" tabindex="0">
+          <div class="pendK-main">
+            <p class="card-label">정산 대기액</p>
+            <p class="card-value num" data-countup data-target="312048900000" data-prefix="₩">₩312,048,900,000</p>
+          </div>
+          <div class="pendK-delta-block">
+            <div class="card-delta delta-flat" style="justify-content:flex-end;">
+              <span>—</span>
+            </div>
+            <p class="pendK-note">신규 지표 · 비교 데이터 없음</p>
+            <div class="mini-spark" aria-hidden="true" style="width:96px; margin-left:auto;">
+              <svg viewBox="0 0 96 32" preserveAspectRatio="none">
+                <title>최근 추이: 평탄</title>
+                <polyline class="spark-line spark-flat" points="0,16 24,16 48,16 72,16 96,16"/>
+              </svg>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+      <article class="card area-trend" data-region="chart-trend" tabindex="0">
+        <div class="chart-head">
+          <p class="card-label">일별 거래액 추이 (최근 30일)</p>
+          <span class="chart-unit">단위: 억</span>
+        </div>
+        <div class="trend-svg-wrap">
+          <svg class="trend-svg" viewBox="0 0 600 220" preserveAspectRatio="xMidYMid meet" role="img" aria-label="최근 30일 일별 거래액 추이, 최고 58.2억(10월14일), 최저 31.7억(10월2일)">
+            <defs>
+              <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#6366F1" stop-opacity="0.22"/>
+                <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <line class="grid-line" x1="40" y1="180" x2="600" y2="180"/>
+            <line class="grid-line" x1="40" y1="138.3" x2="600" y2="138.3"/>
+            <line class="grid-line" x1="40" y1="96.6" x2="600" y2="96.6"/>
+            <line class="grid-line" x1="40" y1="54.9" x2="600" y2="54.9"/>
+            <text class="axis-label" x="34" y="183" text-anchor="end">0</text>
+            <text class="axis-label" x="34" y="141.3" text-anchor="end">20억</text>
+            <text class="axis-label" x="34" y="99.6" text-anchor="end">40억</text>
+            <text class="axis-label" x="34" y="57.9" text-anchor="end">60억</text>
+
+            <polygon class="trend-area" points="40,180 40,106.6 59.3,113.9 78.6,107.4 97.9,100.5 117.2,103.9 136.6,96.1 155.9,98.7 175.2,91.1 194.5,94.3 213.8,86.6 233.1,83.6 252.4,86.1 271.7,76.3 291.0,58.6 310.3,70.9 329.7,78.0 349.0,75.5 368.3,81.1 387.6,72.0 406.9,68.2 426.2,77.4 445.5,71.5 464.8,64.5 484.1,74.2 503.4,67.6 522.8,63.0 542.1,66.8 561.4,61.1 580.7,63.6 600,60.1 600,180"/>
+            <polyline class="trend-line" pathLength="100" points="40,106.6 59.3,113.9 78.6,107.4 97.9,100.5 117.2,103.9 136.6,96.1 155.9,98.7 175.2,91.1 194.5,94.3 213.8,86.6 233.1,83.6 252.4,86.1 271.7,76.3 291.0,58.6 310.3,70.9 329.7,78.0 349.0,75.5 368.3,81.1 387.6,72.0 406.9,68.2 426.2,77.4 445.5,71.5 464.8,64.5 484.1,74.2 503.4,67.6 522.8,63.0 542.1,66.8 561.4,61.1 580.7,63.6 600,60.1"/>
+
+            <circle class="mark-dot mark-max" cx="291.0" cy="58.6" r="4"/>
+            <text class="mark-label" x="291" y="16" text-anchor="middle">최고 ₩58.2억</text>
+            <text class="mark-label-sub" x="291" y="28" text-anchor="middle">(10/14)</text>
+
+            <circle class="mark-dot mark-min" cx="59.3" cy="113.9" r="4"/>
+            <text class="mark-label" x="80" y="199" text-anchor="start">최저 ₩31.7억</text>
+            <text class="mark-label-sub" x="80" y="211" text-anchor="start">(10/02)</text>
+          </svg>
+        </div>
+      </article>
+
+      <article class="card area-donut" data-region="chart-part" tabindex="0">
+        <p class="card-label">결제수단 구성비</p>
+        <div class="donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 120 120" role="img" aria-label="결제수단 구성비: 카드 52%, 계좌이체 24%, 간편결제 18%, 기타 6%">
+            <g transform="rotate(-90 60 60)">
+              <circle class="donut-seg" cx="60" cy="60" r="54" fill="none" stroke="#D4D4D8" stroke-width="16" stroke-dasharray="339.29 339.29" stroke-dashoffset="0"><title>기타 6%</title></circle>
+              <circle class="donut-seg" cx="60" cy="60" r="54" fill="none" stroke="#6366F1" stroke-width="16" stroke-dasharray="176.43 339.29" stroke-dashoffset="0"><title>카드 52%</title></circle>
+              <circle class="donut-seg" cx="60" cy="60" r="54" fill="none" stroke="#818CF8" stroke-width="16" stroke-dasharray="81.43 339.29" stroke-dashoffset="-176.43"><title>계좌이체 24%</title></circle>
+              <circle class="donut-seg" cx="60" cy="60" r="54" fill="none" stroke="#4338CA" stroke-width="16" stroke-dasharray="61.07 339.29" stroke-dashoffset="-257.86"><title>간편결제 18%</title></circle>
+              <circle class="donut-seg" cx="60" cy="60" r="54" fill="none" stroke="#D4D4D8" stroke-width="16" stroke-dasharray="20.36 339.29" stroke-dashoffset="-318.93"><title>기타 6%</title></circle>
+            </g>
+          </svg>
+          <ul class="donut-legend">
+            <li><span class="sw" style="background:#6366F1"></span>카드<span class="pct num">52%</span></li>
+            <li><span class="sw" style="background:#818CF8"></span>계좌이체<span class="pct num">24%</span></li>
+            <li><span class="sw" style="background:#4338CA"></span>간편결제<span class="pct num">18%</span></li>
+            <li><span class="sw" style="background:#D4D4D8"></span>기타<span class="pct num">6%</span></li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card area-goal" data-region="goal" tabindex="0">
+        <p class="card-label">4분기 정산액 목표</p>
+        <p class="goal-value num" title="₩3.4조 / ₩5조 · 달성 68%">₩3.4조 / ₩5조</p>
+        <div class="goal-bar-track" title="달성 68%">
+          <div class="goal-bar-fill"></div>
+        </div>
+        <p class="goal-pct num">68%</p>
+      </article>
+
+      <article class="card area-table" data-region="table" tabindex="0">
+        <div class="table-head-row">
+          <p class="card-label" style="margin:0;">가맹점별 정산 현황</p>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>가맹점</th>
+                <th class="num-col">거래액</th>
+                <th class="num-col">건수</th>
+                <th class="num-col">승인율</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>(주)새벽마켓</td>
+                <td class="num-col num">₩48,203,000,000</td>
+                <td class="num-col num">482,030</td>
+                <td class="num-col num">96.2%</td>
+                <td><span class="badge badge-done"><span class="dot"></span>완료</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-cell">글로벌 커머스 인터내셔널 유한회사<span class="merchant-flag">해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</span></td>
+                <td class="num-col num">₩31,209,000,000</td>
+                <td class="num-col num">288,110</td>
+                <td class="num-col num">91.4%</td>
+                <td><span class="badge badge-wait"><span class="dot"></span>대기</span></td>
+              </tr>
+              <tr>
+                <td>김철수 스토어</td>
+                <td class="num-col num">₩894,000,000</td>
+                <td class="num-col num">8,940</td>
+                <td class="num-col num">88.0%</td>
+                <td><span class="badge badge-hold"><span class="dot"></span>보류</span></td>
+              </tr>
+              <tr>
+                <td>데일리박스</td>
+                <td class="num-col num">₩12,048,300,000</td>
+                <td class="num-col num missing">—</td>
+                <td class="num-col num">94.7%</td>
+                <td><span class="badge badge-done"><span class="dot"></span>완료</span></td>
+              </tr>
+              <tr>
+                <td>페이앤고</td>
+                <td class="num-col num">₩6,201,500,000</td>
+                <td class="num-col num">61,205</td>
+                <td class="num-col num">79.3%</td>
+                <td><span class="badge badge-fail"><span class="dot"></span>실패</span></td>
+              </tr>
+              <tr>
+                <td>미니샵 코리아</td>
+                <td class="num-col num">₩2,900,000</td>
+                <td class="num-col num">290</td>
+                <td class="num-col num">100.0%</td>
+                <td><span class="badge badge-done"><span class="dot"></span>완료</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card area-empty" data-region="empty" tabindex="0">
+        <div class="empty-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <p class="empty-title">표시할 이상거래가 없어요</p>
+        <p class="empty-desc">최근 30일간 감지된 이상거래가 없습니다.</p>
+        <button class="btn btn-ghost empty-cta" data-region="action">탐지 규칙 보기</button>
+      </article>
+
+    </section>
+
+    <p class="footer">STYLE 14 · 벤토 그리드</p>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+
+  if (reduced) {
+    cards.forEach(function(c){ c.classList.add('revealed'); });
+    return;
+  }
+
+  // stagger reveal, left-to-right / top-to-bottom reading order
+  cards.forEach(function(card, i){
+    setTimeout(function(){ card.classList.add('revealed'); }, 100 + i * 60);
+  });
+
+  // count-up for KPI numbers, guarded — final text already present as fallback
+  function formatValue(n, decimals, prefix, suffix){
+    var out = decimals > 0 ? n.toFixed(decimals) : Math.round(n).toLocaleString('en-US');
+    return (prefix || '') + out + (suffix || '');
+  }
+
+  document.querySelectorAll('[data-countup]').forEach(function(el){
+    var target = parseFloat(el.getAttribute('data-target'));
+    if (isNaN(target)) return;
+    var decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+    var prefix = el.getAttribute('data-prefix') || '';
+    var suffix = el.getAttribute('data-suffix') || '';
+    var duration = 650;
+    var start = null;
+
+    function step(ts){
+      if (start === null) start = ts;
+      var p = Math.min(1, (ts - start) / duration);
+      var eased = 1 - Math.pow(1 - p, 2);
+      el.textContent = formatValue(target * eased, decimals, prefix, suffix);
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = formatValue(target, decimals, prefix, suffix);
+    }
+    setTimeout(function(){ requestAnimationFrame(step); }, 220);
+  });
+
+  // period tabs — progressive enhancement only, markup already valid without JS
+  document.querySelectorAll('.tabs[role="tablist"]').forEach(function(group){
+    group.querySelectorAll('.tab').forEach(function(tab){
+      tab.addEventListener('click', function(){
+        group.querySelectorAll('.tab').forEach(function(t){ t.setAttribute('aria-selected', 'false'); });
+        tab.setAttribute('aria-selected', 'true');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

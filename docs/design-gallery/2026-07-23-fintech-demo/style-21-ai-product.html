@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>핀그리드 · 정산 대시보드 — STYLE 21 AI 프로덕트</title>
+<meta name="description" content="핀그리드(FinGrid) B2B 결제·정산 분석 대시보드 — AI 프로덕트 스타일 디자인 시안">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  /* ============================================================
+     STYLE 21 · AI 프로덕트 — 핀그리드 정산 대시보드 (원형 A)
+     팔레트 노트: 스타일 지시의 텍스트-약(#8A8A99)·상태색(성공/경고/문제 원색)은
+     "텍스트로 직접 쓰였을 때" WCAG 4.5:1 을 만족하지 못해 살짝 톤을 낮춰 재정의했다
+     (수기 대비 검증, style-lint 21 은 MANUAL). 원본 파스텔 톤은 차트 선·아이콘 등
+     비텍스트 장식 요소에는 그대로 남겨 무드를 유지한다.
+     ============================================================ */
+  :root{
+    --bg:#FAFAFB;
+    --surface:#FFFFFF;
+    --surface-subtle:#F4F4F7;
+    --surface-subtle-2:#ECECF2;
+    --border:#E8E8EE;
+    --border-strong:#D9D9E3;
+
+    --text-strong:#16161D;
+    --text-body:#3A3A44;
+    --text-weak:#6B6C7A;      /* AA 보정 (원안 #8A8A99 → 텍스트용 톤다운) */
+    --text-faint:#9A9AA8;     /* 장식 전용(아이콘/축눈금), 정보 텍스트 금지 */
+
+    --accent-purple:#7C5CFF;      /* 장식 전용(차트선·글로우·아이콘) */
+    --accent-indigo:#5B8DEF;      /* 장식 전용(차트선·글로우·아이콘) */
+    --accent-strong:#6A47F5;      /* 온-화이트 텍스트/버튼 배경 안전 톤 */
+    --accent-indigo-safe:#3E6FD1; /* 그라디언트 텍스트/버튼의 안전 파트너 톤 */
+    --accent-light:#EDE9FF;
+    --accent-border:#DCD4FF;
+    --on-accent:#FFFFFF;
+    --glow-rgb:155,123,255;
+
+    --success-bg:#E7F8EF; --success-text:#0D7A4C; --success-dot:#12B76A;
+    --warning-bg:#FFF3E0; --warning-text:#9A4A06; --warning-dot:#F79009;
+    --danger-bg:#FDECEA;  --danger-text:#B42318;  --danger-dot:#F04438;
+    --pending-bg:var(--accent-light); --pending-text:var(--accent-strong); --pending-dot:var(--accent-strong);
+
+    --donut-1:#6A47F5; --donut-2:#5B8DEF; --donut-3:#1FB6C9; --donut-4:#C9C9D3;
+
+    --r-card:16px; --r-control:10px; --r-pill:999px;
+    --shadow-flat:0 1px 2px rgba(16,16,29,.04);
+    --shadow-card:0 0 40px rgba(var(--glow-rgb),.10), 0 1px 2px rgba(16,16,29,.04);
+    --shadow-card-hover:0 0 52px rgba(var(--glow-rgb),.16), 0 1px 2px rgba(16,16,29,.04);
+
+    --sidebar-w:248px;
+    --sidebar-w-collapsed:76px;
+  }
+
+  @property --grad-angle{ syntax:'<angle>'; inherits:false; initial-value:135deg; }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ background:var(--bg); }
+  body{
+    margin:0; background:var(--bg); color:var(--text-body);
+    font-family:'Inter','Pretendard',-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;
+    font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  svg{ display:block; }
+  button,input,select,textarea{ font:inherit; color:inherit; }
+  a{ color:inherit; text-decoration:none; }
+  ul{ margin:0; padding:0; list-style:none; }
+  h1,h2,h3,p{ margin:0; }
+  .tabular{ font-variant-numeric:tabular-nums; font-feature-settings:'tnum' 1; }
+
+  :focus{ outline:none; }
+  :focus-visible{
+    box-shadow:0 0 0 4px var(--accent-light);
+    outline:1px solid var(--accent-strong); outline-offset:1px;
+    border-radius:inherit;
+  }
+
+  .visually-hidden{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  /* ---------- layout ---------- */
+  .app{ display:grid; grid-template-columns:var(--sidebar-w) 1fr; min-height:100vh; }
+
+  .sidebar{
+    grid-column:1; background:var(--surface); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; padding:24px 16px;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+    animation:fadeDown .25s ease-out both;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    padding:4px 8px 20px; border-bottom:1px solid var(--border); margin-bottom:16px;
+  }
+  .brand-mark{
+    position:relative; width:32px; height:32px; border-radius:10px; flex:none;
+    background:linear-gradient(135deg,var(--accent-purple),var(--accent-indigo));
+    display:flex; align-items:center; justify-content:center; color:#fff;
+    box-shadow:0 0 16px rgba(var(--glow-rgb),.35);
+  }
+  .brand-mark svg{ width:18px; height:18px; }
+  .brand-mark .sparkle-dot{
+    position:absolute; top:-4px; right:-4px; width:12px; height:12px; color:var(--accent-purple);
+    animation:sparklePulse 4.2s ease-in-out .6s infinite;
+  }
+  .brand-text{ font-size:16px; font-weight:700; color:var(--text-strong); letter-spacing:-0.01em; }
+
+  .nav-group{ display:flex; flex-direction:column; gap:2px; }
+  .nav-item{
+    position:relative; display:flex; align-items:center; gap:12px;
+    padding:10px 12px; border-radius:10px; font-size:14px; font-weight:500; color:var(--text-body);
+    transition:background .15s ease, color .15s ease;
+  }
+  .nav-item svg{ width:20px; height:20px; flex:none; color:var(--text-weak); }
+  .nav-item:hover{ background:var(--surface-subtle); }
+  .nav-item .nav-label{ white-space:nowrap; }
+  .nav-item.is-active{ background:var(--accent-light); color:var(--accent-strong); font-weight:600; }
+  .nav-item.is-active svg{ color:var(--accent-strong); }
+  .nav-item.is-active::before{
+    content:''; position:absolute; left:-16px; top:8px; bottom:8px; width:3px;
+    border-radius:999px; background:linear-gradient(180deg,var(--accent-purple),var(--accent-indigo));
+    animation:indicatorSlide .22s ease-out .1s both;
+  }
+
+  .sidebar-footer{
+    margin-top:auto; display:flex; align-items:center; gap:10px;
+    padding:12px; border-top:1px solid var(--border);
+  }
+  .avatar{
+    width:32px; height:32px; border-radius:999px; flex:none;
+    background:var(--accent-strong); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700;
+  }
+  .user-meta{ min-width:0; }
+  .user-name{ font-size:13px; font-weight:600; color:var(--text-strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-role{ font-size:12px; color:var(--text-weak); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .main{ grid-column:2; min-width:0; display:flex; flex-direction:column; }
+  .content{
+    width:100%; max-width:1320px; margin:0 auto;
+    padding:24px 32px 64px; display:flex; flex-direction:column; gap:24px;
+  }
+
+  /* ---------- topbar / filter ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    animation:fadeDown .2s ease-out both;
+  }
+  .topbar h1{ font-size:26px; line-height:34px; font-weight:700; color:var(--text-strong); letter-spacing:-0.02em; }
+
+  .filterbar{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+
+  .period-tabs{
+    display:inline-flex; align-items:center; gap:2px; padding:4px;
+    background:var(--surface-subtle); border:1px solid var(--border); border-radius:999px;
+  }
+  .period-tab{
+    border:none; background:transparent; cursor:pointer; padding:8px 16px; border-radius:999px;
+    font-size:13px; font-weight:500; color:var(--text-weak); transition:background .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+  .period-tab.is-active{ background:var(--surface); color:var(--text-strong); font-weight:600; box-shadow:0 1px 2px rgba(16,16,29,.10); }
+  .period-tab:hover:not(.is-active){ color:var(--text-strong); }
+
+  .filters-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+
+  .select-wrap{ position:relative; display:inline-flex; align-items:center; }
+  .select-wrap select{
+    appearance:none; -webkit-appearance:none;
+    height:40px; padding:0 36px 0 14px; min-width:168px;
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    font-size:13px; font-weight:500; color:var(--text-body); cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .select-wrap select:hover{ border-color:var(--border-strong); }
+  .select-wrap svg{
+    position:absolute; right:12px; width:16px; height:16px; color:var(--text-weak); pointer-events:none;
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px;
+    border-radius:10px; border:1px solid transparent; font-size:14px; font-weight:600; cursor:pointer;
+    transition:box-shadow .2s ease, background .2s ease, border-color .15s ease, transform .1s ease, --grad-angle .3s ease;
+  }
+  .btn svg{ width:16px; height:16px; }
+  .btn:active{ transform:translateY(1px); }
+  .btn--primary{
+    --grad-angle:135deg;
+    background:linear-gradient(var(--grad-angle), var(--accent-strong), var(--accent-indigo-safe));
+    color:var(--on-accent);
+    box-shadow:0 1px 2px rgba(16,16,29,.08);
+  }
+  .btn--primary:hover{ --grad-angle:115deg; box-shadow:0 6px 20px rgba(106,71,245,.30); }
+  .btn--ghost{
+    background:var(--surface); border-color:var(--border); color:var(--text-strong);
+  }
+  .btn--ghost:hover{ background:var(--surface-subtle); border-color:var(--border-strong); }
+
+  /* ---------- banner ---------- */
+  .banner{
+    display:flex; align-items:center; gap:12px;
+    background:var(--accent-light); border:1px solid var(--accent-border); border-radius:14px;
+    padding:14px 20px; color:var(--text-strong); font-size:14px;
+    animation:fadeDown .22s ease-out .05s both;
+  }
+  .banner .banner-icon{
+    width:32px; height:32px; border-radius:999px; flex:none; background:var(--surface);
+    display:flex; align-items:center; justify-content:center; color:var(--accent-strong);
+  }
+  .banner .banner-icon svg{ width:18px; height:18px; }
+  .banner strong.amount{ color:var(--accent-strong); font-weight:700; }
+  .banner .banner-sub{ color:var(--text-weak); font-size:13px; }
+
+  /* ---------- kpi ---------- */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .kpi-card{
+    position:relative; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card);
+    padding:24px; display:flex; flex-direction:column; gap:12px;
+    box-shadow:var(--shadow-card);
+    animation:cardIn .28s ease-out both, glowFade .32s ease-out both;
+    transition:box-shadow .2s ease;
+  }
+  .kpi-card:hover{ box-shadow:var(--shadow-card-hover); }
+  .kpi-card:nth-child(1){ animation-delay:.15s,.22s; }
+  .kpi-card:nth-child(2){ animation-delay:.20s,.27s; }
+  .kpi-card:nth-child(3){ animation-delay:.25s,.32s; }
+  .kpi-card:nth-child(4){ animation-delay:.30s,.37s; }
+
+  .kpi-label{ font-size:13px; font-weight:500; color:var(--text-weak); }
+  .kpi-value{
+    font-size:28px; line-height:1.2; font-weight:700; color:var(--text-strong);
+    letter-spacing:-0.01em; overflow-wrap:anywhere;
+  }
+  .kpi-value.is-gradient{
+    background:linear-gradient(135deg,var(--accent-strong),var(--accent-indigo-safe));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .kpi-change{ display:inline-flex; align-items:center; gap:4px; font-size:13px; font-weight:600; width:fit-content; }
+  .kpi-change svg{ width:14px; height:14px; }
+  .kpi-change--up{ color:var(--success-text); }
+  .kpi-change--down{ color:var(--danger-text); }
+  .kpi-change--flat{ color:var(--text-weak); font-weight:500; }
+  .kpi-change .kpi-change-note{ color:var(--text-weak); font-weight:400; }
+
+  .kpi-spark{ margin-top:2px; height:32px; width:100%; }
+  .kpi-spark .spark-line--up{ stroke:var(--success-dot); }
+  .kpi-spark .spark-line--down{ stroke:var(--danger-dot); }
+  .kpi-spark .spark-line--flat{ stroke:var(--text-faint); }
+  .kpi-spark path{
+    fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:120; stroke-dashoffset:120;
+    animation:drawSpark .6s ease-out .5s forwards;
+  }
+  .kpi-spark circle{ opacity:0; animation:dotIn .2s ease-out 1.05s forwards; }
+
+  /* ---------- section cards (flat, non-glow) ---------- */
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--r-card);
+    box-shadow:var(--shadow-flat);
+  }
+  .card-head{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    padding:24px 24px 0;
+  }
+  .card-title{ font-size:16px; line-height:24px; font-weight:600; color:var(--text-strong); }
+  .card-sub{ font-size:13px; color:var(--text-weak); margin-top:2px; }
+
+  /* trend card gets the top-priority glow (identity-bearing chart) */
+  .chart-trend-card{
+    box-shadow:var(--shadow-card);
+    animation:cardIn .3s ease-out .35s both, glowFade .35s ease-out .4s both;
+    transition:box-shadow .2s ease;
+  }
+  .chart-trend-card:hover{ box-shadow:var(--shadow-card-hover); }
+
+  .insight-badge{
+    display:inline-flex; align-items:center; gap:8px; max-width:460px;
+    background:var(--accent-light); border-radius:999px; padding:8px 14px 8px 10px;
+    animation:badgeIn .3s cubic-bezier(.2,.9,.3,1.3) .55s both;
+  }
+  .insight-badge .sparkle-icon{ width:16px; height:16px; flex:none; color:var(--accent-strong);
+    animation:sparklePulse 4s ease-in-out 1.4s infinite; }
+  .insight-badge .insight-label{ font-size:12px; font-weight:700; color:var(--accent-strong); flex:none; }
+  .insight-badge .insight-text{ font-size:13px; color:var(--text-body); }
+
+  .chart-wrap{ padding:16px 24px 24px; }
+  .chart-axis-note{
+    display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    margin-top:8px; font-size:13px; color:var(--text-weak);
+  }
+  .chart-axis-note b{ color:var(--text-strong); font-weight:600; }
+  .chart-legend-dot{ display:inline-block; width:8px; height:8px; border-radius:999px; margin-right:6px; }
+
+  .trend-svg{ width:100%; height:auto; }
+  .trend-area{ opacity:0; animation:fadeIn .5s ease-out .85s forwards; }
+  .trend-line{
+    fill:none; stroke:url(#trendLineGrad); stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:1500; stroke-dashoffset:1500;
+    animation:drawLine .9s ease-out .45s forwards;
+  }
+  .trend-dot{ opacity:0; animation:dotIn .25s ease-out 1.3s forwards; }
+  .trend-gridline{ stroke:var(--border); stroke-width:1; }
+  .trend-axis-label{ font-size:11px; fill:var(--text-faint); font-family:'Inter',sans-serif; }
+  .trend-annot-label{ font-size:11px; fill:var(--text-weak); font-weight:600; font-family:'Inter','Pretendard',sans-serif; }
+
+  /* ---------- 2-col row: donut + goal ---------- */
+  .row-2col{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; }
+
+  .donut-body{ display:flex; align-items:center; gap:24px; padding:16px 24px 24px; flex-wrap:wrap; }
+  .donut-svg{ width:144px; height:144px; flex:none; }
+  .donut-legend{ display:flex; flex-direction:column; gap:10px; flex:1; min-width:160px; }
+  .legend-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:14px; }
+  .legend-left{ display:flex; align-items:center; gap:8px; color:var(--text-body); }
+  .legend-pct{ font-weight:700; color:var(--text-strong); }
+
+  .goal-body{ padding:16px 24px 24px; display:flex; flex-direction:column; gap:16px; }
+  .goal-numbers{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .goal-current{ font-size:24px; font-weight:700; color:var(--text-strong); letter-spacing:-0.01em; }
+  .goal-target{ font-size:14px; color:var(--text-weak); }
+  .goal-pct-badge{
+    font-size:14px; font-weight:700; color:var(--accent-strong); background:var(--accent-light);
+    padding:4px 10px; border-radius:999px;
+  }
+  .goal-track{
+    position:relative; height:12px; border-radius:999px; background:var(--surface-subtle-2);
+    overflow:hidden; border:1px solid var(--border);
+  }
+  .goal-fill{
+    position:absolute; inset:0 auto 0 0; width:0%; border-radius:999px;
+    background:linear-gradient(90deg,var(--accent-purple),var(--accent-indigo));
+    animation:goalFill .8s cubic-bezier(.2,.8,.3,1) .5s forwards;
+  }
+  .goal-note{ font-size:12.5px; color:var(--text-weak); }
+
+  /* ---------- table ---------- */
+  .table-card-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    padding:20px 24px;
+  }
+  .table-scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:680px; }
+  thead th{
+    text-align:left; padding:10px 24px; font-size:12px; font-weight:600; color:var(--text-weak);
+    letter-spacing:.02em; background:var(--surface-subtle); border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border); white-space:nowrap;
+  }
+  thead th.num, tbody td.num{ text-align:right; }
+  tbody td{ padding:16px 24px; font-size:14px; color:var(--text-body); border-bottom:1px solid var(--border); vertical-align:middle; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr{ opacity:0; transform:translateY(4px); animation:rowIn .3s ease-out forwards; }
+  tbody tr:nth-child(1){ animation-delay:.55s; }
+  tbody tr:nth-child(2){ animation-delay:.58s; }
+  tbody tr:nth-child(3){ animation-delay:.61s; }
+  tbody tr:nth-child(4){ animation-delay:.64s; }
+  tbody tr:nth-child(5){ animation-delay:.67s; }
+  tbody tr:nth-child(6){ animation-delay:.70s; }
+  tbody tr:hover{ background:var(--surface-subtle); }
+  .merchant-name{ font-weight:600; color:var(--text-strong); max-width:300px; overflow-wrap:break-word; line-height:1.45; display:block; }
+  .merchant-sub{ display:block; font-weight:400; font-size:12.5px; color:var(--text-weak); margin-top:2px; overflow-wrap:break-word; }
+  .missing{ color:var(--text-weak); font-weight:500; }
+
+  .status-badge{
+    display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px;
+    font-size:12.5px; font-weight:700; white-space:nowrap;
+  }
+  .status-badge svg{ width:14px; height:14px; flex:none; }
+  .status--done{ background:var(--success-bg); color:var(--success-text); }
+  .status--pending{ background:var(--pending-bg); color:var(--pending-text); }
+  .status--hold{ background:var(--warning-bg); color:var(--warning-text); }
+  .status--fail{ background:var(--danger-bg); color:var(--danger-text); }
+
+  /* ---------- empty state ---------- */
+  .empty-card{ padding:40px 24px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; }
+  .empty-icon{
+    width:56px; height:56px; border-radius:999px; background:var(--surface-subtle);
+    display:flex; align-items:center; justify-content:center; color:var(--accent-strong); margin-bottom:8px;
+  }
+  .empty-icon svg{ width:26px; height:26px; }
+  .empty-headline{ font-size:16px; font-weight:700; color:var(--text-strong); }
+  .empty-desc{ font-size:14px; color:var(--text-weak); max-width:420px; }
+  .empty-cta{ margin-top:8px; }
+
+  /* ---------- footer ---------- */
+  .page-footer{
+    text-align:center; padding:8px 16px 40px; font-size:12px; color:var(--text-weak);
+    letter-spacing:.02em;
+  }
+
+  /* ---------- keyframes ---------- */
+  @keyframes fadeDown{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn{ from{ opacity:0; } to{ opacity:.9; } }
+  @keyframes cardIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes glowFade{ from{ box-shadow:0 0 0 rgba(var(--glow-rgb),0), 0 1px 2px rgba(16,16,29,0); } to{ box-shadow:var(--shadow-card); } }
+  @keyframes badgeIn{ from{ opacity:0; transform:scale(.8); } to{ opacity:1; transform:scale(1); } }
+  @keyframes indicatorSlide{ from{ transform:translateX(-6px); opacity:0; } to{ transform:translateX(0); opacity:1; } }
+  @keyframes sparklePulse{ 0%,88%,100%{ transform:scale(1); opacity:.85; } 94%{ transform:scale(1.2); opacity:1; } }
+  @keyframes drawLine{ to{ stroke-dashoffset:0; } }
+  @keyframes drawSpark{ to{ stroke-dashoffset:0; } }
+  @keyframes dotIn{ to{ opacity:1; } }
+  @keyframes rowIn{ to{ opacity:1; transform:translateY(0); } }
+  @keyframes goalFill{ to{ width:68%; } }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1100px){
+    .app{ grid-template-columns:var(--sidebar-w-collapsed) 1fr; }
+    .sidebar{ padding:24px 12px; align-items:center; }
+    .brand{ justify-content:center; padding-left:0; padding-right:0; }
+    .brand-text, .nav-label, .user-meta{ display:none; }
+    .nav-item{ justify-content:center; padding:10px; }
+    .nav-item.is-active::before{ left:-12px; }
+    .sidebar-footer{ justify-content:center; padding:12px 0; }
+  }
+  @media (max-width:960px){
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+    .row-2col{ grid-template-columns:1fr; }
+  }
+  @media (max-width:640px){
+    .content{ padding:16px 16px 48px; gap:16px; }
+    .kpi-grid{ grid-template-columns:1fr; }
+    .filterbar{ flex-direction:column; align-items:stretch; }
+    .period-tabs{ justify-content:space-between; }
+    .filters-right{ justify-content:space-between; }
+    .card-head{ padding:20px 16px 0; }
+    .chart-wrap{ padding:12px 16px 20px; }
+    .donut-body, .goal-body{ padding:12px 16px 20px; }
+    thead th, tbody td{ padding:12px 16px; }
+    .table-card-head{ padding:16px; }
+  }
+
+  /* ---------- reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation:none !important; transition:none !important; }
+    .sidebar, .topbar, .banner, .kpi-card, .chart-trend-card, .insight-badge, tbody tr{
+      opacity:1 !important; transform:none !important;
+    }
+    .kpi-card, .chart-trend-card{ box-shadow:var(--shadow-card) !important; }
+    .trend-line, .kpi-spark path{ stroke-dashoffset:0 !important; }
+    .trend-area, .trend-dot, .kpi-spark circle{ opacity:.9 !important; }
+    .kpi-spark circle{ opacity:1 !important; }
+    .goal-fill{ width:68% !important; }
+    .nav-item.is-active::before{ opacity:1 !important; transform:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 아이콘 스프라이트 (순수 인라인 SVG, 라이브러리 없음) ============ -->
+<svg style="display:none" aria-hidden="true">
+  <defs>
+    <symbol id="ic-sparkle" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5c.55 3.3 1.1 4.9 2.3 6.1 1.2 1.2 2.8 1.75 6.2 2.4-3.4.65-5 1.2-6.2 2.4-1.2 1.2-1.75 2.8-2.3 6.1-.55-3.3-1.1-4.9-2.3-6.1-1.2-1.2-2.8-1.75-6.2-2.4 3.4-.65 5-1.2 6.2-2.4 1.2-1.2 1.75-2.8 2.3-6.1z"/></symbol>
+    <symbol id="ic-grid" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></g></symbol>
+    <symbol id="ic-swap" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13"/><path d="M14 4.5 17 8l-3 3.5"/><path d="M20 16H7"/><path d="M10 12.5 7 16l3 3.5"/></g></symbol>
+    <symbol id="ic-wallet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7V5.6A1.6 1.6 0 0 1 8.6 4h6.8A1.6 1.6 0 0 1 17 5.6V7"/><rect x="3" y="7" width="18" height="12.5" rx="2"/><path d="M15.5 13.3h3"/></g></symbol>
+    <symbol id="ic-store" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5 5 4.5h14l1 5"/><path d="M4 9.5v9.5a1 1 0 0 0 1 1h3.5v-6h7v6H19a1 1 0 0 0 1-1V9.5"/><path d="M4 9.5h16"/></g></symbol>
+    <symbol id="ic-report" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 17v-5M12 17v-8M15 17v-3"/></g></symbol>
+    <symbol id="ic-gear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M4.2 12h3M16.8 12h3M6.2 6.2l2.1 2.1M15.7 15.7l2.1 2.1M17.8 6.2l-2.1 2.1M8.3 15.7l-2.1 2.1"/></g></symbol>
+    <symbol id="ic-chevron-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M6 9.5 12 15l6-5.5"/></symbol>
+    <symbol id="ic-download" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11.5"/><path d="M7 10l5 5 5-5"/><path d="M5 20.5h14"/></g></symbol>
+    <symbol id="ic-bell" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18.2 16v-4.8a6.2 6.2 0 0 0-12.4 0V16l-1.8 2h16z"/><path d="M9.3 19.8a2.7 2.7 0 0 0 5.4 0"/></g></symbol>
+    <symbol id="ic-arrow-up" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 19V6M6.5 11.5 12 6l5.5 5.5"/></symbol>
+    <symbol id="ic-arrow-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 5v13M6.5 12.5 12 18l5.5-5.5"/></symbol>
+    <symbol id="ic-minus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 12h14"/></symbol>
+    <symbol id="ic-check-circle" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.3 10.5 15 16 9.3"/></g></symbol>
+    <symbol id="ic-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.2 2"/></g></symbol>
+    <symbol id="ic-pause-circle" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 9.3v5.4M14 9.3v5.4"/></g></symbol>
+    <symbol id="ic-x-circle" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6"/></g></symbol>
+    <symbol id="ic-shield-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 6v5c0 5-3.2 8.2-7 9.8-3.8-1.6-7-4.8-7-9.8V6z"/><path d="M9 12.2l2.1 2.1L15.3 10"/></g></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <!-- ============ 사이드바 ============ -->
+  <aside class="sidebar" data-region="nav" aria-label="주 내비게이션">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>
+        <svg class="sparkle-dot" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-sparkle"/></svg>
+      </div>
+      <span class="brand-text">핀그리드</span>
+    </div>
+
+    <ul class="nav-group">
+      <li><a class="nav-item is-active" href="#" aria-current="page">
+        <svg><use href="#ic-grid"/></svg><span class="nav-label">대시보드</span></a></li>
+      <li><a class="nav-item" href="#">
+        <svg><use href="#ic-swap"/></svg><span class="nav-label">거래</span></a></li>
+      <li><a class="nav-item" href="#">
+        <svg><use href="#ic-wallet"/></svg><span class="nav-label">정산</span></a></li>
+      <li><a class="nav-item" href="#">
+        <svg><use href="#ic-store"/></svg><span class="nav-label">가맹점</span></a></li>
+      <li><a class="nav-item" href="#">
+        <svg><use href="#ic-report"/></svg><span class="nav-label">리포트</span></a></li>
+      <li><a class="nav-item" href="#">
+        <svg><use href="#ic-gear"/></svg><span class="nav-label">설정</span></a></li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="avatar" aria-hidden="true">김</div>
+      <div class="user-meta">
+        <div class="user-name">김운영</div>
+        <div class="user-role">정산팀</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ 메인 ============ -->
+  <div class="main">
+    <div class="content">
+
+      <!-- 상단바: 제목 -->
+      <header class="topbar" data-region="identity">
+        <h1>정산 대시보드</h1>
+      </header>
+
+      <!-- 필터 바: 기간 탭 · 채널 필터 · 내보내기 -->
+      <div class="filterbar" data-region="filter">
+        <div class="period-tabs" role="tablist" aria-label="조회 기간">
+          <button type="button" class="period-tab" role="tab" aria-selected="false">오늘</button>
+          <button type="button" class="period-tab" role="tab" aria-selected="false">7일</button>
+          <button type="button" class="period-tab is-active" role="tab" aria-selected="true">30일</button>
+          <button type="button" class="period-tab" role="tab" aria-selected="false">90일</button>
+        </div>
+        <div class="filters-right">
+          <div class="select-wrap">
+            <label class="visually-hidden" for="channel-select">채널 필터</label>
+            <select id="channel-select">
+              <option>전체 채널</option>
+              <option>카드</option>
+              <option>계좌이체</option>
+              <option>간편결제</option>
+            </select>
+            <svg aria-hidden="true"><use href="#ic-chevron-down"/></svg>
+          </div>
+          <button type="button" class="btn btn--primary" data-region="action">
+            <svg><use href="#ic-download"/></svg>내보내기
+          </button>
+        </div>
+      </div>
+
+      <!-- 안내 배너 -->
+      <div class="banner" data-region="banner" role="status">
+        <span class="banner-icon" aria-hidden="true"><svg><use href="#ic-bell"/></svg></span>
+        <span>
+          10월 21일 정산 예정 — <strong class="amount tabular" aria-label="예정 정산액 약 12억">₩1,284,900,000</strong>
+          <span class="banner-sub">· 영업일 기준 D-1</span>
+        </span>
+      </div>
+
+      <!-- KPI 4장 -->
+      <section class="kpi-grid" data-region="kpi" aria-label="핵심 지표">
+
+        <article class="kpi-card">
+          <span class="kpi-label">총 거래액(GMV)</span>
+          <span class="kpi-value is-gradient tabular" aria-label="약 1조 2,847억">₩1,284,732,050,000</span>
+          <span class="kpi-change kpi-change--up tabular">
+            <svg aria-hidden="true"><use href="#ic-arrow-up"/></svg>+8.3%
+            <span class="kpi-change-note">전주 대비</span>
+          </span>
+          <svg class="kpi-spark" viewBox="0 0 104 32" preserveAspectRatio="none" role="img" aria-label="최근 추이: 상승">
+            <path class="spark-line--up" d="M 3.0,29.0 L 11.9,26.4 L 20.8,27.7 L 29.7,23.8 L 38.6,21.2 L 47.5,22.5 L 56.5,18.6 L 65.4,14.7 L 74.3,16.0 L 83.2,10.8 L 92.1,6.9 L 101.0,3.0"/>
+            <circle class="spark-line--up" cx="101.0" cy="3.0" r="2.4" fill="var(--success-dot)" stroke="none"/>
+          </svg>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-label">결제 건수</span>
+          <span class="kpi-value tabular">12,847,192건</span>
+          <span class="kpi-change kpi-change--up tabular">
+            <svg aria-hidden="true"><use href="#ic-arrow-up"/></svg>+12.1%
+            <span class="kpi-change-note">전주 대비</span>
+          </span>
+          <svg class="kpi-spark" viewBox="0 0 104 32" preserveAspectRatio="none" role="img" aria-label="최근 추이: 상승">
+            <path class="spark-line--up" d="M 3.0,29.0 L 11.9,26.5 L 20.8,22.8 L 29.7,24.0 L 38.6,20.3 L 47.5,21.6 L 56.5,17.9 L 65.4,15.4 L 74.3,11.7 L 83.2,12.9 L 92.1,8.0 L 101.0,3.0"/>
+            <circle class="spark-line--up" cx="101.0" cy="3.0" r="2.4" fill="var(--success-dot)" stroke="none"/>
+          </svg>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-label">승인율</span>
+          <span class="kpi-value tabular">94.7%</span>
+          <span class="kpi-change kpi-change--down tabular">
+            <svg aria-hidden="true"><use href="#ic-arrow-down"/></svg>−1.2%p
+            <span class="kpi-change-note">전주 대비</span>
+          </span>
+          <svg class="kpi-spark" viewBox="0 0 104 32" preserveAspectRatio="none" role="img" aria-label="최근 추이: 하락">
+            <path class="spark-line--down" d="M 3.0,3.0 L 11.9,6.9 L 20.8,12.1 L 29.7,9.5 L 38.6,16.0 L 47.5,21.2 L 56.5,18.6 L 65.4,23.8 L 74.3,27.7 L 83.2,23.8 L 92.1,29.0 L 101.0,26.4"/>
+            <circle class="spark-line--down" cx="101.0" cy="26.4" r="2.4" fill="var(--danger-dot)" stroke="none"/>
+          </svg>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-label">정산 대기액</span>
+          <span class="kpi-value tabular" aria-label="약 3,120억">₩312,048,900,000</span>
+          <span class="kpi-change kpi-change--flat tabular">
+            <svg aria-hidden="true"><use href="#ic-minus"/></svg>—
+            <span class="kpi-change-note">신규 지표 · 비교 데이터 없음</span>
+          </span>
+          <svg class="kpi-spark" viewBox="0 0 104 32" preserveAspectRatio="none" role="img" aria-label="최근 추이: 평탄">
+            <path class="spark-line--flat" d="M 3.0,16.0 L 11.9,15.2 L 20.8,16.8 L 29.7,15.7 L 38.6,15.0 L 47.5,16.3 L 56.5,15.5 L 65.4,16.0 L 74.3,16.5 L 83.2,15.7 L 92.1,15.5 L 101.0,16.0"/>
+            <circle class="spark-line--flat" cx="101.0" cy="16.0" r="2.4" fill="var(--text-faint)" stroke="none"/>
+          </svg>
+        </article>
+
+      </section>
+
+      <!-- 추이 차트 -->
+      <section class="card chart-trend-card" data-region="chart-trend" aria-label="일별 거래액 추이">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">일별 거래액 추이 (최근 30일)</h2>
+            <p class="card-sub">채널 전체</p>
+          </div>
+          <div class="insight-badge">
+            <svg class="sparkle-icon" aria-hidden="true"><use href="#ic-sparkle"/></svg>
+            <span class="insight-label">AI 인사이트</span>
+            <span class="insight-text">승인율이 전주 대비 1.2%p 하락했어요 — 페이앤고 가맹점의 실패 건 증가 영향으로 보여요.</span>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <svg class="trend-svg" viewBox="0 0 760 220" role="img" aria-label="일별 거래액 추이, 최근 30일. 최고 ₩58.2억 10월 14일, 최저 ₩31.7억 10월 2일">
+            <defs>
+              <linearGradient id="trendLineGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="var(--accent-purple)"/>
+                <stop offset="100%" stop-color="var(--accent-indigo)"/>
+              </linearGradient>
+              <linearGradient id="trendAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--accent-purple)" stop-opacity="0.16"/>
+                <stop offset="100%" stop-color="var(--accent-purple)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- 0 기준선 + 상단 격자 -->
+            <line class="trend-gridline" x1="8" y1="192" x2="752" y2="192"/>
+            <line class="trend-gridline" x1="8" y1="104" x2="752" y2="104" stroke-dasharray="2 4"/>
+            <text class="trend-axis-label" x="8" y="207">10/01</text>
+            <text class="trend-axis-label" x="716" y="207">10/30</text>
+            <text class="trend-axis-label" x="8" y="99">0</text>
+
+            <path class="trend-area" fill="url(#trendAreaGrad)"
+              d="M 8.0,61.1 L 33.7,102.0 L 59.3,55.5 L 85.0,47.5 L 110.6,45.0 L 136.3,37.3 L 161.9,38.7 L 187.6,39.0 L 213.2,53.5 L 238.9,54.6 L 264.6,65.7 L 290.2,69.4 L 315.9,71.4 L 341.5,26.8 L 367.2,84.1 L 392.8,82.7 L 418.5,75.9 L 444.1,74.5 L 469.8,74.5 L 495.4,64.5 L 521.1,56.3 L 546.8,61.1 L 572.4,46.7 L 598.1,45.0 L 623.7,47.8 L 649.4,50.1 L 675.0,42.1 L 700.7,53.2 L 726.3,60.6 L 752.0,65.4 L 752.0,192 L 8.0,192 Z"/>
+
+            <path class="trend-line"
+              d="M 8.0,61.1 L 33.7,102.0 L 59.3,55.5 L 85.0,47.5 L 110.6,45.0 L 136.3,37.3 L 161.9,38.7 L 187.6,39.0 L 213.2,53.5 L 238.9,54.6 L 264.6,65.7 L 290.2,69.4 L 315.9,71.4 L 341.5,26.8 L 367.2,84.1 L 392.8,82.7 L 418.5,75.9 L 444.1,74.5 L 469.8,74.5 L 495.4,64.5 L 521.1,56.3 L 546.8,61.1 L 572.4,46.7 L 598.1,45.0 L 623.7,47.8 L 649.4,50.1 L 675.0,42.1 L 700.7,53.2 L 726.3,60.6 L 752.0,65.4"/>
+
+            <!-- 최고점 10/14 -->
+            <circle class="trend-dot" cx="341.5" cy="26.8" r="4.5" fill="var(--accent-strong)" stroke="#fff" stroke-width="2"/>
+            <text class="trend-annot-label" x="349" y="22">최고 ₩58.2억 (10/14)</text>
+            <!-- 최저점 10/02 -->
+            <circle class="trend-dot" cx="33.7" cy="102.0" r="4.5" fill="var(--danger-dot)" stroke="#fff" stroke-width="2"/>
+            <text class="trend-annot-label" x="41" y="118">최저 ₩31.7억 (10/02)</text>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 구성비 도넛 + 목표 진행률 -->
+      <div class="row-2col">
+
+        <section class="card" data-region="chart-part" aria-label="결제수단 구성비">
+          <div class="card-head"><h2 class="card-title">결제수단 구성비</h2></div>
+          <div class="donut-body">
+            <svg class="donut-svg" viewBox="0 0 160 160" role="img" aria-label="결제수단 구성비: 카드 52%, 계좌이체 24%, 간편결제 18%, 기타 6%">
+              <g transform="rotate(-90 80 80)">
+                <circle cx="80" cy="80" r="64" fill="none" stroke="var(--surface-subtle-2)" stroke-width="24"/>
+                <circle cx="80" cy="80" r="64" fill="none" stroke="var(--donut-1)" stroke-width="24"
+                  stroke-dasharray="209.10 193.02" stroke-dashoffset="0"/>
+                <circle cx="80" cy="80" r="64" fill="none" stroke="var(--donut-2)" stroke-width="24"
+                  stroke-dasharray="96.51 305.61" stroke-dashoffset="-209.10"/>
+                <circle cx="80" cy="80" r="64" fill="none" stroke="var(--donut-3)" stroke-width="24"
+                  stroke-dasharray="72.38 329.74" stroke-dashoffset="-305.61"/>
+                <circle cx="80" cy="80" r="64" fill="none" stroke="var(--donut-4)" stroke-width="24"
+                  stroke-dasharray="24.13 377.99" stroke-dashoffset="-377.99"/>
+              </g>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-row"><span class="legend-left"><span class="legend-chip" style="display:inline-block;width:8px;height:8px;border-radius:999px;background:var(--donut-1)"></span>카드</span><span class="legend-pct tabular">52%</span></div>
+              <div class="legend-row"><span class="legend-left"><span class="legend-chip" style="display:inline-block;width:8px;height:8px;border-radius:999px;background:var(--donut-2)"></span>계좌이체</span><span class="legend-pct tabular">24%</span></div>
+              <div class="legend-row"><span class="legend-left"><span class="legend-chip" style="display:inline-block;width:8px;height:8px;border-radius:999px;background:var(--donut-3)"></span>간편결제</span><span class="legend-pct tabular">18%</span></div>
+              <div class="legend-row"><span class="legend-left"><span class="legend-chip" style="display:inline-block;width:8px;height:8px;border-radius:999px;background:var(--donut-4)"></span>기타</span><span class="legend-pct tabular">6%</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" data-region="goal" aria-label="4분기 정산액 목표">
+          <div class="card-head"><h2 class="card-title">4분기 정산액 목표</h2></div>
+          <div class="goal-body">
+            <div class="goal-numbers">
+              <span class="goal-current tabular">₩3.4조</span>
+              <span class="goal-target tabular">/ ₩5조</span>
+              <span class="goal-pct-badge tabular">68%</span>
+            </div>
+            <div class="goal-track" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-label="4분기 정산액 목표 달성률 68%">
+              <div class="goal-fill"></div>
+            </div>
+            <span class="goal-note">전 분기 대비 누적 집계 · 영업일 기준</span>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- 가맹점별 정산 현황 표 -->
+      <section class="card" data-region="table" aria-label="가맹점별 정산 현황">
+        <div class="table-card-head">
+          <h2 class="card-title">가맹점별 정산 현황</h2>
+          <span class="card-sub">최근 30일 · 상위 6개 가맹점</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>가맹점</th>
+                <th class="num">거래액</th>
+                <th class="num">건수</th>
+                <th class="num">승인율</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="merchant-name">(주)새벽마켓</span></td>
+                <td class="num tabular">₩48,203,000,000</td>
+                <td class="num tabular">482,030</td>
+                <td class="num tabular">96.2%</td>
+                <td><span class="status-badge status--done"><svg><use href="#ic-check-circle"/></svg>완료</span></td>
+              </tr>
+              <tr>
+                <td><span class="merchant-name">글로벌 커머스 인터내셔널 유한회사<span class="merchant-sub">해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</span></span></td>
+                <td class="num tabular">₩31,209,000,000</td>
+                <td class="num tabular">288,110</td>
+                <td class="num tabular">91.4%</td>
+                <td><span class="status-badge status--pending"><svg><use href="#ic-clock"/></svg>대기</span></td>
+              </tr>
+              <tr>
+                <td><span class="merchant-name">김철수 스토어</span></td>
+                <td class="num tabular">₩894,000,000</td>
+                <td class="num tabular">8,940</td>
+                <td class="num tabular">88.0%</td>
+                <td><span class="status-badge status--hold"><svg><use href="#ic-pause-circle"/></svg>보류</span></td>
+              </tr>
+              <tr>
+                <td><span class="merchant-name">데일리박스</span></td>
+                <td class="num tabular">₩12,048,300,000</td>
+                <td class="num tabular missing">—</td>
+                <td class="num tabular">94.7%</td>
+                <td><span class="status-badge status--done"><svg><use href="#ic-check-circle"/></svg>완료</span></td>
+              </tr>
+              <tr>
+                <td><span class="merchant-name">페이앤고</span></td>
+                <td class="num tabular">₩6,201,500,000</td>
+                <td class="num tabular">61,205</td>
+                <td class="num tabular">79.3%</td>
+                <td><span class="status-badge status--fail"><svg><use href="#ic-x-circle"/></svg>실패</span></td>
+              </tr>
+              <tr>
+                <td><span class="merchant-name">미니샵 코리아</span></td>
+                <td class="num tabular">₩2,900,000</td>
+                <td class="num tabular">290</td>
+                <td class="num tabular">100.0%</td>
+                <td><span class="status-badge status--done"><svg><use href="#ic-check-circle"/></svg>완료</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 이상거래 패널 → 빈 상태 -->
+      <section class="card empty-card" data-region="empty" aria-label="이상거래">
+        <span class="empty-icon" aria-hidden="true"><svg><use href="#ic-shield-check"/></svg></span>
+        <p class="empty-headline">표시할 이상거래가 없어요</p>
+        <p class="empty-desc">최근 30일간 감지된 이상거래가 없습니다.</p>
+        <button type="button" class="btn btn--ghost empty-cta" data-region="action">탐지 규칙 보기</button>
+      </section>
+
+    </div>
+
+    <footer class="page-footer">STYLE 21 · AI 프로덕트</footer>
+  </div>
+</div>
+
+<script>
+  // 연출 전용 — 실패해도 위 마크업이 이미 최종 상태(30일/대시보드 선택 등)를 담고 있음
+  (function(){
+    try{
+      var tabs = document.querySelectorAll('.period-tab');
+      tabs.forEach(function(tab){
+        tab.addEventListener('click', function(){
+          tabs.forEach(function(t){ t.classList.remove('is-active'); t.setAttribute('aria-selected','false'); });
+          tab.classList.add('is-active'); tab.setAttribute('aria-selected','true');
+        });
+      });
+    }catch(e){ /* JS 실패해도 기본 HTML 상태로 정상 렌더 */ }
+  })();
+</script>
+
+</body>
+</html>

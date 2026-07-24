@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>정산 대시보드 · 핀그리드 정산분석시스템</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#F5F6F8;
+    --navy:#00447C;
+    --navy-dark:#003060;
+    --th-sky:#E8F1F9;
+    --row-hover:#EEF5FC;
+    --text:#1A1A1A;
+    --muted:#55606B;
+    --border:#D5DBE1;
+    --zebra:#FAFBFC;
+    --success:#1A7F3C;
+    --danger:#C62828;
+    --pending:#9A6700;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:13px;
+    line-height:1.55;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+  }
+  .num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+  a{ color:var(--navy); }
+  a:hover{ color:var(--navy-dark); background:var(--row-hover); }
+  button{ font-family:inherit; }
+
+  /* ===== 기관 마스트헤드 ===== */
+  .masthead{
+    background:var(--navy);
+    color:#fff;
+    padding:10px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:12.5px;
+    border-bottom:1px solid var(--navy-dark);
+  }
+  .masthead .sys-name{ font-weight:700; letter-spacing:0.01em; }
+  .masthead .sys-name .mark{
+    display:inline-block;
+    width:9px; height:9px;
+    background:#fff;
+    margin-right:8px;
+    vertical-align:middle;
+  }
+  .masthead .updated{ color:#D9E6F2; }
+  .masthead .updated b{ color:#fff; font-weight:600; }
+
+  /* 안내 밴드 — 이 데이터가 무엇인지 + 집계기준일 + 출처 */
+  .info-band{
+    background:#EDEFF2;
+    border-bottom:1px solid var(--border);
+    padding:6px 20px;
+    font-size:11.5px;
+    color:var(--muted);
+  }
+  .info-band b{ color:var(--text); font-weight:600; }
+
+  /* ===== 레이아웃 골격 ===== */
+  .shell{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    align-items:start;
+    max-width:1400px;
+    margin:0 auto;
+  }
+
+  /* ===== 사이드바(nav) ===== */
+  .sidebar{
+    background:#fff;
+    border-right:1px solid var(--border);
+    min-height:calc(100vh - 66px);
+    padding:20px 0;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
+  .sidebar .brand{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:0 20px 18px 20px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:12px;
+  }
+  .sidebar .brand .logo-mark{
+    width:18px; height:18px;
+    background:var(--navy);
+    flex:none;
+  }
+  .sidebar .brand .logo-text{
+    font-size:16px;
+    font-weight:700;
+    color:var(--navy);
+    letter-spacing:-0.01em;
+  }
+  .sidebar nav{ display:flex; flex-direction:column; }
+  .sidebar nav a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 20px;
+    text-decoration:none;
+    color:var(--text);
+    font-size:13px;
+    border-left:3px solid transparent;
+  }
+  .sidebar nav a .dot{
+    width:5px; height:5px;
+    background:var(--muted);
+    flex:none;
+  }
+  .sidebar nav a:hover{ background:var(--row-hover); color:var(--navy-dark); }
+  .sidebar nav a.active{
+    background:var(--th-sky);
+    border-left-color:var(--navy);
+    color:var(--navy-dark);
+    font-weight:700;
+  }
+  .sidebar nav a.active .dot{ background:var(--navy); }
+  .sidebar .user{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 20px 0 20px;
+    margin:12px 20px 0 20px;
+    border-top:1px solid var(--border);
+  }
+  .sidebar .user .avatar{
+    width:28px; height:28px;
+    background:var(--navy);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:700;
+    flex:none;
+  }
+  .sidebar .user .who{ font-size:12px; color:var(--muted); line-height:1.4; }
+  .sidebar .user .who b{ display:block; color:var(--text); font-size:13px; font-weight:600; }
+
+  /* ===== 메인 ===== */
+  main{ padding:20px 24px 40px 24px; min-width:0; }
+
+  /* 상단 identity + filter 바 */
+  .topbar{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding-bottom:14px;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--border);
+  }
+  .topbar h1{
+    font-size:20px;
+    font-weight:700;
+    margin:0;
+    color:var(--text);
+    letter-spacing:-0.01em;
+  }
+  .topbar .controls{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:8px;
+  }
+  .tabs{
+    display:flex;
+    border:1px solid var(--border);
+    background:#fff;
+  }
+  .tabs button{
+    border:none;
+    background:transparent;
+    padding:7px 14px;
+    font-size:12.5px;
+    color:var(--text);
+    cursor:pointer;
+    border-right:1px solid var(--border);
+  }
+  .tabs button:last-child{ border-right:none; }
+  .tabs button:hover{ background:var(--row-hover); }
+  .tabs button.active{
+    background:var(--navy);
+    color:#fff;
+    font-weight:700;
+  }
+  select.channel{
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--text);
+    padding:7px 10px;
+    font-size:12.5px;
+    font-family:inherit;
+    height:34px;
+  }
+  select.channel:focus{ outline:2px solid var(--navy); outline-offset:1px; }
+  .btn{
+    border:1px solid var(--navy);
+    background:var(--navy);
+    color:#fff;
+    padding:8px 16px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    height:34px;
+  }
+  .btn:hover{ background:var(--navy-dark); border-color:var(--navy-dark); }
+  .btn:focus{ outline:2px solid var(--navy-dark); outline-offset:2px; }
+  .btn.secondary{
+    background:#fff;
+    color:var(--navy);
+  }
+  .btn.secondary:hover{ background:var(--row-hover); }
+  .btn:disabled{
+    background:#EDEFF2;
+    border-color:var(--border);
+    color:#9AA3AC;
+    cursor:not-allowed;
+  }
+
+  /* 배너 */
+  .banner{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--th-sky);
+    border:1px solid #C9DEF0;
+    border-left:4px solid var(--navy);
+    padding:10px 16px;
+    font-size:12.5px;
+    margin-bottom:20px;
+  }
+  .banner .tag{
+    font-weight:700;
+    color:var(--navy-dark);
+    flex:none;
+  }
+
+  /* 섹션 공통 */
+  section.block{ margin-bottom:28px; }
+  .section-title{
+    font-size:15px;
+    font-weight:700;
+    color:var(--text);
+    padding-left:10px;
+    border-left:4px solid var(--navy);
+    margin:0 0 12px 0;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .section-title .hint{ font-size:11.5px; font-weight:400; color:var(--muted); }
+  .footnote{
+    font-size:11px;
+    color:var(--muted);
+    border-top:1px dashed var(--border);
+    padding-top:6px;
+    margin-top:10px;
+  }
+  .actions-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    font-size:12px;
+    margin-top:8px;
+  }
+  .actions-row a{ text-decoration:none; font-weight:600; }
+
+  /* ===== KPI ===== */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0,1fr));
+    gap:12px;
+  }
+  .kpi-card{
+    background:#fff;
+    border:1px solid var(--border);
+    padding:14px 16px;
+    position:relative;
+    min-width:0;
+  }
+  .kpi-card .label{
+    font-size:11.5px;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .kpi-card .value{
+    font-size:clamp(15px,2.1vw,21px);
+    font-weight:700;
+    color:var(--text);
+    word-break:break-all;
+    line-height:1.25;
+  }
+  .kpi-card .delta{
+    font-size:12px;
+    margin-top:6px;
+    font-weight:600;
+  }
+  .delta.up{ color:var(--success); }
+  .delta.down{ color:var(--danger); }
+  .delta.flat{ color:var(--muted); font-weight:400; }
+  .kpi-card .spark{ margin-top:8px; display:block; }
+  .spark-label{
+    font-size:10.5px;
+    color:var(--muted);
+    margin-left:4px;
+  }
+
+  /* ===== 차트 영역 레이아웃 ===== */
+  .chart-row{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:16px;
+    align-items:stretch;
+  }
+  .panel{
+    background:#fff;
+    border:1px solid var(--border);
+    padding:16px;
+    min-width:0;
+  }
+  .trend-svg{ width:100%; height:auto; display:block; }
+  .trend-caption{
+    display:flex;
+    justify-content:space-between;
+    font-size:11.5px;
+    color:var(--muted);
+    margin-top:6px;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .trend-caption .max{ color:var(--success); font-weight:600; }
+  .trend-caption .min{ color:var(--danger); font-weight:600; }
+
+  /* 도넛 */
+  .donut-wrap{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .legend{ font-size:12px; flex:1; min-width:120px; }
+  .legend-item{ display:flex; align-items:center; gap:8px; padding:4px 0; }
+  .legend-swatch{ width:11px; height:11px; flex:none; border:1px solid rgba(0,0,0,0.15); }
+  .legend-item .pct{ margin-left:auto; font-weight:700; }
+
+  /* 목표 진행률 */
+  .goal-figures{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:10px;
+    font-size:12.5px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .goal-figures .current{ font-size:19px; font-weight:700; color:var(--navy-dark); }
+  .goal-figures .target{ color:var(--muted); }
+  .goal-figures .pct{ font-weight:700; color:var(--navy); }
+  .goal-bar-track{
+    position:relative;
+    height:18px;
+    background:var(--th-sky);
+    border:1px solid var(--border);
+  }
+  .goal-bar-fill{
+    height:100%;
+    background:var(--navy);
+  }
+  .goal-ticks{
+    display:flex;
+    justify-content:space-between;
+    font-size:10.5px;
+    color:var(--muted);
+    margin-top:4px;
+  }
+  .goal-ticks span{ border-left:1px solid var(--border); padding-left:3px; }
+  .goal-ticks span:first-child{ border-left:none; padding-left:0; }
+
+  /* ===== 표 ===== */
+  .table-scroll{ overflow-x:auto; }
+  table.gov-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12.5px;
+    min-width:640px;
+  }
+  table.gov-table caption{
+    text-align:left;
+    font-size:12px;
+    color:var(--muted);
+    padding-bottom:8px;
+    caption-side:top;
+  }
+  table.gov-table th, table.gov-table td{
+    border:1px solid var(--border);
+    padding:8px 10px;
+    text-align:left;
+    vertical-align:top;
+  }
+  table.gov-table thead th{
+    background:var(--th-sky);
+    font-weight:700;
+    color:var(--text);
+    white-space:nowrap;
+    cursor:pointer;
+  }
+  table.gov-table thead th .arrows{
+    color:var(--muted);
+    font-weight:400;
+    margin-left:4px;
+    font-size:11px;
+  }
+  table.gov-table thead th:hover{ background:#DCEAF6; }
+  table.gov-table td.num, table.gov-table th.num{ text-align:right; }
+  table.gov-table td.status{ text-align:center; }
+  table.gov-table tbody tr:nth-child(even){ background:var(--zebra); }
+  table.gov-table tbody tr:hover{ background:var(--row-hover); }
+  table.gov-table td.merchant-name{ max-width:280px; }
+  table.gov-table td.merchant-name .sub{
+    display:block;
+    color:var(--muted);
+    font-size:11px;
+    margin-top:2px;
+  }
+  .status-badge{
+    display:inline-block;
+    font-size:11.5px;
+    font-weight:700;
+    padding:2px 8px;
+    border:1px solid transparent;
+  }
+  .status-badge.done{ color:var(--success); border-color:var(--success); background:#EAF5EC; }
+  .status-badge.wait{ color:var(--pending); border-color:var(--pending); background:#FBF3E2; }
+  .status-badge.hold{ color:var(--navy-dark); border-color:var(--navy-dark); background:var(--th-sky); }
+  .status-badge.fail{ color:var(--danger); border-color:var(--danger); background:#FBEAEA; }
+  .missing{ color:var(--muted); }
+
+  /* ===== 빈 상태 ===== */
+  .empty-panel{
+    background:#fff;
+    border:1px dashed var(--border);
+    padding:28px 20px;
+    text-align:center;
+  }
+  .empty-panel .glyph{
+    width:34px; height:34px;
+    margin:0 auto 12px auto;
+    border:2px solid var(--border);
+    position:relative;
+  }
+  .empty-panel .glyph::after{
+    content:"";
+    position:absolute;
+    left:50%; top:50%;
+    width:20px; height:2px;
+    background:var(--border);
+    transform:translate(-50%,-50%) rotate(45deg);
+  }
+  .empty-panel h3{ font-size:14px; margin:0 0 6px 0; color:var(--text); }
+  .empty-panel p{ font-size:12.5px; color:var(--muted); margin:0 0 14px 0; }
+
+  /* ===== 푸터 ===== */
+  footer.site-footer{
+    border-top:1px solid var(--border);
+    margin-top:12px;
+    padding:16px 24px 24px 24px;
+    font-size:11px;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    grid-column:1 / -1;
+  }
+
+  /* ===== 반응형 ===== */
+  @media (max-width:1100px){
+    .shell{ grid-template-columns:1fr; }
+    .sidebar{
+      min-height:auto;
+      flex-direction:row;
+      align-items:center;
+      padding:10px 0;
+      overflow-x:auto;
+    }
+    .sidebar .brand{ border-bottom:none; border-right:1px solid var(--border); margin-bottom:0; padding:0 14px; }
+    .sidebar nav{ flex-direction:row; }
+    .sidebar nav a{ border-left:none; border-bottom:3px solid transparent; white-space:nowrap; }
+    .sidebar nav a.active{ border-left-color:transparent; border-bottom-color:var(--navy); }
+    .sidebar .user{ border-top:none; border-left:1px solid var(--border); margin:0; padding:0 14px; }
+    .chart-row{ grid-template-columns:1fr; }
+  }
+  @media (max-width:720px){
+    .kpi-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .topbar{ flex-direction:column; align-items:flex-start; }
+  }
+  @media (max-width:480px){
+    .kpi-grid{ grid-template-columns:1fr; }
+    main{ padding:16px 12px 32px 12px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+
+  /* ===== 인쇄 ===== */
+  @media print{
+    body{ background:#fff; }
+    .masthead{ background:#fff !important; color:#000; border-bottom:2px solid #000; }
+    .masthead .updated, .masthead .updated b{ color:#000; }
+    .info-band{ background:#fff; }
+    .sidebar, .btn, .tabs, select.channel, .actions-row, .empty-panel{ display:none !important; }
+    .shell{ grid-template-columns:1fr; }
+    .panel, .kpi-card, .banner{ border:1px solid #000; }
+    table.gov-table thead th{ background:#eee !important; -webkit-print-color-adjust:exact; }
+    tbody tr:nth-child(even){ background:#f5f5f5 !important; -webkit-print-color-adjust:exact; }
+    a{ color:#000; text-decoration:underline; }
+    footer.site-footer::after{
+      content:"1 / 1 페이지 · 인쇄물은 열람용 참고자료이며 법적 효력을 갖지 않습니다.";
+      display:block;
+      width:100%;
+      margin-top:6px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="sys-name"><span class="mark"></span>핀그리드 정산분석시스템</div>
+  <div class="updated">최종 갱신일 <b>2026-10-31 09:00</b> (KST)</div>
+</div>
+<div class="info-band">
+  이 화면은 <b>핀그리드(FinGrid)</b> 가맹점 정산 현황 통계입니다 · 집계 기준일 <b>2026-10-31</b> · 출처 <b>핀그리드 정산관리시스템</b>
+</div>
+
+<div class="shell">
+  <aside class="sidebar" data-region="nav">
+    <div>
+      <div class="brand">
+        <span class="logo-mark"></span>
+        <span class="logo-text">핀그리드</span>
+      </div>
+      <nav>
+        <a href="#" class="active"><span class="dot"></span>대시보드</a>
+        <a href="#"><span class="dot"></span>거래</a>
+        <a href="#"><span class="dot"></span>정산</a>
+        <a href="#"><span class="dot"></span>가맹점</a>
+        <a href="#"><span class="dot"></span>리포트</a>
+        <a href="#"><span class="dot"></span>설정</a>
+      </nav>
+    </div>
+    <div class="user">
+      <span class="avatar">김</span>
+      <span class="who"><b>김운영</b>정산팀</span>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar" data-region="identity">
+      <h1>정산 대시보드</h1>
+      <div class="controls">
+        <div class="tabs" data-region="filter" role="tablist" aria-label="조회 기간">
+          <button role="tab" aria-selected="false">오늘</button>
+          <button role="tab" aria-selected="false">7일</button>
+          <button role="tab" aria-selected="true" class="active">30일</button>
+          <button role="tab" aria-selected="false">90일</button>
+        </div>
+        <select class="channel" aria-label="채널 필터">
+          <option>전체 채널 ▾</option>
+          <option>카드</option>
+          <option>계좌이체</option>
+          <option>간편결제</option>
+        </select>
+        <button class="btn" data-region="action">내보내기</button>
+      </div>
+    </div>
+
+    <div class="banner" data-region="banner">
+      <span class="tag">정산 예정</span>
+      <span>10월 21일 정산 예정 — <strong class="num">₩1,284,900,000</strong> · 영업일 기준 D-1</span>
+    </div>
+
+    <!-- ===== KPI ===== -->
+    <section class="block" data-region="kpi">
+      <h2 class="section-title">핵심 지표<span class="hint">전주 대비 증감</span></h2>
+      <div class="kpi-grid">
+
+        <div class="kpi-card">
+          <div class="label">총 거래액(GMV)</div>
+          <div class="value num">₩1,284,732,050,000</div>
+          <div class="delta up">▲ +8.3% <span style="font-weight:400;">전주 대비</span></div>
+          <svg class="spark" width="100%" height="28" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,24 15,22 30,18 45,19 60,13 75,9 90,4 100,2" fill="none" stroke="#1A7F3C" stroke-width="2"/>
+          </svg>
+          <span class="spark-label">상승 추세 ↗</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="label">결제 건수</div>
+          <div class="value num">12,847,192건</div>
+          <div class="delta up">▲ +12.1% <span style="font-weight:400;">전주 대비</span></div>
+          <svg class="spark" width="100%" height="28" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,25 15,20 30,21 45,15 60,16 75,8 90,6 100,3" fill="none" stroke="#1A7F3C" stroke-width="2"/>
+          </svg>
+          <span class="spark-label">상승 추세 ↗</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="label">승인율</div>
+          <div class="value num">94.7%</div>
+          <div class="delta down">▼ −1.2%p <span style="font-weight:400;">전주 대비</span></div>
+          <svg class="spark" width="100%" height="28" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,6 15,9 30,8 45,14 60,15 75,20 90,19 100,23" fill="none" stroke="#C62828" stroke-width="2"/>
+          </svg>
+          <span class="spark-label">하락 추세 ↘</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="label">정산 대기액</div>
+          <div class="value num">₩312,048,900,000</div>
+          <div class="delta flat">— <span>신규 지표 · 전주 비교 없음</span></div>
+          <svg class="spark" width="100%" height="28" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,14 15,14 30,15 45,14 60,13 75,14 90,14 100,14" fill="none" stroke="#55606B" stroke-width="2"/>
+          </svg>
+          <span class="spark-label">평탄 →</span>
+        </div>
+
+      </div>
+      <div class="footnote">※ 출처 핀그리드 정산관리시스템 · 집계 기준 2026-10-25~2026-10-31(최근 7일 비교) · 갱신 주기 매일 09:00 · 다음 갱신 예정일 2026-11-01 09:00</div>
+    </section>
+
+    <!-- ===== 차트 ===== -->
+    <div class="chart-row">
+      <section class="block panel" data-region="chart-trend" style="margin-bottom:0;">
+        <h2 class="section-title">일별 거래액 추이<span class="hint">최근 30일</span></h2>
+        <svg class="trend-svg" viewBox="0 0 600 150" preserveAspectRatio="none" role="img" aria-label="일별 거래액 추이 라인 차트, 2026년 10월 2일부터 10월 31일까지, 최고 10월 14일 58.2억, 최저 10월 2일 31.7억">
+          <!-- 세로축 0 기준 격자 -->
+          <line x1="0" y1="150" x2="600" y2="150" stroke="#D5DBE1" stroke-width="1"/>
+          <line x1="0" y1="112.5" x2="600" y2="112.5" stroke="#EDEFF2" stroke-width="1"/>
+          <line x1="0" y1="75" x2="600" y2="75" stroke="#EDEFF2" stroke-width="1"/>
+          <line x1="0" y1="37.5" x2="600" y2="37.5" stroke="#EDEFF2" stroke-width="1"/>
+          <polygon points="0,150 0.0,76.85 20.69,71.08 41.38,65.08 62.07,69.0 82.76,61.38 103.45,57.23 124.14,51.69 144.83,54.69 165.52,46.85 186.21,41.77 206.9,36.46 227.59,26.54 248.28,15.69 268.97,21.23 289.66,29.77 310.34,37.85 331.03,45.46 351.72,49.15 372.41,46.38 393.1,43.38 413.79,39.69 434.48,44.77 455.17,50.54 475.86,53.54 496.55,56.54 517.24,52.38 537.93,48.23 558.62,49.38 579.31,51.0 600.0,47.54 600,150" fill="#E8F1F9" stroke="none"/>
+          <polyline points="0.0,76.85 20.69,71.08 41.38,65.08 62.07,69.0 82.76,61.38 103.45,57.23 124.14,51.69 144.83,54.69 165.52,46.85 186.21,41.77 206.9,36.46 227.59,26.54 248.28,15.69 268.97,21.23 289.66,29.77 310.34,37.85 331.03,45.46 351.72,49.15 372.41,46.38 393.1,43.38 413.79,39.69 434.48,44.77 455.17,50.54 475.86,53.54 496.55,56.54 517.24,52.38 537.93,48.23 558.62,49.38 579.31,51.0 600.0,47.54" fill="none" stroke="#00447C" stroke-width="2"/>
+          <!-- 최고 지점 (10/14) -->
+          <circle cx="248.28" cy="15.69" r="3.5" fill="#1A7F3C"/>
+          <line x1="248.28" y1="15.69" x2="248.28" y2="0" stroke="#1A7F3C" stroke-width="1" stroke-dasharray="2,2"/>
+          <!-- 최저 지점 (10/02) -->
+          <circle cx="0.0" cy="76.85" r="3.5" fill="#C62828"/>
+        </svg>
+        <div class="trend-caption">
+          <span class="max">▲ 최고 ₩58.2억 (10/14)</span>
+          <span class="min">▼ 최저 ₩31.7억 (10/02)</span>
+        </div>
+        <div class="footnote">※ 출처 핀그리드 정산관리시스템 · 집계 기준 2026-10-01~2026-10-31 · 갱신 주기 매일 09:00 · 다음 갱신 예정일 2026-11-01 09:00</div>
+      </section>
+
+      <section class="block panel" data-region="chart-part" style="margin-bottom:0;">
+        <h2 class="section-title">결제수단 구성비</h2>
+        <div class="donut-wrap">
+          <svg width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="결제수단 구성비: 카드 52%, 계좌이체 24%, 간편결제 18%, 기타 6%">
+            <g transform="translate(66,66) rotate(-90)">
+              <circle r="60" fill="none" stroke="#EDEFF2" stroke-width="16"/>
+              <circle r="60" fill="none" stroke="#00447C" stroke-width="16"
+                      stroke-dasharray="196.04 376.99" stroke-dashoffset="0"/>
+              <circle r="60" fill="none" stroke="#4C86B5" stroke-width="16"
+                      stroke-dasharray="90.48 376.99" stroke-dashoffset="-196.04"/>
+              <circle r="60" fill="none" stroke="#9AC0DD" stroke-width="16"
+                      stroke-dasharray="67.86 376.99" stroke-dashoffset="-286.51"/>
+              <circle r="60" fill="none" stroke="#55606B" stroke-width="16"
+                      stroke-dasharray="22.62 376.99" stroke-dashoffset="-354.37"/>
+            </g>
+            <text x="66" y="62" text-anchor="middle" font-size="18" font-weight="700" fill="#1A1A1A">52%</text>
+            <text x="66" y="78" text-anchor="middle" font-size="10" fill="#55606B">카드 최다</text>
+          </svg>
+          <div class="legend">
+            <div class="legend-item"><span class="legend-swatch" style="background:#00447C;"></span>카드<span class="pct num">52%</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#4C86B5;"></span>계좌이체<span class="pct num">24%</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#9AC0DD;"></span>간편결제<span class="pct num">18%</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#55606B;"></span>기타<span class="pct num">6%</span></div>
+          </div>
+        </div>
+        <div class="footnote">※ 출처 핀그리드 정산관리시스템 · 집계 기준 2026-10-01~2026-10-31 · 갱신 주기 매일 09:00 · 다음 갱신 예정일 2026-11-01 09:00</div>
+      </section>
+    </div>
+
+    <!-- ===== 목표 진행률 ===== -->
+    <section class="block panel" data-region="goal">
+      <h2 class="section-title">4분기 정산액 목표</h2>
+      <div class="goal-figures">
+        <span><span class="current num">₩3.4조</span> <span class="target">/ 목표 ₩5조</span></span>
+        <span class="pct num">68% 달성</span>
+      </div>
+      <div class="goal-bar-track" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-label="4분기 정산액 목표 달성률 68%">
+        <div class="goal-bar-fill" style="width:68%;"></div>
+      </div>
+      <div class="goal-ticks">
+        <span class="num">0</span><span class="num">25%</span><span class="num">50%</span><span class="num">75%</span><span class="num">100% (₩5조)</span>
+      </div>
+      <div class="footnote">※ 출처 핀그리드 정산관리시스템 · 집계 기준 2026-10-01~2026-12-31(4분기 누계, 10월 31일 현재) · 갱신 주기 매일 09:00 · 다음 갱신 예정일 2026-11-01 09:00</div>
+    </section>
+
+    <!-- ===== 표 ===== -->
+    <section class="block" data-region="table">
+      <h2 class="section-title">가맹점별 정산 현황<span class="hint">전체 1,842개 가맹점 중 상위 6</span></h2>
+      <div class="table-scroll">
+        <table class="gov-table">
+          <caption>가맹점별 정산 현황 — 거래액·건수·승인율·정산 상태 (2026-10-31 기준)</caption>
+          <thead>
+            <tr>
+              <th scope="col">가맹점<span class="arrows">↕</span></th>
+              <th scope="col" class="num">거래액<span class="arrows">↕</span></th>
+              <th scope="col" class="num">건수<span class="arrows">↕</span></th>
+              <th scope="col" class="num">승인율<span class="arrows">↕</span></th>
+              <th scope="col">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="merchant-name">(주)새벽마켓</td>
+              <td class="num">₩48,203,000,000</td>
+              <td class="num">482,030</td>
+              <td class="num">96.2%</td>
+              <td class="status"><span class="status-badge done">완료</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-name">글로벌 커머스 인터내셔널 유한회사<span class="sub">— 해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</span></td>
+              <td class="num">₩31,209,000,000</td>
+              <td class="num">288,110</td>
+              <td class="num">91.4%</td>
+              <td class="status"><span class="status-badge wait">대기</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-name">김철수 스토어</td>
+              <td class="num">₩894,000,000</td>
+              <td class="num">8,940</td>
+              <td class="num">88.0%</td>
+              <td class="status"><span class="status-badge hold">보류</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-name">데일리박스</td>
+              <td class="num">₩12,048,300,000</td>
+              <td class="num missing" aria-label="건수 집계중 결측">— <span style="font-size:10.5px;">(집계중)</span></td>
+              <td class="num">94.7%</td>
+              <td class="status"><span class="status-badge done">완료</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-name">페이앤고</td>
+              <td class="num">₩6,201,500,000</td>
+              <td class="num">61,205</td>
+              <td class="num">79.3%</td>
+              <td class="status"><span class="status-badge fail">실패</span></td>
+            </tr>
+            <tr>
+              <td class="merchant-name">미니샵 코리아</td>
+              <td class="num">₩2,900,000</td>
+              <td class="num">290</td>
+              <td class="num">100.0%</td>
+              <td class="status"><span class="status-badge done">완료</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="actions-row">
+        <a href="#">전체 목록 보기 +</a>
+        <a href="#">원자료(CSV) 내려받기</a>
+        <a href="#">이전 회차 비교</a>
+      </div>
+      <div class="footnote">※ 출처 핀그리드 정산관리시스템 · 집계 기준 2026-10-31 09:00 · 갱신 주기 매일 09:00 · 다음 갱신 예정일 2026-11-01 09:00</div>
+    </section>
+
+    <!-- ===== 빈 상태: 이상거래 ===== -->
+    <section class="block">
+      <h2 class="section-title">이상거래 탐지</h2>
+      <div class="empty-panel" data-region="empty">
+        <div class="glyph" aria-hidden="true"></div>
+        <h3>표시할 이상거래가 없어요</h3>
+        <p>최근 30일간 감지된 이상거래가 없습니다.</p>
+        <button class="btn secondary" data-region="action">탐지 규칙 보기</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>STYLE 02 · 공공 포털</span>
+    <span>본 화면의 수치는 핀그리드(FinGrid) 데모 데이터이며 실제 정산 금액이 아닙니다. 출처 핀그리드 정산관리시스템 · 집계 기준일 2026-10-31 · 갱신 주기 매일 09:00 · 다음 갱신 예정일 2026-11-01 09:00</span>
+  </footer>
+</div>
+
+<script>
+  // 연출 전용 — 실패해도 위 정적 HTML만으로 완전한 화면.
+  document.querySelectorAll('.tabs button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tabs button').forEach(function(b){
+        b.classList.remove('active');
+        b.setAttribute('aria-selected','false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected','true');
+    });
+  });
+  document.querySelectorAll('table.gov-table thead th').forEach(function(th){
+    th.addEventListener('click', function(){ /* 정렬 시연용 훅 — 데이터 변경 없음 */ });
+  });
+</script>
+</body>
+</html>

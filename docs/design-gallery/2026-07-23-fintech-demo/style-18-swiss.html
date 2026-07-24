@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>핀그리드 · 정산 대시보드 — Style 18 스위스</title>
+<meta name="description" content="핀그리드 정산 대시보드, 스위스 인터내셔널 스타일 시안">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --ink:#111111;
+    --red:#E2231A;
+    --grid:#E4E4E4;
+    --gray:#6B6B6B;
+    --sidebar-w:256px;
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ background:var(--bg); }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter','Pretendard',-apple-system,'Helvetica Neue',Arial,sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,p,ul,li,figure{ margin:0; padding:0; }
+  ul{ list-style:none; }
+  a{ color:inherit; text-decoration:none; }
+  button,select,input{ font-family:inherit; color:inherit; }
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+  :focus-visible{ outline:2px solid var(--red); outline-offset:2px; }
+
+  /* ---------- layout shell ---------- */
+  .shell{ display:grid; grid-template-columns: var(--sidebar-w) 1fr; min-height:100vh; }
+
+  /* ---------- sidebar / nav ---------- */
+  .sidebar{
+    border-right:1px solid var(--grid);
+    padding:32px 24px;
+    display:flex;
+    flex-direction:column;
+    gap:48px;
+    min-height:100vh;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand-mark{
+    width:32px; height:32px; background:var(--ink); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:13px; letter-spacing:0;
+    flex:none;
+  }
+  .brand-name{ font-weight:800; font-size:16px; letter-spacing:-0.01em; }
+  .nav-list{ display:flex; flex-direction:column; gap:4px; }
+  .nav-link{
+    display:block; padding:10px 8px; font-size:14px; font-weight:500;
+    color:var(--gray); border-left:2px solid transparent;
+    transition:color 120ms, border-color 120ms, background 120ms;
+  }
+  .nav-link:hover{ color:var(--ink); background:#FAFAFA; }
+  .nav-link.is-active{ color:var(--ink); font-weight:700; border-left-color:var(--ink); background:#FAFAFA; }
+  .sidebar-foot{ margin-top:auto; display:flex; align-items:center; gap:12px; border-top:1px solid var(--grid); padding-top:24px; }
+  .user-avatar{
+    width:32px; height:32px; background:var(--ink); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:13px; flex:none;
+  }
+  .user-info{ display:flex; flex-direction:column; font-size:13px; line-height:1.35; }
+  .user-info strong{ font-weight:700; }
+  .user-info span{ color:var(--gray); }
+
+  /* ---------- content ---------- */
+  .content{ min-width:0; }
+  .content-inner{
+    position:relative;
+    max-width:1560px;
+    padding:48px 64px 96px;
+  }
+  .grid-guides{
+    position:absolute; top:0; left:64px; right:64px; bottom:0;
+    display:grid; grid-template-columns:repeat(12,1fr); column-gap:24px;
+    pointer-events:none; z-index:0;
+    clip-path:inset(0 100% 0 0);
+    animation:grid-draw 260ms 180ms ease-out forwards;
+  }
+  .grid-guides span{ border-right:1px solid var(--grid); height:100%; }
+  .grid-guides span:last-child{ border-right:1px solid var(--grid); }
+  @keyframes grid-draw{ to{ clip-path:inset(0 0 0 0); } }
+
+  .content-inner > *{ position:relative; z-index:1; }
+
+  /* ---------- hero / headline ---------- */
+  .hero{ margin-bottom:40px; }
+  .eyebrow{
+    font-size:11px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--gray); margin-bottom:16px;
+  }
+  .headline{
+    font-weight:800; letter-spacing:-0.03em; line-height:0.9;
+    font-size:clamp(48px, 8.6vw, 116px);
+    text-align:left;
+  }
+
+  /* ---------- control row (filter/tabs) ---------- */
+  .control-row{
+    display:flex; align-items:center; flex-wrap:wrap; gap:32px;
+    padding-bottom:24px; margin-bottom:32px; border-bottom:1px solid var(--ink);
+  }
+  .tabs{ display:flex; gap:24px; }
+  .tab{
+    background:none; border:none; cursor:pointer; padding:8px 0 10px;
+    font-size:14px; font-weight:500; color:var(--gray);
+    border-bottom:2px solid transparent; margin-bottom:-1px;
+    transition:color 120ms, border-color 120ms;
+  }
+  .tab:hover{ color:var(--ink); }
+  .tab.is-active{ color:var(--ink); font-weight:700; border-bottom-color:var(--ink); }
+  .channel-filter{ position:relative; display:inline-flex; align-items:center; }
+  .channel-filter select{
+    appearance:none; -webkit-appearance:none; -moz-appearance:none;
+    background:var(--bg); border:1px solid var(--ink);
+    padding:9px 32px 9px 14px; font-size:14px; font-weight:500; cursor:pointer;
+  }
+  .channel-filter::after{
+    content:'▾'; position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    pointer-events:none; font-size:11px; color:var(--ink);
+  }
+  .btn-primary{
+    background:var(--ink); color:#fff; border:1px solid var(--ink);
+    padding:10px 22px; font-size:14px; font-weight:700; letter-spacing:0.01em;
+    cursor:pointer; margin-left:auto; transition:background 120ms;
+  }
+  .btn-primary:hover{ background:#000; }
+  .btn-primary:active{ background:#222; }
+  .btn-secondary{
+    background:transparent; color:var(--ink); border:1px solid var(--ink);
+    padding:10px 22px; font-size:14px; font-weight:700; cursor:pointer;
+    transition:background 120ms, color 120ms;
+  }
+  .btn-secondary:hover{ background:var(--ink); color:#fff; }
+
+  /* ---------- banner ---------- */
+  .banner{
+    border-top:1px solid var(--ink); border-bottom:1px solid var(--ink);
+    padding:16px 0; margin-bottom:48px;
+    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  }
+  .banner-mark{ width:8px; height:8px; background:var(--ink); flex:none; }
+  .banner p{ font-size:15px; font-variant-numeric:tabular-nums; }
+  .banner strong{ font-weight:700; }
+
+  /* ---------- section headers ---------- */
+  .section-head{ margin-bottom:24px; display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; }
+  .section-label{ font-size:11px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color:var(--gray); }
+  .section-head h2{ font-size:24px; font-weight:700; letter-spacing:-0.01em; }
+
+  /* ---------- KPI grid ---------- */
+  .kpi-grid{
+    display:grid; grid-template-columns:repeat(12,1fr); gap:24px;
+    border-top:1px solid var(--ink); border-bottom:1px solid var(--grid);
+    margin-bottom:64px;
+  }
+  .kpi{
+    position:relative; padding:24px 24px 24px 0;
+    display:flex; flex-direction:column; gap:12px;
+    opacity:0; transform:translateY(4px);
+    animation:kpi-in 340ms ease-out forwards;
+  }
+  .kpi::after{
+    content:''; position:absolute; left:0; right:24px; bottom:0; height:1px;
+    background:var(--grid); transition:height 150ms, background 150ms;
+  }
+  .kpi:hover::after, .kpi:focus-within::after{ height:2px; background:var(--ink); }
+  .kpi + .kpi{ border-left:1px solid var(--grid); padding-left:24px; }
+  .kpi--gmv{ grid-column:span 5; animation-delay:520ms; }
+  .kpi--count{ grid-column:span 3; animation-delay:580ms; }
+  .kpi--rate{ grid-column:span 2; animation-delay:640ms; }
+  .kpi--pending{ grid-column:span 2; animation-delay:700ms; }
+  @keyframes kpi-in{ to{ opacity:1; transform:translateY(0); } }
+  .kpi-label{ font-size:11px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray); }
+  .kpi-value{
+    font-size:clamp(20px, 2.3vw, 32px); font-weight:700; letter-spacing:-0.02em;
+    font-variant-numeric:tabular-nums; overflow-wrap:anywhere;
+  }
+  .kpi-delta{ font-size:13px; font-weight:600; display:flex; align-items:baseline; gap:6px; font-variant-numeric:tabular-nums; }
+  .kpi-delta-note{ font-weight:500; color:var(--gray); font-size:12px; }
+  .kpi-delta--up{ color:var(--ink); }
+  .kpi-delta--down{ color:var(--ink); }
+  .kpi-delta--flat{ color:var(--gray); }
+  .sparkline{ width:100%; height:32px; display:block; overflow:visible; }
+  .sparkline path{ fill:none; stroke:var(--ink); stroke-width:1.5; }
+
+  /* ---------- chart row ---------- */
+  .chart-row{ display:grid; grid-template-columns:repeat(12,1fr); gap:24px; margin-bottom:64px; align-items:stretch; }
+  .panel{ border-top:1px solid var(--ink); padding-top:20px; }
+  .panel h3{ font-size:11px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray); margin-bottom:20px; }
+
+  .chart-trend{ grid-column:span 7; }
+  .chart-part{ grid-column:span 3; }
+  .goal{ grid-column:span 2; }
+
+  .trend-svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .plot-group{
+    clip-path:inset(0 100% 0 0);
+    animation:reveal 520ms 560ms ease-out forwards;
+  }
+  @keyframes reveal{ to{ clip-path:inset(0 0% 0 0); } }
+  .axis-line{ stroke:var(--grid); stroke-width:1; }
+  .axis-label{ font-size:10px; fill:var(--gray); font-variant-numeric:tabular-nums; }
+  .trend-area{ fill:rgba(17,17,17,0.05); }
+  .trend-line{ fill:none; stroke:var(--ink); stroke-width:2; }
+  .anno-dot{ fill:var(--ink); }
+  .anno-label{ font-size:11px; font-weight:600; fill:var(--ink); font-variant-numeric:tabular-nums; }
+  .crosshair{ stroke:var(--gray); stroke-width:1; opacity:0; }
+  .chart-tooltip{ opacity:0; transition:opacity 100ms; }
+  .chart-tooltip rect{ fill:var(--ink); }
+  .chart-tooltip text{ fill:#fff; font-size:11px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .trend-foot{ display:flex; gap:24px; margin-top:16px; flex-wrap:wrap; }
+  .trend-foot p{ font-size:12px; color:var(--gray); }
+  .trend-foot strong{ color:var(--ink); font-weight:700; font-variant-numeric:tabular-nums; }
+
+  .donut-wrap{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .donut-svg{ width:120px; height:120px; flex:none; }
+  .donut-center-label{ font-size:20px; font-weight:800; fill:var(--ink); font-variant-numeric:tabular-nums; }
+  .donut-center-sub{ font-size:10px; fill:var(--gray); letter-spacing:0.06em; }
+  .legend{ display:flex; flex-direction:column; gap:10px; flex:1; min-width:110px; }
+  .legend-item{ display:flex; align-items:center; gap:8px; font-size:13px; }
+  .legend-swatch{ width:10px; height:10px; flex:none; }
+  .legend-swatch--card{ background:var(--ink); }
+  .legend-swatch--transfer{ background:var(--gray); }
+  .legend-swatch--easypay{ background:var(--grid); border:1px solid var(--ink); }
+  .legend-swatch--etc{ background:transparent; border:1px dashed var(--ink); }
+  .legend-name{ flex:1; }
+  .legend-pct{ font-weight:700; font-variant-numeric:tabular-nums; }
+
+  .goal-pct{ font-size:40px; font-weight:800; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; margin-bottom:8px; }
+  .goal-track{ height:8px; background:var(--grid); position:relative; margin-bottom:12px; }
+  .goal-fill{ position:absolute; left:0; top:0; bottom:0; width:0%; background:var(--ink); animation:goal-grow 700ms 620ms ease-out forwards; }
+  @keyframes goal-grow{ to{ width:68%; } }
+  .goal-ticks{ display:flex; justify-content:space-between; font-size:10px; color:var(--gray); margin-bottom:16px; }
+  .goal-value{ font-size:13px; color:var(--gray); }
+  .goal-value strong{ color:var(--ink); font-weight:700; font-variant-numeric:tabular-nums; }
+
+  /* ---------- table ---------- */
+  .table-section{ margin-bottom:64px; }
+  .table-wrap{ overflow-x:auto; border-top:2px solid var(--ink); }
+  table{ width:100%; border-collapse:collapse; min-width:760px; }
+  thead th{
+    text-align:left; padding:14px 16px; font-size:11px; font-weight:600;
+    letter-spacing:0.08em; text-transform:uppercase; color:var(--gray);
+    border-bottom:1px solid var(--grid); white-space:nowrap;
+  }
+  .th-sort{
+    background:none; border:none; padding:0; cursor:pointer; font:inherit;
+    letter-spacing:inherit; text-transform:inherit; color:inherit;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .th-sort i{ font-style:normal; font-size:9px; color:var(--gray); }
+  .th-sort.is-sorted{ color:var(--ink); }
+  .th-sort.is-sorted i{ color:var(--ink); }
+  tbody td{
+    padding:18px 16px; font-size:14px; border-bottom:1px solid var(--grid);
+    vertical-align:top; word-break:keep-all;
+  }
+  tbody td:first-child{ position:relative; font-weight:600; max-width:340px; line-height:1.4; }
+  tbody td:first-child::before{
+    content:''; position:absolute; left:-16px; top:0; bottom:0; width:0;
+    background:var(--red); transition:width 150ms;
+  }
+  tbody tr:hover td{ background:#FAFAFA; }
+  tbody tr:hover td:first-child::before{ width:2px; }
+  .num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .cell-muted{ color:var(--gray); }
+  .status{ display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:13px; white-space:nowrap; }
+  .status-dot{ width:8px; height:8px; flex:none; }
+  .status--done .status-dot{ background:var(--ink); }
+  .status--pending .status-dot{ background:transparent; border:1px solid var(--ink); }
+  .status--hold .status-dot{ background:var(--gray); }
+  .status--fail .status-dot{ background:var(--red); animation:red-light 200ms 820ms ease-out both; }
+  @keyframes red-light{ from{ opacity:0; } to{ opacity:1; } }
+
+  /* ---------- empty state ---------- */
+  .empty-panel{
+    border:1px solid var(--grid); padding:48px; margin-bottom:48px;
+    display:flex; flex-direction:column; align-items:flex-start; gap:16px; max-width:640px;
+  }
+  .empty-panel h2{ font-size:22px; font-weight:700; }
+  .empty-panel p{ font-size:14px; color:var(--gray); max-width:44ch; }
+
+  /* ---------- footer ---------- */
+  .page-footer{
+    border-top:1px solid var(--grid); padding-top:24px; margin-top:32px;
+    font-size:11px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray);
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1100px){
+    .shell{ display:block; }
+    .sidebar{ min-height:auto; flex-direction:row; align-items:center; flex-wrap:wrap; gap:24px; border-right:none; border-bottom:1px solid var(--grid); padding:20px 24px; }
+    .nav-list{ flex-direction:row; flex-wrap:wrap; gap:4px 20px; }
+    .sidebar-foot{ margin-top:0; margin-left:auto; border-top:none; padding-top:0; }
+    .content-inner{ padding:32px 24px 64px; }
+    .grid-guides{ left:24px; right:24px; }
+    .headline{ font-size:clamp(40px, 11vw, 72px); }
+    .kpi--gmv, .kpi--count, .kpi--rate, .kpi--pending{ grid-column:span 6; }
+    .kpi:nth-child(3), .kpi:nth-child(4){ border-left:1px solid var(--grid); }
+    .chart-trend, .chart-part, .goal{ grid-column:span 12; }
+    .btn-primary{ margin-left:0; }
+  }
+  @media (max-width:640px){
+    .kpi--gmv, .kpi--count, .kpi--rate, .kpi--pending{ grid-column:span 12; border-left:none !important; padding-left:0 !important; }
+    .kpi{ border-top:1px solid var(--grid); padding-top:16px; }
+    .control-row{ gap:16px; }
+    .donut-wrap{ flex-direction:column; align-items:flex-start; }
+  }
+
+  /* ---------- reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce){
+    .grid-guides,.plot-group,.kpi,.goal-fill,.status--fail .status-dot{
+      animation:none !important;
+      clip-path:none !important;
+      opacity:1 !important;
+      transform:none !important;
+      width:68% !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar" data-region="nav">
+    <div class="brand" data-region="brand">
+      <span class="brand-mark" aria-hidden="true">FG</span>
+      <span class="brand-name">핀그리드</span>
+    </div>
+    <nav aria-label="주요 메뉴">
+      <ul class="nav-list">
+        <li><a href="#" class="nav-link is-active" aria-current="page">대시보드</a></li>
+        <li><a href="#" class="nav-link">거래</a></li>
+        <li><a href="#" class="nav-link">정산</a></li>
+        <li><a href="#" class="nav-link">가맹점</a></li>
+        <li><a href="#" class="nav-link">리포트</a></li>
+        <li><a href="#" class="nav-link">설정</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="user-avatar" aria-hidden="true">김</span>
+      <span class="user-info">
+        <strong>김운영</strong>
+        <span>정산팀</span>
+      </span>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="content-inner">
+      <div class="grid-guides" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <header class="hero" data-region="identity">
+        <p class="eyebrow">핀그리드 · SETTLEMENT DASHBOARD</p>
+        <h1 class="headline">정산<br>대시보드</h1>
+      </header>
+
+      <div class="control-row" data-region="filter">
+        <div class="tabs" role="tablist" aria-label="조회 기간">
+          <button type="button" class="tab" role="tab" aria-selected="false">오늘</button>
+          <button type="button" class="tab" role="tab" aria-selected="false">7일</button>
+          <button type="button" class="tab is-active" role="tab" aria-selected="true">30일</button>
+          <button type="button" class="tab" role="tab" aria-selected="false">90일</button>
+        </div>
+        <label class="channel-filter">
+          <span class="sr-only">채널 필터</span>
+          <select>
+            <option selected>전체 채널</option>
+            <option>카드</option>
+            <option>계좌이체</option>
+            <option>간편결제</option>
+          </select>
+        </label>
+        <button type="button" class="btn-primary" data-region="action">내보내기</button>
+      </div>
+
+      <section class="banner" data-region="banner" aria-label="정산 예정 안내">
+        <span class="banner-mark" aria-hidden="true"></span>
+        <p><strong>10월 21일 정산 예정</strong> — ₩1,284,900,000 · 영업일 기준 D-1</p>
+      </section>
+
+      <section class="kpi-grid" data-region="kpi" aria-label="핵심 지표">
+        <article class="kpi kpi--gmv">
+          <h3 class="kpi-label"><span aria-hidden="true">01 · </span>총 거래액(GMV)</h3>
+          <p class="kpi-value">₩1,284,732,050,000</p>
+          <p class="kpi-delta kpi-delta--up"><span aria-hidden="true">▲</span>&nbsp;+8.3%<span class="kpi-delta-note">전주 대비</span></p>
+          <svg class="sparkline" viewBox="0 0 110 32" preserveAspectRatio="none" role="img">
+            <title>최근 추이 상승</title>
+            <path d="M0,28 L15,25 L30,26 L45,18 L60,20 L75,10 L90,13 L105,4"></path>
+          </svg>
+        </article>
+        <article class="kpi kpi--count">
+          <h3 class="kpi-label"><span aria-hidden="true">02 · </span>결제 건수</h3>
+          <p class="kpi-value">12,847,192건</p>
+          <p class="kpi-delta kpi-delta--up"><span aria-hidden="true">▲</span>&nbsp;+12.1%<span class="kpi-delta-note">전주 대비</span></p>
+          <svg class="sparkline" viewBox="0 0 110 32" preserveAspectRatio="none" role="img">
+            <title>최근 추이 상승</title>
+            <path d="M0,27 L15,24 L30,25 L45,16 L60,19 L75,9 L90,12 L105,3"></path>
+          </svg>
+        </article>
+        <article class="kpi kpi--rate">
+          <h3 class="kpi-label"><span aria-hidden="true">03 · </span>승인율</h3>
+          <p class="kpi-value">94.7%</p>
+          <p class="kpi-delta kpi-delta--down"><span aria-hidden="true">▼</span>&nbsp;−1.2%p<span class="kpi-delta-note">전주 대비</span></p>
+          <svg class="sparkline" viewBox="0 0 110 32" preserveAspectRatio="none" role="img">
+            <title>최근 추이 하락</title>
+            <path d="M0,6 L15,9 L30,8 L45,15 L60,13 L75,21 L90,19 L105,26"></path>
+          </svg>
+        </article>
+        <article class="kpi kpi--pending">
+          <h3 class="kpi-label"><span aria-hidden="true">04 · </span>정산 대기액</h3>
+          <p class="kpi-value">₩312,048,900,000</p>
+          <p class="kpi-delta kpi-delta--flat"><span aria-hidden="true">—</span><span class="kpi-delta-note">신규 지표</span></p>
+          <svg class="sparkline" viewBox="0 0 110 32" preserveAspectRatio="none" role="img">
+            <title>최근 추이 보합</title>
+            <path d="M0,16 L15,15 L30,17 L45,16 L60,14 L75,16 L90,15 L105,16"></path>
+          </svg>
+        </article>
+      </section>
+
+      <section class="chart-row" aria-label="추이 및 구성">
+        <div class="panel chart-trend" data-region="chart-trend">
+          <h3><span aria-hidden="true">05 · </span>일별 거래액 추이 (최근 30일)</h3>
+          <svg class="trend-svg" viewBox="0 0 660 236" preserveAspectRatio="xMidYMid meet" role="img">
+            <title>일별 거래액 추이, 최근 30일. 최고 10월14일 58.2억, 최저 10월2일 31.7억</title>
+            <g transform="translate(56,12)">
+              <line class="axis-line" x1="0" y1="0" x2="580" y2="0"></line>
+              <line class="axis-line" x1="0" y1="100" x2="580" y2="100"></line>
+              <line class="axis-line" x1="0" y1="200" x2="580" y2="200"></line>
+              <text class="axis-label" x="-12" y="4" text-anchor="end">60</text>
+              <text class="axis-label" x="-12" y="104" text-anchor="end">30</text>
+              <text class="axis-label" x="-12" y="204" text-anchor="end">0</text>
+              <text class="axis-label" x="0" y="216" text-anchor="start">10/01</text>
+              <text class="axis-label" x="260" y="216" text-anchor="middle">10/14</text>
+              <text class="axis-label" x="580" y="216" text-anchor="end">10/30</text>
+
+              <g class="plot-group">
+                <path class="trend-area" d="M0,200 L0,86 L20,94.3 L40,88.3 L60,77.3 L80,83 L100,72 L120,62.7 L140,68 L160,56.7 L180,47.7 L200,52.3 L220,40.3 L240,29.3 L260,6 L280,18 L300,32.3 L320,39.7 L340,45 L360,34 L380,25.3 L400,30.3 L420,41.3 L440,49.3 L460,54 L480,46.3 L500,37.7 L520,50.3 L540,59 L560,64.7 L580,70.3 L580,200 Z"></path>
+                <path class="trend-line" d="M0,86 L20,94.3 L40,88.3 L60,77.3 L80,83 L100,72 L120,62.7 L140,68 L160,56.7 L180,47.7 L200,52.3 L220,40.3 L240,29.3 L260,6 L280,18 L300,32.3 L320,39.7 L340,45 L360,34 L380,25.3 L400,30.3 L420,41.3 L440,49.3 L460,54 L480,46.3 L500,37.7 L520,50.3 L540,59 L560,64.7 L580,70.3"></path>
+                <rect class="anno-dot" x="257" y="3" width="6" height="6"></rect>
+                <text class="anno-label" x="266" y="18">최고 ₩58.2억 (10/14)</text>
+                <rect class="anno-dot" x="17" y="91.3" width="6" height="6"></rect>
+                <text class="anno-label" x="30" y="128">최저 ₩31.7억 (10/02)</text>
+              </g>
+              <line class="crosshair" x1="0" y1="0" x2="0" y2="200"></line>
+              <g class="chart-tooltip">
+                <rect x="-30" y="-14" width="60" height="20"></rect>
+                <text x="0" y="0" text-anchor="middle"></text>
+              </g>
+            </g>
+          </svg>
+          <div class="trend-foot">
+            <p>최고 <strong>₩58.2억</strong> · 10/14</p>
+            <p>최저 <strong>₩31.7억</strong> · 10/02</p>
+          </div>
+        </div>
+
+        <div class="panel chart-part" data-region="chart-part">
+          <h3><span aria-hidden="true">06 · </span>결제수단 구성비</h3>
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 140 140" role="img">
+              <title>결제수단 구성비. 카드 52퍼센트, 계좌이체 24퍼센트, 간편결제 18퍼센트, 기타 6퍼센트</title>
+              <g transform="rotate(-90 70 70)">
+                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--ink)" stroke-width="20" stroke-dasharray="176.4 339.3" stroke-dashoffset="0"></circle>
+                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--gray)" stroke-width="20" stroke-dasharray="81.4 339.3" stroke-dashoffset="-176.4"></circle>
+                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--grid)" stroke-width="20" stroke-dasharray="61.1 339.3" stroke-dashoffset="-257.8"></circle>
+                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--ink)" stroke-width="1" stroke-dasharray="61.1 339.3" stroke-dashoffset="-257.8"></circle>
+                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--ink)" stroke-width="20" stroke-dasharray="1.6 2.4" stroke-dashoffset="-318.9" stroke-linecap="butt" opacity="0" ></circle>
+                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--ink)" stroke-width="1" stroke-dasharray="20.4 339.3" stroke-dashoffset="-318.9" stroke-linecap="butt"></circle>
+              </g>
+              <text class="donut-center-label" x="70" y="66" text-anchor="middle">52%</text>
+              <text class="donut-center-sub" x="70" y="80" text-anchor="middle">카드</text>
+            </svg>
+            <ul class="legend">
+              <li class="legend-item"><span class="legend-swatch legend-swatch--card" aria-hidden="true"></span><span class="legend-name">카드</span><span class="legend-pct">52%</span></li>
+              <li class="legend-item"><span class="legend-swatch legend-swatch--transfer" aria-hidden="true"></span><span class="legend-name">계좌이체</span><span class="legend-pct">24%</span></li>
+              <li class="legend-item"><span class="legend-swatch legend-swatch--easypay" aria-hidden="true"></span><span class="legend-name">간편결제</span><span class="legend-pct">18%</span></li>
+              <li class="legend-item"><span class="legend-swatch legend-swatch--etc" aria-hidden="true"></span><span class="legend-name">기타</span><span class="legend-pct">6%</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="panel goal" data-region="goal">
+          <h3><span aria-hidden="true">07 · </span>4분기 목표</h3>
+          <p class="goal-pct">68%</p>
+          <div class="goal-track" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-label="4분기 정산액 목표 달성률 68퍼센트">
+            <div class="goal-fill"></div>
+          </div>
+          <div class="goal-ticks"><span>0</span><span>50</span><span>100</span></div>
+          <p class="goal-value">4분기 정산액 목표<br><strong>₩3.4조</strong> / ₩5조</p>
+        </div>
+      </section>
+
+      <section class="table-section" data-region="table">
+        <div class="section-head">
+          <p class="section-label"><span aria-hidden="true">08 · </span>MERCHANTS</p>
+          <h2>가맹점별 정산 현황</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="merchant-table">
+            <thead>
+              <tr>
+                <th><button type="button" class="th-sort is-sorted" data-key="name">가맹점 <i>▲</i></button></th>
+                <th><button type="button" class="th-sort" data-key="amount">거래액 <i>▲</i></button></th>
+                <th><button type="button" class="th-sort" data-key="count">건수 <i>▲</i></button></th>
+                <th><button type="button" class="th-sort" data-key="rate">승인율 <i>▲</i></button></th>
+                <th><button type="button" class="th-sort" data-key="status">상태 <i>▲</i></button></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-name="(주)새벽마켓" data-amount="48203000000" data-count="482030" data-rate="96.2" data-status="완료">
+                <td>(주)새벽마켓</td>
+                <td class="num">₩48,203,000,000</td>
+                <td class="num">482,030</td>
+                <td class="num">96.2%</td>
+                <td><span class="status status--done"><span class="status-dot" aria-hidden="true"></span>완료</span></td>
+              </tr>
+              <tr data-name="글로벌 커머스 인터내셔널 유한회사" data-amount="31209000000" data-count="288110" data-rate="91.4" data-status="대기">
+                <td>글로벌 커머스 인터내셔널 유한회사 — 해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</td>
+                <td class="num">₩31,209,000,000</td>
+                <td class="num">288,110</td>
+                <td class="num">91.4%</td>
+                <td><span class="status status--pending"><span class="status-dot" aria-hidden="true"></span>대기</span></td>
+              </tr>
+              <tr data-name="김철수 스토어" data-amount="894000000" data-count="8940" data-rate="88.0" data-status="보류">
+                <td>김철수 스토어</td>
+                <td class="num">₩894,000,000</td>
+                <td class="num">8,940</td>
+                <td class="num">88.0%</td>
+                <td><span class="status status--hold"><span class="status-dot" aria-hidden="true"></span>보류</span></td>
+              </tr>
+              <tr data-name="데일리박스" data-amount="12048300000" data-count="" data-rate="94.7" data-status="완료">
+                <td>데일리박스</td>
+                <td class="num">₩12,048,300,000</td>
+                <td class="num cell-muted" aria-label="집계중">—</td>
+                <td class="num">94.7%</td>
+                <td><span class="status status--done"><span class="status-dot" aria-hidden="true"></span>완료</span></td>
+              </tr>
+              <tr data-name="페이앤고" data-amount="6201500000" data-count="61205" data-rate="79.3" data-status="실패">
+                <td>페이앤고</td>
+                <td class="num">₩6,201,500,000</td>
+                <td class="num">61,205</td>
+                <td class="num">79.3%</td>
+                <td><span class="status status--fail"><span class="status-dot" aria-hidden="true"></span>실패</span></td>
+              </tr>
+              <tr data-name="미니샵 코리아" data-amount="2900000" data-count="290" data-rate="100.0" data-status="완료">
+                <td>미니샵 코리아</td>
+                <td class="num">₩2,900,000</td>
+                <td class="num">290</td>
+                <td class="num">100.0%</td>
+                <td><span class="status status--done"><span class="status-dot" aria-hidden="true"></span>완료</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="empty-panel" data-region="empty">
+        <p class="section-label"><span aria-hidden="true">09 · </span>ANOMALY</p>
+        <h2>표시할 이상거래가 없어요</h2>
+        <p>최근 30일간 감지된 이상거래가 없습니다.</p>
+        <button type="button" class="btn-secondary" data-region="action">탐지 규칙 보기</button>
+      </section>
+
+      <footer class="page-footer">STYLE 18 · 스위스</footer>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // period tabs
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(o){ o.classList.remove('is-active'); o.setAttribute('aria-selected','false'); });
+      t.classList.add('is-active');
+      t.setAttribute('aria-selected','true');
+    });
+  });
+
+  // table sort
+  var table = document.querySelector('.merchant-table');
+  if (table) {
+    var tbody = table.querySelector('tbody');
+    var sortButtons = Array.prototype.slice.call(table.querySelectorAll('.th-sort'));
+    var currentDir = {};
+    sortButtons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var key = btn.getAttribute('data-key');
+        var dir = currentDir[key] === 'asc' ? 'desc' : 'asc';
+        currentDir = {}; currentDir[key] = dir;
+
+        sortButtons.forEach(function(b){
+          b.classList.remove('is-sorted');
+          b.querySelector('i').textContent = '▲';
+        });
+        btn.classList.add('is-sorted');
+        btn.querySelector('i').textContent = dir === 'asc' ? '▲' : '▼';
+
+        var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+        var isText = (key === 'name' || key === 'status');
+        rows.sort(function(a, b){
+          var av = a.getAttribute('data-' + key);
+          var bv = b.getAttribute('data-' + key);
+          if (isText) {
+            return dir === 'asc' ? av.localeCompare(bv, 'ko') : bv.localeCompare(av, 'ko');
+          }
+          var an = av === '' ? null : parseFloat(av);
+          var bn = bv === '' ? null : parseFloat(bv);
+          if (an === null && bn === null) return 0;
+          if (an === null) return 1;
+          if (bn === null) return -1;
+          return dir === 'asc' ? an - bn : bn - an;
+        });
+        rows.forEach(function(r){ tbody.appendChild(r); });
+      });
+    });
+  }
+
+  // trend chart crosshair
+  var svg = document.querySelector('.trend-svg');
+  if (svg && window.SVGGraphicsElement) {
+    var points = [
+      {x:0,  y:86,  d:'10/01', v:'34.2'}, {x:20, y:94.3,d:'10/02', v:'31.7'},
+      {x:40, y:88.3,d:'10/03', v:'33.5'}, {x:60, y:77.3,d:'10/04', v:'36.8'},
+      {x:80, y:83,  d:'10/05', v:'35.1'}, {x:100,y:72,  d:'10/06', v:'38.4'},
+      {x:120,y:62.7,d:'10/07', v:'41.2'}, {x:140,y:68,  d:'10/08', v:'39.6'},
+      {x:160,y:56.7,d:'10/09', v:'43.0'}, {x:180,y:47.7,d:'10/10', v:'45.7'},
+      {x:200,y:52.3,d:'10/11', v:'44.3'}, {x:220,y:40.3,d:'10/12', v:'47.9'},
+      {x:240,y:29.3,d:'10/13', v:'51.2'}, {x:260,y:6,   d:'10/14', v:'58.2'},
+      {x:280,y:18,  d:'10/15', v:'54.6'}, {x:300,y:32.3,d:'10/16', v:'50.3'},
+      {x:320,y:39.7,d:'10/17', v:'48.1'}, {x:340,y:45,  d:'10/18', v:'46.5'},
+      {x:360,y:34,  d:'10/19', v:'49.8'}, {x:380,y:25.3,d:'10/20', v:'52.4'},
+      {x:400,y:30.3,d:'10/21', v:'50.9'}, {x:420,y:41.3,d:'10/22', v:'47.6'},
+      {x:440,y:49.3,d:'10/23', v:'45.2'}, {x:460,y:54,  d:'10/24', v:'43.8'},
+      {x:480,y:46.3,d:'10/25', v:'46.1'}, {x:500,y:37.7,d:'10/26', v:'48.7'},
+      {x:520,y:50.3,d:'10/27', v:'44.9'}, {x:540,y:59,  d:'10/28', v:'42.3'},
+      {x:560,y:64.7,d:'10/29', v:'40.6'}, {x:580,y:70.3,d:'10/30', v:'38.9'}
+    ];
+    var crosshair = svg.querySelector('.crosshair');
+    var tooltip = svg.querySelector('.chart-tooltip');
+    var tooltipText = tooltip.querySelector('text');
+
+    svg.addEventListener('mousemove', function(e){
+      var pt = svg.createSVGPoint();
+      pt.x = e.clientX; pt.y = e.clientY;
+      var ctm = svg.getScreenCTM();
+      if (!ctm) return;
+      var loc = pt.matrixTransform(ctm.inverse());
+      var localX = loc.x - 56;
+      var idx = Math.round(localX / 20);
+      idx = Math.max(0, Math.min(points.length - 1, idx));
+      var p = points[idx];
+      crosshair.setAttribute('x1', p.x); crosshair.setAttribute('x2', p.x);
+      crosshair.style.opacity = 1;
+      tooltipText.textContent = p.d + '  ₩' + p.v + '억';
+      var tx = Math.min(Math.max(p.x, 32), 548);
+      tooltip.setAttribute('transform', 'translate(' + tx + ',' + p.y + ')');
+      tooltip.style.opacity = 1;
+    });
+    svg.addEventListener('mouseleave', function(){
+      crosshair.style.opacity = 0;
+      tooltip.style.opacity = 0;
+    });
+  }
+})();
+</script>
+</body>
+</html>

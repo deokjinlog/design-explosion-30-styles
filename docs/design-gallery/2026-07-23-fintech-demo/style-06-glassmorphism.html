@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>핀그리드 · 정산 대시보드 — 글래스모피즘</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --glass-fill: rgba(255,255,255,.12);
+  --glass-fill-hover: rgba(255,255,255,.20);
+  --glass-fill-strong: rgba(255,255,255,.16);
+  --glass-border: rgba(255,255,255,.30);
+  --glass-border-hover: rgba(255,255,255,.40);
+  --scrim: rgba(0,0,0,.18);
+  --text-1: #FFFFFF;
+  --text-2: rgba(255,255,255,.66);
+  --text-3: rgba(255,255,255,.48);
+  --accent: #F0ABFC;
+  --ok: #34D399;
+  --wait: #FBBF24;
+  --hold: #FB923C;
+  --fail: #F87171;
+  --radius-lg: 24px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+  --radius-xs: 10px;
+  --blur: blur(24px) saturate(140%);
+  --blur-strong: blur(28px) saturate(150%);
+  --shadow-1: 0 20px 44px -18px rgba(0,0,0,.38);
+  --shadow-2: 0 10px 26px -12px rgba(0,0,0,.32);
+  --sidebar-w: 248px;
+  --sidebar-w-collapsed: 76px;
+}
+
+*, *::before, *::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight:500;
+  font-variant-numeric: tabular-nums;
+  color:var(--text-1);
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 35%, #9333EA 65%, #EC4899 100%);
+  background-size:220% 220%;
+  background-attachment: fixed;
+  animation: auroraDrift 34s ease-in-out infinite alternate;
+  overflow-x:hidden;
+}
+h1,h2,h3,h4{ margin:0; font-weight:700; letter-spacing:-0.02em; }
+p{ margin:0; }
+button, select, input{ font-family:inherit; }
+a{ color:inherit; }
+
+@keyframes auroraDrift{
+  0%{ background-position: 0% 30%; }
+  50%{ background-position: 60% 60%; }
+  100%{ background-position: 100% 20%; }
+}
+
+/* ---------- 오로라 블롭 (배경 광원) ---------- */
+.aurora{
+  position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none;
+}
+.blob{
+  position:absolute; border-radius:50%; filter: blur(85px);
+  opacity:.55; will-change: transform;
+}
+.blob-1{
+  width:52vw; height:52vw; max-width:720px; max-height:720px;
+  top:-14%; left:-12%; background:#22D3EE;
+  animation: blobFloat1 26s ease-in-out infinite alternate;
+}
+.blob-2{
+  width:46vw; height:46vw; max-width:640px; max-height:640px;
+  bottom:-18%; right:-10%; background:#F472B6;
+  animation: blobFloat2 34s ease-in-out infinite alternate;
+}
+.blob-3{
+  width:38vw; height:38vw; max-width:520px; max-height:520px;
+  top:32%; right:18%; background:#A855F7;
+  opacity:.42;
+  animation: blobFloat3 29s ease-in-out infinite alternate;
+}
+@keyframes blobFloat1{ from{ transform: translate(0,0) scale(1); } to{ transform: translate(6vw, 8vh) scale(1.08); } }
+@keyframes blobFloat2{ from{ transform: translate(0,0) scale(1); } to{ transform: translate(-7vw, -6vh) scale(1.05); } }
+@keyframes blobFloat3{ from{ transform: translate(0,0) scale(1); } to{ transform: translate(-4vw, 7vh) scale(0.96); } }
+
+/* ---------- 유리 표면 베이스 ---------- */
+.glass{
+  background: var(--glass-fill);
+  border:1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    var(--shadow-2);
+  transition: background .25s ease, border-color .25s ease, backdrop-filter .25s ease;
+}
+.glass.scrim{
+  background: linear-gradient(var(--scrim), var(--scrim)), var(--glass-fill-strong);
+}
+.glass:hover{
+  background: var(--glass-fill-hover);
+  border-color: var(--glass-border-hover);
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+}
+.glass.scrim:hover{
+  background: linear-gradient(var(--scrim), var(--scrim)), var(--glass-fill-hover);
+}
+
+@supports not (backdrop-filter: blur(1px)){
+  .glass{ background: rgba(255,255,255,.22); }
+}
+
+/* ---------- 레이아웃 ---------- */
+.app{
+  display:grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height:100vh;
+}
+.main{
+  min-width:0;
+  padding: 24px 32px 48px;
+  display:flex; flex-direction:column; gap:24px;
+}
+.content-max{ max-width:1360px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:24px; }
+
+/* ---------- 사이드바 ---------- */
+.sidebar{
+  position:sticky; top:0; align-self:start; height:100vh;
+  display:flex; flex-direction:column;
+  padding:22px 16px;
+  border-radius:0;
+  border-right:1px solid var(--glass-border);
+  border-top:none; border-bottom:none; border-left:none;
+  background: var(--glass-fill);
+  backdrop-filter: var(--blur-strong);
+  -webkit-backdrop-filter: var(--blur-strong);
+  box-shadow: inset -1px 0 0 rgba(255,255,255,.12);
+  z-index:5;
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  padding: 4px 10px 22px;
+  font-size:20px; font-weight:700; letter-spacing:-0.01em;
+}
+.brand-mark{
+  width:32px; height:32px; border-radius:10px; flex:none;
+  background: linear-gradient(135deg, rgba(34,211,238,.85), rgba(168,85,247,.85));
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; font-weight:700; color:#fff;
+  border:1px solid rgba(255,255,255,.4);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+}
+.brand-name .sub{ display:block; font-size:11px; font-weight:600; color: var(--text-2); letter-spacing:.02em; }
+
+.nav-list{ list-style:none; margin:4px 0 0; padding:0; display:flex; flex-direction:column; gap:4px; flex:1; }
+.nav-item a{
+  display:flex; align-items:center; gap:12px;
+  padding:11px 12px; border-radius: var(--radius-xs);
+  text-decoration:none; color: var(--text-2);
+  font-size:14px; font-weight:600;
+  border:1px solid transparent;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.nav-item a svg{ width:19px; height:19px; flex:none; stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.nav-item a:hover{ background: rgba(255,255,255,.10); color: var(--text-1); }
+.nav-item a:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.nav-item.active a{
+  background: var(--glass-fill-hover);
+  border-color: var(--glass-border-hover);
+  color:#fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+}
+.nav-label{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.sidebar-user{
+  margin-top:12px; padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.18);
+  display:flex; align-items:center; gap:10px;
+}
+.avatar{
+  width:34px; height:34px; border-radius:50%; flex:none;
+  background: rgba(255,255,255,.16); border:1px solid var(--glass-border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; color:#fff;
+}
+.user-meta{ min-width:0; }
+.user-meta .name{ font-size:13px; font-weight:700; color:#fff; }
+.user-meta .role{ font-size:11.5px; color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.nav-toggle{
+  display:none; align-items:center; justify-content:center;
+  width:38px; height:38px; border-radius:var(--radius-xs);
+  background: var(--glass-fill); border:1px solid var(--glass-border); color:#fff;
+  cursor:pointer;
+}
+.nav-toggle svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; }
+#nav-check{ display:none; }
+
+/* ---------- 상단바 ---------- */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  flex-wrap:wrap;
+  padding:16px 20px;
+}
+.topbar-left{ display:flex; align-items:center; gap:14px; min-width:0; }
+.page-title{ font-size:22px; }
+.crumb{ font-size:12px; color:var(--text-3); font-weight:600; }
+
+.filter-bar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.tabs{
+  display:flex; gap:2px; padding:4px;
+  background: rgba(255,255,255,.08); border:1px solid var(--glass-border);
+  border-radius: var(--radius-xs);
+}
+.tab{
+  border:none; background:transparent; color:var(--text-2);
+  font-size:13px; font-weight:600; padding:7px 14px; border-radius:8px;
+  cursor:pointer; transition: background .2s ease, color .2s ease;
+}
+.tab:hover{ color:#fff; background: rgba(255,255,255,.08); }
+.tab:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.tab[aria-selected="true"]{
+  background: rgba(255,255,255,.9); color:#3B0764; box-shadow: var(--shadow-2);
+}
+
+.select-wrap{ position:relative; }
+.select{
+  appearance:none; -webkit-appearance:none;
+  background: rgba(255,255,255,.10); border:1px solid var(--glass-border); color:#fff;
+  font-size:13px; font-weight:600; padding:9px 32px 9px 14px; border-radius: var(--radius-xs);
+  cursor:pointer;
+}
+.select:hover{ background: rgba(255,255,255,.16); }
+.select:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.select-wrap::after{
+  content:""; position:absolute; right:12px; top:50%; width:7px; height:7px;
+  border-right:1.6px solid var(--text-2); border-bottom:1.6px solid var(--text-2);
+  transform: translateY(-65%) rotate(45deg); pointer-events:none;
+}
+
+.btn{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:13.5px; font-weight:700; padding:10px 18px; border-radius: var(--radius-xs);
+  cursor:pointer; border:1px solid transparent; white-space:nowrap;
+  transition: background .2s ease, border-color .2s ease, transform .15s ease;
+}
+.btn-primary{
+  background: rgba(255,255,255,.92); color:#3B0764;
+  box-shadow: var(--shadow-2);
+}
+.btn-primary:hover{ background:#fff; }
+.btn-primary:active{ transform: translateY(1px); }
+.btn-primary:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
+.btn-primary:disabled{ background: rgba(255,255,255,.35); color: rgba(59,7,100,.5); cursor:not-allowed; box-shadow:none; }
+.btn-ghost{
+  background: rgba(255,255,255,.08); border-color: var(--glass-border); color:#fff;
+}
+.btn-ghost:hover{ background: rgba(255,255,255,.16); }
+.btn-ghost:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.btn svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+/* ---------- 배너 ---------- */
+.banner{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:16px 22px; position:relative; z-index:1; margin-bottom:-18px;
+}
+.banner-icon{
+  width:36px; height:36px; border-radius:11px; flex:none;
+  background: rgba(240,171,252,.18); border:1px solid rgba(240,171,252,.4);
+  display:flex; align-items:center; justify-content:center; color:var(--accent);
+}
+.banner-icon svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.banner-text{ font-size:14px; color:var(--text-1); font-weight:600; }
+.banner-text b{ color:var(--accent); font-weight:700; text-shadow:0 1px 2px rgba(0,0,0,.25); }
+.banner-text .dim{ color:var(--text-2); font-weight:500; }
+
+/* ---------- KPI ---------- */
+.kpi-grid{
+  position:relative; z-index:2;
+  padding-top:20px;
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:18px;
+}
+.kpi-card{
+  padding:20px 20px 18px; min-width:0;
+  display:flex; flex-direction:column; gap:12px;
+  opacity:0; animation: cardIn .4s ease forwards;
+}
+.kpi-card:nth-child(1){ animation-delay: .02s; }
+.kpi-card:nth-child(2){ animation-delay: .08s; }
+.kpi-card:nth-child(3){ animation-delay: .14s; }
+.kpi-card:nth-child(4){ animation-delay: .20s; }
+@keyframes cardIn{
+  from{ opacity:0; transform: translateY(8px); backdrop-filter: blur(0px) saturate(100%); -webkit-backdrop-filter: blur(0px) saturate(100%); }
+  to{ opacity:1; transform: translateY(0); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); }
+}
+.kpi-label{ font-size:13px; font-weight:600; color:var(--text-2); }
+.kpi-value{
+  font-size: clamp(1.05rem, 1vw + 1rem, 1.55rem);
+  font-weight:700; letter-spacing:-0.01em; color:#fff; line-height:1.2;
+  overflow-wrap:break-word;
+  text-shadow:0 1px 2px rgba(0,0,0,.22);
+}
+.kpi-foot{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; }
+.kpi-delta{ display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:700; padding:4px 9px; border-radius:999px; border:1px solid; }
+.kpi-delta.up{ color:var(--ok); border-color: rgba(52,211,153,.45); background: rgba(52,211,153,.10); }
+.kpi-delta.down{ color:var(--fail); border-color: rgba(248,113,113,.45); background: rgba(248,113,113,.10); }
+.kpi-delta.flat{ color:var(--text-2); border-color: rgba(255,255,255,.28); background: rgba(255,255,255,.06); }
+.kpi-spark{ display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+.kpi-spark svg{ width:64px; height:24px; display:block; }
+.kpi-spark .spark-label{ font-size:10.5px; font-weight:600; color:var(--text-3); }
+.spark-up{ stroke:var(--ok); }
+.spark-down{ stroke:var(--fail); }
+.spark-flat{ stroke: var(--text-3); }
+
+/* ---------- 섹션 헤더 ---------- */
+.panel{ padding:22px 22px 20px; min-width:0; }
+.panel-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+.panel-title{ font-size:16px; font-weight:700; }
+.panel-sub{ font-size:12.5px; color:var(--text-2); font-weight:500; margin-top:3px; }
+.legend{ display:flex; gap:14px; flex-wrap:wrap; }
+.legend-item{ display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--text-2); }
+.legend-dot{ width:9px; height:9px; border-radius:50%; flex:none; }
+
+/* ---------- 차트 그리드 ---------- */
+.charts-row{ display:grid; grid-template-columns:1.7fr 1fr; gap:18px; align-items:stretch; }
+
+.trend-wrap{ position:relative; }
+.trend-wrap svg{ width:100%; height:auto; display:block; overflow:visible; }
+.trend-annotations{ display:flex; gap:22px; margin-top:14px; flex-wrap:wrap; }
+.annotation{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--text-2); }
+.annotation .dot{ width:8px; height:8px; border-radius:50%; flex:none; }
+.annotation b{ color:#fff; font-weight:700; }
+.dot-max{ background:var(--accent); box-shadow:0 0 0 3px rgba(240,171,252,.22); }
+.dot-min{ background:#22D3EE; box-shadow:0 0 0 3px rgba(34,211,238,.22); }
+
+.donut-wrap{ display:flex; flex-direction:column; align-items:center; gap:16px; }
+.donut-svg{ width:168px; height:168px; }
+.donut-center-val{ font-size:22px; font-weight:700; fill:#fff; }
+.donut-center-lbl{ font-size:10.5px; font-weight:600; fill: rgba(255,255,255,.6); }
+.donut-legend{ width:100%; display:flex; flex-direction:column; gap:9px; }
+.donut-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; }
+.donut-row .name{ display:flex; align-items:center; gap:8px; color:var(--text-2); font-weight:600; }
+.donut-row .pct{ font-weight:700; color:#fff; }
+
+/* ---------- 목표 + 빈 상태 ---------- */
+.mid-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:stretch; }
+
+.goal-value-row{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+.goal-values{ font-size:20px; font-weight:700; }
+.goal-values .of{ color:var(--text-2); font-weight:600; font-size:15px; margin:0 4px; }
+.goal-pct{ font-size:26px; font-weight:700; color:var(--accent); text-shadow:0 1px 2px rgba(0,0,0,.25); }
+
+.goal-track{
+  position:relative; height:22px; border-radius:999px; overflow:hidden;
+  background: rgba(255,255,255,.10); border:1px solid var(--glass-border);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.goal-fill{
+  position:relative; height:100%; width:68%; border-radius:999px;
+  background: linear-gradient(90deg, rgba(34,211,238,.55), rgba(168,85,247,.65), rgba(240,171,252,.75));
+  border:1px solid rgba(255,255,255,.4);
+  backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  transition: filter .2s ease;
+}
+.goal-fill::after{
+  content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background: rgba(255,255,255,.85); opacity:0; transition: opacity .2s ease;
+}
+.goal-card:hover .goal-fill{ filter:brightness(1.18); }
+.goal-card:hover .goal-fill::after{ opacity:1; }
+.goal-ticks{ display:flex; justify-content:space-between; margin-top:8px; font-size:11px; color:var(--text-3); font-weight:600; }
+
+.empty-inner{ height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:10px; padding:8px 6px; }
+.empty-icon{
+  width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background: rgba(52,211,153,.14); border:1px solid rgba(52,211,153,.35); color:var(--ok);
+  margin-bottom:4px;
+}
+.empty-icon svg{ width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.empty-headline{ font-size:16px; font-weight:700; }
+.empty-desc{ font-size:13px; color:var(--text-2); max-width:34ch; line-height:1.5; }
+.empty-cta{ margin-top:6px; }
+
+/* ---------- 테이블 ---------- */
+.table-scroll{ overflow-x:auto; margin: 0 -4px; padding: 0 4px; }
+table.data{ width:100%; min-width:760px; border-collapse:collapse; }
+table.data th{
+  text-align:left; font-size:12px; font-weight:700; color: var(--text-2);
+  text-transform:none; letter-spacing:.01em;
+  padding:10px 14px; border-bottom:1px solid rgba(255,255,255,.22);
+  white-space:nowrap;
+}
+table.data th.num, table.data td.num{ text-align:right; }
+table.data td{
+  padding:14px 14px; font-size:13.5px; font-weight:600; color:#fff;
+  border-bottom:1px solid rgba(255,255,255,.12);
+  vertical-align:middle;
+}
+table.data tbody tr{ transition: background .2s ease; }
+table.data tbody tr:hover{ background: rgba(255,255,255,.07); }
+table.data tbody tr:last-child td{ border-bottom:none; }
+.merchant-cell{ max-width:280px; }
+.merchant-name{ display:block; line-height:1.45; overflow-wrap:break-word; }
+.merchant-name.long{ color: var(--text-1); font-weight:600; }
+.merchant-flag{ display:block; font-size:11px; color:var(--text-3); font-weight:600; margin-top:2px; }
+.na{ color: var(--text-3); font-weight:700; }
+
+.rate-cell{ display:flex; flex-direction:column; gap:5px; min-width:76px; }
+.rate-bar{ height:4px; border-radius:999px; background: rgba(255,255,255,.14); overflow:hidden; }
+.rate-bar > span{ display:block; height:100%; border-radius:999px; background: rgba(255,255,255,.7); }
+
+.status-pill{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 11px 5px 9px; border-radius:999px; font-size:12px; font-weight:700;
+  background: rgba(255,255,255,.08); border:1px solid;
+}
+.status-dot{ width:7px; height:7px; border-radius:50%; flex:none; }
+.status-done{ color:var(--ok); border-color:rgba(52,211,153,.45); }
+.status-done .status-dot{ background:var(--ok); }
+.status-pending{ color:var(--wait); border-color:rgba(251,191,36,.45); }
+.status-pending .status-dot{ background:var(--wait); }
+.status-hold{ color:var(--hold); border-color:rgba(251,146,60,.45); }
+.status-hold .status-dot{ background:var(--hold); }
+.status-fail{ color:var(--fail); border-color:rgba(248,113,113,.45); }
+.status-fail .status-dot{ background:var(--fail); }
+
+/* ---------- 푸터 ---------- */
+.footer{
+  text-align:center; padding:18px 0 6px; font-size:12px; color: var(--text-3); font-weight:600;
+}
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 1100px){
+  .app{ grid-template-columns: var(--sidebar-w-collapsed) 1fr; }
+  .sidebar{ padding:20px 12px; align-items:center; }
+  .brand{ justify-content:center; padding:4px 0 20px; }
+  .brand-name{ display:none; }
+  .nav-item a{ justify-content:center; padding:11px; }
+  .nav-label{ display:none; }
+  .sidebar-user{ justify-content:center; }
+  .user-meta{ display:none; }
+  .main{ padding:20px 18px 40px; }
+  .kpi-grid{ grid-template-columns:repeat(2, 1fr); }
+  .charts-row{ grid-template-columns:1fr; }
+  .mid-row{ grid-template-columns:1fr; }
+}
+
+@media (max-width: 900px){
+  .nav-toggle{ display:inline-flex; }
+  .app{ grid-template-columns: 1fr; }
+  .sidebar{
+    position:fixed; left:0; top:0; height:100vh; width: min(78vw, 280px);
+    transform: translateX(-100%);
+    transition: transform .25s ease; z-index:50;
+    align-items:stretch;
+  }
+  .sidebar .brand-name, .sidebar .nav-label, .sidebar .user-meta{ display:block; }
+  .sidebar .brand{ justify-content:flex-start; }
+  .sidebar .nav-item a{ justify-content:flex-start; }
+  .sidebar .sidebar-user{ justify-content:flex-start; }
+  #nav-check:checked ~ .app .sidebar{ transform: translateX(0); box-shadow: 40px 0 80px rgba(0,0,0,.35); }
+  .nav-scrim{
+    display:none; position:fixed; inset:0; background: rgba(0,0,0,.35); z-index:40;
+  }
+  #nav-check:checked ~ .app .nav-scrim{ display:block; }
+  .topbar{ padding:14px 16px; }
+  .page-title{ font-size:19px; }
+}
+
+@media (max-width: 640px){
+  .kpi-grid{ grid-template-columns:1fr; }
+  .filter-bar{ width:100%; justify-content:flex-start; }
+  .tabs{ overflow-x:auto; }
+  .panel{ padding:18px 16px 16px; }
+  .donut-svg{ width:140px; height:140px; }
+  .goal-values{ font-size:17px; }
+  .goal-pct{ font-size:22px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  body, .blob, .kpi-card{ animation:none !important; }
+  .kpi-card{ opacity:1; transform:none; backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); }
+  .glass{ transition:none; }
+}
+</style>
+</head>
+<body>
+
+<div class="aurora" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<input type="checkbox" id="nav-check">
+<label for="nav-check" class="nav-scrim" aria-hidden="true"></label>
+
+<div class="app">
+
+  <aside class="sidebar glass scrim" data-region="nav" aria-label="주요 내비게이션">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">FG</span>
+      <span class="brand-name">핀그리드<span class="sub">FinGrid</span></span>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active">
+        <a href="#" aria-current="page">
+          <svg viewBox="0 0 20 20"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+          <span class="nav-label">대시보드</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#">
+          <svg viewBox="0 0 20 20"><path d="M3 6.5h11.5m0 0-3-3m3 3-3 3"/><path d="M17 13.5H5.5m0 0 3 3m-3-3 3-3"/></svg>
+          <span class="nav-label">거래</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#">
+          <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M6.6 10.2l2.1 2.1 4.2-4.6"/></svg>
+          <span class="nav-label">정산</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#">
+          <svg viewBox="0 0 20 20"><path d="M3 8.2 4 4h12l1 4.2"/><path d="M3 8.2h14V16H3z"/><path d="M8 16v-4.2h4V16"/></svg>
+          <span class="nav-label">가맹점</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#">
+          <svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="1.6"/><path d="M6.5 13v-3M10 13V7m3.5 6v-5"/></svg>
+          <span class="nav-label">리포트</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#">
+          <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.1"/><path d="M10 2.6v2M10 15.4v2M2.6 10h2M15.4 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/></svg>
+          <span class="nav-label">설정</span>
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar-user">
+      <span class="avatar" aria-hidden="true">김운</span>
+      <div class="user-meta">
+        <span class="name">김운영</span>
+        <span class="role">정산팀</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="content-max">
+
+      <div class="topbar glass scrim">
+        <div class="topbar-left">
+          <label for="nav-check" class="nav-toggle" aria-label="메뉴 열기">
+            <svg viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14"/></svg>
+          </label>
+          <div>
+            <h1 class="page-title" data-region="identity">정산 대시보드</h1>
+            <span class="crumb">핀그리드 · Info &gt; Finance</span>
+          </div>
+        </div>
+        <div class="filter-bar" data-region="filter">
+          <div class="tabs" role="tablist" aria-label="조회 기간">
+            <button class="tab" role="tab" aria-selected="false">오늘</button>
+            <button class="tab" role="tab" aria-selected="false">7일</button>
+            <button class="tab" role="tab" aria-selected="true">30일</button>
+            <button class="tab" role="tab" aria-selected="false">90일</button>
+          </div>
+          <div class="select-wrap">
+            <select class="select" aria-label="채널 필터">
+              <option>전체 채널</option>
+              <option>카드</option>
+              <option>계좌이체</option>
+              <option>간편결제</option>
+            </select>
+          </div>
+          <button class="btn btn-primary">
+            <svg viewBox="0 0 20 20"><path d="M10 3v10m0 0-3.5-3.5M10 13l3.5-3.5"/><path d="M3.5 15.5v1.2c0 .9.7 1.6 1.6 1.6h9.8c.9 0 1.6-.7 1.6-1.6v-1.2"/></svg>
+            내보내기
+          </button>
+        </div>
+      </div>
+
+      <div class="banner glass scrim" data-region="banner">
+        <span class="banner-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.2"/><path d="M10 6.2v4.4l3 1.8"/></svg>
+        </span>
+        <p class="banner-text">10월 21일 정산 예정 — <b>₩1,284,900,000</b> <span class="dim">· 영업일 기준 D-1</span></p>
+      </div>
+
+      <section class="kpi-grid" data-region="kpi" aria-label="핵심 지표">
+        <article class="kpi-card glass scrim">
+          <span class="kpi-label">총 거래액(GMV)</span>
+          <span class="kpi-value">₩1,284,732,050,000</span>
+          <div class="kpi-foot">
+            <span class="kpi-delta up" aria-label="전주 대비 8.3퍼센트 상승">▲ +8.3%</span>
+            <span class="kpi-spark">
+              <svg viewBox="0 0 80 30" class="spark-up" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="0,24 16,20 32,21 48,12 64,9 80,4"/>
+              </svg>
+              <span class="spark-label">상승 ↗</span>
+            </span>
+          </div>
+        </article>
+        <article class="kpi-card glass scrim">
+          <span class="kpi-label">결제 건수</span>
+          <span class="kpi-value">12,847,192건</span>
+          <div class="kpi-foot">
+            <span class="kpi-delta up" aria-label="전주 대비 12.1퍼센트 상승">▲ +12.1%</span>
+            <span class="kpi-spark">
+              <svg viewBox="0 0 80 30" class="spark-up" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="0,25 16,22 32,17 48,15 64,8 80,5"/>
+              </svg>
+              <span class="spark-label">상승 ↗</span>
+            </span>
+          </div>
+        </article>
+        <article class="kpi-card glass scrim">
+          <span class="kpi-label">승인율</span>
+          <span class="kpi-value">94.7%</span>
+          <div class="kpi-foot">
+            <span class="kpi-delta down" aria-label="전주 대비 1.2퍼센트포인트 하락">▼ −1.2%p</span>
+            <span class="kpi-spark">
+              <svg viewBox="0 0 80 30" class="spark-down" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="0,6 16,9 32,8 48,17 64,21 80,26"/>
+              </svg>
+              <span class="spark-label">하락 ↘</span>
+            </span>
+          </div>
+        </article>
+        <article class="kpi-card glass scrim">
+          <span class="kpi-label">정산 대기액</span>
+          <span class="kpi-value">₩312,048,900,000</span>
+          <div class="kpi-foot">
+            <span class="kpi-delta flat" aria-label="전주 대비 데이터 없음 · 신규 지표">—</span>
+            <span class="kpi-spark">
+              <svg viewBox="0 0 80 30" class="spark-flat" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="0,15 16,16 32,14 48,16 64,15 80,15"/>
+              </svg>
+              <span class="spark-label">평탄</span>
+            </span>
+          </div>
+        </article>
+      </section>
+
+      <div class="charts-row">
+        <section class="panel glass scrim" data-region="chart-trend" aria-label="일별 거래액 추이">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">일별 거래액 추이</h2>
+              <p class="panel-sub">최근 30일 · 단위: 억</p>
+            </div>
+          </div>
+          <div class="trend-wrap">
+            <svg viewBox="0 0 580 196" preserveAspectRatio="none" role="img" aria-label="최근 30일 일별 거래액 추이 라인 차트">
+              <defs>
+                <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="rgba(255,255,255,.42)"/>
+                  <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+                </linearGradient>
+              </defs>
+              <line x1="8" y1="26" x2="572" y2="26" stroke="rgba(255,255,255,.14)" stroke-width="1"/>
+              <line x1="8" y1="98" x2="572" y2="98" stroke="rgba(255,255,255,.14)" stroke-width="1"/>
+              <line x1="8" y1="172" x2="572" y2="172" stroke="rgba(255,255,255,.24)" stroke-width="1"/>
+              <path d="M8,190 L8,135.09 L27.45,172 L46.9,158.23 L66.34,143.9 L85.79,129.03 L105.24,114.7 L124.69,124.62 L144.14,137.84 L163.59,119.66 L183.03,100.93 L202.48,86.05 L221.93,94.32 L241.38,72.83 L260.83,26 L280.28,57.95 L299.72,77.24 L319.17,91.56 L338.62,100.38 L358.07,83.3 L377.52,70.08 L396.97,51.34 L416.41,63.46 L435.86,78.34 L455.31,88.26 L474.76,75.03 L494.21,55.75 L513.66,43.08 L533.1,50.79 L552.55,35.92 L572,44.18 L572,190 Z" fill="url(#areaFill)"/>
+              <path d="M8,135.09 L27.45,172 L46.9,158.23 L66.34,143.9 L85.79,129.03 L105.24,114.7 L124.69,124.62 L144.14,137.84 L163.59,119.66 L183.03,100.93 L202.48,86.05 L221.93,94.32 L241.38,72.83 L260.83,26 L280.28,57.95 L299.72,77.24 L319.17,91.56 L338.62,100.38 L358.07,83.3 L377.52,70.08 L396.97,51.34 L416.41,63.46 L435.86,78.34 L455.31,88.26 L474.76,75.03 L494.21,55.75 L513.66,43.08 L533.1,50.79 L552.55,35.92 L572,44.18" fill="none" stroke="#F0ABFC" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="260.83" cy="26" r="4.6" fill="#F0ABFC" stroke="rgba(255,255,255,.8)" stroke-width="1.4"/>
+              <circle cx="27.45" cy="172" r="4.6" fill="#22D3EE" stroke="rgba(255,255,255,.8)" stroke-width="1.4"/>
+              <text x="8" y="188" fill="rgba(255,255,255,.42)" font-size="9" font-weight="600">10/01</text>
+              <text x="255" y="188" fill="rgba(255,255,255,.42)" font-size="9" font-weight="600">10/14</text>
+              <text x="548" y="188" fill="rgba(255,255,255,.42)" font-size="9" font-weight="600">10/30</text>
+            </svg>
+          </div>
+          <div class="trend-annotations">
+            <span class="annotation"><span class="dot dot-max"></span>최고 <b>₩58.2억</b> (10/14)</span>
+            <span class="annotation"><span class="dot dot-min"></span>최저 <b>₩31.7억</b> (10/02)</span>
+          </div>
+        </section>
+
+        <section class="panel glass scrim" data-region="chart-part" aria-label="결제수단 구성비">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">결제수단 구성비</h2>
+              <p class="panel-sub">최근 30일 결제 건수 기준</p>
+            </div>
+          </div>
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 200 200" role="img" aria-label="결제수단 구성비 도넛 차트: 카드 52%, 계좌이체 24%, 간편결제 18%, 기타 6%">
+              <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="24"/>
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#22D3EE" stroke-width="24"
+                stroke-dasharray="228.71 211.11" stroke-dashoffset="0" stroke-linecap="butt" transform="rotate(-90 100 100)" opacity=".92"/>
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#F472B6" stroke-width="24"
+                stroke-dasharray="105.56 334.26" stroke-dashoffset="-228.71" stroke-linecap="butt" transform="rotate(-90 100 100)" opacity=".92"/>
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#A855F7" stroke-width="24"
+                stroke-dasharray="79.17 360.65" stroke-dashoffset="-334.27" stroke-linecap="butt" transform="rotate(-90 100 100)" opacity=".92"/>
+              <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="24"
+                stroke-dasharray="26.39 413.43" stroke-dashoffset="-413.44" stroke-linecap="butt" transform="rotate(-90 100 100)"/>
+              <text x="100" y="96" text-anchor="middle" class="donut-center-val">52%</text>
+              <text x="100" y="114" text-anchor="middle" class="donut-center-lbl">카드 최다</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="donut-row"><span class="name"><span class="legend-dot" style="background:#22D3EE"></span>카드</span><span class="pct">52%</span></div>
+              <div class="donut-row"><span class="name"><span class="legend-dot" style="background:#F472B6"></span>계좌이체</span><span class="pct">24%</span></div>
+              <div class="donut-row"><span class="name"><span class="legend-dot" style="background:#A855F7"></span>간편결제</span><span class="pct">18%</span></div>
+              <div class="donut-row"><span class="name"><span class="legend-dot" style="background:rgba(255,255,255,.55)"></span>기타</span><span class="pct">6%</span></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="mid-row">
+        <section class="panel glass scrim goal-card" data-region="goal" aria-label="4분기 정산액 목표">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">4분기 정산액 목표</h2>
+              <p class="panel-sub">누적 정산액 기준 달성률</p>
+            </div>
+          </div>
+          <div class="goal-value-row">
+            <span class="goal-values">₩3.4조<span class="of">/</span>₩5조</span>
+            <span class="goal-pct">68%</span>
+          </div>
+          <div class="goal-track" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-label="4분기 정산액 목표 달성률 68퍼센트">
+            <div class="goal-fill"></div>
+          </div>
+          <div class="goal-ticks"><span>₩0</span><span>₩2.5조</span><span>₩5조</span></div>
+        </section>
+
+        <section class="panel glass scrim" data-region="empty" aria-label="이상거래 탐지">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">이상거래 탐지</h2>
+              <p class="panel-sub">최근 30일 기준</p>
+            </div>
+          </div>
+          <div class="empty-inner">
+            <span class="empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9"/></svg>
+            </span>
+            <h3 class="empty-headline">표시할 이상거래가 없어요</h3>
+            <p class="empty-desc">최근 30일간 감지된 이상거래가 없습니다.</p>
+            <button class="btn btn-ghost empty-cta">탐지 규칙 보기</button>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel glass scrim" data-region="table" aria-label="가맹점별 정산 현황">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">가맹점별 정산 현황</h2>
+            <p class="panel-sub">거래액 기준 상위 6개 가맹점</p>
+          </div>
+          <div class="legend">
+            <span class="legend-item"><span class="legend-dot" style="background:var(--ok)"></span>완료</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--wait)"></span>대기</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--hold)"></span>보류</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--fail)"></span>실패</span>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="data">
+            <thead>
+              <tr>
+                <th scope="col">가맹점</th>
+                <th scope="col" class="num">거래액</th>
+                <th scope="col" class="num">건수</th>
+                <th scope="col" class="num">승인율</th>
+                <th scope="col">상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="merchant-cell"><span class="merchant-name">(주)새벽마켓</span></td>
+                <td class="num">₩48,203,000,000</td>
+                <td class="num">482,030</td>
+                <td class="num">
+                  <span class="rate-cell"><span>96.2%</span><span class="rate-bar"><span style="width:96.2%"></span></span></span>
+                </td>
+                <td><span class="status-pill status-done"><span class="status-dot"></span>완료</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-cell">
+                  <span class="merchant-name long">글로벌 커머스 인터내셔널 유한회사 — 해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</span>
+                </td>
+                <td class="num">₩31,209,000,000</td>
+                <td class="num">288,110</td>
+                <td class="num">
+                  <span class="rate-cell"><span>91.4%</span><span class="rate-bar"><span style="width:91.4%"></span></span></span>
+                </td>
+                <td><span class="status-pill status-pending"><span class="status-dot"></span>대기</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-cell"><span class="merchant-name">김철수 스토어</span></td>
+                <td class="num">₩894,000,000</td>
+                <td class="num">8,940</td>
+                <td class="num">
+                  <span class="rate-cell"><span>88.0%</span><span class="rate-bar"><span style="width:88.0%"></span></span></span>
+                </td>
+                <td><span class="status-pill status-hold"><span class="status-dot"></span>보류</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-cell"><span class="merchant-name">데일리박스</span></td>
+                <td class="num">₩12,048,300,000</td>
+                <td class="num"><span class="na">—</span></td>
+                <td class="num">
+                  <span class="rate-cell"><span>94.7%</span><span class="rate-bar"><span style="width:94.7%"></span></span></span>
+                </td>
+                <td><span class="status-pill status-done"><span class="status-dot"></span>완료</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-cell"><span class="merchant-name">페이앤고</span></td>
+                <td class="num">₩6,201,500,000</td>
+                <td class="num">61,205</td>
+                <td class="num">
+                  <span class="rate-cell"><span>79.3%</span><span class="rate-bar"><span style="width:79.3%"></span></span></span>
+                </td>
+                <td><span class="status-pill status-fail"><span class="status-dot"></span>실패</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-cell"><span class="merchant-name">미니샵 코리아</span></td>
+                <td class="num">₩2,900,000</td>
+                <td class="num">290</td>
+                <td class="num">
+                  <span class="rate-cell"><span>100.0%</span><span class="rate-bar"><span style="width:100%"></span></span></span>
+                </td>
+                <td><span class="status-pill status-done"><span class="status-dot"></span>완료</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="footer">STYLE 06 · 글래스모피즘</footer>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

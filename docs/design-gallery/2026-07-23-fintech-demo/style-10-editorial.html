@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>정산 대시보드 · 핀그리드 — 에디토리얼</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700;900&display=swap">
+<style>
+  :root{
+    --paper:#FAF7F2;
+    --paper-dim:#F3EEE4;
+    --ink:#1C1B18;
+    --ink-muted:rgba(28,27,24,.64);
+    --ink-faint:rgba(28,27,24,.40);
+    --crimson:#A32638;
+    --crimson-dim:rgba(163,38,56,.10);
+    --hairline:#D8D2C6;
+    --hairline-strong:#B9AF9A;
+    --green:#3F6B4F;
+    --green-dim:rgba(63,107,79,.10);
+    --ochre:#A6791F;
+    --ochre-dim:rgba(166,121,31,.12);
+    --slate:#6B655C;
+    --slate-dim:rgba(107,101,92,.12);
+    --highlighter:rgba(230,196,74,.28);
+    --sidebar-w:232px;
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Pretendard', -apple-system, sans-serif;
+    font-feature-settings:'tnum' 1;
+    font-variant-numeric:tabular-nums;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .visually-hidden{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+  a{color:var(--crimson); text-decoration:underline; text-underline-offset:2px;}
+  a:hover{color:#7E1D2C;}
+  h1,h2,h3{margin:0; font-family:'Noto Serif KR', serif; font-weight:700; letter-spacing:-0.01em;}
+  p{margin:0;}
+  button{font-family:inherit;}
+
+  /* ---------- 페이드인 (전체 일괄 1회) ---------- */
+  .page{animation:fadeIn 400ms ease-out both;}
+  @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
+  @media (prefers-reduced-motion: reduce){
+    .page{animation:none; opacity:1;}
+  }
+
+  /* ---------- 레이아웃 ---------- */
+  .page{
+    display:grid;
+    grid-template-columns:var(--sidebar-w) 1fr;
+    min-height:100vh;
+    max-width:1440px;
+    margin:0 auto;
+  }
+  .main{
+    min-width:0;
+    padding:var(--s6) var(--s7) var(--s9);
+    border-left:1px solid var(--hairline);
+  }
+
+  /* ---------- 이중 괘선 (섹션 상단) ---------- */
+  .rule-double{
+    position:relative;
+    border-top:2px solid var(--ink);
+    padding-top:6px;
+    margin-bottom:var(--s5);
+  }
+  .rule-double::before{
+    content:"";
+    position:absolute; left:0; right:0; top:4px; height:1px;
+    background:var(--hairline-strong);
+  }
+  .section-label{
+    display:inline-block;
+    font-family:'Noto Serif KR', serif;
+    font-style:italic;
+    font-size:13px;
+    color:var(--ink-muted);
+    letter-spacing:.02em;
+  }
+
+  /* ================= 사이드바 (nav) ================= */
+  .toc{
+    display:flex; flex-direction:column;
+    padding:var(--s6) var(--s5);
+    gap:var(--s6);
+  }
+  .toc-brand{
+    padding-bottom:var(--s4);
+    border-bottom:2px solid var(--ink);
+  }
+  .toc-logo{
+    display:block;
+    font-family:'Noto Serif KR', serif;
+    font-weight:900;
+    font-size:26px;
+    letter-spacing:-0.01em;
+  }
+  .toc-logo-sub{
+    display:block;
+    font-family:'Noto Serif KR', serif;
+    font-style:italic;
+    font-size:12px;
+    color:var(--ink-muted);
+    margin-top:2px;
+  }
+  .toc-menu{
+    display:flex; flex-direction:column;
+  }
+  .toc-item{
+    display:flex; align-items:baseline; gap:var(--s2);
+    padding:var(--s3) 0;
+    border-bottom:1px solid var(--hairline);
+    font-size:15px;
+    color:var(--ink);
+    text-decoration:none;
+  }
+  .toc-item::before{
+    content:"·";
+    color:var(--ink-faint);
+  }
+  .toc-item:hover{color:var(--crimson);}
+  .toc-item.is-active{
+    font-weight:700;
+    color:var(--crimson);
+  }
+  .toc-item.is-active::before{
+    content:"—";
+    color:var(--crimson);
+  }
+  .toc-user{
+    margin-top:auto;
+    padding-top:var(--s4);
+    border-top:1px solid var(--hairline);
+    display:flex; align-items:center; gap:var(--s3);
+  }
+  .toc-user-avatar{
+    width:28px; height:28px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--ink);
+    font-family:'Noto Serif KR', serif; font-weight:700; font-size:13px;
+    flex:none;
+  }
+  .toc-user-text{
+    font-size:13px;
+    color:var(--ink-muted);
+  }
+
+  /* ================= 마스트헤드 (identity) ================= */
+  .masthead-top{
+    display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap;
+    gap:var(--s3);
+    margin-bottom:var(--s3);
+  }
+  .nameplate{display:flex; align-items:baseline; gap:var(--s3);}
+  .nameplate-main{
+    font-family:'Noto Serif KR', serif; font-weight:900;
+    font-size:40px; letter-spacing:-0.015em;
+  }
+  .nameplate-en{
+    font-family:'Noto Serif KR', serif; font-style:italic;
+    font-size:14px; color:var(--ink-muted);
+  }
+  .masthead-meta{
+    display:flex; gap:var(--s3); flex-wrap:wrap;
+    font-size:12px; color:var(--ink-muted);
+    letter-spacing:.02em;
+  }
+  .meta-dot{color:var(--ink-faint);}
+  .page-title{
+    font-size:22px;
+    margin-top:var(--s5);
+    margin-bottom:var(--s3);
+  }
+  .lead{
+    font-family:'Noto Serif KR', serif;
+    font-size:19px;
+    line-height:1.62;
+    color:var(--ink);
+    max-width:74ch;
+    margin-bottom:var(--s7);
+  }
+  .lead strong{font-weight:700;}
+  .dropcap{
+    float:left;
+    font-family:'Noto Serif KR', serif;
+    font-weight:900;
+    font-size:64px;
+    line-height:.82;
+    padding:4px 8px 0 0;
+  }
+
+  /* ================= 툴바 (filter + action) ================= */
+  .toolbar{
+    display:flex; align-items:center; flex-wrap:wrap;
+    gap:var(--s5);
+    padding:var(--s4) 0;
+    border-top:1px solid var(--hairline);
+    border-bottom:1px solid var(--hairline);
+    margin-bottom:var(--s7);
+  }
+  .tabs{display:flex; gap:var(--s2);}
+  .tab{
+    appearance:none; background:transparent; border:1px solid transparent;
+    padding:6px 12px;
+    font-size:14px; color:var(--ink-muted);
+    cursor:pointer;
+  }
+  .tab:hover{color:var(--ink); border-color:var(--hairline-strong);}
+  .tab:focus-visible{outline:2px solid var(--crimson); outline-offset:1px;}
+  .tab.is-active{
+    color:var(--ink); font-weight:700;
+    border-bottom:2px solid var(--crimson);
+  }
+  .channel-select{position:relative; display:inline-flex; align-items:center;}
+  .channel-select::after{
+    content:"▾";
+    position:absolute; right:10px; pointer-events:none;
+    font-size:11px; color:var(--ink-muted);
+  }
+  .channel-select select{
+    appearance:none; -webkit-appearance:none;
+    background:var(--paper);
+    border:1px solid var(--hairline-strong);
+    padding:7px 28px 7px 12px;
+    font-family:inherit; font-size:14px; color:var(--ink);
+    cursor:pointer;
+  }
+  .channel-select select:focus-visible{outline:2px solid var(--crimson); outline-offset:1px;}
+  .spacer{flex:1;}
+  .btn-export{
+    appearance:none; cursor:pointer;
+    background:transparent;
+    border:1px solid var(--ink);
+    color:var(--ink);
+    font-family:inherit; font-size:14px; font-weight:600;
+    padding:9px 18px;
+  }
+  .btn-export:hover{background:var(--ink); color:var(--paper);}
+  .btn-export:active{background:var(--crimson); border-color:var(--crimson); color:var(--paper);}
+  .btn-export:focus-visible{outline:2px solid var(--crimson); outline-offset:2px;}
+
+  /* ================= 배너 ================= */
+  .banner{
+    display:flex; align-items:baseline; gap:var(--s4); flex-wrap:wrap;
+    padding:var(--s4) var(--s5);
+    border-left:3px solid var(--ochre);
+    background:var(--ochre-dim);
+    margin-bottom:var(--s8);
+    font-size:15px;
+  }
+  .banner-label{
+    font-family:'Noto Serif KR', serif; font-weight:700; font-style:italic;
+    font-size:13px; color:var(--ochre);
+    flex:none;
+  }
+  .banner p{color:var(--ink);}
+  .banner strong{font-weight:700;}
+
+  /* ================= KPI ================= */
+  .kpi-cards{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:0 var(--s6);
+    margin-bottom:var(--s8);
+  }
+  .kpi-card{
+    padding:0 0 var(--s6);
+    border-bottom:1px solid var(--hairline);
+    display:flex; flex-direction:column; gap:var(--s2);
+  }
+  .kpi-label{
+    font-size:13px; color:var(--ink-muted);
+    letter-spacing:.02em;
+  }
+  .kpi-value{
+    font-family:'Noto Serif KR', serif; font-weight:700;
+    font-size:29px; letter-spacing:-0.01em;
+    line-height:1.15;
+    word-break:break-word;
+  }
+  .kpi-delta{
+    display:flex; align-items:center; gap:var(--s2);
+    font-size:14px; font-weight:600;
+  }
+  .kpi-delta .delta-text{
+    font-size:12px; font-weight:400; color:var(--ink-muted);
+  }
+  .kpi-delta.is-up{color:var(--green);}
+  .kpi-delta.is-down{color:var(--crimson);}
+  .kpi-delta.is-none{color:var(--ink-faint); font-weight:400;}
+  .kpi-spark{margin:var(--s2) 0; height:32px;}
+  .kpi-spark svg{width:100%; height:100%; display:block; overflow:visible;}
+  .kpi-headline{
+    font-family:'Noto Serif KR', serif;
+    font-size:14px; line-height:1.55;
+    color:var(--ink);
+    padding-top:var(--s2);
+    border-top:1px solid var(--hairline);
+  }
+
+  /* ================= 차트 : 추이 ================= */
+  .chart-trend{margin-bottom:var(--s8);}
+  .chart-title{font-size:19px; margin-bottom:var(--s5);}
+  .chart-wrap{
+    border-top:1px solid var(--hairline);
+    border-bottom:1px solid var(--hairline);
+    padding:var(--s5) 0 var(--s4);
+  }
+  .chart-wrap svg{width:100%; height:auto; display:block;}
+  .chart-caption{
+    margin-top:var(--s4);
+    font-family:'Noto Serif KR', serif; font-style:italic;
+    font-size:14px; line-height:1.6;
+    color:var(--ink-muted);
+    max-width:70ch;
+  }
+  .chart-caption strong{font-style:normal; color:var(--ink); font-weight:700;}
+
+  /* ================= 구성비 + 목표 ================= */
+  .split-row{
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:var(--s7);
+    margin-bottom:var(--s8);
+    align-items:stretch;
+  }
+  .panel{border-top:2px solid var(--ink); border-bottom:1px solid var(--hairline); padding:var(--s5) 0;}
+  .panel h3{font-size:17px; margin-bottom:var(--s5);}
+  .donut-row{display:flex; align-items:center; gap:var(--s6);}
+  .donut-legend{list-style:none; margin:0; padding:0; flex:1; min-width:0;}
+  .donut-legend li{
+    display:flex; align-items:center; gap:var(--s3);
+    padding:7px 0;
+    border-bottom:1px solid var(--hairline);
+    font-size:14px;
+  }
+  .donut-legend li:last-child{border-bottom:none;}
+  .swatch{
+    width:12px; height:12px; flex:none;
+    border:1px solid var(--ink);
+  }
+  .swatch.sw-card{background:var(--ink);}
+  .swatch.sw-transfer{background:var(--crimson);}
+  .swatch.sw-easypay{background:var(--ochre);}
+  .swatch.sw-etc{background:var(--paper); background-image:repeating-linear-gradient(45deg, var(--slate) 0 2px, transparent 2px 5px);}
+  .legend-name{flex:1; color:var(--ink);}
+  .legend-pct{font-weight:700; font-family:'Noto Serif KR', serif;}
+  .goal-figure{
+    font-family:'Noto Serif KR', serif; font-weight:700;
+    font-size:38px; margin-bottom:var(--s2);
+  }
+  .goal-sub{font-size:14px; color:var(--ink-muted); margin-bottom:var(--s5);}
+  .goal-track{
+    position:relative;
+    height:14px;
+    background:var(--paper-dim);
+    border:1px solid var(--hairline-strong);
+  }
+  .goal-fill{
+    position:absolute; top:0; left:0; bottom:0;
+    background:var(--ink);
+  }
+  .goal-ticks{
+    display:flex; justify-content:space-between;
+    margin-top:6px;
+    font-size:11px; color:var(--ink-faint);
+  }
+  .panel-caption{
+    margin-top:var(--s4);
+    font-family:'Noto Serif KR', serif; font-style:italic;
+    font-size:13px; line-height:1.55; color:var(--ink-muted);
+  }
+  .panel-caption strong{font-style:normal; color:var(--ink); font-weight:700;}
+
+  /* ================= 표 ================= */
+  .table-section{margin-bottom:var(--s8);}
+  .table-title{font-size:19px; margin-bottom:var(--s2);}
+  .table-scroll{overflow-x:auto;}
+  table{
+    width:100%; min-width:640px;
+    border-collapse:collapse;
+    font-size:14px;
+  }
+  thead th{
+    text-align:left;
+    font-family:'Noto Serif KR', serif; font-weight:700; font-size:13px;
+    padding:var(--s3) var(--s4);
+    border-bottom:2px solid var(--ink);
+    white-space:nowrap;
+  }
+  thead th.num, tbody td.num{text-align:right;}
+  tbody td{
+    padding:var(--s3) var(--s4);
+    border-bottom:1px solid var(--hairline);
+    vertical-align:top;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--highlighter);}
+  td.merchant{
+    max-width:280px;
+    line-height:1.5;
+    word-break:keep-all;
+    overflow-wrap:break-word;
+  }
+  td.missing{color:var(--ink-faint); text-align:right;}
+  .status{
+    display:inline-flex; align-items:center; gap:6px;
+    font-weight:600; font-size:13.5px;
+    white-space:nowrap;
+  }
+  .status::before{content:""; width:8px; height:8px; flex:none;}
+  .status.st-done{color:var(--green);}
+  .status.st-done::before{background:var(--green);}
+  .status.st-pending{color:var(--ochre);}
+  .status.st-pending::before{background:var(--ochre);}
+  .status.st-hold{color:var(--slate);}
+  .status.st-hold::before{background:var(--slate);}
+  .status.st-fail{color:var(--crimson);}
+  .status.st-fail::before{background:var(--crimson);}
+  .table-caption{
+    margin-top:var(--s4);
+    font-family:'Noto Serif KR', serif; font-style:italic;
+    font-size:13px; color:var(--ink-muted);
+  }
+
+  /* ================= 빈 상태 (이상거래) ================= */
+  .empty-panel{
+    border-top:1px solid var(--hairline);
+    border-bottom:1px solid var(--hairline);
+    padding:var(--s7) var(--s5);
+    text-align:center;
+    margin-bottom:var(--s7);
+  }
+  .empty-mark{
+    width:40px; height:40px; margin:0 auto var(--s4);
+    border:1px solid var(--hairline-strong);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Noto Serif KR', serif; font-size:18px; color:var(--ink-faint);
+  }
+  .empty-title{font-size:18px; margin-bottom:var(--s2);}
+  .empty-desc{font-size:14px; color:var(--ink-muted); margin-bottom:var(--s4);}
+  .empty-cta{font-size:14px; font-weight:600;}
+
+  footer{
+    padding-top:var(--s5);
+    border-top:2px solid var(--ink);
+    font-size:12px; color:var(--ink-faint);
+    letter-spacing:.04em;
+    text-transform:uppercase;
+  }
+
+  /* ================= 반응형 ================= */
+  @media (max-width:1100px){
+    .page{grid-template-columns:1fr;}
+    .main{border-left:none; padding:var(--s5) var(--s5) var(--s8);}
+    .toc{
+      flex-direction:row; align-items:center; flex-wrap:wrap;
+      gap:var(--s5);
+      border-bottom:2px solid var(--ink);
+      padding:var(--s4) var(--s5);
+    }
+    .toc-brand{border-bottom:none; padding-bottom:0;}
+    .toc-menu{flex-direction:row; flex-wrap:wrap; gap:var(--s2) var(--s5);}
+    .toc-item{border-bottom:none; padding:4px 0;}
+    .toc-user{margin-top:0; margin-left:auto; padding-top:0; border-top:none;}
+    .kpi-cards{grid-template-columns:repeat(2, 1fr);}
+    .split-row{grid-template-columns:1fr;}
+    .nameplate-main{font-size:32px;}
+  }
+  @media (max-width:640px){
+    .main{padding:var(--s4) var(--s4) var(--s7);}
+    .kpi-cards{grid-template-columns:1fr;}
+    .kpi-card{border-right:none;}
+    .lead{font-size:17px;}
+    .dropcap{font-size:52px;}
+    .toolbar{gap:var(--s3);}
+    .donut-row{flex-direction:column; align-items:stretch;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <aside class="toc" data-region="nav">
+    <div class="toc-brand">
+      <span class="toc-logo">핀그리드</span>
+      <span class="toc-logo-sub">FinGrid</span>
+    </div>
+    <nav class="toc-menu" aria-label="주요 메뉴">
+      <a href="#" class="toc-item is-active" aria-current="page">대시보드</a>
+      <a href="#" class="toc-item">거래</a>
+      <a href="#" class="toc-item">정산</a>
+      <a href="#" class="toc-item">가맹점</a>
+      <a href="#" class="toc-item">리포트</a>
+      <a href="#" class="toc-item">설정</a>
+    </nav>
+    <div class="toc-user">
+      <span class="toc-user-avatar" aria-hidden="true">김</span>
+      <span class="toc-user-text">김운영 · 정산팀</span>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <header class="masthead" data-region="identity">
+      <div class="masthead-top">
+        <div class="nameplate">
+          <span class="nameplate-main">핀그리드</span>
+          <span class="nameplate-en">FinGrid</span>
+        </div>
+        <div class="masthead-meta">
+          <span>정산 리포트 · 조간</span>
+          <span class="meta-dot">·</span>
+          <span>2026년 7월 24일 금요일</span>
+          <span class="meta-dot">·</span>
+          <span>제128호</span>
+        </div>
+      </div>
+      <div class="rule-double"></div>
+      <h1 class="page-title">정산 대시보드</h1>
+      <p class="lead">
+        <span class="dropcap" aria-hidden="true">최</span>근 30일 총 거래액이 <strong>₩1,284,732,050,000</strong>으로 전주 대비 8.3% 늘었다. 승인율은 94.7%로 1.2%p 낮아졌고, 정산 대기액은 ₩312,048,900,000 규모다.
+      </p>
+    </header>
+
+    <div class="toolbar" data-region="filter">
+      <div class="tabs" role="tablist" aria-label="조회 기간">
+        <button type="button" class="tab" role="tab" aria-selected="false">오늘</button>
+        <button type="button" class="tab" role="tab" aria-selected="false">7일</button>
+        <button type="button" class="tab is-active" role="tab" aria-selected="true">30일</button>
+        <button type="button" class="tab" role="tab" aria-selected="false">90일</button>
+      </div>
+      <label class="channel-select">
+        <span class="visually-hidden">채널 필터</span>
+        <select>
+          <option>전체 채널</option>
+          <option>카드</option>
+          <option>계좌이체</option>
+          <option>간편결제</option>
+        </select>
+      </label>
+      <span class="spacer"></span>
+      <button type="button" class="btn-export" data-region="action">내보내기</button>
+    </div>
+
+    <div class="banner" data-region="banner">
+      <span class="banner-label">정산 예정</span>
+      <p>10월 21일 정산 예정 — <strong>₩1,284,900,000</strong> · 영업일 기준 D-1</p>
+    </div>
+
+    <section data-region="kpi">
+      <div class="rule-double"><span class="section-label">지표 · 최근 30일, 전주 대비</span></div>
+      <div class="kpi-cards">
+
+        <article class="kpi-card">
+          <p class="kpi-label">총 거래액 (GMV)</p>
+          <p class="kpi-value">₩1,284,732,050,000</p>
+          <p class="kpi-delta is-up">▲ +8.3%<span class="delta-text">전주 대비</span></p>
+          <div class="kpi-spark" aria-hidden="true">
+            <svg viewBox="0 0 100 32" preserveAspectRatio="none">
+              <polyline points="0,26 14,24 28,25 42,20 57,17 71,12 85,9 100,4" fill="none" stroke="var(--green)" stroke-width="2"/>
+            </svg>
+          </div>
+          <p class="kpi-headline">거래액, 전주 대비 8.3% 늘며 이번 리포트 기간 최고 수준을 유지했다.</p>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-label">결제 건수</p>
+          <p class="kpi-value">12,847,192건</p>
+          <p class="kpi-delta is-up">▲ +12.1%<span class="delta-text">전주 대비</span></p>
+          <div class="kpi-spark" aria-hidden="true">
+            <svg viewBox="0 0 100 32" preserveAspectRatio="none">
+              <polyline points="0,27 14,23 28,25 42,18 57,20 71,13 85,10 100,3" fill="none" stroke="var(--green)" stroke-width="2"/>
+            </svg>
+          </div>
+          <p class="kpi-headline">결제 건수, 전주보다 12.1% 늘어 이번 리포트 기간 중 최다를 기록했다.</p>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-label">승인율</p>
+          <p class="kpi-value">94.7%</p>
+          <p class="kpi-delta is-down">▼ −1.2%p<span class="delta-text">전주 대비</span></p>
+          <div class="kpi-spark" aria-hidden="true">
+            <svg viewBox="0 0 100 32" preserveAspectRatio="none">
+              <polyline points="0,4 14,7 28,6 42,14 57,12 71,20 85,18 100,26" fill="none" stroke="var(--crimson)" stroke-width="2"/>
+            </svg>
+          </div>
+          <p class="kpi-headline">승인율, 전주 대비 1.2%p 낮아지며 하락 전환됐다.</p>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-label">정산 대기액</p>
+          <p class="kpi-value">₩312,048,900,000</p>
+          <p class="kpi-delta is-none">—<span class="delta-text">비교 데이터 없음</span></p>
+          <div class="kpi-spark" aria-hidden="true">
+            <svg viewBox="0 0 100 32" preserveAspectRatio="none">
+              <polyline points="0,17 14,15 28,18 42,16 57,17 71,15 85,18 100,16" fill="none" stroke="var(--ink-faint)" stroke-width="2"/>
+            </svg>
+          </div>
+          <p class="kpi-headline">정산 대기액, 이번 주 새로 집계에 편입된 지표라 전주 비교값이 없다.</p>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="chart-trend" data-region="chart-trend">
+      <div class="rule-double"><span class="section-label">추이 · 전체 채널 합산</span></div>
+      <h2 class="chart-title">일별 거래액 추이 (최근 30일)</h2>
+      <div class="chart-wrap">
+        <svg viewBox="0 0 900 250" role="img" aria-label="최근 30일 일별 거래액 추이, 10월 14일 최고 ₩58.2억, 10월 2일 최저 ₩31.7억">
+          <!-- y축 그리드 (0억부터) -->
+          <g stroke="var(--hairline)" stroke-width="1">
+            <line x1="56" y1="216" x2="860" y2="216"/>
+            <line x1="56" y1="149.3" x2="860" y2="149.3"/>
+            <line x1="56" y1="82.7" x2="860" y2="82.7"/>
+            <line x1="56" y1="16" x2="860" y2="16"/>
+          </g>
+          <g font-family="Pretendard, sans-serif" font-size="11" fill="var(--ink-faint)">
+            <text x="48" y="219" text-anchor="end">0억</text>
+            <text x="48" y="152.3" text-anchor="end">20억</text>
+            <text x="48" y="85.7" text-anchor="end">40억</text>
+            <text x="48" y="19" text-anchor="end">60억</text>
+          </g>
+          <!-- 영역 -->
+          <path d="M56.0,102.0 L83.7,110.3 L111.4,103.3 L139.2,95.7 L166.9,98.0 L194.6,86.3 L222.3,92.0 L250.1,81.0 L277.8,83.3 L305.5,75.0 L333.2,69.0 L361.0,60.0 L388.7,52.0 L416.4,22.0 L444.1,40.7 L471.9,53.0 L499.6,58.3 L527.3,63.3 L555.0,68.7 L582.8,60.3 L610.5,54.3 L638.2,49.0 L665.9,56.3 L693.7,50.7 L721.4,45.0 L749.1,36.7 L776.8,48.7 L804.6,40.3 L832.3,33.0 L860.0,28.3 L860.0,216 L56.0,216 Z" fill="var(--crimson-dim)" stroke="none"/>
+          <!-- 라인 -->
+          <path d="M56.0,102.0 L83.7,110.3 L111.4,103.3 L139.2,95.7 L166.9,98.0 L194.6,86.3 L222.3,92.0 L250.1,81.0 L277.8,83.3 L305.5,75.0 L333.2,69.0 L361.0,60.0 L388.7,52.0 L416.4,22.0 L444.1,40.7 L471.9,53.0 L499.6,58.3 L527.3,63.3 L555.0,68.7 L582.8,60.3 L610.5,54.3 L638.2,49.0 L665.9,56.3 L693.7,50.7 L721.4,45.0 L749.1,36.7 L776.8,48.7 L804.6,40.3 L832.3,33.0 L860.0,28.3" fill="none" stroke="var(--ink)" stroke-width="2"/>
+          <!-- 최고점 (10/14) -->
+          <circle cx="416.4" cy="22.0" r="4" fill="var(--ink)"/>
+          <text x="416.4" y="12" text-anchor="middle" font-family="'Noto Serif KR', serif" font-weight="700" font-size="12" fill="var(--ink)">최고 ₩58.2억 (10/14)</text>
+          <!-- 최저점 (10/02) -->
+          <circle cx="83.7" cy="110.3" r="4" fill="var(--crimson)"/>
+          <text x="83.7" y="128" text-anchor="middle" font-family="'Noto Serif KR', serif" font-weight="700" font-size="12" fill="var(--crimson)">최저 ₩31.7억 (10/02)</text>
+          <!-- x축 라벨 -->
+          <g font-family="Pretendard, sans-serif" font-size="11" fill="var(--ink-faint)">
+            <text x="56" y="236">10/01</text>
+            <text x="416" y="236" text-anchor="middle">10/14</text>
+            <text x="860" y="236" text-anchor="end">10/30</text>
+          </g>
+        </svg>
+      </div>
+      <p class="chart-caption">10월 14일 <strong>₩58.2억</strong>으로 이번 기간 최고치를 찍었고, 10월 2일 <strong>₩31.7억</strong>까지 내려앉았던 저점 대비 완연한 회복세다.</p>
+    </section>
+
+    <div class="split-row">
+
+      <section class="panel" data-region="chart-part">
+        <h3>결제수단 구성비</h3>
+        <div class="donut-row">
+          <svg width="140" height="140" viewBox="0 0 168 168" role="img" aria-label="결제수단 구성비, 카드 52%, 계좌이체 24%, 간편결제 18%, 기타 6%">
+            <g transform="translate(84,84) rotate(-90)">
+              <circle r="70" fill="none" stroke="var(--hairline)" stroke-width="28"/>
+              <circle r="70" fill="none" stroke="var(--ink)" stroke-width="28"
+                      stroke-dasharray="228.71 211.12" stroke-dashoffset="0"/>
+              <circle r="70" fill="none" stroke="var(--crimson)" stroke-width="28"
+                      stroke-dasharray="105.56 334.27" stroke-dashoffset="-228.71"/>
+              <circle r="70" fill="none" stroke="var(--ochre)" stroke-width="28"
+                      stroke-dasharray="79.17 360.65" stroke-dashoffset="-334.27"/>
+              <circle r="70" fill="none" stroke="var(--slate)" stroke-width="28"
+                      stroke-dasharray="26.39 413.43" stroke-dashoffset="-413.43"/>
+            </g>
+            <text x="84" y="80" text-anchor="middle" font-family="'Noto Serif KR', serif" font-weight="700" font-size="22" fill="var(--ink)">52%</text>
+            <text x="84" y="98" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="11" fill="var(--ink-muted)">카드 최다</text>
+          </svg>
+          <ul class="donut-legend">
+            <li><span class="swatch sw-card" aria-hidden="true"></span><span class="legend-name">카드</span><span class="legend-pct">52%</span></li>
+            <li><span class="swatch sw-transfer" aria-hidden="true"></span><span class="legend-name">계좌이체</span><span class="legend-pct">24%</span></li>
+            <li><span class="swatch sw-easypay" aria-hidden="true"></span><span class="legend-name">간편결제</span><span class="legend-pct">18%</span></li>
+            <li><span class="swatch sw-etc" aria-hidden="true"></span><span class="legend-name">기타</span><span class="legend-pct">6%</span></li>
+          </ul>
+        </div>
+        <p class="panel-caption">카드 결제가 <strong>52%</strong>로 절반을 넘어서며 여전히 가장 큰 결제 채널이다.</p>
+      </section>
+
+      <section class="panel" data-region="goal">
+        <h3>4분기 정산액 목표</h3>
+        <p class="goal-figure">68%</p>
+        <p class="goal-sub"><strong>₩3.4조</strong> / ₩5조 달성</p>
+        <div class="goal-track" role="img" aria-label="4분기 정산액 목표 ₩5조 중 ₩3.4조 달성, 68퍼센트">
+          <div class="goal-fill" style="width:68%"></div>
+        </div>
+        <div class="goal-ticks">
+          <span>0</span><span>1조</span><span>2조</span><span>3조</span><span>4조</span><span>5조</span>
+        </div>
+        <p class="panel-caption">4분기 목표 <strong>₩5조</strong> 중 <strong>₩3.4조</strong>를 채워 68% 지점을 지나는 중이다.</p>
+      </section>
+
+    </div>
+
+    <section class="table-section" data-region="table">
+      <div class="rule-double"><span class="section-label">시세표 · 가맹점별 정산 현황</span></div>
+      <h2 class="table-title">가맹점별 정산 현황</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">가맹점</th>
+              <th scope="col" class="num">거래액</th>
+              <th scope="col" class="num">건수</th>
+              <th scope="col" class="num">승인율</th>
+              <th scope="col">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="merchant">(주)새벽마켓</td>
+              <td class="num">₩48,203,000,000</td>
+              <td class="num">482,030</td>
+              <td class="num">96.2%</td>
+              <td><span class="status st-done">완료</span></td>
+            </tr>
+            <tr>
+              <td class="merchant">글로벌 커머스 인터내셔널 유한회사 — 해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</td>
+              <td class="num">₩31,209,000,000</td>
+              <td class="num">288,110</td>
+              <td class="num">91.4%</td>
+              <td><span class="status st-pending">대기</span></td>
+            </tr>
+            <tr>
+              <td class="merchant">김철수 스토어</td>
+              <td class="num">₩894,000,000</td>
+              <td class="num">8,940</td>
+              <td class="num">88.0%</td>
+              <td><span class="status st-hold">보류</span></td>
+            </tr>
+            <tr>
+              <td class="merchant">데일리박스</td>
+              <td class="num">₩12,048,300,000</td>
+              <td class="num missing">—</td>
+              <td class="num">94.7%</td>
+              <td><span class="status st-done">완료</span></td>
+            </tr>
+            <tr>
+              <td class="merchant">페이앤고</td>
+              <td class="num">₩6,201,500,000</td>
+              <td class="num">61,205</td>
+              <td class="num">79.3%</td>
+              <td><span class="status st-fail">실패</span></td>
+            </tr>
+            <tr>
+              <td class="merchant">미니샵 코리아</td>
+              <td class="num">₩2,900,000</td>
+              <td class="num">290</td>
+              <td class="num">100.0%</td>
+              <td><span class="status st-done">완료</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-caption">거래액 기준 상위 6개 가맹점 · 데일리박스는 건수 집계 중이라 결측(—) 처리됐다.</p>
+    </section>
+
+    <section class="empty-panel" data-region="empty">
+      <div class="empty-mark" aria-hidden="true">✓</div>
+      <p class="empty-title">표시할 이상거래가 없어요</p>
+      <p class="empty-desc">최근 30일간 감지된 이상거래가 없습니다.</p>
+      <a href="#" class="empty-cta">탐지 규칙 보기</a>
+    </section>
+
+    <footer>STYLE 10 · 에디토리얼</footer>
+
+  </div>
+</div>
+</body>
+</html>

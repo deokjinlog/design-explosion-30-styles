@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>정산 대시보드 · 핀그리드 — STYLE 09 레트로 픽셀</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+/* ============================================================
+   STYLE 09 · 레트로 픽셀 — 핀그리드 정산 대시보드
+   8비트 게임 콘솔 문법: READY? 부팅 → 블록 계단 차트 → HP바 상태뱃지
+   ============================================================ */
+
+:root{
+  /* 팔레트 (저채도 레트로 톤, 유채색 4계열: 블루/그린/옐로/레드) */
+  --bg:#1A1C2C;
+  --panel:#29366F;
+  --panel-deep:#141a3d;
+  --panel-rail:#20284f;
+  --green:#38B764;
+  --yellow:#FFCD75;
+  --red:#B13E53;
+  --hold:#6E93E8;
+  --text:#F4F4F4;
+  --muted:#A6ACC9;
+  --ink:#1A1C2C;
+  --frame:#3B4E9E;
+  --frame-dim:#26305e;
+
+  /* 8px 리듬 (4px 그리드 하위호환) */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-6:24px; --sp-8:32px; --sp-12:48px; --sp-16:64px;
+
+  /* 타이포 스케일 */
+  --fs-xs:12px; --fs-sm:13px; --fs-base:14px; --fs-md:16px; --fs-lg:20px; --fs-xl:24px;
+
+  /* 픽셀 계단식 클립 (라운드 대신 — radius:0 유지) */
+  --clip-lg: polygon(
+    0 8px, 4px 8px, 4px 4px, 8px 4px, 8px 0,
+    calc(100% - 8px) 0, calc(100% - 8px) 4px, calc(100% - 4px) 4px, calc(100% - 4px) 8px, 100% 8px,
+    100% calc(100% - 8px), calc(100% - 4px) calc(100% - 8px), calc(100% - 4px) calc(100% - 4px), calc(100% - 8px) calc(100% - 4px), calc(100% - 8px) 100%,
+    8px 100%, 8px calc(100% - 4px), 4px calc(100% - 4px), 4px calc(100% - 8px), 0 calc(100% - 8px)
+  );
+  --clip-sm: polygon(
+    0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+html,body{ height:100%; }
+
+body{
+  background-color:var(--bg);
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.03) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,.18) 0 2px, transparent 2px 4px);
+  color:var(--text);
+  font-family:'Pretendard', -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+  font-size:var(--fs-base);
+  line-height:1.6;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+.px{ font-family:'Press Start 2P', 'Pretendard', -apple-system, sans-serif; letter-spacing:0; }
+.tnum{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+
+/* ---------------- 부팅 시퀀스: READY? ---------------- */
+.boot{
+  position:fixed; inset:0; z-index:999;
+  background:var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  animation: boot-out .6s steps(1,end) forwards;
+}
+.boot-text{
+  font-size:16px;
+  color:var(--yellow);
+  animation: boot-blink .6s steps(1,end) 2;
+}
+@keyframes boot-out{ 0%,99.9%{ opacity:1; visibility:visible; } 100%{ opacity:0; visibility:hidden; } }
+@keyframes boot-blink{
+  0%,24%{ opacity:1; } 25%,49%{ opacity:0; }
+  50%,74%{ opacity:1; } 75%,100%{ opacity:0; }
+}
+
+.dashboard{ animation: reveal .6s steps(1,end) forwards; opacity:0; }
+@keyframes reveal{ 0%,99.9%{ opacity:0; } 100%{ opacity:1; } }
+
+/* ---------------- 레이아웃 ---------------- */
+.shell{ display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
+
+.sidebar{
+  background:var(--panel-rail);
+  border-right:4px solid var(--frame-dim);
+  display:flex; flex-direction:column;
+  padding:var(--sp-4) var(--sp-3);
+  gap:var(--sp-6);
+}
+.brand{ display:flex; align-items:center; gap:var(--sp-2); padding:var(--sp-2) var(--sp-1); }
+.brand-mark{ width:20px; height:20px; flex:none; }
+.brand-mark rect{ fill:var(--yellow); }
+.brand-name{ font-weight:700; font-size:var(--fs-md); }
+
+.nav-list{ list-style:none; display:flex; flex-direction:column; gap:var(--sp-1); }
+.nav-item{
+  display:flex; align-items:center; gap:var(--sp-2);
+  padding:var(--sp-2) var(--sp-3);
+  color:var(--muted); text-decoration:none;
+  font-size:var(--fs-base);
+  border:2px solid transparent;
+}
+.nav-item::before{ content:"▶"; opacity:0; font-size:10px; color:var(--yellow); width:10px; flex:none; }
+.nav-item:hover{ color:var(--text); background:var(--panel-deep); }
+.nav-item:hover::before{ opacity:1; }
+.nav-item.active{
+  color:var(--ink); background:var(--yellow); font-weight:700;
+  clip-path:var(--clip-sm);
+}
+.nav-item.active::before{ opacity:1; color:var(--ink); }
+.nav-item:focus-visible{ outline:2px solid var(--yellow); outline-offset:2px; }
+
+.nav-user{
+  margin-top:auto;
+  border-top:2px solid var(--frame-dim);
+  padding-top:var(--sp-4);
+  display:flex; align-items:center; gap:var(--sp-2);
+  font-size:var(--fs-xs); color:var(--muted);
+}
+.nav-user .avatar{
+  width:24px; height:24px; flex:none;
+  background:var(--hold);
+  clip-path:var(--clip-sm);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--ink); font-weight:700; font-size:11px;
+}
+.nav-user strong{ color:var(--text); font-weight:700; display:block; font-size:var(--fs-xs); }
+
+/* ---------------- 메인 ---------------- */
+.main{ padding:var(--sp-6); display:flex; flex-direction:column; gap:var(--sp-6); min-width:0; }
+
+.topbar{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--sp-4); }
+.page-title{ font-size:var(--fs-xl); font-weight:800; letter-spacing:-0.01em; }
+
+.topbar-filter{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-3); }
+
+.tabs{ display:flex; gap:var(--sp-1); background:var(--panel-deep); padding:var(--sp-1); clip-path:var(--clip-sm); }
+.tab{
+  border:none; background:transparent; color:var(--muted);
+  font-family:inherit; font-size:var(--fs-xs); font-weight:700;
+  padding:var(--sp-1) var(--sp-3); cursor:pointer;
+}
+.tab:hover{ color:var(--text); }
+.tab.active{ background:var(--green); color:var(--ink); clip-path:var(--clip-sm); }
+.tab:focus-visible{ outline:2px solid var(--yellow); outline-offset:2px; }
+
+.fake-select{
+  display:inline-flex; align-items:center; gap:var(--sp-2);
+  background:var(--panel-deep); color:var(--text);
+  border:2px solid var(--frame-dim);
+  padding:var(--sp-1) var(--sp-3); font-size:var(--fs-xs);
+  clip-path:var(--clip-sm); cursor:pointer;
+}
+.fake-select:hover{ border-color:var(--yellow); }
+.fake-select .arrow{ color:var(--yellow); }
+
+.btn{
+  font-family:inherit; font-size:var(--fs-xs); font-weight:700;
+  padding:var(--sp-2) var(--sp-4); border:2px solid transparent; cursor:pointer;
+  clip-path:var(--clip-sm);
+}
+.btn-primary{ background:var(--green); color:var(--ink); }
+.btn-primary:hover{ background:var(--yellow); }
+.btn-primary:active{ transform:translate(2px,2px); }
+.btn-primary:focus-visible{ outline:2px solid var(--text); outline-offset:2px; }
+.btn-primary:disabled{ background:var(--frame-dim); color:var(--muted); cursor:not-allowed; }
+
+.btn-secondary{ background:transparent; color:var(--text); border:2px solid var(--frame); }
+.btn-secondary:hover{ border-color:var(--yellow); color:var(--yellow); }
+.btn-secondary:active{ transform:translate(2px,2px); }
+.btn-secondary:focus-visible{ outline:2px solid var(--yellow); outline-offset:2px; }
+
+/* ---------------- 공통 픽셀 프레임 ---------------- */
+.pixel-frame{ background:var(--frame); padding:4px; clip-path:var(--clip-lg); }
+.pixel-frame > .pixel-body{ background:var(--panel); height:100%; clip-path:var(--clip-lg); padding:var(--sp-4); }
+.pixel-frame:hover{ background:var(--yellow); }
+.pixel-frame:hover > .pixel-body{ background:var(--panel-deep); }
+
+.panel-title{ font-size:var(--fs-sm); font-weight:800; margin-bottom:var(--sp-3); display:flex; align-items:center; gap:var(--sp-2); }
+.panel-title::before{ content:"■"; color:var(--yellow); font-size:10px; }
+
+/* ---------------- 배너 ---------------- */
+.banner{ background:var(--yellow); color:var(--ink); padding:4px; clip-path:var(--clip-lg); }
+.banner > div{ background:var(--yellow); clip-path:var(--clip-lg); padding:var(--sp-3) var(--sp-4); display:flex; align-items:center; gap:var(--sp-2); font-size:var(--fs-sm); font-weight:700; }
+.banner .flag{ font-size:14px; }
+
+/* ---------------- KPI ---------------- */
+.kpi-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--sp-4); }
+.kpi-card{ min-width:0; }
+.kpi-label{ font-size:var(--fs-xs); color:var(--muted); font-weight:700; margin-bottom:var(--sp-2); }
+.kpi-value{ font-size:13px; font-weight:400; overflow-wrap:anywhere; word-break:break-all; line-height:1.5; margin-bottom:var(--sp-2); }
+.kpi-delta{ display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; padding:2px 6px; margin-bottom:var(--sp-3); }
+.kpi-delta.positive{ background:var(--green); color:var(--ink); }
+.kpi-delta.negative{ background:var(--red); color:var(--text); }
+.kpi-delta.neutral{ background:transparent; color:var(--muted); padding-left:0; }
+.kpi-spark{ display:flex; align-items:flex-end; gap:2px; height:28px; }
+.kpi-spark i{ display:block; width:6px; background:var(--muted); }
+.kpi-card[data-trend="up"] .kpi-spark i{ background:var(--green); }
+.kpi-card[data-trend="down"] .kpi-spark i{ background:var(--red); }
+.kpi-card[data-trend="flat"] .kpi-spark i{ background:var(--hold); }
+.kpi-spark-label{ font-size:10px; color:var(--muted); margin-top:4px; }
+
+/* 차트 블록 계단 등장 (steps 타이밍 = 부드러운 성장 아님) */
+.grow-step{ animation: grow-steps .8s steps(8,end) .8s both; transform-origin:bottom; }
+@keyframes grow-steps{ 0%{ transform:scaleY(0); } 100%{ transform:scaleY(1); } }
+
+/* ---------------- 차트 영역 ---------------- */
+.charts-row{ display:grid; grid-template-columns:2fr 1fr; gap:var(--sp-4); align-items:stretch; }
+.side-charts{ display:flex; flex-direction:column; gap:var(--sp-4); }
+
+.trend-head{ display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:var(--sp-2); margin-bottom:var(--sp-2); }
+.trend-svg{ width:100%; height:auto; display:block; }
+.trend-annotations{ display:flex; gap:var(--sp-4); margin-top:var(--sp-2); font-size:11px; color:var(--muted); flex-wrap:wrap; }
+.trend-annotations b{ color:var(--text); }
+.trend-annotations .hi b{ color:var(--green); }
+.trend-annotations .lo b{ color:var(--red); }
+.peak-cursor{ animation: cursor-blink 1s steps(1,end) 1.4s infinite; }
+@keyframes cursor-blink{ 0%,49%{ opacity:1; } 50%,100%{ opacity:0; } }
+
+/* 결제수단 구성비 — 도트 그리드 (곡선 없음) */
+.block-grid{ display:grid; grid-template-columns:repeat(10, 1fr); gap:2px; margin-bottom:var(--sp-3); }
+.block-grid .blk{ width:100%; aspect-ratio:1/1; }
+.blk.card{ background:var(--green); }
+.blk.transfer{ background:var(--yellow); }
+.blk.easypay{ background:var(--hold); }
+.blk.etc{ background:var(--muted); }
+.legend{ display:flex; flex-direction:column; gap:6px; font-size:11px; }
+.legend-row{ display:flex; align-items:center; gap:6px; }
+.legend-row .swatch{ width:10px; height:10px; flex:none; }
+.legend-row .swatch.card{ background:var(--green); }
+.legend-row .swatch.transfer{ background:var(--yellow); }
+.legend-row .swatch.easypay{ background:var(--hold); }
+.legend-row .swatch.etc{ background:var(--muted); }
+.legend-row .pct{ margin-left:auto; font-weight:700; }
+
+/* 목표 진행률 — HP바 */
+.goal-value{ font-size:13px; margin-bottom:var(--sp-1); }
+.goal-bar{ display:flex; gap:2px; margin:var(--sp-3) 0; }
+.goal-bar .gblk{ flex:1; height:16px; }
+.gblk.on{ background:var(--green); }
+.gblk.off{ background:var(--panel-deep); border:1px solid var(--frame-dim); }
+.goal-pct{ font-size:var(--fs-lg); font-weight:400; color:var(--green); }
+.goal-meta{ font-size:11px; color:var(--muted); margin-top:var(--sp-1); }
+
+/* ---------------- 표 ---------------- */
+.table-scroll{ overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; min-width:640px; }
+th{ text-align:left; font-size:11px; color:var(--muted); font-weight:700; padding:var(--sp-2) var(--sp-3); border-bottom:2px solid var(--frame-dim); white-space:nowrap; }
+td{ padding:var(--sp-3); font-size:var(--fs-sm); border-bottom:1px solid var(--frame-dim); vertical-align:top; }
+tbody tr{ position:relative; }
+tbody tr::before{ content:"▶"; position:absolute; left:-16px; top:50%; transform:translateY(-50%); color:var(--yellow); font-size:11px; opacity:0; }
+tbody tr:hover::before{ opacity:1; }
+tbody tr:hover td{ background:var(--panel-deep); }
+.merchant-name{ max-width:260px; overflow-wrap:break-word; word-break:keep-all; line-height:1.5; }
+.merchant-name.long{ color:var(--yellow); font-weight:700; }
+.missing{ color:var(--muted); }
+
+.status-badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; font-size:11px; font-weight:700; clip-path:var(--clip-sm); white-space:nowrap; }
+.status-badge .gauge{ display:flex; gap:1px; }
+.status-badge .gauge i{ width:4px; height:9px; display:block; }
+.status-badge.st-complete{ background:var(--green); color:var(--ink); }
+.status-badge.st-complete .gauge i{ background:var(--ink); }
+.status-badge.st-pending{ background:var(--yellow); color:var(--ink); }
+.status-badge.st-pending .gauge i.off{ background:rgba(26,28,44,.25); }
+.status-badge.st-pending .gauge i.on{ background:var(--ink); }
+.status-badge.st-hold{ background:var(--hold); color:var(--ink); }
+.status-badge.st-hold .gauge i.off{ background:rgba(26,28,44,.25); }
+.status-badge.st-hold .gauge i.on{ background:var(--ink); }
+.status-badge.st-failed{ background:var(--red); color:var(--text); }
+.status-badge.st-failed .gauge i.off{ background:rgba(244,244,244,.2); }
+.status-badge.st-failed .gauge i.on{ background:var(--text); animation:blink-block 1s steps(1,end) infinite; }
+
+@keyframes blink-block{ 0%,49%{ opacity:1; } 50%,100%{ opacity:.15; } }
+
+/* ---------------- 빈 상태 ---------------- */
+.empty-panel .pixel-body{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:var(--sp-3); padding:var(--sp-8) var(--sp-4); }
+.empty-icon{ width:48px; height:48px; }
+.empty-icon rect{ fill:var(--green); }
+.empty-head{ font-size:var(--fs-md); font-weight:800; }
+.empty-desc{ font-size:var(--fs-sm); color:var(--muted); max-width:38ch; }
+
+/* ---------------- 푸터 ---------------- */
+.footer{ font-size:11px; color:var(--muted); padding:var(--sp-4) 0 var(--sp-8); text-align:center; }
+
+/* ---------------- 반응형: 1100px 이하 사이드바 접힘 ---------------- */
+@media (max-width:1100px){
+  .shell{ grid-template-columns:64px 1fr; }
+  .brand-name, .nav-item span, .nav-user .who{ display:none; }
+  .nav-item{ justify-content:center; padding:var(--sp-2); }
+  .nav-item::before{ display:none; }
+  .kpi-grid{ grid-template-columns:repeat(2, 1fr); }
+  .charts-row{ grid-template-columns:1fr; }
+}
+
+@media (max-width:640px){
+  .shell{ grid-template-columns:1fr; }
+  .sidebar{ flex-direction:row; align-items:center; overflow-x:auto; border-right:none; border-bottom:4px solid var(--frame-dim); }
+  .nav-list{ flex-direction:row; }
+  .nav-user{ margin-top:0; margin-left:auto; border-top:none; padding-top:0; }
+  .kpi-grid{ grid-template-columns:1fr; }
+  .main{ padding:var(--sp-4); }
+  .topbar-filter{ width:100%; }
+}
+
+/* ---------------- 접근성: 모든 연출 제거 ---------------- */
+@media (prefers-reduced-motion: reduce){
+  .boot{ display:none; }
+  .dashboard{ animation:none; opacity:1; }
+  .boot-text{ animation:none; }
+  .grow-step{ animation:none; transform:none; }
+  .peak-cursor{ animation:none; opacity:1; }
+  .status-badge.st-failed .gauge i.on{ animation:none; opacity:1; }
+  *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="boot" aria-hidden="true"><div class="boot-text px">READY?</div></div>
+
+<div class="dashboard">
+<div class="shell">
+
+  <aside class="sidebar" data-region="nav">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true">
+        <rect x="0" y="0" width="4" height="4"/><rect x="8" y="0" width="4" height="4"/>
+        <rect x="4" y="4" width="4" height="4"/>
+        <rect x="0" y="8" width="4" height="4"/><rect x="8" y="8" width="4" height="4"/>
+      </svg>
+      <span class="brand-name">핀그리드</span>
+    </div>
+    <ul class="nav-list">
+      <li><a class="nav-item active" href="#"><span>대시보드</span></a></li>
+      <li><a class="nav-item" href="#"><span>거래</span></a></li>
+      <li><a class="nav-item" href="#"><span>정산</span></a></li>
+      <li><a class="nav-item" href="#"><span>가맹점</span></a></li>
+      <li><a class="nav-item" href="#"><span>리포트</span></a></li>
+      <li><a class="nav-item" href="#"><span>설정</span></a></li>
+    </ul>
+    <div class="nav-user">
+      <span class="avatar">김</span>
+      <span class="who"><strong>김운영</strong>정산팀</span>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <header class="topbar">
+      <div data-region="identity">
+        <h1 class="page-title">정산 대시보드</h1>
+      </div>
+      <div class="topbar-filter" data-region="filter">
+        <div class="tabs" role="tablist" aria-label="기간 선택">
+          <button class="tab" type="button">오늘</button>
+          <button class="tab" type="button">7일</button>
+          <button class="tab active" type="button" aria-current="true">30일</button>
+          <button class="tab" type="button">90일</button>
+        </div>
+        <div class="fake-select" tabindex="0" role="button" aria-haspopup="listbox">
+          <span>전체 채널</span><span class="arrow">▾</span>
+        </div>
+        <div data-region="action">
+          <button class="btn btn-primary" type="button">내보내기</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="banner" data-region="banner">
+      <div><span class="flag">■</span><span>10월 21일 정산 예정 — <span class="tnum">₩1,284,900,000</span> · 영업일 기준 D-1</span></div>
+    </div>
+
+    <section class="kpi-grid" data-region="kpi">
+
+      <article class="kpi-card pixel-frame" data-trend="up">
+        <div class="pixel-body">
+          <div class="kpi-label">총 거래액(GMV)</div>
+          <div class="kpi-value tnum px">₩1,284,732,050,000</div>
+          <div class="kpi-delta positive">▲ +8.3%</div>
+          <div class="kpi-spark grow-step" aria-hidden="true">
+            <i style="height:10px"></i><i style="height:12px"></i><i style="height:11px"></i><i style="height:14px"></i>
+            <i style="height:16px"></i><i style="height:15px"></i><i style="height:19px"></i><i style="height:22px"></i>
+          </div>
+          <div class="kpi-spark-label">상승 ↗</div>
+        </div>
+      </article>
+
+      <article class="kpi-card pixel-frame" data-trend="up">
+        <div class="pixel-body">
+          <div class="kpi-label">결제 건수</div>
+          <div class="kpi-value tnum px">12,847,192건</div>
+          <div class="kpi-delta positive">▲ +12.1%</div>
+          <div class="kpi-spark grow-step" aria-hidden="true">
+            <i style="height:8px"></i><i style="height:9px"></i><i style="height:11px"></i><i style="height:10px"></i>
+            <i style="height:13px"></i><i style="height:15px"></i><i style="height:17px"></i><i style="height:20px"></i>
+          </div>
+          <div class="kpi-spark-label">상승 ↗</div>
+        </div>
+      </article>
+
+      <article class="kpi-card pixel-frame" data-trend="down">
+        <div class="pixel-body">
+          <div class="kpi-label">승인율</div>
+          <div class="kpi-value tnum px">94.7%</div>
+          <div class="kpi-delta negative">▼ −1.2%p</div>
+          <div class="kpi-spark grow-step" aria-hidden="true">
+            <i style="height:20px"></i><i style="height:19px"></i><i style="height:18px"></i><i style="height:16px"></i>
+            <i style="height:15px"></i><i style="height:13px"></i><i style="height:12px"></i><i style="height:10px"></i>
+          </div>
+          <div class="kpi-spark-label">하락 ↘</div>
+        </div>
+      </article>
+
+      <article class="kpi-card pixel-frame" data-trend="flat">
+        <div class="pixel-body">
+          <div class="kpi-label">정산 대기액</div>
+          <div class="kpi-value tnum px">₩312,048,900,000</div>
+          <div class="kpi-delta neutral">—</div>
+          <div class="kpi-spark grow-step" aria-hidden="true">
+            <i style="height:14px"></i><i style="height:15px"></i><i style="height:13px"></i><i style="height:14px"></i>
+            <i style="height:15px"></i><i style="height:14px"></i><i style="height:13px"></i><i style="height:14px"></i>
+          </div>
+          <div class="kpi-spark-label">평탄</div>
+        </div>
+      </article>
+
+    </section>
+
+    <div class="charts-row">
+
+      <section class="pixel-frame" data-region="chart-trend">
+        <div class="pixel-body">
+          <div class="trend-head">
+            <div class="panel-title">일별 거래액 추이 (최근 30일)</div>
+          </div>
+          <svg class="trend-svg" viewBox="0 0 600 220" preserveAspectRatio="none" shape-rendering="crispEdges" role="img" aria-label="일별 거래액 추이 라인 차트, 최근 30일">
+            <line x1="10" y1="200" x2="590" y2="200" stroke="var(--frame-dim)" stroke-width="2"/>
+            <line x1="10" y1="144.6" x2="590" y2="144.6" stroke="var(--frame-dim)" stroke-width="1" stroke-dasharray="2 4"/>
+            <line x1="10" y1="89.2" x2="590" y2="89.2" stroke="var(--frame-dim)" stroke-width="1" stroke-dasharray="2 4"/>
+            <line x1="10" y1="33.8" x2="590" y2="33.8" stroke="var(--frame-dim)" stroke-width="1" stroke-dasharray="2 4"/>
+            <text x="4" y="203" font-size="9" fill="var(--muted)">0</text>
+            <text x="4" y="92" font-size="9" fill="var(--muted)">40억</text>
+            <g class="grow-step">
+              <path d="M 10.0 93.7 L 30.0 93.7 L 30.0 112.2 L 50.0 112.2 L 50.0 102.5 L 70.0 102.5 L 70.0 89.0 L 90.0 89.0 L 90.0 76.5 L 110.0 76.5 L 110.0 82.9 L 130.0 82.9 L 130.0 89.8 L 150.0 89.8 L 150.0 71.2 L 170.0 71.2 L 170.0 66.5 L 190.0 66.5 L 190.0 75.4 L 210.0 75.4 L 210.0 62.4 L 230.0 62.4 L 230.0 55.7 L 250.0 55.7 L 250.0 46.6 L 270.0 46.6 L 270.0 38.8 L 290.0 38.8 L 290.0 50.5 L 310.0 50.5 L 310.0 60.7 L 330.0 60.7 L 330.0 67.6 L 350.0 67.6 L 350.0 77.6 L 370.0 77.6 L 370.0 85.1 L 390.0 85.1 L 390.0 78.4 L 410.0 78.4 L 410.0 70.7 L 430.0 70.7 L 430.0 64.0 L 450.0 64.0 L 450.0 57.9 L 470.0 57.9 L 470.0 65.4 L 490.0 65.4 L 490.0 72.9 L 510.0 72.9 L 510.0 80.4 L 530.0 80.4 L 530.0 87.6 L 550.0 87.6 L 550.0 92.3 L 570.0 92.3 L 570.0 82.6 L 590.0 82.6 L 590.0 73.2 L 590.0 200 L 10.0 200 Z"
+                    fill="var(--green)" fill-opacity="0.28" stroke="none"/>
+              <path d="M 10.0 93.7 L 30.0 93.7 L 30.0 112.2 L 50.0 112.2 L 50.0 102.5 L 70.0 102.5 L 70.0 89.0 L 90.0 89.0 L 90.0 76.5 L 110.0 76.5 L 110.0 82.9 L 130.0 82.9 L 130.0 89.8 L 150.0 89.8 L 150.0 71.2 L 170.0 71.2 L 170.0 66.5 L 190.0 66.5 L 190.0 75.4 L 210.0 75.4 L 210.0 62.4 L 230.0 62.4 L 230.0 55.7 L 250.0 55.7 L 250.0 46.6 L 270.0 46.6 L 270.0 38.8 L 290.0 38.8 L 290.0 50.5 L 310.0 50.5 L 310.0 60.7 L 330.0 60.7 L 330.0 67.6 L 350.0 67.6 L 350.0 77.6 L 370.0 77.6 L 370.0 85.1 L 390.0 85.1 L 390.0 78.4 L 410.0 78.4 L 410.0 70.7 L 430.0 70.7 L 430.0 64.0 L 450.0 64.0 L 450.0 57.9 L 470.0 57.9 L 470.0 65.4 L 490.0 65.4 L 490.0 72.9 L 510.0 72.9 L 510.0 80.4 L 530.0 80.4 L 530.0 87.6 L 550.0 87.6 L 550.0 92.3 L 570.0 92.3 L 570.0 82.6 L 590.0 82.6 L 590.0 73.2"
+                    fill="none" stroke="var(--green)" stroke-width="3"/>
+            </g>
+            <rect x="264" y="30.8" width="12" height="8" fill="var(--yellow)"/>
+            <text x="270" y="26" font-size="10" fill="var(--yellow)" text-anchor="middle" class="peak-cursor">▶</text>
+            <circle cx="30" cy="112.2" r="3" fill="var(--red)"/>
+          </svg>
+          <div class="trend-annotations">
+            <span class="hi">최고 <b class="tnum">₩58.2억</b> (10/14)</span>
+            <span class="lo">최저 <b class="tnum">₩31.7억</b> (10/02)</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="side-charts">
+
+        <section class="pixel-frame" data-region="chart-part">
+          <div class="pixel-body">
+            <div class="panel-title">결제수단 구성비</div>
+            <div class="block-grid" role="img" aria-label="결제수단 구성비 도트 그리드: 카드 52%, 계좌이체 24%, 간편결제 18%, 기타 6%">
+              <i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i>
+              <i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i>
+              <i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk card"></i><i class="blk transfer"></i><i class="blk transfer"></i><i class="blk transfer"></i><i class="blk transfer"></i>
+              <i class="blk transfer"></i><i class="blk transfer"></i><i class="blk transfer"></i><i class="blk transfer"></i><i class="blk transfer"></i><i class="blk transfer"></i><i class="blk transfer"></i><i class="blk transfer"></i><i class="blk easypay"></i><i class="blk easypay"></i>
+              <i class="blk easypay"></i><i class="blk easypay"></i><i class="blk easypay"></i><i class="blk easypay"></i><i class="blk easypay"></i><i class="blk easypay"></i><i class="blk easypay"></i><i class="blk etc"></i><i class="blk etc"></i><i class="blk etc"></i>
+            </div>
+            <div class="legend">
+              <div class="legend-row"><span class="swatch card"></span><span>카드</span><span class="pct tnum">52%</span></div>
+              <div class="legend-row"><span class="swatch transfer"></span><span>계좌이체</span><span class="pct tnum">24%</span></div>
+              <div class="legend-row"><span class="swatch easypay"></span><span>간편결제</span><span class="pct tnum">18%</span></div>
+              <div class="legend-row"><span class="swatch etc"></span><span>기타</span><span class="pct tnum">6%</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="pixel-frame" data-region="goal">
+          <div class="pixel-body">
+            <div class="panel-title">4분기 정산액 목표</div>
+            <div class="goal-value tnum px">₩3.4조 / ₩5조</div>
+            <div class="goal-bar" role="img" aria-label="4분기 정산액 목표 달성률 68%">
+              <i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk on"></i><i class="gblk off"></i><i class="gblk off"></i><i class="gblk off"></i><i class="gblk off"></i><i class="gblk off"></i><i class="gblk off"></i><i class="gblk off"></i><i class="gblk off"></i>
+            </div>
+            <div class="goal-pct px tnum">68%</div>
+            <div class="goal-meta">달성 진행률</div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <section class="pixel-frame" data-region="table">
+      <div class="pixel-body">
+        <div class="panel-title">가맹점별 정산 현황</div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>가맹점</th><th>거래액</th><th>건수</th><th>승인율</th><th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="merchant-name">(주)새벽마켓</td>
+                <td class="tnum">₩48,203,000,000</td>
+                <td class="tnum">482,030</td>
+                <td class="tnum">96.2%</td>
+                <td><span class="status-badge st-complete"><span class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>완료</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-name long">글로벌 커머스 인터내셔널 유한회사 — 해외 크로스보더 정산 전용 계정(USD·JPY·EUR 다통화)</td>
+                <td class="tnum">₩31,209,000,000</td>
+                <td class="tnum">288,110</td>
+                <td class="tnum">91.4%</td>
+                <td><span class="status-badge st-pending"><span class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i></span>대기</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-name">김철수 스토어</td>
+                <td class="tnum">₩894,000,000</td>
+                <td class="tnum">8,940</td>
+                <td class="tnum">88.0%</td>
+                <td><span class="status-badge st-hold"><span class="gauge"><i class="on"></i><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i></span>보류</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-name">데일리박스</td>
+                <td class="tnum">₩12,048,300,000</td>
+                <td class="tnum missing">—</td>
+                <td class="tnum">94.7%</td>
+                <td><span class="status-badge st-complete"><span class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>완료</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-name">페이앤고</td>
+                <td class="tnum">₩6,201,500,000</td>
+                <td class="tnum">61,205</td>
+                <td class="tnum">79.3%</td>
+                <td><span class="status-badge st-failed"><span class="gauge"><i class="on"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></span>실패</span></td>
+              </tr>
+              <tr>
+                <td class="merchant-name">미니샵 코리아</td>
+                <td class="tnum">₩2,900,000</td>
+                <td class="tnum">290</td>
+                <td class="tnum">100.0%</td>
+                <td><span class="status-badge st-complete"><span class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>완료</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="pixel-frame empty-panel" data-region="empty">
+      <div class="pixel-body">
+        <svg class="empty-icon" viewBox="0 0 48 48" shape-rendering="crispEdges" aria-hidden="true">
+          <rect x="0" y="24" width="6" height="6"/>
+          <rect x="6" y="30" width="6" height="6"/>
+          <rect x="12" y="36" width="6" height="6"/>
+          <rect x="18" y="30" width="6" height="6"/>
+          <rect x="24" y="24" width="6" height="6"/>
+          <rect x="30" y="18" width="6" height="6"/>
+          <rect x="36" y="12" width="6" height="6"/>
+          <rect x="42" y="6" width="6" height="6"/>
+        </svg>
+        <div class="empty-head">표시할 이상거래가 없어요</div>
+        <div class="empty-desc">최근 30일간 감지된 이상거래가 없습니다.</div>
+        <button class="btn btn-secondary" type="button">탐지 규칙 보기</button>
+      </div>
+    </section>
+
+    <footer class="footer">STYLE 09 · 레트로 픽셀</footer>
+
+  </div>
+</div>
+</div>
+
+</body>
+</html>
