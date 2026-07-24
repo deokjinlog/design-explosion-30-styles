@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 — 이야기 창작 지원 시스템</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#F5F6F8;
+    --navy:#00447C;
+    --navy-dark:#003060;
+    --th-sky:#E8F1F9;
+    --row-hover:#EEF5FC;
+    --text:#1A1A1A;
+    --text-sub:#55606B;
+    --border:#D5DBE1;
+    --stripe:#FAFBFC;
+    --ok:#1A7F3C;
+    --danger:#C62828;
+    --pending:#9A6700;
+    --white:#FFFFFF;
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Pretendard','Malgun Gothic',-apple-system,sans-serif;
+    font-size:13px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  button, input, textarea{ font-family:inherit; }
+  a{ color:var(--navy); }
+  a:hover{ color:var(--navy-dark); }
+  ul{ list-style:none; margin:0; padding:0; }
+  p{ margin:0; }
+  h1,h2,h3{ margin:0; font-weight:700; }
+
+  /* ===== 최상단 기관 헤더 바 ===== */
+  .gov-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--navy);
+    color:var(--white);
+    padding:10px 20px;
+    border-bottom:2px solid var(--navy-dark);
+  }
+  .gov-header__brand{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .gov-header__mark{
+    width:28px; height:28px;
+    background:var(--white);
+    color:var(--navy);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:14px;
+    flex:0 0 auto;
+  }
+  .gov-header__title{ font-size:16px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .gov-header__title em{ font-style:normal; font-weight:400; opacity:.85; margin-left:8px; font-size:12.5px; }
+  .gov-header__meta{ font-size:11px; opacity:.9; flex:0 0 auto; font-variant-numeric:tabular-nums; }
+
+  /* ===== 전체 셸 ===== */
+  .app-body{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    align-items:stretch;
+    min-height:calc(100vh - 49px);
+  }
+
+  /* ===== 사이드바 nav ===== */
+  .sidebar{
+    background:var(--white);
+    border-right:1px solid var(--border);
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    min-height:100%;
+  }
+  .sidebar__brand{ display:flex; align-items:center; gap:8px; }
+  .brand-mark{
+    width:24px; height:24px;
+    background:var(--navy);
+    color:var(--white);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:12px;
+  }
+  .brand-name{ font-size:15px; font-weight:700; color:var(--navy); }
+
+  .btn-primary, .btn-secondary{
+    border:1px solid var(--navy);
+    background:var(--navy);
+    color:var(--white);
+    font-size:13px;
+    font-weight:700;
+    padding:9px 14px;
+    cursor:pointer;
+    line-height:1.2;
+  }
+  .btn-primary:hover{ background:var(--navy-dark); border-color:var(--navy-dark); }
+  .btn-primary:active{ background:var(--navy-dark); }
+  .btn-primary:disabled{ background:#9AA6B2; border-color:#9AA6B2; cursor:not-allowed; }
+  .btn-primary:focus-visible, .btn-secondary:focus-visible, a:focus-visible, textarea:focus-visible, .composer__icon-btn:focus-visible, .nav-list a:focus-visible{
+    outline:2px solid var(--navy);
+    outline-offset:2px;
+  }
+  .btn-secondary{
+    background:var(--white);
+    color:var(--navy);
+    border:1px solid var(--navy);
+  }
+  .btn-secondary:hover{ background:var(--th-sky); }
+  .btn-secondary:active{ background:var(--row-hover); }
+
+  .btn-new{ width:100%; text-align:center; }
+
+  .sidebar__section-title{
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--text);
+    border-left:4px solid var(--navy);
+    padding-left:8px;
+  }
+
+  .nav-toggle{ display:flex; gap:0; border:1px solid var(--border); }
+  .nav-toggle input{ position:absolute; opacity:0; pointer-events:none; }
+  .nav-toggle label{
+    flex:1 1 0;
+    text-align:center;
+    font-size:11px;
+    padding:6px 4px;
+    color:var(--text-sub);
+    background:var(--white);
+    cursor:pointer;
+    border-right:1px solid var(--border);
+  }
+  .nav-toggle label:last-child{ border-right:none; }
+  #navview-list:checked ~ .nav-toggle label[for="navview-list"],
+  #navview-empty:checked ~ .nav-toggle label[for="navview-empty"]{
+    background:var(--th-sky);
+    color:var(--navy-dark);
+    font-weight:700;
+  }
+
+  .nav-list{ display:flex; flex-direction:column; }
+  .nav-list li{ border-bottom:1px solid var(--border); }
+  .nav-list li:first-child{ border-top:1px solid var(--border); }
+  .nav-list a{
+    display:block;
+    padding:9px 8px;
+    font-size:13px;
+    color:var(--text);
+    text-decoration:none;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .nav-list a:hover{ background:var(--row-hover); color:var(--navy-dark); }
+  .nav-list li.is-active a{
+    background:var(--th-sky);
+    border-left:4px solid var(--navy);
+    padding-left:4px;
+    color:var(--navy-dark);
+    font-weight:700;
+  }
+  .nav-list li.is-active a::after{
+    content:"· 현재";
+    margin-left:6px;
+    font-size:11px;
+    color:var(--navy);
+    font-weight:400;
+  }
+
+  .nav-empty{ display:none; border:1px solid var(--border); padding:16px 12px; text-align:center; background:var(--stripe); }
+  #navview-empty:checked ~ .nav-list{ display:none; }
+  #navview-empty:checked ~ .nav-empty{ display:block; }
+  .nav-empty__headline{ font-size:13px; font-weight:700; margin-bottom:6px; }
+  .nav-empty__desc{ font-size:11.5px; color:var(--text-sub); margin-bottom:12px; }
+
+  .sidebar__user{
+    margin-top:auto;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border-top:1px solid var(--border);
+    padding-top:12px;
+  }
+  .user-avatar{
+    width:24px; height:24px;
+    background:var(--navy-dark);
+    color:var(--white);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700;
+    flex:0 0 auto;
+  }
+  .user-name{ font-size:12.5px; color:var(--text); font-weight:700; }
+  .user-role{ font-size:11px; color:var(--text-sub); display:block; }
+
+  /* ===== 메인 ===== */
+  .main{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+  }
+
+  .banner{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    background:var(--th-sky);
+    border-left:4px solid var(--navy);
+    padding:10px 16px;
+    margin:16px 20px 0 20px;
+  }
+  .banner__label{
+    font-size:11px;
+    font-weight:700;
+    color:var(--navy-dark);
+    border:1px solid var(--navy);
+    padding:1px 6px;
+    flex:0 0 auto;
+    background:var(--white);
+  }
+  .banner p{ font-size:12.5px; color:var(--text); }
+
+  /* ===== 대화 ===== */
+  .conversation{
+    flex:1 1 auto;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    overflow-y:auto;
+  }
+
+  .msg{ display:flex; gap:10px; max-width:100%; }
+  .msg--grouped{ margin-top:-8px; }
+  .msg--ai{ justify-content:flex-start; }
+  .msg--user{ justify-content:flex-end; }
+
+  .msg__avatar{
+    width:28px; height:28px;
+    flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700;
+    color:var(--white);
+  }
+  .msg--ai .msg__avatar{ background:var(--navy); order:0; }
+  .msg--user .msg__avatar{ background:var(--navy-dark); order:2; }
+  .msg__avatar--spacer{ visibility:hidden; }
+
+  .msg__body{ max-width:min(560px, 78%); min-width:0; }
+  .msg--user .msg__body{ order:1; }
+
+  .msg__meta{ display:flex; align-items:baseline; gap:8px; margin-bottom:4px; }
+  .msg--user .msg__meta{ justify-content:flex-end; }
+  .msg__speaker{ font-size:12px; font-weight:700; color:var(--text); }
+  .msg__time{ font-size:11px; color:var(--text-sub); font-variant-numeric:tabular-nums; }
+
+  .msg__bubble{
+    border:1px solid var(--border);
+    padding:10px 12px;
+    background:var(--white);
+    font-size:13px;
+    color:var(--text);
+    word-break:keep-all;
+    overflow-wrap:break-word;
+  }
+  .msg--ai .msg__bubble{ background:var(--white); border-left:3px solid var(--navy); }
+  .msg--user .msg__bubble{ background:var(--stripe); border-right:3px solid var(--navy-dark); }
+
+  .msg__status{
+    display:inline-block;
+    margin-top:5px;
+    font-size:11px;
+    font-weight:700;
+    padding:1px 6px;
+    border:1px solid;
+  }
+  .msg__status--sent{ color:var(--ok); border-color:var(--ok); background:#F1F8F3; }
+  .msg__status--grouped{ color:var(--text-sub); border-color:var(--border); background:var(--stripe); }
+  .msg--user .msg__status-wrap{ text-align:right; }
+
+  /* ===== 응답(초안) 카드 ===== */
+  .draft-card{
+    margin-left:38px;
+    max-width:min(560px, 78%);
+    border:1px solid var(--navy);
+    background:var(--white);
+  }
+  .draft-card__label{
+    font-size:11px;
+    font-weight:700;
+    color:var(--white);
+    background:var(--navy);
+    padding:3px 8px;
+    display:inline-block;
+  }
+  .draft-card__body{ padding:12px 14px; }
+  .draft-card__title{ font-size:15px; color:var(--navy-dark); margin-bottom:8px; }
+  .draft-card__excerpt{
+    margin:0 0 12px 0;
+    padding-left:10px;
+    border-left:2px solid var(--border);
+    font-size:12.5px;
+    color:var(--text-sub);
+    font-style:normal;
+  }
+  .draft-card__actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  /* ===== 작성중(타이핑) ===== */
+  .typing-row{ display:flex; gap:10px; align-items:flex-end; }
+  .typing-bubble{
+    border:1px solid var(--border);
+    border-left:3px solid var(--pending);
+    background:var(--white);
+    padding:8px 12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .typing-bubble__text{ font-size:12.5px; color:var(--text-sub); }
+  .typing-dots{ display:inline-flex; gap:4px; }
+  .typing-dots i{
+    width:5px; height:5px;
+    background:var(--pending);
+    display:inline-block;
+  }
+  .msg__status--pending{ color:var(--pending); border-color:var(--pending); background:#FBF4E4; margin-left:8px; }
+
+  /* ===== 각주/메타 ===== */
+  .meta-note{
+    margin:4px 20px 0 20px;
+    padding:8px 12px 8px 16px;
+    border-left:4px solid var(--border);
+    background:var(--white);
+    font-size:11px;
+    color:var(--text-sub);
+  }
+
+  /* ===== 입력창 composer ===== */
+  .composer{
+    border-top:1px solid var(--border);
+    background:var(--white);
+    padding:12px 20px 14px 20px;
+  }
+  .composer__row{
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    border:1px solid var(--border);
+    background:var(--white);
+    padding:6px 8px;
+  }
+  .composer__row:focus-within{ border-color:var(--navy); }
+  .composer__icon-btn{
+    width:32px; height:32px;
+    flex:0 0 auto;
+    border:1px solid var(--border);
+    background:var(--white);
+    color:var(--navy);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .composer__icon-btn:hover{ background:var(--th-sky); }
+  .composer__input{
+    flex:1 1 auto;
+    min-width:0;
+    resize:none;
+    border:none;
+    outline:none;
+    font-size:13px;
+    line-height:1.5;
+    padding:6px 4px;
+    max-height:96px;
+    color:var(--text);
+    background:transparent;
+  }
+  .composer__input::placeholder{ color:var(--text-sub); }
+  .composer__send{ flex:0 0 auto; }
+  .composer__hint{ font-size:11px; color:var(--text-sub); margin-top:6px; padding-left:2px; }
+
+  /* ===== 페이지 푸터 ===== */
+  .page-footer{
+    border-top:1px solid var(--border);
+    background:var(--white);
+    padding:10px 20px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:6px;
+    font-size:11px;
+    color:var(--text-sub);
+  }
+  .style-tag{ font-weight:700; color:var(--navy-dark); }
+
+  /* ===== 반응형 1000px ===== */
+  @media (max-width:1000px){
+    .app-body{ grid-template-columns:1fr; }
+    .sidebar{
+      flex-direction:row;
+      flex-wrap:nowrap;
+      align-items:center;
+      gap:12px;
+      overflow-x:auto;
+      padding:10px 12px;
+      min-height:auto;
+    }
+    .sidebar__brand{ flex:0 0 auto; }
+    .btn-new{ flex:0 0 auto; width:auto; white-space:nowrap; }
+    .sidebar__section-title{ flex:0 0 auto; white-space:nowrap; }
+    .nav-toggle{ flex:0 0 auto; width:160px; }
+    .nav-list{ flex-direction:row; }
+    .nav-list li{ border-bottom:none; border-right:1px solid var(--border); flex:0 0 auto; }
+    .nav-list li:first-child{ border-top:none; }
+    .nav-list a{ white-space:nowrap; }
+    .nav-empty{ flex:0 0 auto; width:220px; }
+    .sidebar__user{ margin-top:0; border-top:none; border-left:1px solid var(--border); padding:0 0 0 12px; flex:0 0 auto; }
+    .msg__body, .draft-card{ max-width:88%; }
+    .draft-card{ margin-left:38px; }
+    .gov-header__title em{ display:none; }
+  }
+  @media (max-width:560px){
+    .msg__body, .draft-card{ max-width:100%; }
+    .draft-card{ margin-left:0; }
+    .msg--ai .msg__avatar{ display:none; }
+  }
+
+  /* ===== 접근성: 모션 축소 ===== */
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; animation:none !important; }
+  }
+
+  /* ===== 인쇄 ===== */
+  @media print{
+    .sidebar, .composer, .gov-header__meta, .nav-toggle, .typing-row, .composer__icon-btn{ display:none; }
+    body{ background:#fff; color:#000; }
+    .gov-header{ background:#fff; color:#000; border-bottom:2px solid #000; }
+    .gov-header__mark{ background:#fff; color:#000; border:1px solid #000; }
+    .app-body{ grid-template-columns:1fr; }
+    .msg__bubble, .draft-card, .banner, .meta-note{ border-color:#000 !important; background:#fff !important; }
+    .draft-card__label{ background:#fff; color:#000; border:1px solid #000; }
+    .page-footer{ border-top:1px solid #000; }
+    .print-page-num::after{ content:"1 / 1 쪽"; }
+  }
+</style>
+</head>
+<body>
+
+<header class="gov-header">
+  <div class="gov-header__brand">
+    <span class="gov-header__mark" aria-hidden="true">연</span>
+    <span class="gov-header__title">연서 <em>이야기 창작 지원 시스템</em></span>
+  </div>
+  <div class="gov-header__meta">최종 갱신일 2026-07-24 21:18</div>
+</header>
+
+<div class="app-body">
+
+  <aside class="sidebar" data-region="nav">
+    <div class="sidebar__brand">
+      <span class="brand-mark" aria-hidden="true">연</span>
+      <span class="brand-name">연서</span>
+    </div>
+
+    <button type="button" class="btn-primary btn-new">＋ 새 이야기</button>
+
+    <div class="sidebar__section-title">지난 대화</div>
+
+    <input type="radio" name="navview" id="navview-list" checked>
+    <input type="radio" name="navview" id="navview-empty">
+    <div class="nav-toggle">
+      <label for="navview-list">목록 보기</label>
+      <label for="navview-empty">빈 상태 보기</label>
+    </div>
+
+    <ul class="nav-list">
+      <li><a href="#">비 오는 정거장</a></li>
+      <li class="is-active"><a href="#" aria-current="page">할머니의 라디오</a></li>
+      <li><a href="#">이름 없는 등대지기</a></li>
+      <li><a href="#">3층 그 방</a></li>
+    </ul>
+
+    <div class="nav-empty" data-region="empty">
+      <p class="nav-empty__headline">아직 시작한 이야기가 없어요</p>
+      <p class="nav-empty__desc">마음에 남은 장면 하나로 시작해보세요.</p>
+      <button type="button" class="btn-primary">새 이야기 시작</button>
+    </div>
+
+    <div class="sidebar__user">
+      <span class="user-avatar" aria-hidden="true">지</span>
+      <span>
+        <span class="user-name">지민</span>
+        <span class="user-role">이용자</span>
+      </span>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="banner" data-region="banner">
+      <span class="banner__label">안내</span>
+      <p>초안은 자동 저장돼요 · 마음에 들면 이어쓰기로 계속</p>
+    </div>
+
+    <section class="conversation" data-region="conversation" aria-label="연서와의 대화">
+
+      <!-- 1: 연서 · 긴 발화 -->
+      <div class="msg msg--ai">
+        <span class="msg__avatar" aria-hidden="true">연</span>
+        <div class="msg__body">
+          <div class="msg__meta">
+            <span class="msg__speaker">연서</span>
+            <span class="msg__time">오후 9:14</span>
+          </div>
+          <p class="msg__bubble">안녕하세요, 연서예요. 오늘은 어떤 이야기를 함께 써볼까요? 거창하지 않아도 괜찮아요 — 최근에 마음에 걸린 장면 하나, 잊히지 않는 얼굴 하나면 충분해요. 그게 첫 문장이 되거든요.</p>
+        </div>
+      </div>
+
+      <!-- 2: 나 · 한 단어 발화 -->
+      <div class="msg msg--user">
+        <span class="msg__avatar" aria-hidden="true">나</span>
+        <div class="msg__body">
+          <div class="msg__meta">
+            <span class="msg__time">오후 9:15</span>
+            <span class="msg__speaker">나</span>
+          </div>
+          <p class="msg__bubble">할머니.</p>
+          <div class="msg__status-wrap">
+            <span class="msg__status msg__status--sent">전송됨</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3: 연서 · 연속 발화 ① -->
+      <div class="msg msg--ai">
+        <span class="msg__avatar" aria-hidden="true">연</span>
+        <div class="msg__body">
+          <div class="msg__meta">
+            <span class="msg__speaker">연서</span>
+            <span class="msg__time">오후 9:15</span>
+          </div>
+          <p class="msg__bubble">할머니. 좋아요.</p>
+        </div>
+      </div>
+
+      <!-- 4: 연서 · 연속 발화 ② (그룹핑, 상태: 이어서) -->
+      <div class="msg msg--ai msg--grouped">
+        <span class="msg__avatar msg__avatar--spacer" aria-hidden="true">연</span>
+        <div class="msg__body">
+          <div class="msg__meta">
+            <span class="msg__time">오후 9:15</span>
+            <span class="msg__status msg__status--grouped">이어서</span>
+          </div>
+          <p class="msg__bubble">그 할머니를 떠올리면 가장 먼저 어떤 감각이 오나요? 냄새, 소리, 손의 온도 — 무엇이든요.</p>
+        </div>
+      </div>
+
+      <!-- 5: 나 · 아주 긴 발화 -->
+      <div class="msg msg--user">
+        <span class="msg__avatar" aria-hidden="true">나</span>
+        <div class="msg__body">
+          <div class="msg__meta">
+            <span class="msg__time">오후 9:17</span>
+            <span class="msg__speaker">나</span>
+          </div>
+          <p class="msg__bubble">여름마다 할머니 집에 가면 마루에서 라디오 소리가 났어요. 트로트였는데 지직거리는 잡음이 늘 섞여 있었고, 할머니는 그 잡음까지 좋아하셨어요. 이제 그 라디오도 없고 할머니도 안 계신데, 가끔 지하철에서 비슷한 잡음이 들리면 그 마루로 순간 이동한 것 같아요. 그 느낌을 이야기로 붙잡고 싶어요.</p>
+          <div class="msg__status-wrap">
+            <span class="msg__status msg__status--sent">전송됨</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6: 연서 · 초안 카드로 이어짐 -->
+      <div class="msg msg--ai">
+        <span class="msg__avatar" aria-hidden="true">연</span>
+        <div class="msg__body">
+          <div class="msg__meta">
+            <span class="msg__speaker">연서</span>
+            <span class="msg__time">오후 9:18</span>
+          </div>
+          <p class="msg__bubble">좋아요. 그 잡음이 이야기의 심장이 될 것 같아요. 이렇게 시작해볼까요?</p>
+        </div>
+      </div>
+
+      <div class="draft-card" data-region="response-card">
+        <span class="draft-card__label">초안</span>
+        <div class="draft-card__body">
+          <h3 class="draft-card__title">잡음의 온도</h3>
+          <blockquote class="draft-card__excerpt">여름은 늘 지직거리는 소리로 시작됐다. 할머니의 라디오는 트로트와 잡음을 구별하지 않았고, 나도 그걸 배웠다. 소리의 흠집마다 여름 냄새가 뱄다.</blockquote>
+          <div class="draft-card__actions">
+            <button type="button" class="btn-primary">이어쓰기</button>
+            <button type="button" class="btn-secondary">다른 제안</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 작성중(대기 표현) -->
+      <div class="typing-row" aria-live="polite">
+        <span class="msg__avatar" aria-hidden="true">연</span>
+        <div class="typing-bubble">
+          <span class="typing-bubble__text">연서가 다음 문장을 쓰는 중…</span>
+          <span class="typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="msg__status msg__status--pending">입력 중</span>
+        </div>
+      </div>
+
+    </section>
+
+    <p class="meta-note">※ 본 대화는 이용자 지민 · 연서 AI 간 창작 보조 세션 기록입니다 · 자동 저장 기준 오후 9:18 · 저장 주기 30초 자동 · 초안의 저작권은 이용자에게 있음</p>
+
+    <div class="composer" data-region="composer">
+      <div class="composer__row">
+        <button type="button" class="composer__icon-btn" aria-label="파일 첨부">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+            <rect x="7" y="2" width="2" height="12" fill="currentColor"></rect>
+            <rect x="2" y="7" width="12" height="2" fill="currentColor"></rect>
+          </svg>
+        </button>
+        <textarea class="composer__input" rows="1" placeholder="이야기의 다음 조각을 들려주세요…"></textarea>
+        <button type="button" class="composer__icon-btn" aria-label="음성 입력">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+            <rect x="6" y="1.5" width="4" height="7.5" fill="none" stroke="currentColor" stroke-width="1.2"></rect>
+            <path d="M4 7.5v0.8a4 4 0 0 0 8 0V7.5" fill="none" stroke="currentColor" stroke-width="1.2"></path>
+            <line x1="8" y1="12.3" x2="8" y2="14.5" stroke="currentColor" stroke-width="1.2"></line>
+            <line x1="5" y1="14.5" x2="11" y2="14.5" stroke="currentColor" stroke-width="1.2"></line>
+          </svg>
+        </button>
+        <button type="button" class="btn-primary composer__send">보내기</button>
+      </div>
+      <p class="composer__hint">Shift+Enter 줄바꿈</p>
+    </div>
+
+  </main>
+</div>
+
+<footer class="page-footer">
+  <span>※ 본 화면은 디자인 스타일 탐색용 데모이며 실제 서비스가 아닙니다 · 등장 인물·대화는 가상의 예시입니다</span>
+  <span class="style-tag print-page-num">STYLE 02 · 공공 포털</span>
+</footer>
+
+<script>
+  // 연출 전용 — 실패해도 위 HTML 최종 상태로 완전함(구성/문구 변화 없음).
+  (function(){
+    var ta = document.querySelector('.composer__input');
+    if(!ta) return;
+    ta.addEventListener('input', function(){
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 96) + 'px';
+    });
+  })();
+</script>
+
+</body>
+</html>

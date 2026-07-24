@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 — 이야기를 함께 쓰는 대화 · STYLE 29 컬러풀 모던</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* ===================== 리셋 ===================== */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  ul, ol { list-style: none; margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; }
+  textarea { font: inherit; color: inherit; }
+
+  /* ===================== 토큰 — 컬러풀 모던 ===================== */
+  :root{
+    --bg:#FFFFFF;
+    --surface:#F6F9FC;
+    --surface-alt:#EEF2FF;
+    --border:#E3E8EF;
+    --primary:#635BFF;
+    --primary-hover:#5548E8;
+    --on-primary:#FFFFFF;
+    --accent-violet:#7A5AF8;
+    --accent-teal:#00C2B8;
+    --accent-pink:#FF6699;
+    --accent-amber:#FFB020;
+    --text:#0A2540;
+    --subtext:#425466;
+    --muted:#8792A2;
+    --success:#00A87E;
+    --warning:#E5A000;
+    --danger:#E5484D;
+
+    --shadow-rest: 0 1px 2px rgba(10,37,64,.06), 0 4px 12px rgba(10,37,64,.05);
+    --shadow-hover: 0 4px 8px rgba(99,91,255,.12), 0 12px 28px rgba(99,91,255,.14);
+
+    --radius-card:16px;
+    --radius-control:10px;
+    --radius-pill:999px;
+    --radius-modal:20px;
+
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px; --sp-16:64px;
+
+    --font-kr:'Pretendard', 'Inter', 'Plus Jakarta Sans', -apple-system, sans-serif;
+    --font-en:'Inter', 'Plus Jakarta Sans', -apple-system, sans-serif;
+  }
+
+  html{ background:var(--bg); }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-kr);
+    font-feature-settings:'tnum' 1;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+
+  :focus-visible{
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* ===================== 레이아웃 셸 ===================== */
+  .app-shell{
+    display:grid;
+    grid-template-columns: 272px 1fr;
+    max-width:1240px;
+    margin:var(--sp-6) auto;
+    min-height: 86vh;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:var(--radius-modal);
+    box-shadow:var(--shadow-rest);
+    overflow:hidden;
+  }
+
+  /* ===================== 사이드바 (비비드 컬러 섹션 블록) ===================== */
+  .sidebar{
+    position:relative;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent-violet) 100%);
+    background-color: var(--primary); /* 솔리드 폴백 */
+    color:#fff;
+    padding: var(--sp-6) var(--sp-4) var(--sp-4);
+    display:flex;
+    flex-direction:column;
+    gap: var(--sp-4);
+    animation: sidebarIn .28s ease-out both;
+  }
+  @keyframes sidebarIn{
+    from{ transform: translateX(-16px); opacity:0; }
+    to{ transform: translateX(0); opacity:1; }
+  }
+
+  .brand{ display:flex; align-items:center; gap:var(--sp-2); padding: 0 var(--sp-2); }
+  .brand-dot{
+    width:28px; height:28px; border-radius:50%;
+    background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--primary);
+    animation: dotPop .3s ease-out .05s both;
+  }
+  @keyframes dotPop{ from{ transform:scale(.6); opacity:0;} to{ transform:scale(1); opacity:1;} }
+  .brand-dot svg{ width:16px; height:16px; }
+  .brand-name{
+    font-family:var(--font-en);
+    font-size:20px; font-weight:800; letter-spacing:-0.02em;
+  }
+
+  .btn-new-story{
+    display:flex; align-items:center; justify-content:center; gap:var(--sp-2);
+    width:100%;
+    height:40px;
+    border-radius:var(--radius-control);
+    background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.28);
+    color:#fff;
+    font-size:14px; font-weight:600;
+    transition: background .18s ease, transform .18s ease;
+  }
+  .btn-new-story svg{ width:16px; height:16px; }
+  .btn-new-story:hover{ background:rgba(255,255,255,.26); }
+  .btn-new-story:active{ transform:scale(.98); }
+
+  /* 지난 대화 / 빈 상태 토글 (순수 CSS, JS 없음) */
+  .nav-demo{ display:flex; flex-direction:column; gap:var(--sp-3); flex:1; min-height:0; }
+  .empty-toggle-input{
+    position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap;
+  }
+  .empty-toggle-label{
+    display:flex; align-items:center; gap:var(--sp-2);
+    padding: var(--sp-1) var(--sp-2);
+    font-size:12px; font-weight:600; letter-spacing:.02em;
+    color:rgba(255,255,255,.82);
+    cursor:pointer; user-select:none;
+  }
+  .toggle-track{
+    width:32px; height:18px; border-radius:var(--radius-pill);
+    background:rgba(255,255,255,.28);
+    position:relative;
+    flex:0 0 auto;
+    transition: background .18s ease;
+  }
+  .toggle-thumb{
+    position:absolute; top:2px; left:2px;
+    width:14px; height:14px; border-radius:50%;
+    background:#fff;
+    transition: transform .22s cubic-bezier(.34,1.56,.64,1);
+  }
+  .empty-toggle-input:checked ~ .empty-toggle-label .toggle-track{ background:rgba(255,255,255,.55); }
+  .empty-toggle-input:checked ~ .empty-toggle-label .toggle-thumb{ transform:translateX(14px); }
+  .empty-toggle-label:hover .toggle-track{ background:rgba(255,255,255,.4); }
+
+  .history-list{
+    display:flex; flex-direction:column; gap:var(--sp-1);
+    overflow-y:auto;
+  }
+  .empty-toggle-input:checked ~ .nav-demo-body .history-list{ display:none; }
+  .nav-demo-body{ display:flex; flex-direction:column; gap:var(--sp-3); flex:1; min-height:0; }
+
+  .history-item{
+    position:relative;
+    display:flex; flex-direction:column; gap:2px;
+    padding: var(--sp-2) var(--sp-3);
+    border-radius:var(--radius-control);
+    color:rgba(255,255,255,.78);
+    animation: itemIn .22s ease-out both;
+  }
+  .history-item::after{
+    content:''; position:absolute; left:var(--sp-3); right:var(--sp-3); bottom:2px;
+    height:1px; background:currentColor; opacity:0; transform:scaleX(0); transform-origin:left;
+    transition: transform .15s ease, opacity .15s ease;
+  }
+  .history-item:hover{ background:rgba(255,255,255,.1); color:#fff; }
+  .history-item:hover::after{ opacity:.5; transform:scaleX(1); }
+  .history-item .h-title{ font-size:14px; font-weight:500; }
+  .history-item.is-active{
+    background:#fff;
+    color:var(--primary);
+    box-shadow:var(--shadow-rest);
+  }
+  .history-item.is-active .h-title{ font-weight:700; }
+  .history-item.is-active .h-tag{
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:11px; font-weight:700; letter-spacing:.02em;
+    color:var(--accent-teal);
+  }
+  .history-item.is-active .h-tag::before{
+    content:''; width:6px; height:6px; border-radius:50%; background:var(--accent-teal);
+    animation: pulseDot 1.6s ease-in-out infinite;
+  }
+  @keyframes pulseDot{ 0%,100%{ opacity:1;} 50%{ opacity:.35;} }
+  .history-item:nth-child(1){ animation-delay:.06s; }
+  .history-item:nth-child(2){ animation-delay:.11s; }
+  .history-item:nth-child(3){ animation-delay:.16s; }
+  .history-item:nth-child(4){ animation-delay:.21s; }
+  @keyframes itemIn{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:translateY(0);} }
+
+  .empty-state{
+    display:none;
+    flex-direction:column; align-items:flex-start; gap:var(--sp-2);
+    padding: var(--sp-4) var(--sp-3);
+    border-radius:var(--radius-card);
+    background:rgba(255,255,255,.1);
+    border:1px dashed rgba(255,255,255,.35);
+  }
+  .empty-toggle-input:checked ~ .nav-demo-body .empty-state{ display:flex; }
+  .empty-icon{
+    width:40px; height:40px; border-radius:50%;
+    background:rgba(255,255,255,.16);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:var(--sp-1);
+  }
+  .empty-icon svg{ width:20px; height:20px; color:#fff; }
+  .empty-headline{ margin:0; font-size:15px; font-weight:700; color:#fff; }
+  .empty-desc{ margin:0; font-size:13px; color:rgba(255,255,255,.75); line-height:1.5; }
+  .btn-empty-cta{
+    margin-top:var(--sp-1);
+    height:36px; padding:0 var(--sp-4);
+    border-radius:var(--radius-control);
+    background:#fff; color:var(--primary);
+    font-size:13px; font-weight:700;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .btn-empty-cta:hover{ box-shadow:0 6px 16px rgba(0,0,0,.18); transform:translateY(-1px); }
+  .btn-empty-cta:active{ transform:scale(.98); }
+
+  .sidebar-user{
+    display:flex; align-items:center; gap:var(--sp-2);
+    padding: var(--sp-3) var(--sp-2) 0;
+    border-top:1px solid rgba(255,255,255,.18);
+    margin-top:auto;
+  }
+  .avatar{
+    width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700;
+    flex:0 0 auto;
+  }
+  .avatar-user{ background:var(--accent-amber); color:#3a2400; }
+  .sidebar-user-name{ font-size:14px; font-weight:600; color:#fff; }
+  .sidebar-user-role{ font-size:12px; color:rgba(255,255,255,.7); }
+
+  /* ===================== 메인 ===================== */
+  .main{
+    display:flex; flex-direction:column;
+    min-width:0;
+    background:var(--bg);
+  }
+
+  /* 안내 배너 */
+  .banner{
+    display:flex; align-items:center; gap:var(--sp-2);
+    margin:var(--sp-4) var(--sp-6) 0;
+    padding: var(--sp-3) var(--sp-4);
+    background:var(--surface-alt);
+    border:1px solid #DCE3FB;
+    border-radius:var(--radius-control);
+    color:var(--primary);
+    font-size:13px; font-weight:600;
+  }
+  .banner svg{ width:18px; height:18px; flex:0 0 auto; color:var(--primary); }
+  .banner span{ color:var(--subtext); font-weight:500; }
+  .banner strong{ color:var(--primary); font-weight:700; }
+
+  /* 대화 흐름 */
+  .conversation{
+    flex:1;
+    overflow-y:auto;
+    padding: var(--sp-6);
+    display:flex; flex-direction:column; gap:var(--sp-6);
+  }
+
+  .msg-group{
+    display:flex; gap:var(--sp-3);
+    max-width: 78%;
+    animation: msgIn .32s ease-out both;
+  }
+  @keyframes msgIn{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+  .msg-group.from-yeonseo{ align-self:flex-start; }
+  .msg-group.from-me{ align-self:flex-end; flex-direction:row-reverse; }
+
+  .msg-avatar{
+    width:34px; height:34px; border-radius:50%;
+    flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700;
+    color:#fff;
+  }
+  .msg-avatar.ai{ background:linear-gradient(135deg, var(--primary), var(--accent-violet)); }
+  .msg-avatar.me{ background:var(--accent-amber); color:#3a2400; }
+  .msg-avatar.is-spacer{ visibility:hidden; }
+
+  .msg-col{ display:flex; flex-direction:column; gap:var(--sp-1); min-width:0; }
+  .from-me .msg-col{ align-items:flex-end; }
+
+  .msg-meta{
+    display:flex; align-items:baseline; gap:var(--sp-2);
+    font-size:12px; color:var(--muted); font-weight:600;
+    padding: 0 var(--sp-1);
+  }
+  .from-me .msg-meta{ flex-direction:row-reverse; }
+  .msg-meta .speaker{ color:var(--text); font-weight:700; }
+  .from-me .msg-meta .speaker{ color:var(--primary); }
+
+  .bubble{
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--radius-card);
+    font-size:15px; line-height:1.6;
+    max-width:100%;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    box-shadow:var(--shadow-rest);
+  }
+  .from-yeonseo .bubble{
+    background:#fff;
+    border:1px solid var(--border);
+    color:var(--text);
+    border-top-left-radius:6px;
+  }
+  .from-me .bubble{
+    background:var(--primary);
+    color:var(--on-primary);
+    border-top-right-radius:6px;
+  }
+  /* 연속 발화 — 같은 화자가 이어질 때 촘촘한 리듬 */
+  .msg-group + .msg-group.is-continued{ margin-top:calc(var(--sp-6) * -1 + var(--sp-2)); }
+  .is-continued .bubble{ border-top-left-radius:var(--radius-card); border-top-right-radius:var(--radius-card); }
+
+  .bubble-time{
+    font-size:11px; color:var(--muted); padding:0 var(--sp-1);
+  }
+  .from-me .bubble-time{ color:var(--muted); }
+
+  .sent-state{
+    display:flex; align-items:center; gap:4px;
+    font-size:11px; font-weight:700; color:var(--success);
+    padding:0 var(--sp-1);
+  }
+  .sent-state svg{ width:12px; height:12px; }
+
+  /* 초안 응답 카드 */
+  .response-card{
+    align-self:flex-start;
+    margin-left:calc(34px + var(--sp-3));
+    max-width:78%;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:var(--radius-card);
+    box-shadow:var(--shadow-rest);
+    overflow:hidden;
+    transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+    animation: msgIn .32s ease-out .1s both;
+  }
+  .response-card:hover{
+    box-shadow:var(--shadow-hover);
+    transform:translateY(-2px);
+    border-color: rgba(99,91,255,.2);
+  }
+  .response-card-head{
+    display:flex; align-items:center; gap:var(--sp-2);
+    padding: var(--sp-3) var(--sp-4) 0;
+  }
+  .draft-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    height:22px; padding:0 var(--sp-2);
+    border-radius:var(--radius-pill);
+    background:rgba(255,102,153,.12);
+    color:#C23A65;
+    font-size:11px; font-weight:700; letter-spacing:.02em;
+  }
+  .draft-badge svg{ width:12px; height:12px; }
+  .response-card-title{
+    margin: var(--sp-2) 0 0; padding: 0 var(--sp-4);
+    font-size:18px; font-weight:700; letter-spacing:-0.01em; color:var(--text);
+  }
+  .response-card-excerpt{
+    margin: var(--sp-2) 0 0; padding: 0 var(--sp-4) var(--sp-4);
+    font-size:14px; line-height:1.7; color:var(--subtext);
+    border-left:3px solid var(--surface-alt);
+    margin-left:var(--sp-4); margin-right:var(--sp-4);
+    padding-left:var(--sp-3);
+  }
+  .response-card-actions{
+    display:flex; gap:var(--sp-2);
+    padding: var(--sp-4);
+    border-top:1px solid var(--border);
+    background:var(--surface);
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    height:38px; padding:0 var(--sp-4);
+    border-radius:var(--radius-control);
+    font-size:14px; font-weight:600;
+    transition: transform .16s ease, box-shadow .16s ease, background .16s ease, filter .16s ease;
+  }
+  .btn-primary{
+    color:var(--on-primary);
+    background:linear-gradient(135deg, var(--primary) 0%, var(--accent-violet) 100%);
+    background-color:var(--primary);
+    box-shadow:var(--shadow-rest);
+    position:relative; overflow:hidden;
+  }
+  .btn-primary::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.55) 48%, transparent 66%);
+    background-size:220% 100%; background-position:140% 0;
+    animation: shimmer .7s ease-out 1s 1;
+  }
+  @keyframes shimmer{ to{ background-position:-40% 0; } }
+  .btn-primary:hover{ background:linear-gradient(120deg, var(--primary-hover) 0%, var(--accent-violet) 100%); box-shadow:var(--shadow-hover); }
+  .btn-primary:active{ transform:scale(.98); }
+  .btn-secondary{
+    color:var(--text);
+    background:#fff;
+    border:1px solid var(--border);
+  }
+  .btn-secondary:hover{ border-color:rgba(99,91,255,.4); background:var(--surface-alt); color:var(--primary); }
+  .btn-secondary:active{ transform:scale(.98); }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; box-shadow:none; }
+
+  /* 작성중 대기 표현 */
+  .typing-row{
+    display:flex; align-items:center; gap:var(--sp-3);
+    align-self:flex-start;
+  }
+  .typing-bubble{
+    display:flex; align-items:center; gap:5px;
+    padding: var(--sp-3) var(--sp-4);
+    background:#fff; border:1px solid var(--border);
+    border-radius:var(--radius-card); border-top-left-radius:6px;
+    box-shadow:var(--shadow-rest);
+  }
+  .typing-bubble .dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--muted);
+    animation: dotBounce 1.2s ease-in-out infinite;
+  }
+  .typing-bubble .dot:nth-child(2){ animation-delay:.15s; }
+  .typing-bubble .dot:nth-child(3){ animation-delay:.3s; }
+  @keyframes dotBounce{
+    0%, 60%, 100%{ transform:translateY(0); opacity:.5; }
+    30%{ transform:translateY(-4px); opacity:1; }
+  }
+  .typing-caption{ font-size:13px; color:var(--muted); font-weight:500; }
+
+  /* ===================== 입력창 (composer) ===================== */
+  .composer{
+    display:flex; flex-direction:column; gap:var(--sp-2);
+    margin: 0 var(--sp-6) var(--sp-6);
+    padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-4);
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:var(--radius-card);
+    box-shadow:var(--shadow-rest);
+    transition: box-shadow .18s ease, border-color .18s ease;
+  }
+  .composer:focus-within{
+    border-color: rgba(99,91,255,.45);
+    box-shadow:var(--shadow-hover);
+  }
+  .composer-row{ display:flex; align-items:flex-end; gap:var(--sp-3); }
+  .composer textarea{
+    flex:1; resize:none;
+    border:none; outline:none;
+    min-height:24px; max-height:120px;
+    font-size:15px; line-height:1.6; color:var(--text);
+    background:transparent;
+    padding: var(--sp-1) 0;
+  }
+  .composer textarea::placeholder{ color:var(--muted); }
+  .composer-icons{ display:flex; align-items:center; gap:var(--sp-1); flex:0 0 auto; }
+  .icon-btn{
+    width:36px; height:36px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    transition: background .16s ease, color .16s ease;
+    color:var(--subtext);
+  }
+  .icon-btn svg{ width:18px; height:18px; }
+  .icon-btn.tint-teal{ background:rgba(0,194,184,.12); color:var(--accent-teal); }
+  .icon-btn.tint-pink{ background:rgba(255,102,153,.12); color:#C23A65; }
+  .icon-btn:hover{ filter:brightness(0.92); }
+  .icon-btn.tint-teal:hover{ background:rgba(0,194,184,.22); }
+  .icon-btn.tint-pink:hover{ background:rgba(255,102,153,.22); }
+  .btn-send{
+    height:38px; padding:0 var(--sp-4);
+    flex:0 0 auto;
+  }
+  .btn-send svg{ width:16px; height:16px; }
+  .composer-hint{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 0 var(--sp-2);
+    font-size:11px; color:var(--muted);
+  }
+
+  /* ===================== 푸터 ===================== */
+  .page-footer{
+    max-width:1240px;
+    margin: 0 auto var(--sp-8);
+    padding: 0 var(--sp-6);
+    text-align:center;
+    font-size:12px; letter-spacing:.04em;
+    color:var(--muted);
+  }
+
+  /* ===================== 반응형 (1000px↓ 사이드바 접힘) ===================== */
+  @media (max-width: 1000px){
+    .app-shell{
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+      margin: 0; border-radius:0; border:none; min-height:100vh;
+    }
+    .sidebar{
+      flex-direction:row; flex-wrap:wrap; align-items:center;
+      gap:var(--sp-3);
+      padding: var(--sp-3) var(--sp-4);
+    }
+    .brand{ padding:0; }
+    .btn-new-story{ width:auto; padding:0 var(--sp-3); }
+    .nav-demo{ order:3; width:100%; flex-direction:row; align-items:center; gap:var(--sp-3); }
+    .nav-demo-body{ flex-direction:row; align-items:center; width:100%; }
+    .history-list{ flex-direction:row; overflow-x:auto; overflow-y:visible; gap:var(--sp-2); padding-bottom:2px; }
+    .history-item{ flex:0 0 auto; min-width:150px; }
+    .empty-state{ min-width:220px; }
+    .empty-toggle-label{ order:0; }
+    .sidebar-user{ border-top:none; margin-top:0; padding-top:0; margin-left:auto; }
+    .banner, .conversation, .composer{ margin-left:var(--sp-4); margin-right:var(--sp-4); }
+    .msg-group, .response-card{ max-width:92%; }
+  }
+  @media (max-width: 640px){
+    .app-shell{ margin:0; }
+    .banner, .conversation, .composer{ margin-left:var(--sp-3); margin-right:var(--sp-3); }
+    .conversation{ padding: var(--sp-4) var(--sp-3); gap:var(--sp-4); }
+    .msg-group, .response-card{ max-width:100%; }
+    .response-card{ margin-left:0; }
+  }
+
+  /* ===================== 접근성 — 모션 축소 ===================== */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; }
+    .sidebar, .history-item, .msg-group, .response-card, .btn-primary::after, .brand-dot{ animation:none !important; }
+    .typing-bubble .dot{ animation:none !important; opacity:.7; }
+    .history-item.is-active .h-tag::before{ animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 아이콘 스프라이트 — 순수 SVG, 라이브러리 없음 -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-feather" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7-3.5-3.5L8 16v3h4z"/><path d="M15 8l3 3"/><path d="M4 20l6-6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M9 21h6"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V6a2 2 0 0 1 2-2h9l5 5v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 13h6M9 17h4"/></symbol>
+</svg>
+
+<div class="app-shell">
+
+  <!-- ============ 사이드바 : nav ============ -->
+  <aside class="sidebar" data-region="nav" aria-label="연서 내비게이션">
+    <div class="brand">
+      <span class="brand-dot"><svg width="16" height="16"><use href="#i-feather"/></svg></span>
+      <span class="brand-name">연서</span>
+    </div>
+
+    <button type="button" class="btn-new-story">
+      <svg><use href="#i-plus"/></svg>
+      ＋ 새 이야기
+    </button>
+
+    <div class="nav-demo">
+      <input type="checkbox" id="emptyToggle" class="empty-toggle-input">
+      <label for="emptyToggle" class="empty-toggle-label">
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        <span class="toggle-text">빈 상태 미리보기</span>
+      </label>
+
+      <div class="nav-demo-body">
+        <nav class="history-list" aria-label="지난 대화 목록">
+          <a class="history-item" href="#">
+            <span class="h-title">비 오는 정거장</span>
+          </a>
+          <a class="history-item is-active" href="#" aria-current="page">
+            <span class="h-title">할머니의 라디오</span>
+            <span class="h-tag">현재 대화</span>
+          </a>
+          <a class="history-item" href="#">
+            <span class="h-title">이름 없는 등대지기</span>
+          </a>
+          <a class="history-item" href="#">
+            <span class="h-title">3층 그 방</span>
+          </a>
+        </nav>
+
+        <div class="empty-state" data-region="empty">
+          <span class="empty-icon"><svg><use href="#i-empty"/></svg></span>
+          <p class="empty-headline">아직 시작한 이야기가 없어요</p>
+          <p class="empty-desc">마음에 남은 장면 하나로 시작해보세요.</p>
+          <button type="button" class="btn-empty-cta" data-region="action">새 이야기 시작</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <span class="avatar avatar-user">지</span>
+      <span>
+        <span class="sidebar-user-name" style="display:block;">지민</span>
+        <span class="sidebar-user-role">작가 모드</span>
+      </span>
+    </div>
+  </aside>
+
+  <!-- ============ 메인 ============ -->
+  <main class="main">
+
+    <div class="banner" data-region="banner">
+      <svg><use href="#i-info"/></svg>
+      <span><strong>초안은 자동 저장돼요</strong> · 마음에 들면 이어쓰기로 계속</span>
+    </div>
+
+    <section class="conversation" data-region="conversation" aria-label="연서와의 대화">
+
+      <!-- group A : 연서 · 긴 발화 -->
+      <div class="msg-group from-yeonseo">
+        <span class="msg-avatar ai">연</span>
+        <div class="msg-col">
+          <div class="msg-meta"><span class="speaker">연서</span><time>오후 9:14</time></div>
+          <div class="bubble">안녕하세요, 연서예요. 오늘은 어떤 이야기를 함께 써볼까요? 거창하지 않아도 괜찮아요 — 최근에 마음에 걸린 장면 하나, 잊히지 않는 얼굴 하나면 충분해요. 그게 첫 문장이 되거든요.</div>
+        </div>
+      </div>
+
+      <!-- group B : 나 · 한 단어 발화 -->
+      <div class="msg-group from-me">
+        <span class="msg-avatar me">지</span>
+        <div class="msg-col">
+          <div class="msg-meta"><span class="speaker">나</span><time>오후 9:15</time></div>
+          <div class="bubble">할머니.</div>
+          <span class="sent-state"><svg><use href="#i-check"/></svg>전송됨</span>
+        </div>
+      </div>
+
+      <!-- group C : 연서 · 연속 발화 2개 -->
+      <div class="msg-group from-yeonseo">
+        <span class="msg-avatar ai">연</span>
+        <div class="msg-col">
+          <div class="msg-meta"><span class="speaker">연서</span><time>오후 9:15</time></div>
+          <div class="bubble">할머니. 좋아요.</div>
+        </div>
+      </div>
+      <div class="msg-group from-yeonseo is-continued">
+        <span class="msg-avatar ai is-spacer">연</span>
+        <div class="msg-col">
+          <div class="bubble">그 할머니를 떠올리면 가장 먼저 어떤 감각이 오나요? 냄새, 소리, 손의 온도 — 무엇이든요.</div>
+          <span class="bubble-time">오후 9:15</span>
+        </div>
+      </div>
+
+      <!-- group D : 나 · 아주 긴 발화 -->
+      <div class="msg-group from-me">
+        <span class="msg-avatar me">지</span>
+        <div class="msg-col">
+          <div class="msg-meta"><span class="speaker">나</span><time>오후 9:17</time></div>
+          <div class="bubble">여름마다 할머니 집에 가면 마루에서 라디오 소리가 났어요. 트로트였는데 지직거리는 잡음이 늘 섞여 있었고, 할머니는 그 잡음까지 좋아하셨어요. 이제 그 라디오도 없고 할머니도 안 계신데, 가끔 지하철에서 비슷한 잡음이 들리면 그 마루로 순간 이동한 것 같아요. 그 느낌을 이야기로 붙잡고 싶어요.</div>
+          <span class="sent-state"><svg><use href="#i-check"/></svg>전송됨</span>
+        </div>
+      </div>
+
+      <!-- group E : 연서 · 마무리 발화 + 초안 카드 -->
+      <div class="msg-group from-yeonseo">
+        <span class="msg-avatar ai">연</span>
+        <div class="msg-col">
+          <div class="msg-meta"><span class="speaker">연서</span><time>오후 9:18</time></div>
+          <div class="bubble">좋아요. 그 잡음이 이야기의 심장이 될 것 같아요. 이렇게 시작해볼까요?</div>
+        </div>
+      </div>
+
+      <!-- 초안 제안 카드 : response-card -->
+      <article class="response-card" data-region="response-card">
+        <div class="response-card-head">
+          <span class="draft-badge"><svg><use href="#i-sparkle"/></svg>AI 초안</span>
+        </div>
+        <h3 class="response-card-title">잡음의 온도</h3>
+        <p class="response-card-excerpt">여름은 늘 지직거리는 소리로 시작됐다. 할머니의 라디오는 트로트와 잡음을 구별하지 않았고, 나도 그걸 배웠다. 소리의 흠집마다 여름 냄새가 뱄다.</p>
+        <div class="response-card-actions" data-region="action">
+          <button type="button" class="btn btn-primary">이어쓰기</button>
+          <button type="button" class="btn btn-secondary">다른 제안</button>
+        </div>
+      </article>
+
+      <!-- 작성중 대기 표현 -->
+      <div class="typing-row">
+        <span class="msg-avatar ai">연</span>
+        <div class="msg-col">
+          <div class="typing-bubble" aria-hidden="true">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          </div>
+          <span class="typing-caption">연서가 다음 문장을 쓰는 중…</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============ 입력창 : composer ============ -->
+    <form class="composer" data-region="composer" onsubmit="return false;">
+      <div class="composer-row">
+        <span class="icon-btn tint-teal" role="button" tabindex="0" aria-label="첨부"><svg><use href="#i-plus"/></svg></span>
+        <textarea rows="1" placeholder="이야기의 다음 조각을 들려주세요…" aria-label="메시지 입력"></textarea>
+        <div class="composer-icons">
+          <span class="icon-btn tint-pink" role="button" tabindex="0" aria-label="음성 입력"><svg><use href="#i-mic"/></svg></span>
+          <button type="submit" class="btn btn-primary btn-send">
+            <svg><use href="#i-send"/></svg>보내기
+          </button>
+        </div>
+      </div>
+      <div class="composer-hint">
+        <span>Shift+Enter 줄바꿈</span>
+        <span></span>
+      </div>
+    </form>
+  </main>
+</div>
+
+<footer class="page-footer">STYLE 29 · 컬러풀 모던</footer>
+
+</body>
+</html>

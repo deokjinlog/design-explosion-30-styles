@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 · 이야기를 함께 쓰는 대화</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;600;700&display=swap">
+<style>
+  :root{
+    --cream:#FAF6F0;
+    --surface:#FFFDF9;
+    --surface-sunken:#F3ECE2;
+    --border:#E7DDCF;
+    --text:#3A342E;
+    --text-secondary:#6B6157;
+    --text-faint:#9A8F82;
+    --terracotta:#C97B5A;
+    --terracotta-strong:#A8552F;
+    --terracotta-strong-hover:#8F4527;
+    --terracotta-tint:#F3E0D6;
+    --olive:#8A9A5B;
+    --olive-strong:#5C6A38;
+    --olive-tint:#E7EBD8;
+    --success:#6E7D45;
+    --warning:#D8973C;
+    --danger:#B15A48;
+    --shadow-sm:0 1px 2px rgba(80,60,40,.05);
+    --shadow-lg:0 8px 24px rgba(120,90,60,.06);
+    --radius-card:14px;
+    --radius-ctrl:10px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--text);
+    font-family:'Mulish','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:15px;
+    line-height:1.6;
+    letter-spacing:.1px;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,p,ul,li,figure,form{margin:0;padding:0;}
+  ul{list-style:none;}
+  button{font-family:inherit;}
+  .tabular{font-variant-numeric:tabular-nums;}
+  .time,.msg-meta,.composer-hint,.user-name,.mobile-title{font-variant-numeric:tabular-nums;}
+
+  /* ===== app shell ===== */
+  .toggle-input{position:absolute;opacity:0;width:0;height:0;pointer-events:none;}
+
+  .app-shell{
+    display:grid;
+    grid-template-columns:280px 1fr;
+    max-width:1280px;
+    margin:0 auto;
+    min-height:100vh;
+  }
+
+  /* ===== sidebar / nav ===== */
+  .sidebar{
+    background:var(--surface-sunken);
+    border-right:1px solid var(--border);
+    padding:24px 20px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    min-height:100vh;
+  }
+  .brand-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:2px 2px 4px;
+  }
+  .brand-mark{
+    width:34px;height:34px;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:50%;
+    background:var(--surface);
+    box-shadow:var(--shadow-sm);
+  }
+  .brand-name{
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:-.01em;
+    color:var(--text);
+  }
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    height:40px;
+    padding:0 18px;
+    border-radius:var(--radius-ctrl);
+    border:1px solid transparent;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    transition:background-color .24s ease, color .24s ease, transform .24s ease, box-shadow .24s ease, border-color .24s ease;
+  }
+  .btn-primary{
+    background:var(--terracotta-strong);
+    color:#FFFDF9;
+    box-shadow:var(--shadow-sm);
+  }
+  .btn-primary:hover{
+    background:var(--terracotta-strong-hover);
+    transform:translateY(-1px);
+    box-shadow:0 4px 10px rgba(120,70,40,.16);
+  }
+  .btn-primary:focus-visible{
+    outline:2px solid var(--terracotta);
+    outline-offset:2px;
+  }
+  .btn-ghost{
+    background:var(--surface);
+    color:var(--olive-strong);
+    border-color:var(--border);
+  }
+  .btn-ghost:hover{
+    background:var(--olive-tint);
+    border-color:var(--olive);
+  }
+  .btn-ghost:focus-visible{
+    outline:2px solid var(--olive-strong);
+    outline-offset:2px;
+  }
+  .btn-new-story{width:100%;}
+
+  .nav-section-label{
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+    color:var(--text-faint);
+    padding:4px 4px 0;
+  }
+
+  .story-list{display:flex;flex-direction:column;gap:4px;}
+  .story-item{border-radius:var(--radius-ctrl);}
+  .story-link{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    padding:10px 12px;
+    border-radius:var(--radius-ctrl);
+    color:var(--text-secondary);
+    text-decoration:none;
+    font-size:14px;
+    border-left:3px solid transparent;
+    transition:background-color .16s ease, border-color .16s ease, color .16s ease;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+  .story-link:hover{
+    background:var(--terracotta-tint);
+    border-left-color:var(--olive);
+    color:var(--text);
+  }
+  .story-item.is-active .story-link{
+    background:var(--terracotta-tint);
+    border-left-color:var(--olive-strong);
+    color:var(--text);
+    font-weight:700;
+  }
+  .badge-current{
+    flex:none;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.3px;
+    color:var(--text);
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:2px 8px;
+  }
+
+  /* empty-state demo toggle (pure CSS, no JS) */
+  .story-list-empty{
+    display:none;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-card);
+    padding:20px 16px;
+    text-align:left;
+  }
+  .empty-icon{
+    width:36px;height:36px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .empty-title{font-size:14px;font-weight:700;color:var(--text);}
+  .empty-desc{font-size:13px;color:var(--text-secondary);line-height:1.5;}
+  .empty-cta{height:34px;padding:0 14px;font-size:13px;margin-top:2px;}
+
+  #emptyDemo:checked ~ .story-list-real{display:none;}
+  #emptyDemo:checked ~ .story-list-empty{display:flex;}
+
+  .empty-demo-toggle{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 4px;
+    cursor:pointer;
+    font-size:12px;
+    color:var(--text-faint);
+    -webkit-user-select:none;user-select:none;
+  }
+  .empty-demo-toggle .track{
+    flex:none;
+    width:30px;height:17px;
+    border-radius:999px;
+    background:var(--border);
+    position:relative;
+    transition:background-color .22s ease;
+  }
+  .empty-demo-toggle .thumb{
+    position:absolute;
+    top:2px;left:2px;
+    width:13px;height:13px;
+    border-radius:50%;
+    background:var(--surface);
+    box-shadow:var(--shadow-sm);
+    transition:transform .25s ease;
+  }
+  #emptyDemo:checked ~ .empty-demo-toggle .track{background:var(--terracotta);}
+  #emptyDemo:checked ~ .empty-demo-toggle .thumb{transform:translateX(13px);}
+  #emptyDemo:focus-visible ~ .empty-demo-toggle .track{outline:2px solid var(--terracotta);outline-offset:2px;}
+
+  .sidebar-footer{
+    margin-top:auto;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 8px 2px;
+    border-top:1px solid var(--border);
+  }
+  .user-name{font-size:14px;font-weight:600;color:var(--text);}
+
+  /* ===== avatars (pure CSS, initials only) ===== */
+  .avatar{
+    flex:none;
+    width:36px;height:36px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0;
+  }
+  .avatar-ai{
+    background:var(--terracotta-tint);
+    color:var(--terracotta-strong-hover);
+    border:1px solid var(--terracotta);
+  }
+  .avatar-user{
+    background:var(--olive-tint);
+    color:var(--olive-strong);
+    border:1px solid var(--olive);
+  }
+  .avatar-user-sm{width:28px;height:28px;font-size:12px;background:var(--olive-tint);color:var(--olive-strong);border:1px solid var(--olive);}
+
+  /* ===== mobile topbar (hidden on desktop) ===== */
+  .mobile-topbar{
+    display:none;
+    align-items:center;
+    gap:12px;
+    padding:14px 16px;
+    background:var(--cream);
+    border-bottom:1px solid var(--border);
+    position:sticky;top:0;
+    z-index:30;
+  }
+  .hamburger-btn{
+    width:36px;height:36px;flex:none;
+    border-radius:var(--radius-ctrl);
+    background:var(--surface);
+    border:1px solid var(--border);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    cursor:pointer;
+  }
+  .hamburger-btn span{width:16px;height:2px;background:var(--text);border-radius:2px;}
+  .mobile-title{font-size:14px;font-weight:700;color:var(--text);flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .mobile-brand{font-size:14px;font-weight:700;color:var(--terracotta-strong-hover);}
+
+  .scrim{
+    display:none;
+    position:fixed;inset:0;
+    background:rgba(58,52,46,.35);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease;
+    z-index:40;
+  }
+
+  /* ===== main panel ===== */
+  .main-panel{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    min-height:100vh;
+  }
+
+  .banner{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--olive-tint);
+    color:var(--text);
+    border-bottom:1px solid var(--border);
+    padding:12px 32px;
+    font-size:13px;
+  }
+  .banner-icon{
+    flex:none;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:var(--surface);
+    border:1px solid var(--olive);
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .conversation{
+    flex:1;
+    padding:28px 32px 24px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    overflow-y:auto;
+  }
+
+  .conv-title-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    padding-bottom:4px;
+  }
+  .conv-title{
+    font-size:20px;
+    font-weight:700;
+    color:var(--text);
+    letter-spacing:-.01em;
+  }
+  .conv-sub{
+    font-size:12px;
+    color:var(--text-faint);
+  }
+
+  /* ===== message groups / bubbles ===== */
+  .msg-group{
+    display:flex;
+    gap:12px;
+    max-width:100%;
+    animation:msgIn .42s ease both;
+  }
+  @keyframes msgIn{
+    from{opacity:0; transform:translateY(8px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .msg-col{display:flex;flex-direction:column;gap:6px;min-width:0;max-width:min(560px,72%);}
+  .msg-meta{
+    display:flex;align-items:center;gap:6px;
+    font-size:12px;
+    color:var(--text-faint);
+  }
+  .msg-meta .speaker{font-weight:700;color:var(--text-secondary);}
+  .msg-meta .dot{opacity:.6;}
+  .meta-right{justify-content:flex-end;}
+
+  .bubble{
+    font-size:15px;
+    line-height:1.65;
+    padding:14px 16px;
+    border-radius:var(--radius-card);
+    word-break:keep-all;
+    overflow-wrap:break-word;
+    box-shadow:var(--shadow-sm);
+  }
+  .bubble-ai{
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-top-left-radius:4px;
+  }
+  .bubble-user{
+    background:var(--terracotta-tint);
+    border:1px solid transparent;
+    color:var(--text);
+    border-top-right-radius:4px;
+    align-self:flex-end;
+  }
+  .msg-user{flex-direction:row-reverse;}
+  .msg-user .msg-col{align-items:flex-end;margin-left:auto;}
+  .msg-user .bubble{width:fit-content;max-width:100%;}
+  .msg-yeonseo .bubble{width:fit-content;max-width:100%;}
+
+  .bubble-run + .bubble-run{margin-top:2px;}
+  .msg-run .msg-col{gap:2px;}
+  .msg-run .msg-meta{margin-bottom:2px;}
+
+  /* response card */
+  .response-card{
+    margin-left:48px;
+    max-width:min(560px,72%);
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-card);
+    padding:22px 24px;
+    box-shadow:var(--shadow-lg);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    animation:msgIn .42s ease both;
+    transition:box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
+  }
+  .response-card:hover{
+    background:#FFFFFC;
+    border-color:#DCCEB9;
+    box-shadow:0 12px 30px rgba(120,90,60,.10);
+  }
+  .response-card-label{
+    display:inline-flex;
+    align-self:flex-start;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+    color:var(--terracotta-strong-hover);
+    background:var(--terracotta-tint);
+    border-radius:999px;
+    padding:3px 10px;
+  }
+  .response-card-title{
+    font-size:20px;
+    font-weight:700;
+    color:var(--text);
+    letter-spacing:-.01em;
+  }
+  .response-card-excerpt{
+    font-size:14px;
+    line-height:1.7;
+    color:var(--text-secondary);
+    border-left:3px solid var(--olive);
+    padding-left:14px;
+  }
+  .response-card-actions{display:flex;gap:10px;margin-top:6px;}
+
+  /* typing indicator */
+  .typing-row{
+    display:flex;align-items:flex-end;gap:12px;
+    animation:msgIn .42s ease both;
+  }
+  .typing-bubble{
+    display:flex;align-items:center;gap:10px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-card);
+    border-top-left-radius:4px;
+    padding:12px 16px;
+    box-shadow:var(--shadow-sm);
+  }
+  .typing-text{font-size:13px;color:var(--text-secondary);}
+  .typing-dots{display:inline-flex;gap:4px;align-items:center;}
+  .typing-dots i{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--terracotta);
+    display:inline-block;
+    animation:dotBounce 1.2s ease-in-out infinite;
+  }
+  .typing-dots i:nth-child(2){animation-delay:.15s;}
+  .typing-dots i:nth-child(3){animation-delay:.3s;}
+  @keyframes dotBounce{
+    0%,60%,100%{transform:translateY(0);opacity:.5;}
+    30%{transform:translateY(-4px);opacity:1;}
+  }
+
+  /* ===== composer ===== */
+  .composer-wrap{
+    padding:16px 32px 22px;
+    border-top:1px solid var(--border);
+    background:var(--cream);
+    position:sticky;bottom:0;
+  }
+  .composer-bar{
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-card);
+    padding:8px 10px;
+    box-shadow:var(--shadow-sm);
+  }
+  .composer-bar:focus-within{
+    border-color:var(--terracotta);
+    box-shadow:0 0 0 4px var(--terracotta-tint);
+  }
+  .composer-icon-btn{
+    flex:none;
+    width:36px;height:36px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--text-secondary);
+    font-size:15px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition:background-color .18s ease, border-color .18s ease;
+  }
+  .composer-icon-btn:hover{background:var(--surface-sunken);border-color:var(--olive);}
+  .composer-icon-btn:focus-visible{outline:2px solid var(--terracotta);outline-offset:2px;}
+  .composer-input{
+    flex:1;
+    min-width:0;
+    border:none;
+    outline:none;
+    background:transparent;
+    resize:none;
+    font-family:inherit;
+    font-size:15px;
+    color:var(--text);
+    line-height:1.5;
+    padding:8px 4px;
+    max-height:120px;
+  }
+  .composer-input::placeholder{color:var(--text-faint);}
+  .composer-send{height:38px;padding:0 20px;flex:none;}
+  .composer-hint{
+    font-size:12px;
+    color:var(--text-faint);
+    padding:8px 6px 0;
+  }
+
+  .page-footer{
+    text-align:center;
+    padding:18px 12px 26px;
+    font-size:12px;
+    letter-spacing:.4px;
+    color:var(--text-faint);
+    background:var(--cream);
+  }
+
+  /* ===== responsive ===== */
+  @media (max-width:1000px){
+    .app-shell{grid-template-columns:1fr;}
+    .mobile-topbar{display:flex;}
+    .scrim{display:block;}
+    .sidebar{
+      position:fixed;
+      top:0;left:0;
+      width:280px;
+      max-width:82vw;
+      transform:translateX(-100%);
+      transition:transform .3s ease;
+      z-index:50;
+      box-shadow:0 0 0 transparent;
+    }
+    #navToggle:checked ~ .app-shell .sidebar{
+      transform:translateX(0);
+      box-shadow:12px 0 32px rgba(60,45,30,.14);
+    }
+    #navToggle:checked ~ .app-shell .scrim{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .conversation{padding:22px 18px 18px;}
+    .composer-wrap{padding:12px 16px 18px;}
+    .banner{padding:10px 18px;}
+    .msg-col{max-width:86%;}
+    .response-card{margin-left:0;max-width:92%;}
+  }
+
+  @media (max-width:640px){
+    .conv-title{font-size:17px;}
+    .response-card{padding:18px 16px;}
+    .msg-col{max-width:100%;}
+  }
+
+  /* ===== reduced motion ===== */
+  @media (prefers-reduced-motion:reduce){
+    *{
+      animation-duration:.001ms !important;
+      animation-delay:0s !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.001ms !important;
+    }
+    .msg-group,.response-card,.typing-row{opacity:1;transform:none;}
+    .typing-dots i{opacity:.8;transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<input type="checkbox" id="navToggle" class="toggle-input" aria-hidden="true">
+
+<div class="app-shell">
+
+  <header class="mobile-topbar">
+    <label for="navToggle" class="hamburger-btn" aria-label="지난 대화 목록 열기">
+      <span></span><span></span><span></span>
+    </label>
+    <span class="mobile-title">할머니의 라디오</span>
+    <span class="mobile-brand">연서</span>
+  </header>
+
+  <label for="navToggle" class="scrim" aria-hidden="true"></label>
+
+  <aside class="sidebar" data-region="nav">
+    <div class="brand-row">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M4 20C4 20 5 9 12 5C19 9 20 20 20 20" stroke="#C97B5A" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M12 5V20" stroke="#8A9A5B" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="brand-name">연서</span>
+    </div>
+
+    <button type="button" class="btn btn-primary btn-new-story">＋ 새 이야기</button>
+
+    <div>
+      <div class="nav-section-label">지난 대화</div>
+
+      <input type="checkbox" id="emptyDemo" class="toggle-input">
+
+      <ul class="story-list story-list-real">
+        <li class="story-item">
+          <a href="#" class="story-link"><span>비 오는 정거장</span></a>
+        </li>
+        <li class="story-item is-active">
+          <a href="#" class="story-link"><span>할머니의 라디오</span><span class="badge-current">현재</span></a>
+        </li>
+        <li class="story-item">
+          <a href="#" class="story-link"><span>이름 없는 등대지기</span></a>
+        </li>
+        <li class="story-item">
+          <a href="#" class="story-link"><span>3층 그 방</span></a>
+        </li>
+      </ul>
+
+      <div class="story-list-empty" data-region="empty">
+        <span class="empty-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+            <rect x="4" y="5" width="16" height="14" rx="3" stroke="#C9B79C" stroke-width="1.5"/>
+            <path d="M8 10H16M8 13.5H13" stroke="#C9B79C" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <p class="empty-title">아직 시작한 이야기가 없어요</p>
+        <p class="empty-desc">마음에 남은 장면 하나로 시작해보세요.</p>
+        <button type="button" class="btn btn-ghost empty-cta">새 이야기 시작</button>
+      </div>
+
+      <label for="emptyDemo" class="empty-demo-toggle">
+        <span class="track" aria-hidden="true"><span class="thumb"></span></span>
+        <span>지난 대화 없음 예시 보기</span>
+      </label>
+    </div>
+
+    <div class="sidebar-footer">
+      <span class="avatar avatar-user-sm" aria-hidden="true">지</span>
+      <span class="user-name">지민</span>
+    </div>
+  </aside>
+
+  <main class="main-panel">
+
+    <div class="banner" data-region="banner">
+      <span class="banner-icon" aria-hidden="true">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#6E7D45" stroke-width="2"/><path d="M8 12.5L11 15.5L16 9" stroke="#6E7D45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span>초안은 자동 저장돼요 · 마음에 들면 이어쓰기로 계속</span>
+    </div>
+
+    <section class="conversation" data-region="conversation" aria-label="연서와의 대화">
+
+      <div class="conv-title-row">
+        <h1 class="conv-title">할머니의 라디오</h1>
+        <span class="conv-sub">연서 · 소크라테스식 이야기 쓰기</span>
+      </div>
+
+      <div class="msg-group msg-yeonseo" style="animation-delay:.03s">
+        <div class="avatar avatar-ai" aria-hidden="true">연</div>
+        <div class="msg-col">
+          <div class="msg-meta"><span class="speaker">연서</span><span class="dot">·</span><span class="time">오후 9:14</span></div>
+          <div class="bubble bubble-ai">안녕하세요, 연서예요. 오늘은 어떤 이야기를 함께 써볼까요? 거창하지 않아도 괜찮아요 — 최근에 마음에 걸린 장면 하나, 잊히지 않는 얼굴 하나면 충분해요. 그게 첫 문장이 되거든요.</div>
+        </div>
+      </div>
+
+      <div class="msg-group msg-user" style="animation-delay:.08s">
+        <div class="avatar avatar-user" aria-hidden="true">지</div>
+        <div class="msg-col">
+          <div class="msg-meta meta-right"><span class="time">오후 9:15</span><span class="dot">·</span><span class="speaker">나</span></div>
+          <div class="bubble bubble-user">할머니.</div>
+        </div>
+      </div>
+
+      <div class="msg-group msg-yeonseo msg-run" style="animation-delay:.13s">
+        <div class="avatar avatar-ai" aria-hidden="true">연</div>
+        <div class="msg-col">
+          <div class="msg-meta"><span class="speaker">연서</span><span class="dot">·</span><span class="time">오후 9:15</span></div>
+          <div class="bubble bubble-ai bubble-run">할머니. 좋아요.</div>
+          <div class="bubble bubble-ai bubble-run">그 할머니를 떠올리면 가장 먼저 어떤 감각이 오나요? 냄새, 소리, 손의 온도 — 무엇이든요.</div>
+        </div>
+      </div>
+
+      <div class="msg-group msg-user" style="animation-delay:.18s">
+        <div class="avatar avatar-user" aria-hidden="true">지</div>
+        <div class="msg-col">
+          <div class="msg-meta meta-right"><span class="time">오후 9:17</span><span class="dot">·</span><span class="speaker">나</span></div>
+          <div class="bubble bubble-user">여름마다 할머니 집에 가면 마루에서 라디오 소리가 났어요. 트로트였는데 지직거리는 잡음이 늘 섞여 있었고, 할머니는 그 잡음까지 좋아하셨어요. 이제 그 라디오도 없고 할머니도 안 계신데, 가끔 지하철에서 비슷한 잡음이 들리면 그 마루로 순간 이동한 것 같아요. 그 느낌을 이야기로 붙잡고 싶어요.</div>
+        </div>
+      </div>
+
+      <div class="msg-group msg-yeonseo" style="animation-delay:.23s">
+        <div class="avatar avatar-ai" aria-hidden="true">연</div>
+        <div class="msg-col">
+          <div class="msg-meta"><span class="speaker">연서</span><span class="dot">·</span><span class="time">오후 9:18</span></div>
+          <div class="bubble bubble-ai">좋아요. 그 잡음이 이야기의 심장이 될 것 같아요. 이렇게 시작해볼까요?</div>
+        </div>
+      </div>
+
+      <div class="response-card" data-region="response-card" style="animation-delay:.3s">
+        <span class="response-card-label">초안 제안 · 가제</span>
+        <h3 class="response-card-title">잡음의 온도</h3>
+        <p class="response-card-excerpt">여름은 늘 지직거리는 소리로 시작됐다. 할머니의 라디오는 트로트와 잡음을 구별하지 않았고, 나도 그걸 배웠다. 소리의 흠집마다 여름 냄새가 뱄다.</p>
+        <div class="response-card-actions" data-region="action">
+          <button type="button" class="btn btn-primary">이어쓰기</button>
+          <button type="button" class="btn btn-ghost">다른 제안</button>
+        </div>
+      </div>
+
+      <div class="typing-row" aria-live="polite" style="animation-delay:.36s">
+        <div class="avatar avatar-ai" aria-hidden="true">연</div>
+        <div class="typing-bubble">
+          <span class="typing-text">연서가 다음 문장을 쓰는 중…</span>
+          <span class="typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        </div>
+      </div>
+
+    </section>
+
+    <div class="composer-wrap">
+      <div class="composer-bar" data-region="composer">
+        <button type="button" class="composer-icon-btn" aria-label="파일 첨부">＋</button>
+        <textarea class="composer-input" rows="1" placeholder="이야기의 다음 조각을 들려주세요…" aria-label="이야기 입력"></textarea>
+        <button type="button" class="composer-icon-btn" aria-label="음성으로 입력">🎤</button>
+        <button type="button" class="btn btn-primary composer-send">보내기</button>
+      </div>
+      <div class="composer-hint">Shift+Enter 줄바꿈</div>
+    </div>
+
+  </main>
+</div>
+
+<footer class="page-footer">STYLE 27 · 웜 프로페셔널</footer>
+
+</body>
+</html>

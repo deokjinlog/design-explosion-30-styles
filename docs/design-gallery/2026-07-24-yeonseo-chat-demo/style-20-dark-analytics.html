@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연서 — 다크 콘솔 대화창 (STYLE 20)</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* ===== 토큰 — style-20 다크 애널리틱스 팔레트 (배경/텍스트 위계만 차용) ===== */
+  :root{
+    --bg:#0d1117;
+    --bg-card:#161b22;
+    --bg-inset:#21262d;
+    --border:#30363d;
+    --border-hover:#3d4552;
+    --text:#c9d1d9;
+    --text-muted:#8b949e;
+    --text-faint:#6e7681;
+
+    --ai:#2dd4bf;      /* 연서 — 청록 */
+    --ai-dim: rgba(45,212,191,.14);
+    --user:#58a6ff;    /* 나 — 파랑 */
+    --user-dim: rgba(88,166,255,.14);
+    --draft:#bc8cff;   /* 초안 카드 — 보라 */
+    --draft-dim: rgba(188,140,255,.14);
+
+    --success:#3fb950;
+    --success-dim: rgba(63,185,80,.14);
+    --focus:#58a6ff;
+
+    --radius-sm:6px;
+    --radius-md:10px;
+    --font: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:var(--bg); color:var(--text);
+    font-family:var(--font);
+    -webkit-font-smoothing:antialiased;
+  }
+  body{ font-size:14px; line-height:1.5; }
+  h1,h2,h3,p,ul,figure{ margin:0; }
+  ul{ list-style:none; padding:0; }
+  button{ font-family:inherit; }
+  ::selection{ background:var(--user-dim); color:var(--text); }
+
+  time,.time,.tnum{
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  :focus-visible{
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  a{ color: inherit; }
+
+  /* thin scrollbar */
+  .chat, .convo-list{ scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .chat::-webkit-scrollbar, .convo-list::-webkit-scrollbar{ width:8px; }
+  .chat::-webkit-scrollbar-thumb, .convo-list::-webkit-scrollbar-thumb{
+    background: var(--border); border-radius: 8px;
+  }
+
+  /* ===== 토글 체크박스 (JS 없이 상태 전환) ===== */
+  .toggle-input{ position:absolute; opacity:0; width:0; height:0; pointer-events:none; }
+
+  /* ===== 앱 그리드 ===== */
+  .app{
+    display:grid;
+    grid-template-columns: 264px 1fr;
+    min-height:100vh;
+    background:var(--bg);
+  }
+
+  /* ===== 사이드바 (nav) ===== */
+  .sidebar{
+    background:var(--bg-card);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+    padding:20px 16px;
+    gap:20px;
+  }
+  .sidebar__brand{
+    display:flex; align-items:center; gap:8px;
+    padding:4px 4px 8px;
+  }
+  .brand-mark{
+    width:28px; height:28px; border-radius: var(--radius-sm);
+    background: var(--ai-dim);
+    border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ai); flex-shrink:0;
+  }
+  .brand-name{ font-size:16px; font-weight:700; letter-spacing:-0.01em; color:var(--text); }
+  .presence{
+    margin-left:auto; display:flex; align-items:center; gap:6px;
+    font-size:11px; color:var(--text-muted);
+  }
+  .presence__dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--success);
+    animation: presencePulse 2.4s ease-in-out infinite;
+  }
+  @keyframes presencePulse{
+    0%,100%{ opacity:1; } 50%{ opacity:.45; }
+  }
+
+  .btn-new{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    width:100%; height:38px;
+    background:var(--bg-inset);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius: var(--radius-sm);
+    font-size:13px; font-weight:600;
+    cursor:pointer;
+    transition: border-color .12s ease, background .12s ease;
+  }
+  .btn-new:hover{ border-color:var(--ai); background:#1a2530; }
+  .btn-new:active{ background:#111722; }
+
+  .sidebar__section-label{
+    font-size:11px; font-weight:600; letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+    padding: 4px 8px 0;
+  }
+  .convo-list{
+    display:flex; flex-direction:column; gap:2px;
+    overflow-y:auto;
+    flex:1;
+    min-height:0;
+  }
+  .convo-list__item{
+    display:flex; align-items:center; gap:8px;
+    padding:9px 10px;
+    border-radius: var(--radius-sm);
+    border:1px solid transparent;
+    border-left:2px solid transparent;
+    font-size:13px; color:var(--text-muted);
+    cursor:pointer;
+    transition: border-color .12s ease, background .12s ease, color .12s ease;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .convo-list__item:hover{
+    border-color:var(--border-hover);
+    background:var(--bg-inset);
+    color:var(--text);
+  }
+  .convo-list__item.is-active{
+    background:var(--ai-dim);
+    border-left-color:var(--ai);
+    color:var(--text);
+    font-weight:600;
+  }
+
+  .sidebar__user{
+    display:flex; align-items:center; gap:8px;
+    padding-top:12px;
+    border-top:1px solid var(--border);
+    font-size:13px;
+  }
+  .user-avatar{
+    width:26px; height:26px; border-radius:50%;
+    background:var(--bg-inset); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; color:var(--text-muted);
+    flex-shrink:0;
+  }
+  .user-name{ color:var(--text); font-weight:600; }
+  .user-role{ color:var(--text-faint); font-size:11px; }
+
+  .nav-scrim{ display:none; }
+
+  .hamburger-btn{
+    display:none;
+    width:32px; height:32px;
+    align-items:center; justify-content:center;
+    border:1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background:var(--bg-card);
+    color:var(--text-muted);
+    cursor:pointer;
+    flex-shrink:0;
+  }
+
+  /* ===== 컨텐츠 컬럼 ===== */
+  .content{
+    display:flex; flex-direction:column;
+    min-height:100vh; min-width:0;
+  }
+
+  .topbar{
+    display:none;
+    align-items:center; gap:12px;
+    padding:12px 16px;
+    border-bottom:1px solid var(--border);
+    background:var(--bg-card);
+  }
+  .topbar__title{ font-size:14px; font-weight:600; color:var(--text); }
+
+  /* 배너 */
+  .banner{
+    display:flex; align-items:center; gap:8px;
+    padding:10px 24px;
+    background:var(--bg-inset);
+    border-bottom:1px solid var(--border);
+    font-size:12.5px; color:var(--text-muted);
+  }
+  .banner__icon{ color:var(--ai); flex-shrink:0; }
+
+  .panels{
+    flex:1; min-height:0;
+    display:flex;
+    position:relative;
+  }
+
+  /* ===== 메인 패널 (대화 + 입력창) ===== */
+  .main-panel{
+    display:flex; flex-direction:column;
+    flex:1; min-height:0; min-width:0;
+  }
+
+  .chat{
+    flex:1; min-height:0;
+    overflow-y:auto;
+    padding:24px;
+    display:flex; flex-direction:column;
+    gap:20px;
+    max-width:760px;
+    margin:0 auto;
+    width:100%;
+  }
+
+  .msg-group{
+    display:flex; gap:10px;
+    max-width:100%;
+    animation: msgIn .28s ease-out both;
+  }
+  @keyframes msgIn{
+    from{ opacity:0; transform:translateY(6px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .msg-group--ai{ justify-content:flex-start; }
+  .msg-group--user{ justify-content:flex-end; }
+
+  .avatar{
+    width:30px; height:30px; border-radius:50%;
+    flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border);
+  }
+  .avatar--ai{ background:var(--ai-dim); color:var(--ai); }
+  .avatar--user{ background:var(--user-dim); color:var(--user); font-size:11px; font-weight:700; }
+  .avatar--spacer{ visibility:hidden; }
+
+  .msg-stack{
+    display:flex; flex-direction:column; gap:6px;
+    max-width: 78%;
+  }
+  .msg-group--user .msg-stack{ align-items:flex-end; }
+
+  .msg-meta{
+    display:flex; align-items:baseline; gap:6px;
+    font-size:12px;
+    padding:0 2px;
+  }
+  .msg-meta .speaker{ font-weight:600; color:var(--text); }
+  .msg-meta .time{ color:var(--text-faint); font-size:11px; }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:3px;
+    font-size:10.5px; font-weight:600;
+    padding:1px 6px;
+    border-radius:20px;
+    line-height:1.6;
+  }
+  .badge--continued{ background:var(--bg-inset); color:var(--text-muted); border:1px solid var(--border); }
+  .badge--draft{ background:var(--draft-dim); color:var(--draft); }
+
+  .bubble{
+    padding:11px 14px;
+    border-radius: var(--radius-md);
+    border:1px solid var(--border);
+    font-size:14.5px; line-height:1.62;
+    color:var(--text);
+    overflow-wrap:break-word;
+    word-break:keep-all;
+  }
+  .bubble--ai{
+    background:var(--bg-card);
+    border-top-left-radius:4px;
+  }
+  .bubble--user{
+    background:#132030;
+    border-color:#22364d;
+    border-top-right-radius:4px;
+  }
+
+  .msg-status{
+    display:flex; align-items:center; gap:4px;
+    font-size:11px; color:var(--success);
+    padding:0 2px;
+  }
+  .msg-status svg{ width:12px; height:12px; flex-shrink:0; }
+
+  /* ===== 초안 응답 카드 ===== */
+  .response-card{
+    margin-top:2px;
+    border:1px solid var(--border);
+    border-left:2px solid var(--draft);
+    background:var(--bg-card);
+    border-radius: var(--radius-md);
+    padding:16px;
+    display:flex; flex-direction:column; gap:10px;
+    max-width: 78%;
+  }
+  .response-card__head{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .response-card__title{
+    font-size:15px; font-weight:700; color:var(--text); letter-spacing:-0.01em;
+  }
+  .response-card__excerpt{
+    margin:0;
+    padding:10px 12px;
+    background:var(--bg-inset);
+    border-radius: var(--radius-sm);
+    border:1px solid var(--border);
+    color:var(--text-muted);
+    font-size:13.5px;
+    line-height:1.68;
+    font-style:normal;
+  }
+  .response-card__actions{
+    display:flex; gap:8px; padding-top:2px;
+  }
+
+  .btn{
+    height:34px;
+    padding:0 14px;
+    border-radius: var(--radius-sm);
+    font-size:13px; font-weight:600;
+    cursor:pointer;
+    border:1px solid transparent;
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    transition: border-color .12s ease, background .12s ease, opacity .12s ease;
+  }
+  .btn-primary{
+    background:var(--ai);
+    color:#04201c;
+    border-color:var(--ai);
+  }
+  .btn-primary:hover{ background:#3fe0ca; border-color:#3fe0ca; }
+  .btn-primary:active{ background:#22b3a0; }
+  .btn-secondary{
+    background:transparent;
+    color:var(--text-muted);
+    border-color:var(--border);
+  }
+  .btn-secondary:hover{ border-color:var(--border-hover); color:var(--text); }
+
+  /* ===== 작성중 (타이핑) ===== */
+  .typing-bubble{
+    display:flex; align-items:center; gap:10px;
+    padding:11px 14px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-top-left-radius:4px;
+    border-radius: var(--radius-md);
+    color:var(--text-muted);
+    font-size:13px;
+  }
+  .typing-dots{ display:flex; align-items:center; gap:4px; }
+  .typing-dots span{
+    width:5px; height:5px; border-radius:50%;
+    background:var(--text-muted);
+    animation: dotBounce 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2){ animation-delay:.15s; }
+  .typing-dots span:nth-child(3){ animation-delay:.3s; }
+  @keyframes dotBounce{
+    0%,60%,100%{ opacity:.35; transform:translateY(0); }
+    30%{ opacity:1; transform:translateY(-3px); }
+  }
+
+  /* ===== 입력창(composer) ===== */
+  .composer{
+    border-top:1px solid var(--border);
+    background:var(--bg-card);
+    padding:14px 24px 16px;
+  }
+  .composer__inner{
+    max-width:760px; margin:0 auto;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .composer__field{
+    display:flex; align-items:flex-end; gap:8px;
+    background:var(--bg-inset);
+    border:1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding:8px 8px 8px 12px;
+    transition: border-color .12s ease;
+  }
+  .composer__field:focus-within{
+    border-color:var(--focus);
+  }
+  .composer__icons{ display:flex; gap:2px; }
+  .icon-btn{
+    width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius: var(--radius-sm);
+    border:1px solid transparent;
+    background:transparent;
+    color:var(--text-muted);
+    font-size:15px;
+    cursor:pointer;
+    transition: background .12s ease, color .12s ease;
+  }
+  .icon-btn:hover{ background:var(--bg-card); color:var(--text); }
+  .composer__textarea{
+    flex:1;
+    resize:none;
+    border:none; outline:none;
+    background:transparent;
+    color:var(--text);
+    font-family:inherit;
+    font-size:14px; line-height:1.5;
+    padding:6px 4px;
+    min-height:20px; max-height:120px;
+  }
+  .composer__textarea::placeholder{ color:var(--text-faint); }
+  .composer__send{
+    height:34px; padding:0 16px;
+    background:var(--ai); color:#04201c;
+    border:1px solid var(--ai);
+    border-radius: var(--radius-sm);
+    font-size:13px; font-weight:700;
+    cursor:pointer;
+    flex-shrink:0;
+    transition: background .12s ease;
+  }
+  .composer__send:hover{ background:#3fe0ca; }
+  .composer__send:active{ background:#22b3a0; }
+  .composer__hint{
+    font-size:11.5px; color:var(--text-faint);
+    padding-left:12px;
+  }
+
+  /* ===== 빈 상태 (지난 대화 0건 미리보기) ===== */
+  .empty-panel{
+    display:none;
+    flex:1;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    padding:40px 24px;
+    text-align:center;
+    position:relative;
+  }
+  .empty-back{
+    position:absolute; top:16px; left:16px;
+    width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background:var(--bg-card);
+    color:var(--text-muted);
+    cursor:pointer;
+  }
+  .empty-back:hover{ border-color:var(--ai); color:var(--ai); }
+  .empty-panel__icon{
+    width:56px; height:56px;
+    border-radius: var(--radius-md);
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--text-faint);
+    margin-bottom:4px;
+  }
+  .empty-panel__headline{ font-size:18px; font-weight:700; color:var(--text); letter-spacing:-0.01em; }
+  .empty-panel__desc{ font-size:13.5px; color:var(--text-muted); max-width:320px; }
+  .empty-panel__cta{
+    margin-top:8px;
+    height:38px; padding:0 20px;
+    background:var(--ai); color:#04201c;
+    border:1px solid var(--ai);
+    border-radius: var(--radius-sm);
+    font-size:13.5px; font-weight:700;
+    cursor:pointer;
+  }
+  .empty-panel__cta:hover{ background:#3fe0ca; }
+
+  /* ===== 토글 로직 (JS 없이 CSS만으로) ===== */
+  .empty-panel{ display:none; }
+  #empty-toggle:checked ~ .content .main-panel{ display:none; }
+  #empty-toggle:checked ~ .content .empty-panel{ display:flex; }
+
+  /* ===== 푸터 ===== */
+  .site-footer{
+    text-align:center;
+    font-size:11px;
+    color:var(--text-faint);
+    padding:10px 16px 14px;
+    border-top:1px solid var(--border);
+    letter-spacing:0.02em;
+  }
+
+  /* ===== 반응형 ===== */
+  @media (max-width: 1000px){
+    .app{ grid-template-columns: 1fr; }
+    .sidebar{
+      position:fixed; top:0; left:0; bottom:0;
+      width:264px;
+      z-index:50;
+      transform:translateX(-100%);
+      transition: transform .22s ease;
+      box-shadow:none;
+    }
+    #nav-toggle:checked ~ .sidebar{ transform:translateX(0); }
+    #nav-toggle:checked ~ .nav-scrim{
+      display:block;
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.55);
+      z-index:40;
+    }
+    .topbar{ display:flex; }
+    .hamburger-btn{ display:flex; }
+    .chat{ padding:16px; }
+    .composer{ padding:12px 16px 14px; }
+    .msg-stack{ max-width:88%; }
+    .response-card{ max-width:88%; }
+  }
+
+  @media (max-width: 520px){
+    .msg-stack{ max-width:94%; }
+    .response-card{ max-width:94%; }
+    .banner{ font-size:11.5px; padding:8px 14px; }
+  }
+
+  /* ===== 접근성: 모션 축소 ===== */
+  @media (prefers-reduced-motion: reduce){
+    *{
+      animation-duration:0.001ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.001ms !important;
+    }
+    .presence__dot{ opacity:1; }
+    .typing-dots span{ opacity:1; transform:none; }
+    .msg-group{ opacity:1; transform:none; }
+    .sidebar{ transition:none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <input type="checkbox" id="nav-toggle" class="toggle-input" aria-hidden="true">
+  <input type="checkbox" id="empty-toggle" class="toggle-input" aria-hidden="true">
+
+  <!-- ===== 사이드바 ===== -->
+  <aside class="sidebar" data-region="nav" aria-label="대화 내비게이션">
+    <div class="sidebar__brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+          <path d="M4 19.5V6a2 2 0 0 1 2-2h11l3 3v12.5a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 19.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M8 8.5h8M8 12h8M8 15.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="brand-name">연서</span>
+      <span class="presence"><span class="presence__dot" aria-hidden="true"></span>연결됨</span>
+    </div>
+
+    <label for="empty-toggle" class="btn-new">
+      <span aria-hidden="true">＋</span> 새 이야기
+    </label>
+
+    <div>
+      <div class="sidebar__section-label">지난 대화</div>
+      <ul class="convo-list" role="list">
+        <li class="convo-list__item">비 오는 정거장</li>
+        <li class="convo-list__item is-active" aria-current="true">할머니의 라디오</li>
+        <li class="convo-list__item">이름 없는 등대지기</li>
+        <li class="convo-list__item">3층 그 방</li>
+      </ul>
+    </div>
+
+    <div class="sidebar__user">
+      <span class="user-avatar" aria-hidden="true">지</span>
+      <div>
+        <div class="user-name">지민</div>
+        <div class="user-role">작가</div>
+      </div>
+    </div>
+  </aside>
+
+  <label for="nav-toggle" class="nav-scrim" aria-hidden="true"></label>
+
+  <!-- ===== 콘텐츠 ===== -->
+  <div class="content">
+    <div class="topbar">
+      <label for="nav-toggle" class="hamburger-btn" aria-label="메뉴 열기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </label>
+      <div class="topbar__title">할머니의 라디오</div>
+    </div>
+
+    <section class="banner" data-region="banner">
+      <span class="banner__icon" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10Z" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4.5l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </span>
+      초안은 자동 저장돼요 · 마음에 들면 이어쓰기로 계속
+    </section>
+
+    <div class="panels">
+      <!-- ===== 대화 + 입력창 ===== -->
+      <main class="main-panel">
+        <section class="chat" data-region="conversation" aria-label="대화 흐름">
+
+          <!-- 1. 연서 — 긴 발화 -->
+          <div class="msg-group msg-group--ai">
+            <div class="avatar avatar--ai" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 20c4-1 6-3 6-7V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3c0 6-4 9-9 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="msg-stack">
+              <div class="msg-meta"><span class="speaker">연서</span><span class="time">오후 9:14</span></div>
+              <div class="bubble bubble--ai">안녕하세요, 연서예요. 오늘은 어떤 이야기를 함께 써볼까요? 거창하지 않아도 괜찮아요 — 최근에 마음에 걸린 장면 하나, 잊히지 않는 얼굴 하나면 충분해요. 그게 첫 문장이 되거든요.</div>
+            </div>
+          </div>
+
+          <!-- 2. 나 — 한 단어 발화 -->
+          <div class="msg-group msg-group--user">
+            <div class="msg-stack">
+              <div class="msg-meta"><span class="time">오후 9:15</span><span class="speaker">나</span></div>
+              <div class="bubble bubble--user">할머니.</div>
+              <div class="msg-status">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5 9 17l11-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                전송됨
+              </div>
+            </div>
+            <div class="avatar avatar--user" aria-hidden="true">나</div>
+          </div>
+
+          <!-- 3~4. 연서 — 연속 발화 ①② -->
+          <div class="msg-group msg-group--ai">
+            <div class="avatar avatar--ai" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 20c4-1 6-3 6-7V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3c0 6-4 9-9 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="msg-stack">
+              <div class="msg-meta"><span class="speaker">연서</span><span class="time">오후 9:15</span></div>
+              <div class="bubble bubble--ai">할머니. 좋아요.</div>
+
+              <div class="msg-meta"><span class="badge badge--continued"><span aria-hidden="true">↳</span> 이어서</span><span class="time">오후 9:15</span></div>
+              <div class="bubble bubble--ai">그 할머니를 떠올리면 가장 먼저 어떤 감각이 오나요? 냄새, 소리, 손의 온도 — 무엇이든요.</div>
+            </div>
+          </div>
+
+          <!-- 5. 나 — 아주 긴 발화 -->
+          <div class="msg-group msg-group--user">
+            <div class="msg-stack">
+              <div class="msg-meta"><span class="time">오후 9:17</span><span class="speaker">나</span></div>
+              <div class="bubble bubble--user">여름마다 할머니 집에 가면 마루에서 라디오 소리가 났어요. 트로트였는데 지직거리는 잡음이 늘 섞여 있었고, 할머니는 그 잡음까지 좋아하셨어요. 이제 그 라디오도 없고 할머니도 안 계신데, 가끔 지하철에서 비슷한 잡음이 들리면 그 마루로 순간 이동한 것 같아요. 그 느낌을 이야기로 붙잡고 싶어요.</div>
+              <div class="msg-status">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5 9 17l11-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                전송됨
+              </div>
+            </div>
+            <div class="avatar avatar--user" aria-hidden="true">나</div>
+          </div>
+
+          <!-- 6. 연서 + 초안 응답 카드 -->
+          <div class="msg-group msg-group--ai">
+            <div class="avatar avatar--ai" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 20c4-1 6-3 6-7V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3c0 6-4 9-9 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="msg-stack" style="max-width:78%;">
+              <div class="msg-meta"><span class="speaker">연서</span><span class="time">오후 9:18</span></div>
+              <div class="bubble bubble--ai">좋아요. 그 잡음이 이야기의 심장이 될 것 같아요. 이렇게 시작해볼까요?</div>
+
+              <div class="response-card" data-region="response-card" style="max-width:100%;">
+                <div class="response-card__head">
+                  <span class="response-card__title">잡음의 온도</span>
+                  <span class="badge badge--draft"><span aria-hidden="true">✎</span> 초안</span>
+                </div>
+                <blockquote class="response-card__excerpt">여름은 늘 지직거리는 소리로 시작됐다. 할머니의 라디오는 트로트와 잡음을 구별하지 않았고, 나도 그걸 배웠다. 소리의 흠집마다 여름 냄새가 뱄다.</blockquote>
+                <div class="response-card__actions">
+                  <button type="button" class="btn btn-primary">이어쓰기</button>
+                  <button type="button" class="btn btn-secondary">다른 제안</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 작성중 상태 -->
+          <div class="msg-group msg-group--ai">
+            <div class="avatar avatar--ai" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 20c4-1 6-3 6-7V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3c0 6-4 9-9 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="msg-stack">
+              <div class="typing-bubble" role="status" aria-live="polite">
+                <span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                연서가 다음 문장을 쓰는 중…
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ===== 입력창 ===== -->
+        <footer class="composer" data-region="composer">
+          <div class="composer__inner">
+            <div class="composer__field">
+              <div class="composer__icons">
+                <button type="button" class="icon-btn" aria-label="첨부"><span aria-hidden="true">＋</span></button>
+                <button type="button" class="icon-btn" aria-label="음성 입력"><span aria-hidden="true">🎤</span></button>
+              </div>
+              <textarea class="composer__textarea" rows="1" placeholder="이야기의 다음 조각을 들려주세요…"></textarea>
+              <button type="button" class="composer__send">보내기</button>
+            </div>
+            <div class="composer__hint">Shift+Enter 줄바꿈</div>
+          </div>
+        </footer>
+      </main>
+
+      <!-- ===== 빈 상태 미리보기 (지난 대화 0건) ===== -->
+      <section class="empty-panel" data-region="empty" aria-label="빈 상태 미리보기">
+        <label for="empty-toggle" class="empty-back" aria-label="대화로 돌아가기">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 5 8 12l7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </label>
+        <div class="empty-panel__icon" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 19.5V6a2 2 0 0 1 2-2h11l3 3v12.5a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 19.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 8.5h8M8 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h2 class="empty-panel__headline">아직 시작한 이야기가 없어요</h2>
+        <p class="empty-panel__desc">마음에 남은 장면 하나로 시작해보세요.</p>
+        <button type="button" class="empty-panel__cta">새 이야기 시작</button>
+      </section>
+    </div>
+
+    <footer class="site-footer">STYLE 20 · 다크 애널리틱스</footer>
+  </div>
+</div>
+</body>
+</html>

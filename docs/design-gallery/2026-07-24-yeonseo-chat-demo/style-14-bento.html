@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 — 벤토 그리드 스타일</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#F4F4F5;
+    --card:#FFFFFF;
+    --card-tint:#FAFAFA;
+    --accent-tint: rgba(99,102,241,.06);
+    --accent-tint-strong: rgba(99,102,241,.12);
+    --text:#18181B;
+    --text-muted:#71717A;
+    --point:#6366F1;
+    --point-strong:#4F46E5;
+    --danger:#EF4444;
+    --success:#10B981;
+    --border-hairline: rgba(24,24,27,.08);
+    --border-hairline-2: rgba(24,24,27,.12);
+    --radius-lg:24px;
+    --radius-md:20px;
+    --radius-sm:14px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,.10);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size:15px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ul{ margin:0; padding:0; list-style:none; }
+  button{ font-family:inherit; }
+  p{ margin:0; }
+  h1,h2,h3{ margin:0; }
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  /* ===== bento base card ===== */
+  .bento-cell{
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-sm);
+    transition:transform 200ms ease-out, box-shadow 200ms ease-out;
+  }
+  .bento-cell:hover{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow-hover);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .bento-cell:hover{ transform:none; }
+  }
+  @keyframes bentoIn{
+    from{ opacity:0; transform:translateY(12px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .bento-cell{ animation:bentoIn 400ms ease-out both; }
+    .brand-cell{ animation-delay:.06s; }
+    .history-cell{ animation-delay:.12s; }
+    .user-cell{ animation-delay:.18s; }
+    .banner-cell{ animation-delay:.06s; }
+    .conversation-card{ animation-delay:.12s; }
+    .composer-bar{ animation-delay:.24s; }
+  }
+
+  :focus-visible{ outline:2px solid var(--point); outline-offset:2px; border-radius:8px; }
+
+  /* ===== layout shell ===== */
+  #navToggle{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+  .app-shell{
+    display:grid;
+    grid-template-columns:300px 1fr;
+    gap:16px;
+    padding:16px;
+    min-height:100vh;
+    align-items:stretch;
+  }
+
+  /* ===== sidebar (nav) ===== */
+  .sidebar{
+    grid-area:sidebar;
+    display:grid;
+    grid-template-rows:auto 1fr auto;
+    grid-template-areas:"brand" "history" "user";
+    gap:16px;
+    min-height:0;
+  }
+  .brand-cell{ grid-area:brand; padding:20px 20px 16px; display:flex; flex-direction:column; gap:14px; }
+  .brand-row{ display:flex; align-items:center; gap:10px; }
+  .brand-mark{ flex-shrink:0; }
+  .brand-word{ font-size:20px; font-weight:800; letter-spacing:-.02em; color:var(--text); }
+  .new-story-btn{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    width:100%; height:40px;
+    background:var(--point-strong); color:#fff; border:none; border-radius:var(--radius-sm);
+    font-size:14px; font-weight:600; cursor:pointer;
+    transition:background 150ms ease, transform 150ms ease;
+  }
+  .new-story-btn:hover{ background:#4338CA; }
+  .new-story-btn:active{ transform:scale(.98); }
+
+  .history-cell{ grid-area:history; padding:18px 14px; display:flex; flex-direction:column; min-height:0; }
+  .history-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 6px 12px; }
+  .history-title{ font-size:13px; font-weight:600; letter-spacing:.04em; color:var(--text-muted); text-transform:uppercase; }
+  .empty-switch{ display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .switch-track{
+    position:relative; width:30px; height:17px; border-radius:999px; background:#D4D4D8;
+    transition:background 150ms ease; flex-shrink:0;
+  }
+  .switch-track .knob{
+    position:absolute; top:2px; left:2px; width:13px; height:13px; border-radius:50%;
+    background:#fff; transition:transform 150ms ease;
+  }
+  .switch-label{ font-size:11px; color:var(--text-muted); white-space:nowrap; }
+  #emptyToggle{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+  #emptyToggle:checked ~ .history-header .switch-track{ background:var(--point); }
+  #emptyToggle:checked ~ .history-header .switch-track .knob{ transform:translateX(13px); }
+  #emptyToggle:focus-visible ~ .history-header .switch-track{ outline:2px solid var(--point); outline-offset:2px; }
+
+  .history-list{ display:flex; flex-direction:column; gap:4px; overflow-y:auto; min-height:0; }
+  #emptyToggle:checked ~ .history-list{ display:none; }
+  .history-item{
+    display:flex; align-items:center; gap:10px;
+    width:100%; padding:11px 12px; border:none; background:transparent; border-radius:var(--radius-sm);
+    text-align:left; cursor:pointer; color:var(--text); font-size:14px;
+    transition:background 150ms ease;
+  }
+  .history-item .dot{ width:6px; height:6px; border-radius:50%; background:#D4D4D8; flex-shrink:0; }
+  .history-item .title-txt{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .history-item .chevron{ color:var(--text-muted); flex-shrink:0; opacity:0; transform:translateX(0); transition:opacity 150ms ease, transform 150ms ease; }
+  .history-item:hover{ background:var(--bg); }
+  .history-item:hover .chevron{ opacity:1; transform:translateX(4px); }
+  .history-item.active{ background:var(--accent-tint); font-weight:700; }
+  .history-item.active .dot{ background:var(--point-strong); }
+  .history-item.active .chevron{ opacity:1; color:var(--point-strong); }
+
+  .history-empty{
+    display:none; flex-direction:column; align-items:flex-start; gap:8px;
+    padding:20px 10px; text-align:left;
+  }
+  #emptyToggle:checked ~ .history-empty{ display:flex; }
+  .history-empty h3{ font-size:15px; font-weight:700; }
+  .history-empty p{ font-size:13px; color:var(--text-muted); line-height:1.55; }
+  .history-empty button{
+    margin-top:4px; height:36px; padding:0 16px; border-radius:var(--radius-sm);
+    background:var(--text); color:#fff; border:none; font-size:13px; font-weight:600; cursor:pointer;
+  }
+  .history-empty button:hover{ background:#000; }
+
+  .user-cell{ grid-area:user; padding:14px 16px; display:flex; align-items:center; gap:10px; }
+  .avatar{
+    width:34px; height:34px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; color:#fff;
+  }
+  .avatar.me{ background:var(--text); }
+  .avatar.ai{ background:var(--point-strong); }
+  .user-cell .name{ font-size:14px; font-weight:600; }
+  .user-cell .role{ font-size:12px; color:var(--text-muted); }
+
+  /* ===== main panel ===== */
+  .main-panel{ display:flex; flex-direction:column; gap:16px; min-height:0; }
+
+  .topbar{ display:flex; align-items:center; gap:12px; padding:2px 4px; }
+  .hamburger-btn{
+    display:none; align-items:center; justify-content:center;
+    width:40px; height:40px; border-radius:var(--radius-sm);
+    background:var(--card); box-shadow:var(--shadow-sm); border:none; color:var(--text); cursor:pointer; flex-shrink:0;
+  }
+  .topbar-title{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .topbar-title .story{ font-size:16px; font-weight:700; letter-spacing:-.01em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .topbar-title .story-sub{ font-size:12px; color:var(--text-muted); }
+
+  .banner-cell{
+    padding:16px 20px; display:flex; align-items:center; gap:10px;
+    font-size:13.5px; color:var(--text); background:var(--card-tint);
+  }
+  .banner-cell .dot-ico{ width:6px; height:6px; border-radius:50%; background:var(--point); flex-shrink:0; }
+  .banner-cell b{ font-weight:700; }
+
+  /* ===== conversation ===== */
+  .conversation-card{
+    flex:1; min-height:0; overflow-y:auto;
+    padding:28px 28px 20px;
+    display:flex; flex-direction:column; gap:18px;
+  }
+  .conversation-card::-webkit-scrollbar{ width:8px; }
+  .conversation-card::-webkit-scrollbar-track{ background:transparent; }
+  .conversation-card::-webkit-scrollbar-thumb{ background:#E4E4E7; border-radius:999px; }
+
+  .msg{ display:flex; gap:10px; max-width:74%; }
+  .msg.ai{ align-self:flex-start; }
+  .msg.user{ align-self:flex-end; flex-direction:row-reverse; }
+  .msg.grouped{ margin-top:-10px; }
+  .avatar-slot{ width:34px; flex-shrink:0; }
+
+  .msg-body{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .msg.user .msg-body{ align-items:flex-end; }
+  .msg-meta{ display:flex; align-items:baseline; gap:6px; font-size:12.5px; color:var(--text-muted); padding:0 2px; }
+  .msg-meta .speaker{ font-weight:700; color:var(--text); }
+  .grouped-tag{
+    font-size:11px; color:var(--point-strong); font-weight:600; padding:0 2px;
+    display:flex; align-items:center; gap:4px;
+  }
+  .grouped-tag .bar{ width:10px; height:2px; border-radius:2px; background:var(--point-strong); display:inline-block; }
+
+  .bubble{
+    padding:14px 16px; font-size:14.5px; line-height:1.65;
+    word-break:keep-all; overflow-wrap:break-word;
+  }
+  .msg.ai .bubble{
+    background:#fff; color:var(--text);
+    border:1px solid var(--border-hairline);
+    border-radius:18px 18px 18px 4px;
+  }
+  .msg.user .bubble{
+    background:var(--point-strong); color:#fff;
+    border-radius:18px 18px 4px 18px;
+  }
+  .bubble-footer{ display:flex; align-items:center; gap:5px; justify-content:flex-end; margin-top:6px; }
+  .bubble-footer .time-sub{ font-size:11px; color:rgba(255,255,255,.75); }
+  .sent-check{ color:rgba(255,255,255,.85); flex-shrink:0; }
+
+  /* typing indicator */
+  .msg.typing .bubble{
+    display:flex; align-items:center; gap:10px;
+    background:#fff; border:1px solid var(--border-hairline);
+  }
+  .typing-text{ font-size:13px; color:var(--text-muted); }
+  .typing-dots{ display:inline-flex; gap:4px; }
+  .typing-dots i{ width:6px; height:6px; border-radius:50%; background:var(--point-strong); display:inline-block; font-style:normal; }
+  @media (prefers-reduced-motion: no-preference){
+    .typing-dots i{ animation:typingBounce 1.2s infinite ease-in-out; }
+    .typing-dots i:nth-child(2){ animation-delay:.15s; }
+    .typing-dots i:nth-child(3){ animation-delay:.3s; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .typing-dots i:nth-child(1){ opacity:1; }
+    .typing-dots i:nth-child(2){ opacity:.65; }
+    .typing-dots i:nth-child(3){ opacity:.35; }
+  }
+  @keyframes typingBounce{
+    0%,80%,100%{ transform:translateY(0); opacity:.4; }
+    40%{ transform:translateY(-4px); opacity:1; }
+  }
+
+  /* draft / response card */
+  .draft-card{
+    align-self:stretch;
+    margin:2px 0 4px 44px;
+    padding:24px 26px;
+    background:var(--accent-tint);
+    border:1px solid var(--accent-tint-strong);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-sm);
+    display:flex; flex-direction:column; gap:14px;
+    transition:transform 200ms ease-out, box-shadow 200ms ease-out;
+  }
+  .draft-card:hover{ transform:translateY(-4px); box-shadow:var(--shadow-hover); }
+  @media (prefers-reduced-motion: reduce){ .draft-card:hover{ transform:none; } }
+  .draft-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .draft-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 10px; border-radius:999px; background:#fff;
+    font-size:11.5px; font-weight:700; color:var(--point-strong); letter-spacing:.02em;
+  }
+  .draft-saved{ display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--text-muted); }
+  .draft-saved svg{ color:var(--success); flex-shrink:0; }
+  .draft-card h3{ font-size:28px; font-weight:800; letter-spacing:-.02em; color:var(--text); }
+  .draft-card blockquote{
+    margin:0; padding-left:14px; border-left:3px solid var(--accent-tint-strong);
+    font-size:14.5px; line-height:1.7; color:#3F3F46; font-style:normal;
+  }
+  .draft-actions{ display:flex; gap:10px; margin-top:4px; }
+  .btn-primary{
+    height:38px; padding:0 18px; border-radius:var(--radius-sm); border:none;
+    background:var(--point-strong); color:#fff; font-size:13.5px; font-weight:700; cursor:pointer;
+    transition:background 150ms ease;
+  }
+  .btn-primary:hover{ background:#4338CA; }
+  .btn-secondary{
+    height:38px; padding:0 18px; border-radius:var(--radius-sm); border:1px solid var(--border-hairline-2);
+    background:#fff; color:var(--text); font-size:13.5px; font-weight:600; cursor:pointer;
+    transition:background 150ms ease;
+  }
+  .btn-secondary:hover{ background:var(--bg); }
+
+  /* ===== composer ===== */
+  .composer-wrap{ display:flex; flex-direction:column; gap:8px; }
+  .composer-bar{
+    display:grid;
+    grid-template-columns:44px 1fr 44px auto;
+    grid-template-areas:"attach input mic send";
+    align-items:end; gap:10px;
+    padding:14px;
+  }
+  .icon-btn{
+    grid-area:attach;
+    width:44px; height:44px; border-radius:var(--radius-sm); border:1px solid var(--border-hairline-2);
+    background:#fff; color:var(--text-muted); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:background 150ms ease, color 150ms ease, transform 150ms ease;
+  }
+  .icon-btn:hover{ background:var(--bg); color:var(--text); }
+  .icon-btn:active{ transform:scale(.94); }
+  .icon-btn.mic-btn{ grid-area:mic; }
+  .composer-input{
+    grid-area:input;
+    border:1px solid var(--border-hairline-2); border-radius:var(--radius-sm);
+    padding:11px 14px; font-size:14.5px; font-family:inherit; color:var(--text);
+    resize:none; min-height:44px; max-height:120px; line-height:1.5;
+    background:#fff;
+    transition:border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .composer-input::placeholder{ color:#A1A1AA; }
+  .composer-input:focus{
+    outline:none; border-color:var(--point); box-shadow:0 0 0 3px rgba(99,102,241,.15);
+  }
+  .send-btn{
+    grid-area:send;
+    height:44px; padding:0 22px; border-radius:var(--radius-sm); border:none;
+    background:var(--point-strong); color:#fff; font-size:14px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; gap:8px; white-space:nowrap;
+    transition:background 150ms ease, transform 150ms ease;
+  }
+  .send-btn:hover{ background:#4338CA; }
+  .send-btn:active{ transform:scale(.97); }
+  .composer-hint{ font-size:11.5px; color:var(--text-muted); padding:0 4px; }
+
+  /* ===== mobile drawer ===== */
+  .nav-backdrop{ display:none; }
+
+  @media (max-width:1000px){
+    .app-shell{ grid-template-columns:1fr; }
+    .sidebar{
+      position:fixed; inset:0 auto 0 0; width:300px; max-width:85vw; z-index:60;
+      padding:16px; transform:translateX(-110%);
+    }
+    @media (prefers-reduced-motion: no-preference){
+      .sidebar{ transition:transform 260ms ease; }
+    }
+    #navToggle:checked ~ .app-shell .sidebar{ transform:translateX(0); box-shadow:0 20px 50px rgba(0,0,0,.28); }
+    .hamburger-btn{ display:flex; }
+    .nav-backdrop{
+      display:block; position:fixed; inset:0; background:rgba(15,15,17,.42);
+      opacity:0; pointer-events:none; z-index:55; transition:opacity 200ms ease;
+      border:none; padding:0; margin:0;
+    }
+    #navToggle:checked ~ .app-shell .nav-backdrop{ opacity:1; pointer-events:auto; }
+    #navToggle:focus-visible ~ .app-shell .hamburger-btn{ outline:2px solid var(--point); outline-offset:2px; }
+  }
+
+  @media (max-width:640px){
+    .app-shell{ padding:10px; gap:10px; }
+    .conversation-card{ padding:18px 16px 16px; }
+    .msg{ max-width:88%; }
+    .draft-card{ margin-left:0; padding:20px; }
+    .draft-card h3{ font-size:22px; }
+    .composer-bar{
+      grid-template-columns:40px 1fr 40px; grid-template-rows:auto auto;
+      grid-template-areas: "attach input mic" "send send send";
+    }
+    .icon-btn{ width:40px; height:40px; }
+    .send-btn{ width:100%; justify-content:center; }
+  }
+
+  footer.site-footer{
+    text-align:center; font-size:12px; color:var(--text-muted);
+    padding:22px 16px 28px; letter-spacing:.02em;
+  }
+</style>
+</head>
+<body>
+
+<input type="checkbox" id="navToggle">
+
+<div class="app-shell">
+
+  <label for="navToggle" class="nav-backdrop" aria-hidden="true"></label>
+
+  <aside class="sidebar" data-region="nav" aria-label="지난 대화 및 사용자">
+    <div class="bento-cell brand-cell" data-region="identity">
+      <div class="brand-row">
+        <svg class="brand-mark" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+          <circle cx="12" cy="15" r="9" fill="#4F46E5"/>
+          <circle cx="19" cy="12" r="6.5" fill="#18181B" opacity="0.85"/>
+        </svg>
+        <span class="brand-word">연서</span>
+      </div>
+      <button type="button" class="new-story-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        새 이야기
+      </button>
+    </div>
+
+    <div class="bento-cell history-cell">
+      <input type="checkbox" id="emptyToggle">
+      <div class="history-header">
+        <span class="history-title">지난 대화</span>
+        <label for="emptyToggle" class="empty-switch">
+          <span class="switch-track" aria-hidden="true"><span class="knob"></span></span>
+          <span class="switch-label">0건 보기</span>
+        </label>
+      </div>
+
+      <ul class="history-list">
+        <li><button type="button" class="history-item"><span class="dot" aria-hidden="true"></span><span class="title-txt">비 오는 정거장</span><svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></li>
+        <li><button type="button" class="history-item active" aria-current="true"><span class="dot" aria-hidden="true"></span><span class="title-txt">할머니의 라디오</span><svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></li>
+        <li><button type="button" class="history-item"><span class="dot" aria-hidden="true"></span><span class="title-txt">이름 없는 등대지기</span><svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></li>
+        <li><button type="button" class="history-item"><span class="dot" aria-hidden="true"></span><span class="title-txt">3층 그 방</span><svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button></li>
+      </ul>
+
+      <div class="history-empty" data-region="empty">
+        <h3>아직 시작한 이야기가 없어요</h3>
+        <p>마음에 남은 장면 하나로 시작해보세요.</p>
+        <button type="button">새 이야기 시작</button>
+      </div>
+    </div>
+
+    <div class="bento-cell user-cell">
+      <div class="avatar me" aria-hidden="true">지</div>
+      <div>
+        <div class="name">지민</div>
+        <div class="role">작가 모드</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-panel">
+    <div class="topbar">
+      <label for="navToggle" class="hamburger-btn" aria-label="지난 대화 메뉴 열기">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </label>
+      <div class="topbar-title">
+        <span class="story">할머니의 라디오</span>
+        <span class="story-sub">연서와 함께 쓰는 중</span>
+      </div>
+    </div>
+
+    <div class="bento-cell banner-cell" data-region="banner">
+      <span class="dot-ico" aria-hidden="true"></span>
+      <span><b>초안은 자동 저장돼요</b> · 마음에 들면 이어쓰기로 계속</span>
+    </div>
+
+    <section class="bento-cell conversation-card" data-region="conversation" aria-label="연서와의 대화">
+
+      <div class="msg ai">
+        <div class="avatar-slot"><div class="avatar ai" aria-hidden="true">연</div></div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="speaker">연서</span><span>· 오후 9:14</span></div>
+          <div class="bubble">안녕하세요, 연서예요. 오늘은 어떤 이야기를 함께 써볼까요? 거창하지 않아도 괜찮아요 — 최근에 마음에 걸린 장면 하나, 잊히지 않는 얼굴 하나면 충분해요. 그게 첫 문장이 되거든요.</div>
+        </div>
+      </div>
+
+      <div class="msg user">
+        <div class="avatar-slot"><div class="avatar me" aria-hidden="true">나</div></div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="speaker">나</span><span>· 오후 9:15</span></div>
+          <div class="bubble">
+            할머니.
+            <div class="bubble-footer">
+              <span class="time-sub sr-only">전송됨</span>
+              <svg class="sent-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="msg ai">
+        <div class="avatar-slot"><div class="avatar ai" aria-hidden="true">연</div></div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="speaker">연서</span><span>· 오후 9:15</span></div>
+          <div class="bubble">할머니. 좋아요.</div>
+        </div>
+      </div>
+
+      <div class="msg ai grouped">
+        <div class="avatar-slot" aria-hidden="true"></div>
+        <div class="msg-body">
+          <span class="grouped-tag"><span class="bar" aria-hidden="true"></span>이어서<span class="sr-only"> — 연서의 연속 메시지</span></span>
+          <div class="bubble">그 할머니를 떠올리면 가장 먼저 어떤 감각이 오나요? 냄새, 소리, 손의 온도 — 무엇이든요.</div>
+        </div>
+      </div>
+
+      <div class="msg user">
+        <div class="avatar-slot"><div class="avatar me" aria-hidden="true">나</div></div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="speaker">나</span><span>· 오후 9:17</span></div>
+          <div class="bubble">
+            여름마다 할머니 집에 가면 마루에서 라디오 소리가 났어요. 트로트였는데 지직거리는 잡음이 늘 섞여 있었고, 할머니는 그 잡음까지 좋아하셨어요. 이제 그 라디오도 없고 할머니도 안 계신데, 가끔 지하철에서 비슷한 잡음이 들리면 그 마루로 순간 이동한 것 같아요. 그 느낌을 이야기로 붙잡고 싶어요.
+            <div class="bubble-footer">
+              <span class="time-sub sr-only">전송됨</span>
+              <svg class="sent-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="msg ai">
+        <div class="avatar-slot"><div class="avatar ai" aria-hidden="true">연</div></div>
+        <div class="msg-body">
+          <div class="msg-meta"><span class="speaker">연서</span><span>· 오후 9:18</span></div>
+          <div class="bubble">좋아요. 그 잡음이 이야기의 심장이 될 것 같아요. 이렇게 시작해볼까요?</div>
+        </div>
+      </div>
+
+      <div class="draft-card" data-region="response-card">
+        <div class="draft-top">
+          <span class="draft-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            초안
+          </span>
+          <span class="draft-saved">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            자동 저장됨 · 방금 전
+          </span>
+        </div>
+        <h3>잡음의 온도</h3>
+        <blockquote>여름은 늘 지직거리는 소리로 시작됐다. 할머니의 라디오는 트로트와 잡음을 구별하지 않았고, 나도 그걸 배웠다. 소리의 흠집마다 여름 냄새가 뱄다.</blockquote>
+        <div class="draft-actions" data-region="action">
+          <button type="button" class="btn-primary">이어쓰기</button>
+          <button type="button" class="btn-secondary">다른 제안</button>
+        </div>
+      </div>
+
+      <div class="msg ai typing">
+        <div class="avatar-slot"><div class="avatar ai" aria-hidden="true">연</div></div>
+        <div class="msg-body">
+          <div class="bubble">
+            <span class="typing-text">연서가 다음 문장을 쓰는 중…</span>
+            <span class="typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <div class="composer-wrap">
+      <div class="bento-cell composer-bar" data-region="composer">
+        <button type="button" class="icon-btn" aria-label="첨부">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <textarea class="composer-input" rows="1" placeholder="이야기의 다음 조각을 들려주세요…" aria-label="메시지 입력"></textarea>
+        <button type="button" class="icon-btn mic-btn" aria-label="음성 입력">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <button type="button" class="send-btn">
+          보내기
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+      <span class="composer-hint">Shift+Enter 줄바꿈</span>
+    </div>
+  </main>
+</div>
+
+<footer class="site-footer">STYLE 14 · 벤토 그리드</footer>
+
+</body>
+</html>

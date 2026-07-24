@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 — 대화형 이야기 쓰기 · STYLE 07 미니멀 모노크롬</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* ── 리셋 ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  button, input, textarea, select {
+    font: inherit; color: inherit; background: none; border: none;
+    border-radius: 0; appearance: none; -webkit-appearance: none;
+  }
+  a { color: inherit; text-decoration: none; }
+  ul, ol { list-style: none; }
+  img, svg { display: block; max-width: 100%; }
+
+  /* ── 팔레트 · 스케일 (변경 금지 값) ── */
+  :root {
+    --bg:    #FFFFFF;
+    --ink:   #111111;
+    --mid:   #767676;
+    --pale:  #A8A8A8;
+    --hair:  #E5E5E5;
+    --accent:#FF4D00;
+
+    --fs-1: 11px; /* 레이블 */
+    --fs-2: 16px; /* 본문 */
+    --fs-3: 24px; /* 섹션 제목 */
+    --fs-4: 36px; /* 대형 헤드라인 */
+    --fs-5: 54px; /* 정체성 워드마크 */
+
+    --sp-1: 8px;
+    --sp-2: 16px;
+    --sp-3: 32px;
+    --sp-4: 64px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: var(--fs-2);
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  /* 순수 CSS 토글용 체크박스 (JS 없음) */
+  .sr-toggle { position: absolute; opacity: 0; pointer-events: none; }
+
+  /* ── 진입 연출: 단 하나, 400ms 페이드인 ── */
+  .fade-wrap { animation: fadeIn 400ms ease forwards; opacity: 0; }
+  @keyframes fadeIn { to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .fade-wrap { opacity: 1; }
+  }
+
+  /* ── 타이포 유틸 ── */
+  .label {
+    font-size: var(--fs-1); font-weight: 500; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink);
+  }
+  .label--muted { color: var(--mid); }
+
+  /* ── 레이아웃 뼈대 ── */
+  .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+  .app-body  { display: flex; flex: 1; min-height: 0; }
+
+  /* 모바일 상단바 (>1000px 에서는 숨김) */
+  .topbar {
+    display: none;
+    align-items: center; gap: var(--sp-3);
+    height: 64px; padding: 0 var(--sp-3);
+    border-bottom: 1px solid var(--hair);
+  }
+  .topbar-toggle {
+    font-size: var(--fs-1); font-weight: 500; letter-spacing: .08em;
+    text-transform: uppercase; cursor: pointer;
+  }
+  .topbar-brand { font-size: var(--fs-3); font-weight: 700; letter-spacing: -.02em; }
+
+  .nav-backdrop { display: none; }
+
+  /* ── 사이드바 (data-region="nav") ── */
+  .sidebar {
+    width: 288px; flex-shrink: 0;
+    display: flex; flex-direction: column;
+    padding: var(--sp-4) var(--sp-3) var(--sp-3);
+    border-right: 1px solid var(--hair);
+  }
+  .brand-mark {
+    font-size: var(--fs-5); font-weight: 800; letter-spacing: -.04em;
+    line-height: 1.1; margin-bottom: var(--sp-3);
+  }
+  .btn-new {
+    display: block; width: 100%;
+    padding: var(--sp-1) var(--sp-2);
+    font-size: var(--fs-2); font-weight: 500;
+    text-align: left; color: var(--ink);
+    border: 1px solid var(--hair);
+    cursor: pointer;
+    transition: border-color 150ms ease;
+  }
+  .btn-new:hover, .btn-new:focus-visible { border-color: var(--ink); }
+  .btn-new:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  .history { margin-top: var(--sp-4); display: flex; flex-direction: column; }
+  .history-label { margin-bottom: var(--sp-2); }
+  .history-item {
+    position: relative;
+    display: block;
+    padding: var(--sp-1) 0 var(--sp-1) var(--sp-2);
+    font-size: var(--fs-2); color: var(--ink);
+    border-top: 1px solid var(--hair);
+    transition: color 150ms ease;
+  }
+  .history-item:last-child { border-bottom: 1px solid var(--hair); }
+  .history-item:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+
+  /* 시그니처 마이크로 인터랙션 ① — 후퇴에 의한 강조: 하나만 잉크, 나머지는 물러난다 */
+  .history:hover .history-item { color: var(--hair); }
+  .history:hover .history-item:hover { color: var(--ink); }
+
+  .history-item.is-active { font-weight: 700; }
+  .history-item.is-active::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: var(--accent);
+  }
+
+  .sidebar-footer {
+    margin-top: auto; padding-top: var(--sp-3);
+    border-top: 1px solid var(--hair);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .state-toggle-label { cursor: pointer; }
+  .state-toggle-on { display: none; }
+
+  /* ── 메인 컬럼 ── */
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  .banner {
+    padding: var(--sp-2) var(--sp-3);
+    border-bottom: 1px solid var(--hair);
+    font-size: var(--fs-1); font-weight: 500; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--mid);
+  }
+
+  .view { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .view-empty { display: none; }
+
+  .thread-head {
+    padding: var(--sp-3) var(--sp-3) 0;
+    max-width: 720px; width: 100%; margin: 0 auto;
+  }
+  .thread-title { font-size: var(--fs-3); font-weight: 700; letter-spacing: -.02em; }
+
+  /* ── 대화 흐름 (data-region="conversation") ── */
+  .conversation {
+    flex: 1; overflow-y: auto;
+    max-width: 720px; width: 100%; margin: 0 auto;
+    padding: var(--sp-3) var(--sp-3) var(--sp-4);
+    display: flex; flex-direction: column;
+  }
+
+  .msg {
+    position: relative;
+    max-width: 60ch;
+    padding: var(--sp-1) var(--sp-2);
+    margin-top: var(--sp-3);
+    transition: none;
+  }
+  .msg:first-child { margin-top: 0; }
+  .msg + .msg.is-consecutive { margin-top: var(--sp-1); }
+
+  /* 시그니처 마이크로 인터랙션 ② — 표 행 문법 차용: hover 시 배경 변화 없이 좌측 2px 잉크 바 */
+  .msg::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: transparent; transition: background 150ms ease;
+  }
+  .msg:hover::before { background: var(--ink); }
+
+  .msg--user { margin-left: auto; margin-right: 0; }
+
+  .msg-meta {
+    display: flex; align-items: baseline; gap: var(--sp-1);
+    margin-bottom: var(--sp-1);
+  }
+  .msg-speaker { font-size: var(--fs-1); font-weight: 500; letter-spacing: .08em; text-transform: uppercase; }
+  .msg-time { font-size: var(--fs-1); font-weight: 400; letter-spacing: .08em; color: var(--mid); }
+  .is-consecutive .msg-meta { display: none; }
+
+  /* 연속 발화 상태 — 같은 화자가 이어질 때 라벨을 생략하고 잇는 헤어라인으로 연결 */
+  .is-consecutive { position: relative; padding-left: calc(var(--sp-2) + 1px); }
+  .is-consecutive::after {
+    content: ""; position: absolute; left: 1px; top: calc(-1 * var(--sp-1)); bottom: 0;
+    width: 1px; background: var(--hair);
+  }
+
+  .msg-text { font-size: var(--fs-2); font-weight: 400; overflow-wrap: break-word; word-break: keep-all; }
+  .msg--user .msg-text { text-align: left; }
+
+  /* ── 초안 제안 카드 (data-region="response-card") ── */
+  .draft-card {
+    margin-top: var(--sp-3);
+    padding: var(--sp-3);
+    border: 1px solid var(--hair);
+    max-width: 60ch;
+  }
+  .draft-card-label {
+    display: flex; align-items: center; gap: var(--sp-1);
+    margin-bottom: var(--sp-2);
+  }
+  .draft-card-label .dot--new {
+    width: 6px; height: 6px; background: var(--accent); flex-shrink: 0;
+  }
+  .draft-title { font-size: var(--fs-3); font-weight: 700; letter-spacing: -.02em; margin-bottom: var(--sp-2); }
+  .draft-excerpt {
+    font-size: var(--fs-2); font-weight: 400;
+    border-left: 2px solid var(--ink);
+    padding-left: var(--sp-2);
+    margin-bottom: var(--sp-3);
+  }
+  .draft-actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+
+  /* ── 버튼 시스템 ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: var(--sp-1) var(--sp-3);
+    font-size: var(--fs-2); font-weight: 500;
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  }
+  .btn-primary { background: var(--ink); color: #FFFFFF; border: 1px solid var(--ink); }
+  .btn-primary:hover { background: #2B2B2B; border-color: #2B2B2B; }
+  .btn-primary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .btn-primary:disabled {
+    background: var(--bg); color: var(--pale); border: 1px solid var(--hair); cursor: not-allowed;
+  }
+  .btn-secondary { background: transparent; color: var(--ink); border: 1px solid var(--hair); }
+  .btn-secondary:hover { border-color: var(--ink); }
+  .btn-secondary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* ── 대기 표현: 작성중 ── */
+  .composing {
+    display: flex; align-items: center; gap: var(--sp-1);
+    margin-top: var(--sp-3);
+  }
+  .composing .dot--live { width: 6px; height: 6px; background: var(--accent); flex-shrink: 0; }
+  .typing-dots { display: flex; align-items: center; gap: var(--sp-1); margin: 0 var(--sp-1); }
+  .typing-dots span {
+    width: 4px; height: 4px; background: var(--ink); display: block;
+  }
+  .typing-dots span:nth-child(1) { opacity: 1; }
+  .typing-dots span:nth-child(2) { opacity: .6; }
+  .typing-dots span:nth-child(3) { opacity: .3; }
+  .composing-text { font-size: var(--fs-1); font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--mid); }
+
+  /* ── 입력창 (data-region="composer") ── */
+  .composer {
+    border-top: 1px solid var(--hair);
+    padding: var(--sp-3);
+    max-width: 720px; width: 100%; margin: 0 auto;
+  }
+  .composer-row { display: flex; align-items: flex-end; gap: var(--sp-2); }
+  .composer-tools { display: flex; gap: var(--sp-1); flex-shrink: 0; padding-bottom: var(--sp-1); }
+  .composer-tool-btn {
+    font-size: var(--fs-1); font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+    padding: var(--sp-1); cursor: pointer; color: var(--mid);
+    transition: color 150ms ease;
+  }
+  .composer-tool-btn:hover { color: var(--ink); }
+  .composer-tool-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  .input-wrap { position: relative; flex: 1; }
+  .composer-input {
+    display: block; width: 100%; resize: none;
+    font-size: var(--fs-2); line-height: 1.5;
+    padding: var(--sp-1) 0;
+    border-bottom: 1px solid var(--hair);
+  }
+  .composer-input::placeholder { color: var(--mid); }
+  .input-wrap::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px;
+    height: 1px; background: var(--ink);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 200ms ease;
+  }
+  .input-wrap:focus-within::after { transform: scaleX(1); }
+  .composer-input:focus { outline: none; }
+
+  .btn-send { flex-shrink: 0; }
+
+  .composer-hint { margin-top: var(--sp-2); }
+
+  /* ── 빈 상태 (data-region="empty") ── */
+  .view-empty { flex: 1; align-items: center; justify-content: center; padding: var(--sp-4); }
+  .empty-inner { max-width: 480px; text-align: left; }
+  .empty-headline { font-size: var(--fs-4); font-weight: 700; letter-spacing: -.02em; margin-bottom: var(--sp-2); max-width: 20ch; }
+  .empty-desc { font-size: var(--fs-2); color: var(--mid); margin-bottom: var(--sp-3); }
+
+  /* ── 상태 토글 (빈 상태 데모용, 순수 CSS) ── */
+  #stateToggle:checked ~ .app-shell .view-populated { display: none; }
+  #stateToggle:checked ~ .app-shell .view-empty { display: flex; }
+  #stateToggle:checked ~ .app-shell .state-toggle-off { display: none; }
+  #stateToggle:checked ~ .app-shell .state-toggle-on { display: inline; }
+
+  /* ── 페이지 푸터 ── */
+  .page-footer {
+    padding: var(--sp-2) var(--sp-3);
+    border-top: 1px solid var(--hair);
+    font-size: var(--fs-1); font-weight: 500; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--mid);
+  }
+
+  /* ── 반응형: 1000px 이하에서 사이드바 접힘 ── */
+  @media (max-width: 1000px) {
+    .topbar { display: flex; }
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 20;
+      background: var(--bg);
+      transform: translateX(-100%);
+      transition: transform 200ms ease;
+      overflow-y: auto;
+    }
+    #navToggle:checked ~ .app-shell .sidebar { transform: translateX(0); }
+    #navToggle:checked ~ .app-shell .nav-backdrop {
+      display: block; position: fixed; inset: 0; z-index: 15;
+      background: rgba(17,17,17,.4);
+    }
+    .thread-head, .conversation, .composer { max-width: 100%; }
+  }
+
+  @media (max-width: 640px) {
+    .sidebar { width: 84vw; max-width: 320px; }
+    .draft-actions { flex-direction: column; align-items: stretch; }
+    .empty-headline { font-size: var(--fs-3); }
+  }
+</style>
+</head>
+<body>
+<input type="checkbox" id="navToggle" class="sr-toggle" aria-hidden="true">
+<input type="checkbox" id="stateToggle" class="sr-toggle" aria-hidden="true">
+
+<div class="fade-wrap">
+  <h1 class="sr-only">연서 — 소크라테스식 문답으로 함께 이야기를 쓰는 대화형 AI</h1>
+
+  <div class="app-shell">
+
+    <header class="topbar">
+      <label for="navToggle" class="topbar-toggle">메뉴</label>
+      <span class="topbar-brand">연서</span>
+    </header>
+
+    <div class="app-body">
+      <label for="navToggle" class="nav-backdrop" aria-hidden="true"></label>
+
+      <aside class="sidebar" data-region="nav">
+        <p class="brand-mark" aria-label="연서">연서</p>
+
+        <button type="button" class="btn-new">＋ 새 이야기</button>
+
+        <nav class="history" aria-label="지난 대화 목록">
+          <p class="label history-label">지난 대화</p>
+          <a class="history-item" href="#">비 오는 정거장</a>
+          <a class="history-item is-active" href="#" aria-current="page">할머니의 라디오</a>
+          <a class="history-item" href="#">이름 없는 등대지기</a>
+          <a class="history-item" href="#">3층 그 방</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <span class="label">지민</span>
+          <label class="label state-toggle-label state-toggle-off" for="stateToggle">빈 상태 보기</label>
+          <label class="label state-toggle-label state-toggle-on" for="stateToggle">대화 화면 보기</label>
+        </div>
+      </aside>
+
+      <main class="main">
+        <section class="banner" data-region="banner">
+          초안은 자동 저장돼요 · 마음에 들면 이어쓰기로 계속
+        </section>
+
+        <div class="view view-populated">
+          <header class="thread-head">
+            <h2 class="thread-title">할머니의 라디오</h2>
+          </header>
+
+          <section class="conversation" data-region="conversation" aria-label="대화 흐름">
+
+            <article class="msg msg--ai">
+              <div class="msg-meta">
+                <span class="msg-speaker">연서</span>
+                <span class="msg-time">오후 9:14</span>
+              </div>
+              <p class="msg-text">안녕하세요, 연서예요. 오늘은 어떤 이야기를 함께 써볼까요? 거창하지 않아도 괜찮아요 — 최근에 마음에 걸린 장면 하나, 잊히지 않는 얼굴 하나면 충분해요. 그게 첫 문장이 되거든요.</p>
+            </article>
+
+            <article class="msg msg--user">
+              <div class="msg-meta">
+                <span class="msg-speaker">나</span>
+                <span class="msg-time">오후 9:15</span>
+              </div>
+              <p class="msg-text">할머니.</p>
+            </article>
+
+            <article class="msg msg--ai is-consecutive">
+              <div class="msg-meta">
+                <span class="msg-speaker">연서</span>
+                <span class="msg-time">오후 9:15</span>
+              </div>
+              <p class="msg-text">할머니. 좋아요.</p>
+            </article>
+
+            <article class="msg msg--ai is-consecutive">
+              <div class="msg-meta">
+                <span class="msg-speaker">연서</span>
+                <span class="msg-time">오후 9:15</span>
+              </div>
+              <p class="msg-text">그 할머니를 떠올리면 가장 먼저 어떤 감각이 오나요? 냄새, 소리, 손의 온도 — 무엇이든요.</p>
+            </article>
+
+            <article class="msg msg--user">
+              <div class="msg-meta">
+                <span class="msg-speaker">나</span>
+                <span class="msg-time">오후 9:17</span>
+              </div>
+              <p class="msg-text">여름마다 할머니 집에 가면 마루에서 라디오 소리가 났어요. 트로트였는데 지직거리는 잡음이 늘 섞여 있었고, 할머니는 그 잡음까지 좋아하셨어요. 이제 그 라디오도 없고 할머니도 안 계신데, 가끔 지하철에서 비슷한 잡음이 들리면 그 마루로 순간 이동한 것 같아요. 그 느낌을 이야기로 붙잡고 싶어요.</p>
+            </article>
+
+            <article class="msg msg--ai">
+              <div class="msg-meta">
+                <span class="msg-speaker">연서</span>
+                <span class="msg-time">오후 9:18</span>
+              </div>
+              <p class="msg-text">좋아요. 그 잡음이 이야기의 심장이 될 것 같아요. 이렇게 시작해볼까요?</p>
+            </article>
+
+            <article class="draft-card" data-region="response-card">
+              <div class="draft-card-label">
+                <span class="dot--new" aria-hidden="true"></span>
+                <span class="label">초안 제안</span>
+              </div>
+              <h3 class="draft-title">잡음의 온도</h3>
+              <p class="draft-excerpt">여름은 늘 지직거리는 소리로 시작됐다. 할머니의 라디오는 트로트와 잡음을 구별하지 않았고, 나도 그걸 배웠다. 소리의 흠집마다 여름 냄새가 뱄다.</p>
+              <div class="draft-actions" role="group" aria-label="초안 액션">
+                <button type="button" class="btn btn-primary">이어쓰기</button>
+                <button type="button" class="btn btn-secondary">다른 제안</button>
+              </div>
+            </article>
+
+            <div class="composing" aria-live="polite">
+              <span class="dot--live" aria-hidden="true"></span>
+              <span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+              <span class="composing-text">연서가 다음 문장을 쓰는 중…</span>
+            </div>
+
+          </section>
+
+          <div class="composer" data-region="composer">
+            <div class="composer-row">
+              <div class="composer-tools">
+                <button type="button" class="composer-tool-btn" aria-label="첨부파일 추가">＋</button>
+                <button type="button" class="composer-tool-btn" aria-label="음성으로 입력">음성</button>
+              </div>
+              <div class="input-wrap">
+                <textarea class="composer-input" rows="1" placeholder="이야기의 다음 조각을 들려주세요…" aria-label="메시지 입력"></textarea>
+              </div>
+              <button type="button" class="btn btn-primary btn-send" disabled>보내기</button>
+            </div>
+            <p class="label composer-hint">Shift+Enter 줄바꿈</p>
+          </div>
+        </div>
+
+        <div class="view view-empty" data-region="empty">
+          <div class="empty-inner">
+            <h2 class="empty-headline">아직 시작한 이야기가 없어요</h2>
+            <p class="empty-desc">마음에 남은 장면 하나로 시작해보세요.</p>
+            <button type="button" class="btn btn-primary">새 이야기 시작</button>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <footer class="page-footer">STYLE 07 · 미니멀 모노크롬</footer>
+</div>
+</body>
+</html>

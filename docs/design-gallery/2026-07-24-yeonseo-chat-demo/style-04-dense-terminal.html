@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>연서 · 대화 세션 — STYLE 04 고밀도 터미널</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* ============ 변수 · 리셋 ============ */
+  :root{
+    --bg:#0A0C10;
+    --panel:#0E1116;
+    --prompt-zone:#0C0F14;
+    --hover-bg:#141922;
+    --border:#1C222C;
+    --border-strong:#2A3140;
+    --amber:#F5A623;
+    --green:#3DDC84;
+    --red:#FF5252;
+    --blue:#4DA3FF;
+    --text:#C8CDD4;
+    --dim:#8B93A3; /* 접근성 보정: 원 팔레트 #5B6472 는 배경 대비 3.3:1 → 4.5:1 확보 위해 명도 상향 */
+    --divider:#2A3140;
+    --amber-ink:#0F0A00;
+    --green-ink:#04140B;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:'JetBrains Mono','Pretendard',ui-monospace,'SFMono-Regular',monospace;
+    font-size:13px;line-height:1.42;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+  }
+  button,input,textarea{font-family:inherit;color:inherit;border-radius:0;}
+  button{cursor:pointer;background:none;border:1px solid var(--border-strong);}
+  ::selection{background:var(--amber);color:var(--amber-ink);}
+  a{color:var(--blue);}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
+  .wrap-safe{overflow-wrap:anywhere;}
+
+  /* ============ 상태바 ============ */
+  .statusbar{
+    height:28px;display:flex;align-items:center;gap:12px;
+    padding:0 12px;background:var(--panel);border-bottom:1px solid var(--border);
+    font-size:11px;letter-spacing:.03em;color:var(--dim);white-space:nowrap;overflow-x:auto;
+  }
+  .statusbar b{color:var(--text);font-weight:600;}
+  .sb-sep{color:var(--divider);}
+  .sb-clock{margin-left:auto;color:var(--green);font-weight:600;}
+
+  /* ============ 전체 셸 ============ */
+  .app-shell{
+    display:grid;grid-template-columns:220px 1fr 220px;
+    height:calc(100vh - 28px - 32px);min-height:420px;
+  }
+  .pane{min-height:0;display:flex;flex-direction:column;overflow:hidden;}
+  .pane-head{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    padding:8px 12px;border-bottom:1px solid var(--border);
+    font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+  }
+  .pane-head .idx{color:var(--amber);}
+  .stream-live{margin-left:auto;color:var(--green);font-size:10px;letter-spacing:.06em;}
+
+  /* ============ 좌: NAV ============ */
+  .pane-nav{background:var(--panel);border-right:1px solid var(--border);}
+  .nav-close{display:none;color:var(--dim);cursor:pointer;margin-left:auto;font-size:14px;}
+  .brand-row{padding:14px 12px 8px;display:flex;align-items:baseline;gap:8px;}
+  .brand-mark{font-size:16px;font-weight:700;letter-spacing:.02em;color:var(--text);}
+  .brand-sub{font-size:10px;color:var(--dim);letter-spacing:.06em;}
+  .btn-new{
+    margin:4px 12px 12px;padding:8px 10px;text-align:left;
+    background:var(--green);color:var(--green-ink);border:1px solid var(--green);
+    font-size:12px;font-weight:700;letter-spacing:.03em;
+  }
+  .btn-new:hover{background:#33c476;}
+  .btn-new:focus-visible,button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:1px;}
+
+  .nav-flagrow{padding:0 12px 10px;border-bottom:1px dashed var(--border);}
+  .flag-toggle{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);cursor:pointer;}
+  .flag-toggle input{accent-color:var(--amber);width:12px;height:12px;}
+  #empty-toggle:focus-visible ~ .app-shell .flag-toggle{outline:1px solid var(--amber);}
+
+  .story-list{flex:1;min-height:0;overflow-y:auto;padding:8px 0;}
+  .story-row{
+    position:relative;display:flex;align-items:center;gap:8px;
+    padding:7px 12px 7px 14px;font-size:12px;color:var(--text);
+    border-left:2px solid transparent;cursor:pointer;
+  }
+  .story-row::before{content:"_";color:var(--amber);opacity:0;width:6px;transition:opacity .12s;}
+  .story-row:hover{background:var(--hover-bg);border-left-color:var(--amber);}
+  .story-row:hover::before{opacity:1;}
+  .story-row.active{background:var(--hover-bg);border-left-color:var(--green);}
+  .story-dot{font-size:10px;line-height:1;}
+  .story-dot.ok{color:var(--green);}
+  .story-dot.dim{color:var(--divider);}
+  .story-name{flex:1;overflow-wrap:anywhere;}
+  .story-flag{font-size:10px;color:var(--green);border:1px solid var(--green);padding:1px 4px;letter-spacing:.05em;}
+
+  .empty-preview{display:none;padding:20px 14px;border-top:1px dashed var(--border);}
+  #empty-toggle:checked ~ .app-shell .story-list{display:none;}
+  #empty-toggle:checked ~ .app-shell .empty-preview{display:block;}
+  .empty-head{margin:0 0 6px;font-size:12px;font-weight:700;color:var(--text);}
+  .empty-desc{margin:0 0 12px;font-size:11px;color:var(--dim);line-height:1.5;}
+  .btn-empty-cta{
+    width:100%;padding:7px 10px;background:var(--green);color:var(--green-ink);
+    border:1px solid var(--green);font-size:11px;font-weight:700;
+  }
+  .btn-empty-cta:hover{background:#33c476;}
+
+  .nav-user{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    padding:10px 12px;border-top:1px solid var(--border);font-size:12px;
+  }
+  .user-avatar{
+    width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+    background:var(--prompt-zone);border:1px solid var(--border-strong);color:var(--blue);
+    font-size:11px;font-weight:700;flex:0 0 auto;
+  }
+  .user-name{flex:1;}
+  .user-status{font-size:9px;color:var(--green);border:1px solid var(--green);padding:1px 4px;}
+
+  /* ============ 중: MAIN ============ */
+  .pane-main{background:var(--bg);}
+  .banner{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    padding:7px 12px;background:var(--prompt-zone);border-bottom:1px solid var(--border);
+    font-size:11.5px;color:var(--dim);
+  }
+  .banner-tag{color:var(--blue);font-weight:700;letter-spacing:.05em;flex:0 0 auto;}
+  .banner-text{overflow-wrap:anywhere;}
+
+  .conversation{
+    flex:1;min-height:0;overflow-y:auto;padding:16px;
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .msg-row{display:flex;flex-direction:column;gap:3px;max-width:80%;}
+  .msg-row.ai{align-self:flex-start;}
+  .msg-row.user{align-self:flex-end;align-items:flex-end;}
+  .msg-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim);}
+  .who{font-weight:700;letter-spacing:.02em;}
+  .who-ai{color:var(--green);}
+  .who-user{color:var(--amber);}
+  .tag{font-size:10px;font-weight:700;letter-spacing:.04em;padding:1px 5px;border:1px solid currentColor;}
+  .tag-ok{color:var(--green);}
+  .tag-warn{color:var(--amber);}
+  .tag-info{color:var(--dim);}
+  .tag-ref{color:var(--blue);}
+
+  .msg-box{
+    padding:9px 12px;border:1px solid var(--border);background:var(--panel);
+    overflow-wrap:anywhere;font-size:13px;line-height:1.55;color:var(--text);
+  }
+  .msg-row.ai .msg-box{border-left:2px solid var(--green);}
+  .msg-row.user .msg-box{border-right:2px solid var(--amber);background:var(--prompt-zone);text-align:left;}
+  .msg-stack{display:flex;flex-direction:column;gap:6px;}
+  .msg-box.continued{position:relative;padding-left:26px;}
+  .cont-mark{position:absolute;left:9px;top:9px;color:var(--dim);}
+
+  .draft-card{
+    align-self:flex-start;max-width:80%;margin-left:2px;
+    border:1px solid var(--blue);background:var(--panel);padding:12px;
+  }
+  .draft-head{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
+  .draft-title{margin:0;font-size:15px;font-weight:700;color:var(--text);overflow-wrap:anywhere;}
+  .draft-excerpt{
+    margin:0 0 10px;padding-left:10px;border-left:2px solid var(--divider);
+    font-size:12.5px;line-height:1.6;color:var(--dim);overflow-wrap:anywhere;
+  }
+  .draft-actions{display:flex;gap:8px;}
+  .btn-primary{
+    padding:7px 14px;background:var(--green);color:var(--green-ink);
+    border:1px solid var(--green);font-size:12px;font-weight:700;letter-spacing:.02em;
+  }
+  .btn-primary:hover{background:#33c476;}
+  .btn-ghost{
+    padding:7px 14px;background:transparent;color:var(--text);
+    border:1px solid var(--border-strong);font-size:12px;
+  }
+  .btn-ghost:hover{border-color:var(--amber);color:var(--amber);}
+
+  .msg-row.typing .msg-box{display:flex;align-items:center;gap:8px;color:var(--dim);}
+  .typing-dots{display:inline-flex;gap:3px;}
+  .typing-dots span{width:5px;height:5px;background:var(--amber);display:inline-block;animation:blink-dot 1.1s infinite ease-in-out;}
+  .typing-dots span:nth-child(2){animation-delay:.18s;}
+  .typing-dots span:nth-child(3){animation-delay:.36s;}
+  @keyframes blink-dot{0%,80%,100%{opacity:.25;}40%{opacity:1;}}
+
+  /* ============ 입력창 ============ */
+  .composer{flex:0 0 auto;border-top:1px solid var(--border);background:var(--prompt-zone);padding:10px 12px;}
+  .prompt-line{display:flex;align-items:flex-start;gap:6px;font-size:13px;flex-wrap:wrap;}
+  .prompt-user{color:var(--amber);font-weight:700;}
+  .prompt-at,.prompt-path,.prompt-dollar{color:var(--dim);}
+  .prompt-host{color:var(--blue);}
+  .prompt-dollar{color:var(--text);margin-right:2px;}
+  .composer-input{
+    flex:1;min-width:160px;background:transparent;border:none;resize:none;
+    color:var(--text);font-size:13px;line-height:1.5;padding:2px 0;outline:none;
+  }
+  .composer-input::placeholder{color:var(--dim);}
+  .cursor-blink{color:var(--amber);animation:cursor-blink 1s step-end infinite;}
+  @keyframes cursor-blink{50%{opacity:0;}}
+  .composer-tools{display:flex;align-items:center;gap:8px;margin-top:8px;}
+  .tool-icons{display:flex;gap:6px;}
+  .icon-btn{
+    width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--border-strong);color:var(--dim);background:transparent;
+  }
+  .icon-btn:hover{color:var(--amber);border-color:var(--amber);}
+  .icon-plus{font-size:15px;line-height:1;}
+  .icon-mic{fill:none;stroke:currentColor;stroke-width:1.6;}
+  .btn-send{
+    margin-left:auto;padding:7px 16px;background:var(--amber);color:var(--amber-ink);
+    border:1px solid var(--amber);font-size:12px;font-weight:700;letter-spacing:.02em;
+  }
+  .btn-send:hover{background:#ffb54a;}
+  .composer-hint{margin-top:6px;font-size:10.5px;color:var(--dim);letter-spacing:.02em;}
+
+  /* ============ 우: 세션 로그 ============ */
+  .pane-log{background:var(--panel);border-left:1px solid var(--border);}
+  .log-stream{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;justify-content:flex-end;padding:6px 0;}
+  .log-line{
+    padding:5px 10px;font-size:10.5px;line-height:1.5;border-left:2px solid transparent;
+    overflow-wrap:anywhere;
+  }
+  .log-line:hover{background:var(--hover-bg);border-left-color:var(--amber);}
+  .log-line:nth-last-child(n+7){opacity:.45;}
+  .log-line:nth-last-child(-n+2){opacity:1;}
+  .log-line:nth-last-child(n+3):nth-last-child(-n+6){opacity:.72;}
+  .log-ts{color:var(--dim);margin-right:6px;}
+  .lvl{font-weight:700;margin-right:6px;letter-spacing:.02em;}
+  .lvl-INFO{color:var(--dim);}
+  .lvl-OK{color:var(--green);}
+  .lvl-WARN{color:var(--amber);}
+  .lvl-ERR{color:var(--red);}
+  .path{color:var(--blue);}
+  .log-new{animation:log-reveal .5s ease-out;}
+  @keyframes log-reveal{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:translateY(0);}}
+  .highlight-link{background:var(--hover-bg) !important;border-left-color:var(--blue) !important;}
+
+  /* ============ 하단 F키 바 ============ */
+  .fkeybar{
+    height:32px;display:flex;align-items:center;gap:14px;padding:0 12px;
+    background:var(--panel);border-top:1px solid var(--border);
+    font-size:11px;color:var(--dim);white-space:nowrap;overflow-x:auto;
+  }
+  .fk b{color:var(--amber);margin-right:3px;}
+  .fk-style{margin-left:auto;color:var(--dim);letter-spacing:.03em;}
+
+  /* ============ 나브 토글(모바일 드로어) ============ */
+  .nav-burger{
+    display:none;position:fixed;top:34px;left:8px;z-index:60;
+    padding:5px 9px;background:var(--panel);border:1px solid var(--border-strong);
+    color:var(--amber);font-size:11px;font-weight:700;letter-spacing:.04em;cursor:pointer;
+  }
+  .nav-overlay{display:none;}
+
+  @media (max-width:1200px){
+    .app-shell{grid-template-columns:220px 1fr;}
+    .pane-log{display:none;}
+  }
+  @media (max-width:1000px){
+    .app-shell{grid-template-columns:1fr;position:relative;}
+    .nav-burger{display:flex;align-items:center;}
+    .nav-close{display:inline;}
+    .pane-nav{
+      position:fixed;top:28px;bottom:32px;left:0;width:250px;z-index:55;
+      transform:translateX(-100%);transition:transform .18s ease;
+    }
+    #nav-toggle:checked ~ .app-shell .pane-nav{transform:translateX(0);}
+    #nav-toggle:checked ~ .app-shell .nav-overlay{
+      display:block;position:fixed;inset:28px 0 32px 0;background:rgba(0,0,0,.5);z-index:50;
+    }
+    .msg-row{max-width:92%;}
+    .draft-card{max-width:92%;}
+  }
+  @media (max-width:600px){
+    .statusbar{gap:8px;}
+    .sb-item.sb-load{display:none;}
+    .composer-tools{flex-wrap:wrap;}
+    .btn-send{margin-left:0;order:3;width:100%;}
+    .fkeybar{gap:8px;}
+    .fk:nth-of-type(n+4){display:none;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
+    .cursor-blink{opacity:1;}
+    .typing-dots span{opacity:1;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="statusbar" role="status" aria-label="시스템 상태바">
+    <span class="sb-item sb-host">host <b>yeonseo-story-02</b></span>
+    <span class="sb-sep">│</span>
+    <span class="sb-item sb-uptime">uptime <b id="uptime">02:14:09</b></span>
+    <span class="sb-sep">│</span>
+    <span class="sb-item sb-load">load <b id="loadavg">0.42 0.38 0.31</b></span>
+    <span class="sb-sep">│</span>
+    <span class="sb-item sb-session">session <b>#할머니의라디오</b></span>
+    <span class="sb-clock" id="clock">21:18:52</span>
+  </div>
+
+  <input type="checkbox" id="nav-toggle" class="visually-hidden" aria-hidden="true">
+  <input type="checkbox" id="empty-toggle" class="visually-hidden" aria-label="빈 상태 미리보기 전환">
+
+  <label class="nav-burger" for="nav-toggle" aria-label="지난 대화 목록 열기">[ nav ]</label>
+
+  <div class="app-shell">
+    <label class="nav-overlay" for="nav-toggle" aria-hidden="true"></label>
+
+    <aside class="pane pane-nav" data-region="nav">
+      <div class="pane-head">
+        <span class="idx">[1]</span> NAV_STORIES
+        <label class="nav-close" for="nav-toggle" aria-label="지난 대화 목록 닫기">×</label>
+      </div>
+
+      <div class="brand-row">
+        <span class="brand-mark">연서</span>
+        <span class="brand-sub">story engine</span>
+      </div>
+
+      <button class="btn-new" type="button">＋ 새 이야기</button>
+
+      <div class="nav-flagrow">
+        <label class="flag-toggle" for="empty-toggle">
+          <span>--empty 미리보기</span>
+        </label>
+      </div>
+
+      <div class="story-list">
+        <div class="story-row"><span class="story-dot dim">○</span><span class="story-name">비 오는 정거장</span></div>
+        <div class="story-row active"><span class="story-dot ok">●</span><span class="story-name">할머니의 라디오</span><span class="story-flag">RUN</span></div>
+        <div class="story-row"><span class="story-dot dim">○</span><span class="story-name">이름 없는 등대지기</span></div>
+        <div class="story-row"><span class="story-dot dim">○</span><span class="story-name">3층 그 방</span></div>
+      </div>
+
+      <div class="empty-preview" data-region="empty">
+        <p class="empty-head">아직 시작한 이야기가 없어요</p>
+        <p class="empty-desc">마음에 남은 장면 하나로 시작해보세요.</p>
+        <button class="btn-empty-cta" type="button">새 이야기 시작</button>
+      </div>
+
+      <div class="nav-user">
+        <span class="user-avatar" aria-hidden="true">지</span>
+        <span class="user-name">지민</span>
+        <span class="user-status">OK</span>
+      </div>
+    </aside>
+
+    <main class="pane pane-main">
+      <div class="banner" data-region="banner">
+        <span class="banner-tag">INFO</span>
+        <span class="banner-text">초안은 자동 저장돼요 · 마음에 들면 이어쓰기로 계속</span>
+      </div>
+
+      <div class="pane-head">
+        <span class="idx">[2]</span> CONVERSATION_STREAM
+        <span class="stream-live">● LIVE</span>
+      </div>
+
+      <section class="conversation" data-region="conversation" aria-label="연서와의 대화">
+
+        <div class="msg-row ai">
+          <div class="msg-meta"><span class="who who-ai">연서</span><span class="ts">오후 9:14</span></div>
+          <div class="msg-box">안녕하세요, 연서예요. 오늘은 어떤 이야기를 함께 써볼까요? 거창하지 않아도 괜찮아요 — 최근에 마음에 걸린 장면 하나, 잊히지 않는 얼굴 하나면 충분해요. 그게 첫 문장이 되거든요.</div>
+        </div>
+
+        <div class="msg-row user">
+          <div class="msg-meta"><span class="ts">오후 9:15</span><span class="who who-user">나</span><span class="tag tag-ok">OK 전송됨</span></div>
+          <div class="msg-box">할머니.</div>
+        </div>
+
+        <div class="msg-row ai">
+          <div class="msg-meta"><span class="who who-ai">연서</span><span class="ts">오후 9:15</span></div>
+          <div class="msg-stack">
+            <div class="msg-box">할머니. 좋아요.</div>
+            <div class="msg-box continued">
+              <span class="cont-mark" aria-hidden="true">├</span>그 할머니를 떠올리면 가장 먼저 어떤 감각이 오나요? 냄새, 소리, 손의 온도 — 무엇이든요.
+              <div style="margin-top:6px;"><span class="tag tag-info">INFO 연속발화</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="msg-row user">
+          <div class="msg-meta"><span class="ts">오후 9:17</span><span class="who who-user">나</span><span class="tag tag-ok">OK 전송됨</span></div>
+          <div class="msg-box">여름마다 할머니 집에 가면 마루에서 라디오 소리가 났어요. 트로트였는데 지직거리는 잡음이 늘 섞여 있었고, 할머니는 그 잡음까지 좋아하셨어요. 이제 그 라디오도 없고 할머니도 안 계신데, 가끔 지하철에서 비슷한 잡음이 들리면 그 마루로 순간 이동한 것 같아요. 그 느낌을 이야기로 붙잡고 싶어요.</div>
+        </div>
+
+        <div class="msg-row ai">
+          <div class="msg-meta"><span class="who who-ai">연서</span><span class="ts">오후 9:18</span></div>
+          <div class="msg-box">좋아요. 그 잡음이 이야기의 심장이 될 것 같아요. 이렇게 시작해볼까요?</div>
+        </div>
+
+        <article class="draft-card" data-region="response-card">
+          <div class="draft-head">
+            <span class="tag tag-ref">REF DRAFT</span>
+            <h3 class="draft-title">잡음의 온도</h3>
+          </div>
+          <p class="draft-excerpt">"여름은 늘 지직거리는 소리로 시작됐다. 할머니의 라디오는 트로트와 잡음을 구별하지 않았고, 나도 그걸 배웠다. 소리의 흠집마다 여름 냄새가 뱄다."</p>
+          <div class="draft-actions" data-region="action">
+            <button class="btn-primary" type="button">이어쓰기</button>
+            <button class="btn-ghost" type="button">다른 제안</button>
+          </div>
+        </article>
+
+        <div class="msg-row ai typing">
+          <div class="msg-meta"><span class="who who-ai">연서</span><span class="tag tag-warn">WARN 작성중</span></div>
+          <div class="msg-box">
+            <span>연서가 다음 문장을 쓰는 중…</span>
+            <span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+          </div>
+        </div>
+
+      </section>
+
+      <div class="composer" data-region="composer">
+        <div class="prompt-line">
+          <span class="prompt-user">지민</span><span class="prompt-at">@</span><span class="prompt-host">yeonseo</span><span class="prompt-path">:~/할머니의라디오</span><span class="prompt-dollar">$</span>
+          <label for="composer-input" class="visually-hidden">이야기의 다음 조각을 들려주세요</label>
+          <textarea id="composer-input" class="composer-input" rows="1" placeholder="이야기의 다음 조각을 들려주세요…"></textarea>
+          <span class="cursor-blink" aria-hidden="true">█</span>
+        </div>
+        <div class="composer-tools">
+          <div class="tool-icons">
+            <button class="icon-btn" type="button" aria-label="첨부"><span class="icon-plus" aria-hidden="true">＋</span></button>
+            <button class="icon-btn" type="button" aria-label="음성 입력">
+              <svg class="icon-mic" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                <rect x="9" y="2" width="6" height="11" rx="0"></rect>
+                <path d="M5 11a7 7 0 0 0 14 0"></path>
+                <line x1="12" y1="18" x2="12" y2="22"></line>
+                <line x1="8" y1="22" x2="16" y2="22"></line>
+              </svg>
+            </button>
+          </div>
+          <button class="btn-send" type="button">보내기</button>
+        </div>
+        <div class="composer-hint">Shift+Enter 줄바꿈</div>
+      </div>
+    </main>
+
+    <aside class="pane pane-log">
+      <div class="pane-head"><span class="idx">[3]</span> SESSION_LOG</div>
+      <div class="log-stream" id="log-stream">
+        <div class="log-line"><span class="log-ts">[21:14:05]</span><span class="lvl lvl-INFO">INFO</span>session.start user=지민 story=할머니의라디오</div>
+        <div class="log-line" data-story="할머니의라디오"><span class="log-ts">[21:14:58]</span><span class="lvl lvl-OK">OK</span>draft.autosave <span class="path">/stories/할머니의라디오/draft-003.md</span></div>
+        <div class="log-line"><span class="log-ts">[21:15:22]</span><span class="lvl lvl-INFO">INFO</span>turn.append speaker=나 chars=3</div>
+        <div class="log-line" data-story="할머니의라디오"><span class="log-ts">[21:17:50]</span><span class="lvl lvl-OK">OK</span>draft.autosave <span class="path">/stories/할머니의라디오/draft-004.md</span></div>
+        <div class="log-line"><span class="log-ts">[21:18:03]</span><span class="lvl lvl-WARN">WARN</span>latency.spike respond_ms=1120</div>
+        <div class="log-line"><span class="log-ts">[21:18:41]</span><span class="lvl lvl-OK">OK</span>render.suggestion title="잡음의 온도"</div>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="fkeybar">
+    <span class="fk"><b>F1</b> HELP</span>
+    <span class="fk"><b>F2</b> SAVE</span>
+    <span class="fk"><b>F3</b> STORIES</span>
+    <span class="fk"><b>F4</b> EXPORT</span>
+    <span class="fk"><b>F5</b> QUIT</span>
+    <span class="fk-style">STYLE 04 · 밀집 터미널</span>
+  </footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced) return; // 정적 초기 상태 그대로 유지
+
+  // ---- 상태바 시계 ----
+  var clockEl = document.getElementById('clock');
+  var uptimeEl = document.getElementById('uptime');
+  var loadEl = document.getElementById('loadavg');
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  var now = new Date();
+  clockEl && (function tickClock(){
+    var d = new Date();
+    clockEl.textContent = pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+    setTimeout(tickClock, 1000);
+  })();
+
+  var uptimeSeconds = 2*3600 + 14*60 + 9;
+  uptimeEl && setInterval(function(){
+    uptimeSeconds++;
+    var h = Math.floor(uptimeSeconds/3600);
+    var m = Math.floor((uptimeSeconds%3600)/60);
+    var s = uptimeSeconds%60;
+    uptimeEl.textContent = pad(h)+':'+pad(m)+':'+pad(s);
+  }, 1000);
+
+  var baseLoad = [0.42, 0.38, 0.31];
+  loadEl && setInterval(function(){
+    var jittered = baseLoad.map(function(v){
+      var j = (Math.random()*0.04 - 0.02);
+      return Math.max(0, v + j).toFixed(2);
+    });
+    loadEl.textContent = jittered.join(' ');
+  }, 3200);
+
+  // ---- 세션 로그 스트림 ----
+  var stream = document.getElementById('log-stream');
+  var pool = [
+    {lvl:'INFO', story:null, html:'context.window tokens=2140/8192'},
+    {lvl:'OK',   story:'할머니의라디오', html:'sync.complete node=story-engine-02'},
+    {lvl:'INFO', story:null, html:'suggestion.rank candidates=3'},
+    {lvl:'WARN', story:null, html:'latency.spike respond_ms=980'},
+    {lvl:'ERR',  story:null, html:'voice.input timeout retry=1'},
+    {lvl:'OK',   story:'할머니의라디오', html:'draft.autosave <span class="path">/stories/할머니의라디오/draft-005.md</span>'},
+  ];
+  var poolIdx = 0;
+  var MAX_LINES = 8;
+
+  function addLogLine(){
+    if(!stream) return;
+    var item = pool[poolIdx % pool.length];
+    poolIdx++;
+    var d = new Date();
+    var ts = '['+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())+']';
+    var row = document.createElement('div');
+    row.className = 'log-line log-new';
+    if(item.story) row.setAttribute('data-story', item.story);
+    row.innerHTML = '<span class="log-ts">'+ts+'</span><span class="lvl lvl-'+item.lvl+'">'+item.lvl+'</span>'+item.html;
+    stream.appendChild(row);
+    while(stream.children.length > MAX_LINES){
+      stream.removeChild(stream.firstElementChild);
+    }
+    row.addEventListener('mouseenter', function(){
+      var story = row.getAttribute('data-story');
+      if(!story) return;
+      var navRows = document.querySelectorAll('.story-row .story-name');
+      navRows.forEach(function(n){
+        if(n.textContent === story){ n.closest('.story-row').classList.add('highlight-link'); }
+      });
+    });
+    row.addEventListener('mouseleave', function(){
+      var story = row.getAttribute('data-story');
+      if(!story) return;
+      var navRows = document.querySelectorAll('.story-row .story-name');
+      navRows.forEach(function(n){
+        if(n.textContent === story){ n.closest('.story-row').classList.remove('highlight-link'); }
+      });
+    });
+    scheduleNext();
+  }
+
+  function scheduleNext(){
+    var delay = 6000 + Math.random()*6000; // 6~12초
+    setTimeout(addLogLine, delay);
+  }
+  scheduleNext();
+
+  // ---- 최초 로그 두 줄 타이핑 리빌 ----
+  var lines = stream ? Array.prototype.slice.call(stream.children) : [];
+  lines.slice(-2).forEach(function(el, i){
+    el.style.maxWidth = '0';
+    el.style.overflow = 'hidden';
+    el.style.whiteSpace = 'nowrap';
+    el.style.transition = 'max-width 900ms steps(30,end)';
+    setTimeout(function(){
+      el.style.maxWidth = '640px';
+      setTimeout(function(){
+        el.style.whiteSpace = 'normal';
+        el.style.overflow = 'visible';
+        el.style.maxWidth = 'none';
+      }, 950);
+    }, 120 + i*150);
+  });
+})();
+</script>
+</body>
+</html>

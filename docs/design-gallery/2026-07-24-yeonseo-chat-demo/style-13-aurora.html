@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연서 — 함께 쓰는 이야기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* =========================================================
+     STYLE 13 — 오로라 그라디언트 · 연서 대화창
+     딥 네이비 어둠 위로 오로라가 느리게 흐르는 대화형 AI 콘솔.
+     ========================================================= */
+
+  :root{
+    /* --- 색 토큰 --- */
+    --bg: #0A0A12;
+    --surface: rgba(255,255,255,0.03);
+    --surface-strong: rgba(255,255,255,0.055);
+    --panel-scrim-1: rgba(9,9,16,0.82);
+    --panel-scrim-2: rgba(9,9,16,0.92);
+    --text: #E8E9F2;
+    --text-muted: #8A8DA6;
+    --hairline: rgba(255,255,255,0.08);
+
+    --aurora-purple: #7C5CFF;
+    --aurora-cyan: #2FD8E8;
+    --aurora-pink: #FF5CC8;
+    --danger: #FF6B8A;
+
+    /* CTA 표면용 — 오로라 3색보다 어둡게 눌러써서 흰 글자 대비 4.5:1+ 확보 */
+    --cta-a: #4B2FA8;
+    --cta-b: #0B6E7A;
+
+    /* --- 스페이싱(8px 그리드) --- */
+    --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+    --sp-6: 24px; --sp-8: 32px; --sp-12: 48px; --sp-16: 64px;
+
+    /* --- 타이포 스케일(제한된 스케일) --- */
+    --fs-xs: 12px; --fs-sm: 14px; --fs-base: 16px;
+    --fs-lg: 20px; --fs-xl: 24px; --fs-2xl: 32px;
+
+    --radius-sm: 10px; --radius-md: 16px; --radius-lg: 20px;
+
+    --scroll-hue: 0deg;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html, body{
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-family: 'Pretendard', 'Inter', -apple-system, sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body{ overflow-x: hidden; }
+
+  ::selection{ background: rgba(124,92,255,0.35); color: #fff; }
+
+  button{ font-family: inherit; }
+
+  /* =========================================================
+     배경 오로라 — 상시 상태 (정지 화면에서도 살아있는 어둠)
+     ========================================================= */
+  .aurora-field{
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--bg);
+  }
+  .aurora-blob{
+    position: absolute;
+    width: 62vw;
+    height: 62vw;
+    max-width: 780px;
+    max-height: 780px;
+    border-radius: 50%;
+    filter: blur(80px) hue-rotate(var(--scroll-hue, 0deg));
+    opacity: 0;
+    transition: transform 0.6s ease-out;
+    will-change: transform;
+    animation: aurora-fade-in 1.2s ease-out forwards, aurora-drift-a 26s ease-in-out infinite 1.2s;
+  }
+  .aurora-blob.b1{
+    top: -12%; left: -8%;
+    background: radial-gradient(circle at 40% 40%, var(--aurora-purple), transparent 68%);
+    animation-name: aurora-fade-in, aurora-drift-a;
+    animation-delay: 0s, 1.2s;
+  }
+  .aurora-blob.b2{
+    top: 22%; right: -14%;
+    background: radial-gradient(circle at 60% 40%, var(--aurora-cyan), transparent 68%);
+    animation-name: aurora-fade-in, aurora-drift-b;
+    animation-delay: 0.15s, 1.35s;
+    animation-duration: 1.2s, 32s;
+  }
+  .aurora-blob.b3{
+    bottom: -18%; left: 18%;
+    background: radial-gradient(circle at 50% 50%, var(--aurora-pink), transparent 68%);
+    animation-name: aurora-fade-in, aurora-drift-c;
+    animation-delay: 0.3s, 1.5s;
+    animation-duration: 1.2s, 30s;
+    opacity: 0;
+  }
+
+  @keyframes aurora-fade-in{ from{ opacity: 0; } to{ opacity: 0.5; } }
+  @keyframes aurora-drift-a{
+    0%,100%{ transform: translate(0,0) scale(1) rotate(0deg); }
+    50%{ transform: translate(4%, 3%) scale(1.08) rotate(6deg); }
+  }
+  @keyframes aurora-drift-b{
+    0%,100%{ transform: translate(0,0) scale(1) rotate(0deg); }
+    50%{ transform: translate(-5%, 4%) scale(1.05) rotate(-5deg); }
+  }
+  @keyframes aurora-drift-c{
+    0%,100%{ transform: translate(0,0) scale(1) rotate(0deg); }
+    50%{ transform: translate(3%, -4%) scale(1.1) rotate(4deg); }
+  }
+
+  /* =========================================================
+     앱 레이아웃
+     ========================================================= */
+  .app{
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  /* --- 사이드바(nav) --- */
+  .sidebar{
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--sp-6) var(--sp-4);
+    border-right: 1px solid var(--hairline);
+    background: rgba(10,10,18,0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    min-height: 100vh;
+    opacity: 0;
+    animation: rise-in 0.6s ease-out 0.3s forwards;
+  }
+
+  .brand{
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: 0 var(--sp-2) var(--sp-6);
+  }
+  .brand-mark{
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(155deg, rgba(124,92,255,0.22), rgba(47,216,232,0.18));
+    border: 1px solid var(--hairline);
+    flex-shrink: 0;
+  }
+  .brand-mark svg{ width: 16px; height: 16px; color: var(--text); }
+  .brand-name{ font-size: var(--fs-lg); font-weight: 700; letter-spacing: -0.02em; }
+
+  .btn-new{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    width: 100%;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    background: linear-gradient(120deg, var(--cta-a), var(--cta-b), var(--cta-a));
+    background-size: 220% 100%;
+    background-position: 0% 0%;
+    transition: background-position 0.4s ease, box-shadow 0.25s ease;
+    box-shadow: 0 0 0 rgba(124,92,255,0);
+  }
+  .btn-new:hover, .btn-new:focus-visible{
+    background-position: 100% 0%;
+    box-shadow: 0 4px 24px rgba(124,92,255,0.28);
+  }
+  .btn-new svg{ width: 16px; height: 16px; }
+
+  .nav-label{
+    margin: var(--sp-6) 0 var(--sp-2);
+    padding: 0 var(--sp-2);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .conv-list{
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    flex: 1;
+    overflow-y: auto;
+  }
+  .conv-item{
+    position: relative;
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-4);
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .conv-item::before{
+    content: "";
+    position: absolute;
+    left: 0; top: 10%; bottom: 10%;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--aurora-cyan);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .conv-item:hover, .conv-item:focus-visible{
+    background: var(--surface);
+    color: var(--text);
+  }
+  .conv-item:hover::before, .conv-item:focus-visible::before{ opacity: 0.55; }
+  .conv-item.is-active{
+    background: var(--surface-strong);
+    color: var(--text);
+    font-weight: 600;
+  }
+  .conv-item.is-active::before{ opacity: 1; }
+
+  .sidebar-footer{
+    margin-top: var(--sp-4);
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .user-avatar{
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--surface-strong);
+    border: 1px solid var(--hairline);
+    display: grid;
+    place-items: center;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .user-name{ font-size: var(--fs-sm); color: var(--text); font-weight: 500; }
+
+  /* --- 모바일 nav 토글 (체크박스 기반, JS 불필요) --- */
+  #nav-toggle{ position: absolute; opacity: 0; pointer-events: none; }
+  .nav-scrim{ display: none; }
+
+  /* =========================================================
+     메인 컬럼
+     ========================================================= */
+  .main{
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-height: 100vh;
+    position: relative;
+  }
+
+  .mobile-topbar{ display: none; }
+
+  /* --- 배너 --- */
+  .banner{
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin: var(--sp-6) var(--sp-8) 0;
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    opacity: 0;
+    animation: rise-in 0.6s ease-out 0.36s forwards;
+  }
+  .banner svg{ width: 16px; height: 16px; flex-shrink: 0; color: var(--aurora-cyan); }
+  .banner strong{ color: var(--text); font-weight: 600; }
+
+  /* --- 대화 흐름 --- */
+  .conversation-wrap{
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .conversation{
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--sp-8) var(--sp-8) var(--sp-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    scroll-behavior: smooth;
+  }
+  .conversation::-webkit-scrollbar{ width: 8px; }
+  .conversation::-webkit-scrollbar-thumb{ background: var(--surface-strong); border-radius: 8px; }
+
+  .msg-group{
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    max-width: 720px;
+    opacity: 0;
+    animation: rise-in 0.5s ease-out forwards;
+  }
+  .msg-group:nth-child(1){ animation-delay: 0.42s; }
+  .msg-group:nth-child(2){ animation-delay: 0.48s; }
+  .msg-group:nth-child(3){ animation-delay: 0.54s; }
+  .msg-group:nth-child(4){ animation-delay: 0.6s; }
+  .msg-group:nth-child(5){ animation-delay: 0.66s; }
+
+  .msg-group.from-ai{ align-self: flex-start; align-items: flex-start; }
+  .msg-group.from-me{ align-self: flex-end; align-items: flex-end; }
+
+  .msg-meta{
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 0 var(--sp-2);
+  }
+  .msg-group.from-me .msg-meta{ flex-direction: row-reverse; }
+
+  .avatar{
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--hairline);
+  }
+  .avatar-ai{
+    background: linear-gradient(155deg, rgba(124,92,255,0.28), rgba(47,216,232,0.22));
+  }
+  .avatar-ai svg{ width: 13px; height: 13px; color: var(--text); }
+  .avatar-me{ background: var(--surface-strong); }
+  .avatar-me svg{ width: 12px; height: 12px; color: var(--text-muted); }
+
+  .speaker-name{ font-size: var(--fs-xs); font-weight: 600; color: var(--text); }
+  .msg-time{ font-size: var(--fs-xs); color: var(--text-muted); }
+  .msg-tag{
+    font-size: var(--fs-xs);
+    color: var(--aurora-cyan);
+    background: rgba(47,216,232,0.1);
+    border: 1px solid rgba(47,216,232,0.28);
+    border-radius: 999px;
+    padding: 1px var(--sp-2);
+  }
+
+  /* --- 말풍선 (스타일을 가르는 표면) --- */
+  .bubble-stack{ display: flex; flex-direction: column; gap: var(--sp-2); }
+  .msg-group.from-ai .bubble-stack{ align-items: flex-start; }
+  .msg-group.from-me .bubble-stack{ align-items: flex-end; }
+
+  .bubble{
+    position: relative;
+    max-width: 560px;
+    padding: var(--sp-3) var(--sp-4);
+    font-size: var(--fs-base);
+    line-height: 1.6;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  .bubble.ai{
+    color: var(--text);
+    background:
+      linear-gradient(var(--panel-scrim-1), var(--panel-scrim-1)) padding-box,
+      linear-gradient(135deg, var(--aurora-purple), var(--aurora-cyan) 55%, var(--aurora-pink)) border-box;
+    border: 1px solid transparent;
+    border-radius: 4px var(--radius-md) var(--radius-md) var(--radius-md);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .bubble.ai::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-cyan) 55%, var(--aurora-pink));
+    opacity: 0.25;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .bubble.me{
+    color: var(--text);
+    background: linear-gradient(155deg, rgba(124,92,255,0.16), rgba(255,255,255,0.03));
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md) 4px var(--radius-md) var(--radius-md);
+  }
+
+  /* 연속 발화 — 같은 화자가 이어지면 리듬을 좁힌다 */
+  .msg-group.continued .msg-meta{ display: none; }
+  .msg-group.continued{ margin-top: calc(var(--sp-2) * -1); }
+
+  /* --- 초안 제안 카드(response-card) --- */
+  .response-card{
+    margin-top: var(--sp-2);
+    width: 100%;
+    max-width: 480px;
+    padding: var(--sp-4) var(--sp-6);
+    border-radius: var(--radius-lg);
+    position: relative;
+    background:
+      linear-gradient(var(--panel-scrim-2), var(--panel-scrim-2)) padding-box,
+      linear-gradient(135deg, var(--aurora-purple), var(--aurora-cyan) 55%, var(--aurora-pink)) border-box;
+    border: 1px solid transparent;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 40px rgba(0,0,0,0.35);
+    transition: box-shadow 0.25s ease;
+  }
+  .response-card::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-cyan) 55%, var(--aurora-pink));
+    opacity: 0.3;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .response-card:hover::before, .response-card:focus-within::before{ opacity: 0.7; }
+  .response-card:hover, .response-card:focus-within{
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 16px 52px rgba(124,92,255,0.22);
+  }
+  .response-card-eyebrow{
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    margin-bottom: var(--sp-1);
+  }
+  .response-card-title{
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--sp-3);
+  }
+  .response-card-excerpt{
+    margin: 0 0 var(--sp-4);
+    font-size: var(--fs-sm);
+    line-height: 1.7;
+    color: var(--text-muted);
+    font-style: italic;
+    padding-left: var(--sp-3);
+    border-left: 2px solid rgba(47,216,232,0.4);
+  }
+  .response-card-actions{ display: flex; gap: var(--sp-3); }
+
+  .btn{
+    height: 38px;
+    padding: 0 var(--sp-4);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    transition: background-position 0.4s ease, box-shadow 0.25s ease, border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .btn-primary{
+    border: none;
+    color: #fff;
+    background: linear-gradient(120deg, var(--cta-a), var(--cta-b), var(--cta-a));
+    background-size: 220% 100%;
+    background-position: 0% 0%;
+  }
+  .btn-primary:hover, .btn-primary:focus-visible{
+    background-position: 100% 0%;
+    box-shadow: 0 4px 24px rgba(124,92,255,0.3);
+  }
+  .btn-primary:active{ box-shadow: 0 2px 10px rgba(124,92,255,0.22); }
+  .btn-ghost{
+    border: 1px solid var(--hairline);
+    background: transparent;
+    color: var(--text-muted);
+  }
+  .btn-ghost:hover, .btn-ghost:focus-visible{
+    color: var(--text);
+    border-color: rgba(47,216,232,0.4);
+    background: rgba(47,216,232,0.06);
+  }
+  .btn:disabled{ opacity: 0.4; cursor: not-allowed; }
+
+  /* --- 대기 표현(작성중) --- */
+  .typing-row{
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: 0 var(--sp-2);
+    margin-top: calc(var(--sp-2) * -1);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    opacity: 0;
+    animation: rise-in 0.5s ease-out 0.75s forwards;
+  }
+  .typing-dots{ display: inline-flex; gap: 4px; align-items: center; }
+  .typing-dots .dot{
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--aurora-cyan);
+    opacity: 0.5;
+    animation: dot-bounce 1.2s ease-in-out infinite;
+  }
+  .typing-dots .dot:nth-child(2){ animation-delay: 0.15s; }
+  .typing-dots .dot:nth-child(3){ animation-delay: 0.3s; }
+  @keyframes dot-bounce{
+    0%, 80%, 100%{ transform: translateY(0); opacity: 0.5; }
+    40%{ transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* =========================================================
+     빈 상태(empty) — 지난 대화 0건일 때 (＋ 새 이야기 로 토글 확인)
+     ========================================================= */
+  .empty-wrap{
+    display: none;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--sp-4);
+    padding: var(--sp-8);
+  }
+  .empty-illust{
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(155deg, rgba(124,92,255,0.16), rgba(47,216,232,0.12));
+    border: 1px solid var(--hairline);
+    margin-bottom: var(--sp-2);
+  }
+  .empty-illust svg{ width: 30px; height: 30px; color: var(--text-muted); }
+  .empty-headline{ font-size: var(--fs-xl); font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+  .empty-desc{ font-size: var(--fs-base); color: var(--text-muted); margin: 0; max-width: 360px; }
+
+  #new-story-toggle:checked ~ .app .conversation-wrap{ display: none; }
+  #new-story-toggle:checked ~ .app .empty-wrap{ display: flex; }
+  #new-story-toggle:checked ~ .app .banner{ display: none; }
+
+  /* --- 입력창(composer) --- */
+  .composer{
+    flex-shrink: 0;
+    padding: var(--sp-4) var(--sp-8) var(--sp-6);
+    border-top: 1px solid var(--hairline);
+    background: rgba(10,10,18,0.5);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+  .composer-box{
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4);
+    border-radius: var(--radius-lg);
+    background:
+      linear-gradient(var(--panel-scrim-1), var(--panel-scrim-1)) padding-box,
+      linear-gradient(135deg, var(--aurora-purple), var(--aurora-cyan) 55%, var(--aurora-pink)) border-box;
+    border: 1px solid transparent;
+    transition: box-shadow 0.25s ease;
+  }
+  .composer-box::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-cyan) 55%, var(--aurora-pink));
+    opacity: 0.25;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .composer-box:focus-within::before{ opacity: 0.6; }
+  .composer-box:focus-within{ box-shadow: 0 8px 32px rgba(124,92,255,0.18); }
+
+  .composer-icon-btn{
+    width: 34px; height: 34px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .composer-icon-btn svg{ width: 17px; height: 17px; }
+  .composer-icon-btn:hover, .composer-icon-btn:focus-visible{
+    background: var(--surface-strong);
+    color: var(--text);
+  }
+
+  .composer-input{
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-family: inherit;
+    font-size: var(--fs-base);
+    line-height: 1.5;
+    resize: none;
+    max-height: 160px;
+    padding: var(--sp-2) 0;
+  }
+  .composer-input::placeholder{ color: var(--text-muted); }
+
+  .btn-send{
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: none;
+    color: #fff;
+    background: linear-gradient(120deg, var(--cta-a), var(--cta-b), var(--cta-a));
+    background-size: 220% 100%;
+    background-position: 0% 0%;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-position 0.4s ease, box-shadow 0.25s ease;
+  }
+  .btn-send svg{ width: 16px; height: 16px; }
+  .btn-send:hover, .btn-send:focus-visible{
+    background-position: 100% 0%;
+    box-shadow: 0 4px 20px rgba(124,92,255,0.32);
+  }
+
+  .composer-hint{
+    margin: var(--sp-2) 0 0;
+    padding-left: var(--sp-3);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+  }
+  .composer-hint kbd{
+    font-family: inherit;
+    font-size: inherit;
+    background: var(--surface-strong);
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+
+  .app-footer{
+    text-align: right;
+    padding: var(--sp-2) var(--sp-8) 0;
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  /* --- 공통 등장 애니메이션 --- */
+  @keyframes rise-in{
+    from{ opacity: 0; transform: translateY(12px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+
+  /* --- 접근성: focus-visible --- */
+  :focus-visible{
+    outline: 2px solid var(--aurora-cyan);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(47,216,232,0.2);
+    border-radius: 4px;
+  }
+
+  .sr-only{
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* =========================================================
+     반응형 — 1000px 이하: 사이드바 접힘(오프캔버스)
+     ========================================================= */
+  @media (max-width: 1000px){
+    .app{ grid-template-columns: 1fr; }
+
+    .mobile-topbar{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-3);
+      padding: var(--sp-4) var(--sp-6) 0;
+    }
+    .mobile-topbar .brand{ padding: 0; }
+    .hamburger{
+      width: 38px; height: 38px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--hairline);
+      background: var(--surface);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .hamburger svg{ width: 18px; height: 18px; }
+
+    .sidebar{
+      position: fixed;
+      z-index: 20;
+      top: 0; left: 0; bottom: 0;
+      width: 280px;
+      max-width: 82vw;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      box-shadow: 12px 0 40px rgba(0,0,0,0.4);
+    }
+    #nav-toggle:checked ~ .app .sidebar{ transform: translateX(0); }
+
+    .nav-scrim{
+      position: fixed;
+      inset: 0;
+      z-index: 19;
+      background: rgba(0,0,0,0.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    #nav-toggle:checked ~ .app .nav-scrim{ opacity: 1; pointer-events: auto; }
+
+    .banner, .conversation, .composer{ padding-left: var(--sp-6); padding-right: var(--sp-6); }
+    .banner{ margin-left: var(--sp-6); margin-right: var(--sp-6); }
+    .bubble{ max-width: 100%; }
+    .msg-group{ max-width: 100%; }
+  }
+
+  @media (max-width: 620px){
+    .banner, .conversation, .composer{ padding-left: var(--sp-4); padding-right: var(--sp-4); }
+    .banner{ margin-left: var(--sp-4); margin-right: var(--sp-4); font-size: var(--fs-xs); }
+    .response-card{ max-width: 100%; padding: var(--sp-4); }
+    .response-card-actions{ flex-direction: column; }
+    .btn{ width: 100%; }
+  }
+
+  /* =========================================================
+     접근성 안전장치 — 모션 축소
+     ========================================================= */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+    .aurora-blob{
+      opacity: 0.5 !important;
+      transform: none !important;
+      filter: blur(80px) !important;
+    }
+    .sidebar, .banner, .msg-group, .typing-row{
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .typing-dots .dot{ opacity: 0.9 !important; transform: none !important; }
+    .bubble.ai::before, .response-card::before, .composer-box::before{ opacity: 0.25 !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 배경 오로라 — 어둠 속에서 상시 새어 나오는 광원 -->
+  <div class="aurora-field" aria-hidden="true">
+    <div class="aurora-blob b1"></div>
+    <div class="aurora-blob b2"></div>
+    <div class="aurora-blob b3"></div>
+  </div>
+
+  <!-- 빈 상태 토글 (＋ 새 이야기) · 순수 CSS, JS 불필요 -->
+  <input type="checkbox" id="new-story-toggle" class="sr-only" aria-hidden="true">
+  <!-- 모바일 사이드바 토글 · 순수 CSS -->
+  <input type="checkbox" id="nav-toggle" class="sr-only" aria-hidden="true">
+
+  <div class="app">
+
+    <!-- ============ 사이드바 : nav ============ -->
+    <label for="nav-toggle" class="nav-scrim" aria-hidden="true"></label>
+
+    <aside class="sidebar" data-region="nav" aria-label="지난 대화 내비게이션">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3 L13.6 9.2 L20 12 L13.6 14.8 L12 21 L10.4 14.8 L4 12 L10.4 9.2 Z"/>
+          </svg>
+        </span>
+        <span class="brand-name">연서</span>
+      </div>
+
+      <label for="new-story-toggle" class="btn-new" role="button" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        새 이야기
+      </label>
+
+      <div class="nav-label">지난 대화</div>
+      <ul class="conv-list">
+        <li><button type="button" class="conv-item">비 오는 정거장</button></li>
+        <li><button type="button" class="conv-item is-active" aria-current="true">할머니의 라디오</button></li>
+        <li><button type="button" class="conv-item">이름 없는 등대지기</button></li>
+        <li><button type="button" class="conv-item">3층 그 방</button></li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <span class="user-avatar" aria-hidden="true">지</span>
+        <span class="user-name">지민</span>
+      </div>
+    </aside>
+
+    <!-- ============ 메인 컬럼 ============ -->
+    <div class="main">
+
+      <div class="mobile-topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3 L13.6 9.2 L20 12 L13.6 14.8 L12 21 L10.4 14.8 L4 12 L10.4 9.2 Z"/>
+            </svg>
+          </span>
+          <span class="brand-name">연서</span>
+        </div>
+        <label for="nav-toggle" class="hamburger" role="button" tabindex="0" aria-label="지난 대화 목록 열기">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </label>
+      </div>
+
+      <!-- 안내 배너 -->
+      <div class="banner" data-region="banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/>
+        </svg>
+        <span><strong>초안은 자동 저장돼요</strong> · 마음에 들면 이어쓰기로 계속</span>
+      </div>
+
+      <div class="conversation-wrap">
+        <!-- 대화 흐름 : conversation (주인공) -->
+        <section class="conversation" data-region="conversation" role="log" aria-label="연서와의 대화">
+
+          <!-- 1. 연서 — 긴 발화 -->
+          <div class="msg-group from-ai">
+            <div class="msg-meta">
+              <span class="avatar avatar-ai" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/></svg>
+              </span>
+              <span class="speaker-name">연서</span>
+              <span class="msg-time">오후 9:14</span>
+            </div>
+            <div class="bubble-stack">
+              <div class="bubble ai">안녕하세요, 연서예요. 오늘은 어떤 이야기를 함께 써볼까요? 거창하지 않아도 괜찮아요 — 최근에 마음에 걸린 장면 하나, 잊히지 않는 얼굴 하나면 충분해요. 그게 첫 문장이 되거든요.</div>
+            </div>
+          </div>
+
+          <!-- 2. 나 — 한 단어 발화 -->
+          <div class="msg-group from-me">
+            <div class="msg-meta">
+              <span class="avatar avatar-me" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+              </span>
+              <span class="speaker-name">나</span>
+              <span class="msg-time">오후 9:15</span>
+              <span class="msg-tag">한 단어 발화</span>
+            </div>
+            <div class="bubble-stack">
+              <div class="bubble me">할머니.</div>
+            </div>
+          </div>
+
+          <!-- 3~4. 연서 — 연속 발화 ①② -->
+          <div class="msg-group from-ai">
+            <div class="msg-meta">
+              <span class="avatar avatar-ai" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/></svg>
+              </span>
+              <span class="speaker-name">연서</span>
+              <span class="msg-time">오후 9:15</span>
+              <span class="msg-tag">연속 발화 ①</span>
+            </div>
+            <div class="bubble-stack">
+              <div class="bubble ai">할머니. 좋아요.</div>
+            </div>
+          </div>
+          <div class="msg-group from-ai continued">
+            <div class="msg-meta">
+              <span class="avatar avatar-ai" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/></svg>
+              </span>
+              <span class="speaker-name">연서</span>
+              <span class="msg-time">오후 9:15</span>
+              <span class="msg-tag">연속 발화 ②</span>
+            </div>
+            <div class="bubble-stack">
+              <div class="bubble ai">그 할머니를 떠올리면 가장 먼저 어떤 감각이 오나요? 냄새, 소리, 손의 온도 — 무엇이든요.</div>
+            </div>
+          </div>
+
+          <!-- 5. 나 — 아주 긴 발화 -->
+          <div class="msg-group from-me">
+            <div class="msg-meta">
+              <span class="avatar avatar-me" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+              </span>
+              <span class="speaker-name">나</span>
+              <span class="msg-time">오후 9:17</span>
+              <span class="msg-tag">아주 긴 발화</span>
+            </div>
+            <div class="bubble-stack">
+              <div class="bubble me">여름마다 할머니 집에 가면 마루에서 라디오 소리가 났어요. 트로트였는데 지직거리는 잡음이 늘 섞여 있었고, 할머니는 그 잡음까지 좋아하셨어요. 이제 그 라디오도 없고 할머니도 안 계신데, 가끔 지하철에서 비슷한 잡음이 들리면 그 마루로 순간 이동한 것 같아요. 그 느낌을 이야기로 붙잡고 싶어요.</div>
+            </div>
+          </div>
+
+          <!-- 6. 연서 — 초안 카드로 이어짐 -->
+          <div class="msg-group from-ai">
+            <div class="msg-meta">
+              <span class="avatar avatar-ai" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/></svg>
+              </span>
+              <span class="speaker-name">연서</span>
+              <span class="msg-time">오후 9:18</span>
+            </div>
+            <div class="bubble-stack">
+              <div class="bubble ai">좋아요. 그 잡음이 이야기의 심장이 될 것 같아요. 이렇게 시작해볼까요?</div>
+
+              <!-- 초안 제안 카드 -->
+              <div class="response-card" data-region="response-card" tabindex="0">
+                <div class="response-card-eyebrow">초안 제안 · 가제</div>
+                <h3 class="response-card-title">잡음의 온도</h3>
+                <p class="response-card-excerpt">여름은 늘 지직거리는 소리로 시작됐다. 할머니의 라디오는 트로트와 잡음을 구별하지 않았고, 나도 그걸 배웠다. 소리의 흠집마다 여름 냄새가 뱄다.</p>
+                <div class="response-card-actions">
+                  <button type="button" class="btn btn-primary">이어쓰기</button>
+                  <button type="button" class="btn btn-ghost">다른 제안</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 대기 표현 : 연서가 다음 문장을 쓰는 중 -->
+          <div class="typing-row" aria-live="polite">
+            <span class="avatar avatar-ai" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/></svg>
+            </span>
+            <span>연서가 다음 문장을 쓰는 중…</span>
+            <span class="typing-dots" aria-hidden="true">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </span>
+          </div>
+
+        </section>
+      </div>
+
+      <!-- 빈 상태 : 지난 대화 0건 (＋ 새 이야기 로 확인) -->
+      <div class="empty-wrap" data-region="empty">
+        <span class="empty-illust" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5V6a2 2 0 0 1 2-2h8.5L20 8.5V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-1.5Z"/>
+            <path d="M14 4v4.5H18.5"/>
+            <path d="M8 13h6M8 16h4"/>
+          </svg>
+        </span>
+        <h2 class="empty-headline">아직 시작한 이야기가 없어요</h2>
+        <p class="empty-desc">마음에 남은 장면 하나로 시작해보세요.</p>
+        <label for="new-story-toggle" class="btn btn-primary" role="button" tabindex="0">새 이야기 시작</label>
+      </div>
+
+      <!-- 입력창 : composer -->
+      <div class="composer" data-region="composer">
+        <div class="composer-box">
+          <button type="button" class="composer-icon-btn" aria-label="파일 첨부">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <textarea class="composer-input" rows="1" placeholder="이야기의 다음 조각을 들려주세요…" aria-label="메시지 입력"></textarea>
+          <button type="button" class="composer-icon-btn" aria-label="음성으로 입력">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5M9 21.5h6"/>
+            </svg>
+          </button>
+          <button type="button" class="btn-send" aria-label="보내기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+        <p class="composer-hint"><kbd>Shift</kbd>+<kbd>Enter</kbd> 줄바꿈</p>
+      </div>
+
+      <div class="app-footer">STYLE 13 · 오로라 그라디언트</div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // JS는 연출 전용 — 실패하거나 비활성화돼도 위 HTML/CSS만으로 완전한 화면.
+  var reduceMotion = false;
+  try{
+    reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }catch(e){}
+
+  if (reduceMotion) return;
+
+  // 1) 마우스 추종 — 아주 은은하게, 최대 20px, CSS transition(0.6s)이 지연 추종을 만든다.
+  var blobs = document.querySelectorAll('.aurora-blob');
+  var raf = null;
+  window.addEventListener('mousemove', function(e){
+    if (raf) return;
+    raf = requestAnimationFrame(function(){
+      var rx = (e.clientX / window.innerWidth - 0.5) * 2;
+      var ry = (e.clientY / window.innerHeight - 0.5) * 2;
+      blobs.forEach(function(b, i){
+        var strength = 8 + i * 5; // blob마다 살짝 다르게 — 최대치 20px 이내
+        var tx = rx * strength;
+        var ty = ry * strength;
+        b.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px)';
+      });
+      raf = null;
+    });
+  }, { passive: true });
+
+  // 2) 스크롤 진행도에 따라 오로라 hue를 아주 천천히 이동 (보라 → 시안 쪽)
+  var convo = document.querySelector('[data-region="conversation"]');
+  if (convo){
+    convo.addEventListener('scroll', function(){
+      var max = convo.scrollHeight - convo.clientHeight;
+      var frac = max > 0 ? convo.scrollTop / max : 0;
+      var hue = (frac * 35).toFixed(1) + 'deg';
+      document.documentElement.style.setProperty('--scroll-hue', hue);
+    }, { passive: true });
+  }
+
+  // 3) composer textarea 자동 높이 (있으면 편의, 없어도 rows=1로 정상 동작)
+  var ta = document.querySelector('.composer-input');
+  if (ta){
+    ta.addEventListener('input', function(){
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+    });
+  }
+})();
+</script>
+</body>
+</html>
