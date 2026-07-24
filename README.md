@@ -75,6 +75,19 @@
 
 ---
 
+## 완성 데모 두 개 — 도메인이 바뀌면 원형이 바뀐다
+
+말보다 갤러리예요. **같은 도구로 정반대 원형**을 뽑아, 게이트 판정이 뒤집히는 걸 그대로 보여줍니다. 두 데모 모두 **30장의 콘텐츠가 한 글자도 다르지 않고**(조 단위 금액·음수 증감·아주 긴 이름·결측 `—`까지), 차트·도넛·스파크라인은 전부 순수 CSS·SVG(라이브러리 0)입니다.
+
+| 데모 (열어보기) | 도메인 | 원형 | 주인공 | archetype-lint 판정 |
+|---|---|---|---|---|
+| [**패션 쇼핑몰 · 30 스타일**](https://deokjinlog.github.io/design-explosion-30-styles/design-gallery/2026-07-22-fashion-demo/gallery.html) | Shopping › Fashion | **D 컬렉션형** | 상품 카드 그리드 · 필터 | KPI·차트·목표진행률 **금지** |
+| [**핀테크 정산 대시보드 · 30 스타일**](https://deokjinlog.github.io/design-explosion-30-styles/design-gallery/2026-07-23-fintech-demo/gallery.html) | Info › Finance | **A 대시보드형** | KPI · 차트 · 표 | 그 셋이 **필수** |
+
+**같은 게이트, 정반대 판정.** 패션 D에선 KPI 하나만 나와도 FAIL, 핀테크 A에선 그게 없으면 FAIL — 원형이 화면 종류를 진짜로 구분한다는 증거예요.
+
+---
+
 ## 이런 적 있죠?
 
 새 화면 디자인 방향을 잡아야 하는데 —
