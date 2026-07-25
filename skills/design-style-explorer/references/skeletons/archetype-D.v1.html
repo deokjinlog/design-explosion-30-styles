@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>archetype-D.v1 — 3층 조립 슬라이스 (패션 쇼핑몰 상품 목록 · 03 트렌디 SaaS)</title>
+<!-- ===== 3층 Zen Garden 조립 =====
+     이 HTML(스켈레톤 계약)은 절대 안 바뀐다. 아래 link만 바꾸면 다른 스타일.
+       base   = 원형 D 공용 컴포넌트 (토큰 먹음)     ← 원형당 1개
+       tokens = 스타일 변수 (원형 무관, 재사용)       ← 링크만 바꾸면 다른 스타일
+       signature = 그 스타일의 구조적 시그니처         ← 일부 스타일만 (아직 없음)
+     다른 스타일로 보려면 tokens/signature 줄만 교체. -->
+<link rel="stylesheet" href="../base/archetype-D.css">
+<link rel="stylesheet" href="../tokens/style-03.css">
+<!-- <link rel="stylesheet" href="../signature/style-03--D.css"> -->
+</head>
+<body>
+<div class="app">
+  <header class="identity" data-region="identity">
+    <a class="brand" href="#"><i class="hook" aria-hidden="true"></i><span class="logo">여</span><b class="brandname">여덟시</b></a>
+    <nav class="categories" aria-label="주요 카테고리">
+      <a class="cat is-active" href="#">여성</a>
+      <a class="cat" href="#">남성</a>
+      <a class="cat" href="#">키즈</a>
+      <a class="cat is-sale" href="#">세일</a>
+    </nav>
+    <form class="search" role="search" onsubmit="return false">
+      <input type="search" placeholder="상품, 브랜드 검색" aria-label="상품 검색">
+      <button class="search-btn" type="submit" aria-label="검색"><i class="hook" aria-hidden="true"></i><span class="ico">🔍</span></button>
+    </form>
+    <div class="identity-actions">
+      <button class="cart-btn" type="button" aria-label="장바구니, 담긴 상품 3개">
+        <i class="hook" aria-hidden="true"></i><span class="ico">🛍</span><span class="cart-count">3</span>
+      </button>
+      <span class="avatar" aria-hidden="true">👤</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="filter" data-region="filter" aria-label="상품 필터">
+      <div class="filter-group">
+        <h3 class="filter-title">카테고리</h3>
+        <ul class="filter-list">
+          <li><a class="filter-item is-active" href="#">아우터</a></li>
+          <li><a class="filter-item" href="#">상의</a></li>
+          <li><a class="filter-item" href="#">하의</a></li>
+          <li><a class="filter-item" href="#">원피스</a></li>
+          <li><a class="filter-item" href="#">신발</a></li>
+        </ul>
+      </div>
+
+      <div class="filter-group">
+        <h3 class="filter-title">사이즈</h3>
+        <div class="size-chips">
+          <button class="chip" type="button">XS</button>
+          <button class="chip" type="button">S</button>
+          <button class="chip is-active" type="button">M</button>
+          <button class="chip" type="button">L</button>
+          <button class="chip" type="button">XL</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h3 class="filter-title">색상</h3>
+        <div class="swatch-grid">
+          <button class="colorchip is-active" type="button" style="--sw:#141414" aria-label="블랙"><i class="hook" aria-hidden="true"></i></button>
+          <button class="colorchip" type="button" style="--sw:#ffffff" aria-label="화이트"><i class="hook" aria-hidden="true"></i></button>
+          <button class="colorchip" type="button" style="--sw:#efe6d8" aria-label="아이보리"><i class="hook" aria-hidden="true"></i></button>
+          <button class="colorchip" type="button" style="--sw:#9b99a6" aria-label="그레이"><i class="hook" aria-hidden="true"></i></button>
+          <button class="colorchip" type="button" style="--sw:#233355" aria-label="네이비"><i class="hook" aria-hidden="true"></i></button>
+          <button class="colorchip" type="button" style="--sw:#7c7a4a" aria-label="카키"><i class="hook" aria-hidden="true"></i></button>
+          <button class="colorchip" type="button" style="--sw:#7a2338" aria-label="버건디"><i class="hook" aria-hidden="true"></i></button>
+          <button class="colorchip" type="button" style="--sw:#3e5878" aria-label="데님블루"><i class="hook" aria-hidden="true"></i></button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h3 class="filter-title">가격</h3>
+        <div class="price-range">
+          <input class="price-slider" type="range" min="0" max="300000" value="300000" aria-label="최대 가격, 0원에서 300,000원 이상">
+          <div class="price-labels"><span>₩0</span><span>₩300,000+</span></div>
+        </div>
+      </div>
+
+      <div class="filter-group filter-toggles">
+        <label class="toggle-row"><span>무료배송만</span><input class="toggle" type="checkbox"><i class="hook" aria-hidden="true"></i></label>
+        <label class="toggle-row"><span>재입고 알림 가능</span><input class="toggle" type="checkbox" checked><i class="hook" aria-hidden="true"></i></label>
+      </div>
+
+      <button class="filter-reset" type="reset">필터 초기화</button>
+    </aside>
+
+    <main class="results-col">
+      <div class="results" data-region="results">
+        <h1 class="result-count">여성 아우터 <b>264</b>개</h1>
+        <label class="sort">정렬
+          <select class="sort-select">
+            <option selected>신상품순</option>
+            <option>인기순</option>
+            <option>낮은 가격순</option>
+            <option>리뷰 많은순</option>
+          </select>
+        </label>
+      </div>
+
+      <section class="collection" data-region="collection" aria-label="상품 목록">
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">여</span></div>
+          <span class="badge badge--best">베스트</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span></button>
+          <div class="card-body">
+            <span class="brand">여덟시</span>
+            <h3 class="name">오버핏 울 블렌드 코트</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#141414"></i><i style="--sw:#9b99a6"></i><i style="--sw:#233355"></i></div>
+            <div class="price-row">
+              <span class="price-was">₩189,000</span>
+              <span class="price-now">₩132,300</span>
+              <span class="discount">30%</span>
+            </div>
+            <div class="rating"><span class="stars">★ 4.7</span><span class="review-count">(1,284)</span></div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">코</span></div>
+          <span class="badge badge--ship">무료배송</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span></button>
+          <div class="card-body">
+            <span class="brand">코튼밀</span>
+            <h3 class="name">経량 패딩 베스트</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#141414"></i><i style="--sw:#efe6d8"></i><i style="--sw:#7a2338"></i></div>
+            <div class="price-row">
+              <span class="price-was">₩89,000</span>
+              <span class="price-now">₩62,300</span>
+              <span class="discount">30%</span>
+            </div>
+            <div class="rating"><span class="stars">★ 4.5</span><span class="review-count">(612)</span></div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">여</span></div>
+          <span class="badge badge--new">신상</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span></button>
+          <div class="card-body">
+            <span class="brand">여덟시</span>
+            <h3 class="name">시그니처 캐시미어 100% 롱 코트 — 이탈리아 원단 · 한정 수량 리오더 불가 · 드라이클리닝 전용</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#141414"></i><i style="--sw:#efe6d8"></i></div>
+            <div class="price-row">
+              <span class="price-was">₩1,290,000</span>
+              <span class="price-now">₩1,161,000</span>
+              <span class="discount">10%</span>
+            </div>
+            <div class="rating rating--missing" aria-label="평점 정보 없음">—</div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">데</span></div>
+          <span class="badge badge--low">품절임박</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span></button>
+          <div class="card-body">
+            <span class="brand">데일리랩</span>
+            <h3 class="name">크롭 무스탕 자켓</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#efe6d8"></i><i style="--sw:#7c7a4a"></i><i style="--sw:#141414"></i></div>
+            <div class="price-row">
+              <span class="price-was">₩259,000</span>
+              <span class="price-now">₩155,400</span>
+              <span class="discount">40%</span>
+            </div>
+            <div class="rating"><span class="stars">★ 4.2</span><span class="review-count">(338)</span></div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">코</span></div>
+          <span class="badge badge--best">베스트</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span></button>
+          <div class="card-body">
+            <span class="brand">코튼밀</span>
+            <h3 class="name">베이직 후드 집업</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#141414"></i><i style="--sw:#ffffff"></i><i style="--sw:#3e5878"></i></div>
+            <div class="price-row">
+              <span class="price-was">₩49,000</span>
+              <span class="price-now">₩39,200</span>
+              <span class="discount">20%</span>
+            </div>
+            <div class="rating"><span class="stars">★ 4.8</span><span class="review-count">(2,041)</span></div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">여</span></div>
+          <span class="badge badge--ship">무료배송</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span></button>
+          <div class="card-body">
+            <span class="brand">여덟시</span>
+            <h3 class="name">워시드 데님 트러커</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#3e5878"></i><i style="--sw:#141414"></i></div>
+            <div class="price-row">
+              <span class="price-was">₩119,000</span>
+              <span class="price-now">₩95,200</span>
+              <span class="discount">20%</span>
+            </div>
+            <div class="rating"><span class="stars">★ 4.4</span><span class="review-count">(517)</span></div>
+          </div>
+        </article>
+
+      </section>
+
+      <nav class="action" data-region="action" aria-label="페이지네이션">
+        <ul class="pager">
+          <li><button class="page-btn prev" type="button" disabled aria-label="이전 페이지">‹</button></li>
+          <li><button class="page-btn is-active" type="button" aria-current="page">1</button></li>
+          <li><button class="page-btn" type="button">2</button></li>
+          <li><button class="page-btn" type="button">3</button></li>
+          <li class="ellipsis" aria-hidden="true">…</li>
+          <li><button class="page-btn" type="button">22</button></li>
+          <li><button class="page-btn next" type="button" aria-label="다음 페이지">›</button></li>
+        </ul>
+        <button class="more-btn" type="button">더 보기</button>
+      </nav>
+
+      <!-- 빈 상태 영역(원형 D 권장) — 실제 서비스에선 필터 결과 0건일 때만 노출되지만,
+           이 스켈레톤은 30개 스타일이 견고성 상태를 동일하게 검증하도록 항상 렌더한다. -->
+      <section class="empty" data-region="empty" aria-label="빈 상태 예시">
+        <div class="empty-illust" aria-hidden="true"><i class="hook" aria-hidden="true"></i></div>
+        <h2 class="empty-title">조건에 맞는 상품이 없어요</h2>
+        <p class="empty-desc">사이즈나 색상 조건을 줄여보세요.</p>
+        <button class="empty-cta" type="button">필터 초기화</button>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

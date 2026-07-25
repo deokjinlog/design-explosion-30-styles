@@ -10,6 +10,7 @@ usage: python3 coverage-lint.py <skeleton.html> <style.css>
 import re, sys
 
 skel = open(sys.argv[1], encoding="utf-8").read()
+skel = re.sub(r'<!--.*?-->', ' ', skel, flags=re.S)   # HTML 주석 제거 — 주석 속 data-region/class 오탐 방지
 css_raw = open(sys.argv[2], encoding="utf-8").read()
 
 # ---------- 스켈레톤에 실재하는 것들 ----------
