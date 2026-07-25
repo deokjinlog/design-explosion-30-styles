@@ -1,0 +1,17 @@
+/* tokens/style-04.css — 04 밀집 터미널. 변수만. 원형 무관 = 어느 원형에도 재사용.
+   이 파일 하나가 P2 좌표이자 랄프 핸드오프물(토큰 세트). */
+:root{
+  --bg:#0a0c10;
+  --surface:#0d1117;
+  --ink:#c9d1d9;
+  --muted:#8b98a5;
+  --accent:#3fb950;
+  --radius:0px;
+  --space:14px;
+  --border:#1f2630;
+  --font:'Consolas','SF Mono',ui-monospace,'D2Coding',monospace;
+  --font-ui:var(--font);
+  --bubble-ai-bg:transparent;
+  --bubble-me-bg:transparent;
+  --bubble-me-ink:#e3b341;
+}
