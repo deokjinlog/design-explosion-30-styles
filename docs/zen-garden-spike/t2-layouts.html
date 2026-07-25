@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko" class="lay-sidebar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>T2 — 정보구조 분기: 1 DOM · 4 레이아웃</title>
+<style>
+/* ==================== T2 목적 ====================
+   내비 DOM 단 하나로, CSS만 바꿔서 4가지 정보구조를 낼 수 있나?
+   사이드바 / 상단바 / 아이콘레일 / 하단탭.
+   되는 것 = 원형당 스켈레톤 1개로 충분(넉넉한 훅 전제).
+   안 되는 것 = 스켈레톤 변형 필요.
+   ★ 관건: 반복 항목(.thread)에 icon/label 분리 훅이 있어야 레일·탭이 됨.
+     (현재 skeleton-B.html 엔 이 훅이 없다 → T2가 드러내는 것)
+   ================================================= */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#1f2430;background:#eef1f5;font-size:14px}
+.switcher{position:fixed;top:0;left:0;right:0;z-index:99;display:flex;gap:6px;padding:8px 12px;background:#0d1117}
+.switcher button{font-size:12px;padding:5px 12px;border:1px solid #30363d;background:#161b22;color:#e6edf3;border-radius:6px;cursor:pointer}
+.switcher .note{margin-left:auto;color:#8b949e;font-size:11px;align-self:center}
+
+/* --- 공통(레이아웃 무관) 최소 스타일 --- */
+.app{padding-top:41px}
+.nav{background:#fff;display:flex}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:26px;height:26px;flex:none;background:#4f46e5;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:13px}
+.brandname{font-weight:800;font-size:16px;white-space:nowrap}
+.newbtn{display:flex;align-items:center;gap:8px;background:#eef;border:1px solid #ccd;border-radius:8px;padding:7px 10px;white-space:nowrap;cursor:pointer}
+.newbtn .ico{font-weight:800}
+.threads{display:flex;gap:4px}
+.thread{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;text-decoration:none;color:#333;white-space:nowrap}
+.thread.is-active{background:#eef}
+.thread-icon{width:18px;height:18px;flex:none;border-radius:6px;background:#c7cede}
+.thread:nth-child(1) .thread-icon{background:#8ab4ff}
+.thread:nth-child(2) .thread-icon{background:#f0a3c6}
+.thread:nth-child(3) .thread-icon{background:#8ce0b5}
+.thread:nth-child(4) .thread-icon{background:#ffd27a}
+.me{display:flex;align-items:center;gap:8px}
+.me-av{width:24px;height:24px;flex:none;background:#334;color:#fff;border-radius:50%;display:grid;place-items:center;font-size:11px}
+.main{background:#f6f8fb;min-height:calc(100vh - 41px)}
+.topbar{padding:12px 18px;border-bottom:1px solid #e3e7ee;font-weight:700}
+.stub{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.row{background:#fff;border:1px solid #e3e7ee;border-radius:10px;padding:12px 14px;max-width:60%}
+.row.me{align-self:flex-end;background:#eef}
+.composer{margin:8px 18px 18px;background:#fff;border:1px solid #e3e7ee;border-radius:10px;padding:10px 12px;color:#8892a4}
+
+/* ========================================================= */
+/* ① 사이드바 (기준)                                          */
+/* ========================================================= */
+.lay-sidebar .app{display:grid;grid-template-columns:220px 1fr}
+.lay-sidebar .nav{flex-direction:column;gap:14px;height:100vh;padding:18px 14px;border-right:1px solid #e3e7ee}
+.lay-sidebar .threads{flex-direction:column}
+.lay-sidebar .me{margin-top:auto;padding-top:12px;border-top:1px solid #eef}
+
+/* ========================================================= */
+/* ② 상단 가로 바  — grid-template 만 바꿈, DOM 그대로          */
+/* ========================================================= */
+.lay-topbar .app{display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr}
+.lay-topbar .nav{flex-direction:row;align-items:center;gap:14px;padding:8px 16px;border-bottom:1px solid #e3e7ee}
+.lay-topbar .threads{flex-direction:row;overflow-x:auto}
+.lay-topbar .me{margin-left:auto}   /* 유저를 우측 끝으로 — order/margin 으로 재배치 */
+
+/* ========================================================= */
+/* ③ 아이콘 레일  — ★ icon/label 분리 훅 덕에 라벨만 숨김        */
+/* ========================================================= */
+.lay-rail .app{display:grid;grid-template-columns:60px 1fr}
+.lay-rail .nav{flex-direction:column;align-items:center;gap:12px;height:100vh;padding:14px 6px;border-right:1px solid #e3e7ee}
+.lay-rail .brandname{display:none}          /* 라벨 숨김 = 훅이 분리돼 있어 가능 */
+.lay-rail .newbtn{padding:8px}
+.lay-rail .newbtn .lbl{display:none}
+.lay-rail .threads{flex-direction:column;align-items:center;width:100%}
+.lay-rail .thread{justify-content:center;padding:8px}
+.lay-rail .thread-label{display:none}       /* ← 이게 핵심. 라벨 훅 없으면 불가능 */
+.lay-rail .me-name{display:none}
+
+/* ========================================================= */
+/* ④ 하단 탭바  — position:fixed + 아이콘 위 라벨              */
+/* ========================================================= */
+.lay-bottomtab .app{display:block}
+.lay-bottomtab .nav{position:fixed;left:0;right:0;bottom:0;flex-direction:row;justify-content:space-around;align-items:center;padding:6px 8px;border-top:1px solid #e3e7ee;box-shadow:0 -2px 12px rgba(0,0,0,.04)}
+.lay-bottomtab .brand,.lay-bottomtab .newbtn,.lay-bottomtab .me{display:none}  /* 탭바는 항목만 — 나머지 숨김(존재는 함) */
+.lay-bottomtab .threads{flex-direction:row;gap:2px;width:100%;justify-content:space-around}
+.lay-bottomtab .thread{flex-direction:column;gap:3px;font-size:11px;padding:4px 8px}
+.lay-bottomtab .thread-label{font-size:10px}
+.lay-bottomtab .main{padding-bottom:64px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="switcher">
+  <button onclick="document.documentElement.className='lay-sidebar'">① 사이드바</button>
+  <button onclick="document.documentElement.className='lay-topbar'">② 상단바</button>
+  <button onclick="document.documentElement.className='lay-rail'">③ 아이콘레일</button>
+  <button onclick="document.documentElement.className='lay-bottomtab'">④ 하단탭</button>
+  <span class="note">↑ 4개 레이아웃 · body DOM은 넷 다 완전히 동일 · CSS만 다름</span>
+</div>
+
+<!-- ===== 단 하나의 내비 DOM. 네 레이아웃이 이걸 CSS로만 바꾼다. ===== -->
+<!-- ★ 현재 skeleton-B 대비 추가된 훅: .thread 안의 .thread-icon/.thread-label,
+        .newbtn 안의 .ico/.lbl, .me 안의 .me-name — 반복/토글 항목의 아이콘·라벨 분리 -->
+<div class="app">
+  <aside class="nav" data-region="nav">
+    <div class="brand"><span class="logo">연</span><b class="brandname">연서</b></div>
+    <button class="newbtn"><span class="ico">＋</span><span class="lbl">새 이야기</span></button>
+    <nav class="threads">
+      <a class="thread" href="#"><span class="thread-icon"></span><span class="thread-label">비 오는 정거장</span></a>
+      <a class="thread is-active" href="#"><span class="thread-icon"></span><span class="thread-label">할머니의 라디오</span></a>
+      <a class="thread" href="#"><span class="thread-icon"></span><span class="thread-label">이름 없는 등대지기</span></a>
+      <a class="thread" href="#"><span class="thread-icon"></span><span class="thread-label">3층 그 방</span></a>
+    </nav>
+    <div class="me"><span class="me-av">지</span><span class="me-name">지민</span></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">할머니의 라디오</div>
+    <div class="stub">
+      <div class="row">안녕하세요, 연서예요. 오늘은 어떤 이야기를 함께 써볼까요?</div>
+      <div class="row me">할머니.</div>
+      <div class="row">그 할머니를 떠올리면 가장 먼저 어떤 감각이 오나요?</div>
+    </div>
+    <div class="composer">이야기의 다음 조각을 들려주세요…</div>
+  </main>
+</div>
+</body>
+</html>
