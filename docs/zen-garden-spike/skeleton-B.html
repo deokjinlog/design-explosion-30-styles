@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>스켈레톤 B · 대화형 (고정 계약 · 수정 금지)</title>
+<!-- ================================================================
+     이것은 원형 B(대화형)의 고정 스켈레톤이다. HTML은 절대 바뀌지 않는다.
+     스타일은 오직 외부 CSS 한 파일로만 준다.
+     여기 실재하는 클래스/속성에만 스타일을 걸어라 — 없는 요소(예: .kpi-card,
+     .sidebar, .chat-bubble)에 규칙을 쓰면 조용히 무시된다.
+     ================================================================ -->
+<style>*{box-sizing:border-box;margin:0;padding:0}</style>
+</head>
+<body>
+<div class="app">
+  <aside class="nav" data-region="nav">
+    <div class="brand"><span class="logo">연</span><b class="brandname">연서</b></div>
+    <button class="newbtn">＋ 새 이야기</button>
+    <nav class="threads">
+      <a class="thread" href="#">비 오는 정거장</a>
+      <a class="thread is-active" href="#">할머니의 라디오</a>
+      <a class="thread" href="#">이름 없는 등대지기</a>
+      <a class="thread" href="#">3층 그 방</a>
+    </nav>
+    <div class="me"><span class="me-av">지</span><span>지민</span></div>
+  </aside>
+
+  <main class="main">
+    <div class="banner" data-region="banner"><i class="hook" aria-hidden="true"></i>초안은 자동 저장돼요 · 마음에 들면 이어쓰기로 계속</div>
+
+    <section class="convo" data-region="conversation">
+      <div class="msg" data-speaker="ai">
+        <div class="av" aria-hidden="true">연</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">안녕하세요, 연서예요. 오늘은 어떤 이야기를 함께 써볼까요? 거창하지 않아도 괜찮아요 — 최근에 마음에 걸린 장면 하나, 잊히지 않는 얼굴 하나면 충분해요. 그게 첫 문장이 되거든요.</p><span class="meta">오후 9:14</span></div>
+      </div>
+      <div class="msg" data-speaker="me">
+        <div class="av" aria-hidden="true">지</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">할머니.</p><span class="meta">오후 9:15</span></div>
+      </div>
+      <div class="msg" data-speaker="ai" data-cont="1">
+        <div class="av" aria-hidden="true">연</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">할머니. 좋아요.</p><span class="meta">오후 9:15</span></div>
+      </div>
+      <div class="msg" data-speaker="ai" data-cont="1">
+        <div class="av" aria-hidden="true">연</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">그 할머니를 떠올리면 가장 먼저 어떤 감각이 오나요? 냄새, 소리, 손의 온도 — 무엇이든요.</p><span class="meta">오후 9:15</span></div>
+      </div>
+      <div class="msg" data-speaker="me">
+        <div class="av" aria-hidden="true">지</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">여름마다 할머니 집에 가면 마루에서 라디오 소리가 났어요. 트로트였는데 지직거리는 잡음이 늘 섞여 있었고, 할머니는 그 잡음까지 좋아하셨어요. 이제 그 라디오도 없고 할머니도 안 계신데, 가끔 지하철에서 비슷한 잡음이 들리면 그 마루로 순간 이동한 것 같아요. 그 느낌을 이야기로 붙잡고 싶어요.</p><span class="meta">오후 9:17</span></div>
+      </div>
+      <div class="msg" data-speaker="ai">
+        <div class="av" aria-hidden="true">연</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">좋아요. 그 잡음이 이야기의 심장이 될 것 같아요. 이렇게 시작해볼까요?</p><span class="meta">오후 9:18</span></div>
+      </div>
+
+      <article class="card" data-region="response-card">
+        <i class="hook" aria-hidden="true"></i>
+        <div class="card-eyebrow">제목(가제)</div>
+        <h3 class="card-title">잡음의 온도</h3>
+        <p class="card-excerpt">여름은 늘 지직거리는 소리로 시작됐다. 할머니의 라디오는 트로트와 잡음을 구별하지 않았고, 나도 그걸 배웠다. 소리의 흠집마다 여름 냄새가 뱄다.</p>
+        <div class="card-actions"><button class="primary">이어쓰기</button><button class="ghost">다른 제안</button></div>
+      </article>
+
+      <div class="typing" aria-live="polite"><span class="dot"></span><span class="dot"></span><span class="dot"></span> 연서가 다음 문장을 쓰는 중…</div>
+    </section>
+
+    <form class="composer" data-region="composer" onsubmit="return false">
+      <button type="button" class="icon" aria-label="첨부">＋</button>
+      <textarea rows="1" placeholder="이야기의 다음 조각을 들려주세요…"></textarea>
+      <button type="button" class="icon" aria-label="음성">🎤</button>
+      <button type="submit" class="send">보내기</button>
+      <span class="hint">Shift+Enter 줄바꿈</span>
+    </form>
+  </main>
+</div>
+</body>
+</html>

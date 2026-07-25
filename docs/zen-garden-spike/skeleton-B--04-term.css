@@ -1,0 +1,604 @@
+/* ==================================================================
+   skeleton-B × STYLE 04 — 고밀도 터미널 (매력 축: 유능감)
+   대상: skeleton-B.html (원형 B, 대화형 — 연서/지민)
+   원칙: CSS 전용. 스켈레톤에 실재하는 클래스/속성에만 스타일을 건다.
+   ================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+
+:root{
+  /* ── 팔레트 (스펙 그대로) ───────────────────────── */
+  --bg:        #0A0C10;
+  --panel:     #0E1116;
+  --promptzone:#0C0F14;
+  --amber:     #F5A623; /* 강조·커서 */
+  --green:     #3DDC84; /* 정상·성공 로그 */
+  --red:       #FF5252; /* 에러 로그 */
+  --blue:      #4DA3FF; /* 경로·링크 */
+  --text:      #C8CDD4;
+  --dim:       #5B6472; /* 장식 전용(보더·구분선). 텍스트에는 쓰지 않음 */
+  --dim-text:  #8A94A3; /* 실제 정보 전달용 딤 텍스트 — 대비 6.4:1 확보 */
+  --row-hover: #141922;
+
+  --mono: 'JetBrains Mono', 'IBM Plex Mono', 'Pretendard', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* ── 리셋 보강 (HTML 인라인 리셋 위에 얹는다) ─────────────── */
+html, body{ height:100%; }
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button, textarea{
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  appearance: none;
+}
+button{ cursor:pointer; }
+a{ color: inherit; text-decoration: none; }
+*{ border-radius: 0 !important; box-shadow: none !important; }
+
+:focus-visible{
+  outline: 2px solid var(--amber);
+  outline-offset: 1px;
+}
+
+::selection{ background: var(--amber); color: var(--bg); }
+
+/* ── 스크롤바 (얇게, 각지게) ──────────────────────── */
+.convo::-webkit-scrollbar,
+.threads::-webkit-scrollbar{ width:8px; }
+.convo::-webkit-scrollbar-track,
+.threads::-webkit-scrollbar-track{ background: var(--panel); }
+.convo::-webkit-scrollbar-thumb,
+.threads::-webkit-scrollbar-thumb{ background: var(--dim); }
+.convo::-webkit-scrollbar-thumb:hover,
+.threads::-webkit-scrollbar-thumb:hover{ background: var(--amber); }
+
+/* ==================================================================
+   레이아웃 골격
+   ================================================================== */
+.app{
+  display:flex;
+  height:100vh;
+  background: var(--bg);
+  overflow:hidden;
+}
+
+.main{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  overflow:hidden;
+  background: var(--bg);
+}
+
+/* ==================================================================
+   [1] NAV — 좌측 상태 요약 패널
+   ================================================================== */
+.nav{
+  width: 232px;
+  flex: 0 0 232px;
+  background: var(--panel);
+  border-right: 1px solid var(--dim);
+  display:flex;
+  flex-direction:column;
+  padding: 10px 0;
+  overflow:hidden;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding: 4px 12px 10px;
+  border-bottom: 1px dashed var(--dim);
+  margin-bottom: 8px;
+}
+.logo{
+  width: 20px; height: 20px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  flex: none;
+}
+.brandname{
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.brandname::after{
+  content: " v2.4.1";
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--dim-text);
+  letter-spacing: 0;
+}
+
+.newbtn{
+  margin: 0 12px 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  font-size: 12px;
+  letter-spacing: .03em;
+  text-align:left;
+  background: transparent;
+  transition: background-color .12s linear;
+}
+.newbtn:hover{ background: rgba(245,166,35,.08); }
+.newbtn::before{
+  content: "_";
+  opacity: 0;
+  margin-right: 2px;
+  color: var(--amber);
+}
+.newbtn:hover::before{ opacity: 1; }
+
+.threads{
+  flex: 1;
+  overflow-y: auto;
+  display:flex;
+  flex-direction:column;
+  padding: 0 4px;
+}
+.threads::before{
+  content: "[1] THREADS \2500\2500\2500\2500\2500\2500\2500\2500\2500\2500";
+  display:block;
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: var(--dim-text);
+  padding: 2px 8px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.thread{
+  display:block;
+  padding: 5px 8px 5px 6px;
+  font-size: 12px;
+  color: var(--dim-text);
+  border-left: 2px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color .1s linear, border-color .1s linear, color .1s linear;
+}
+.thread::before{
+  content: "\251C\2500  ";
+  color: var(--dim);
+}
+.thread:last-child::before{
+  content: "\2514\2500  ";
+}
+.thread:hover{
+  background: var(--row-hover);
+  border-left-color: var(--amber);
+  color: var(--text);
+}
+.thread:hover::after{
+  content: " _";
+  color: var(--amber);
+}
+.thread.is-active{
+  color: var(--amber);
+  border-left-color: var(--amber);
+  background: var(--row-hover);
+  font-weight: 600;
+}
+.thread.is-active::before{ color: var(--amber); }
+
+.me{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding: 10px 12px 6px;
+  border-top: 1px dashed var(--dim);
+  font-size: 12px;
+  color: var(--text);
+}
+.me-av{
+  width: 18px; height: 18px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border: 1px solid var(--blue);
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 700;
+  flex: none;
+}
+.nav::after{
+  content: "F1 \C0C8\AE00  F2 \AC80\C0C9  F3 \C124\C815  F4 \B3C4\C6C0  F5 \C885\B8CC";
+  display:block;
+  padding: 8px 12px 2px;
+  font-size: 9px;
+  letter-spacing: .04em;
+  color: var(--dim-text);
+  border-top: 1px solid var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* ==================================================================
+   BANNER — 최상단 상태바 (host·uptime·load 라인)
+   ================================================================== */
+.banner{
+  flex: none;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding: 6px 16px;
+  font-size: 11px;
+  letter-spacing: .02em;
+  color: var(--dim-text);
+  background: var(--promptzone);
+  border-bottom: 1px solid var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.banner::before{
+  content: "yeonseo@session ~ uptime 00:14:22 \00B7  load 0.32 \00B7  ";
+  color: var(--dim-text);
+  flex: none;
+}
+.banner .hook{
+  font-style: normal;
+  color: var(--green);
+  flex: none;
+}
+.banner .hook::before{
+  content: "\25CF";
+  animation: blink 1.4s steps(1,end) infinite;
+}
+
+/* ==================================================================
+   [2] CONVO — 대화 흐름(로그 스트림)
+   ================================================================== */
+.convo{
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--bg);
+  position: relative;
+}
+.convo::before{
+  content: "[2] LOG STREAM \2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500\2500";
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display:block;
+  background: var(--bg);
+  color: var(--dim-text);
+  font-size: 10px;
+  letter-spacing: .08em;
+  padding: 8px 16px 6px;
+  border-bottom: 1px solid var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.msg{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  padding: 7px 16px;
+  border-bottom: 1px dashed var(--dim);
+  transition: background-color .1s linear;
+}
+.msg:hover{
+  background: var(--row-hover);
+  box-shadow: inset 2px 0 0 var(--amber) !important;
+}
+.msg[data-cont="1"]{
+  padding-top: 1px;
+  border-top: none;
+}
+
+.av{
+  flex: none;
+  width: 20px; height: 20px;
+  margin-top: 2px;
+  display:flex; align-items:center; justify-content:center;
+  font-size: 10px;
+  font-weight: 700;
+}
+.msg[data-speaker="ai"] .av{ border: 1px solid var(--green); color: var(--green); }
+.msg[data-speaker="me"] .av{ border: 1px solid var(--blue);  color: var(--blue); }
+.msg[data-cont="1"] .av{ opacity: .28; }
+
+.bubble{
+  flex: 1;
+  min-width: 0;
+  display:flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+  row-gap: 2px;
+}
+
+.bubble .meta{
+  order: -2;
+  font-size: 10px;
+  color: var(--dim-text);
+  letter-spacing: .02em;
+  flex: none;
+}
+.bubble .meta::before{ content: "["; color: var(--dim); }
+.bubble .meta::after{ content: "]"; color: var(--dim); }
+
+.bubble .hook{
+  order: -1;
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  flex: none;
+}
+.msg[data-speaker="ai"] .bubble .hook::before{ content: "OK"; color: var(--green); }
+.msg[data-speaker="me"] .bubble .hook::before{ content: "IN"; color: var(--amber); }
+
+.bubble .text{
+  order: 0;
+  flex: 1 0 100%;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.msg[data-speaker="ai"] .bubble .text::before{
+  content: "\C5F0\C11C  > ";
+  color: var(--green);
+  font-weight: 700;
+}
+.msg[data-speaker="me"] .bubble .text::before{
+  content: "\C9C0\BBFC  $ ";
+  color: var(--amber);
+  font-weight: 700;
+}
+
+/* ── 초안 카드 ────────────────────────────────────── */
+.card{
+  margin: 10px 16px 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--amber);
+  background: var(--panel);
+  position: relative;
+  transition: background-color .1s linear;
+}
+.card:hover{
+  background: var(--row-hover);
+  box-shadow: inset 2px 0 0 var(--amber) !important;
+}
+.card .hook{
+  display:block;
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: var(--dim-text);
+  margin-bottom: 8px;
+}
+.card .hook::before{
+  content: "\2500\2500\2500  DRAFT \2500\2500\2500";
+}
+.card-eyebrow{
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim-text);
+  margin-bottom: 4px;
+}
+.card-title{
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--amber);
+  margin-bottom: 8px;
+  letter-spacing: .01em;
+}
+.card-excerpt{
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text);
+  border-left: 2px solid var(--dim);
+  padding-left: 10px;
+  margin-bottom: 12px;
+}
+.card-actions{
+  display:flex;
+  gap: 10px;
+}
+.card-actions button{
+  padding: 6px 10px;
+  font-size: 12px;
+  letter-spacing: .02em;
+  border: 1px solid var(--dim);
+  transition: background-color .1s linear, border-color .1s linear, color .1s linear;
+}
+.card-actions button::before{ content: "["; color: var(--dim); }
+.card-actions button::after{ content: "]"; color: var(--dim); }
+.card-actions .primary{
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.card-actions .primary:hover{
+  background: var(--amber);
+  color: var(--bg);
+}
+.card-actions .primary:hover::before,
+.card-actions .primary:hover::after{ color: var(--bg); }
+.card-actions .ghost{
+  color: var(--dim-text);
+}
+.card-actions .ghost:hover{
+  border-color: var(--blue);
+  color: var(--blue);
+}
+.card-actions .ghost:hover::before,
+.card-actions .ghost:hover::after{ color: var(--blue); }
+
+/* ── 타이핑 표시 ──────────────────────────────────── */
+.typing{
+  display:flex;
+  align-items:center;
+  gap: 6px;
+  padding: 8px 16px 16px;
+  font-size: 11px;
+  color: var(--dim-text);
+  letter-spacing: .02em;
+}
+.typing .dot{
+  width: 5px; height: 5px;
+  background: var(--green);
+  display:inline-block;
+  opacity: .25;
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+.typing .dot:nth-child(1){ animation-delay: 0s; }
+.typing .dot:nth-child(2){ animation-delay: .2s; }
+.typing .dot:nth-child(3){ animation-delay: .4s; }
+
+/* ==================================================================
+   [3] COMPOSER — 프롬프트 라인 (시그니처: 살아있는 프롬프트 + 커서)
+   ================================================================== */
+.composer{
+  flex: none;
+  display:flex;
+  flex-wrap: nowrap;
+  align-items:center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--promptzone);
+  border-top: 1px solid var(--dim);
+}
+
+.composer > .icon{
+  flex: none;
+  width: 26px; height: 26px;
+  display:flex; align-items:center; justify-content:center;
+  border: 1px solid var(--dim);
+  color: var(--dim-text);
+  font-size: 13px;
+  line-height: 1;
+  transition: border-color .1s linear, color .1s linear;
+}
+.composer > .icon:hover{
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.composer > .icon:hover::before{ content: "_"; position:absolute; margin-top: 14px; color: var(--amber); font-size:10px; }
+.composer > .icon[aria-label="\CCA8\BD80"]{ order: 1; }
+.composer > .icon[aria-label="\C74C\C131"]{ order: 5; }
+
+.composer::before{
+  order: 2;
+  content: "\C9C0\BBFC@\C5F0\C11C:~/\D560\BA38\B2C8\C758\B77C\B514\C624$ ";
+  flex: none;
+  font-size: 12px;
+  color: var(--green);
+  white-space: nowrap;
+}
+
+.composer textarea{
+  order: 3;
+  flex: 1 1 auto;
+  min-width: 0;
+  resize: none;
+  padding: 6px 4px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.3;
+}
+.composer textarea::placeholder{
+  color: var(--dim-text);
+}
+
+.composer::after{
+  order: 4;
+  content: "\2588";
+  flex: none;
+  color: var(--amber);
+  font-size: 13px;
+  margin-left: -6px;
+  animation: blink 1s steps(1,end) infinite;
+}
+
+.composer > .send{
+  order: 6;
+  flex: none;
+  padding: 6px 14px;
+  border: 1px solid var(--amber);
+  background: var(--amber);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+.composer > .send:hover{
+  background: var(--promptzone);
+  color: var(--amber);
+}
+
+.composer > .hint{
+  order: 7;
+  flex: none;
+  font-size: 10px;
+  color: var(--dim-text);
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+.composer > .hint::before{ content: "("; }
+.composer > .hint::after{ content: ")"; }
+
+/* ==================================================================
+   애니메이션
+   ================================================================== */
+@keyframes blink{
+  0%, 49%{ opacity: 1; }
+  50%, 100%{ opacity: 0; }
+}
+@keyframes pulse-dot{
+  0%, 100%{ opacity: .25; }
+  50%{ opacity: 1; }
+}
+
+/* ── 접근성: 모션 감소 ────────────────────────────── */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation: none !important;
+    transition: none !important;
+  }
+  .banner .hook::before{ opacity: 1; }
+  .composer::after{ opacity: 1; }
+  .typing .dot{ opacity: .7; }
+}
+
+/* ==================================================================
+   좁은 화면 대응
+   ================================================================== */
+@media (max-width: 720px){
+  .app{ flex-direction: column; height: auto; min-height: 100vh; overflow: visible; }
+  .nav{ width: 100%; flex: none; border-right: none; border-bottom: 1px solid var(--dim); }
+  .threads{ max-height: 140px; }
+  .main{ height: auto; }
+  .composer::before{ display: none; }
+}
