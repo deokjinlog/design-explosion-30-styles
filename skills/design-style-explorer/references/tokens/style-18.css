@@ -1,0 +1,15 @@
+/* tokens/style-18.css — 18 스위스 인터내셔널. 변수만. */
+:root{
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --ink:#111111;
+  --muted:#6B6B6B;
+  --accent:#E2231A;
+  --radius:0px;
+  --space:24px;
+  --border:#E4E4E4;
+  --font:'Helvetica Neue','Inter','Pretendard',sans-serif;
+  --font-ui:'Inter','Helvetica Neue',sans-serif;
+  --elevation:0;
+  --type-scale:2.2;
+}

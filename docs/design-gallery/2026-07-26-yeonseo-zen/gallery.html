@@ -1,0 +1,38 @@
+<!doctype html><meta charset="utf-8"><title>연서 대화형 — 3층 조립 (Zen Garden) 30 스타일</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>*{box-sizing:border-box}body{font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;margin:0 auto;padding:28px;background:#0d1117;color:#e6edf3;line-height:1.5;max-width:1500px}
+h1{font-size:23px;margin:0 0 4px}.sub{color:#8b949e;font-size:14px;margin-bottom:10px}.sub b{color:#c9d1d9}
+.b{display:inline-block;font-size:12px;background:#238636;color:#fff;padding:3px 10px;border-radius:99px;margin:0 6px 4px 0}
+.b.g{background:#1f6feb}.b.p{background:#8957e5}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-top:22px}
+.card{border:1px solid #30363d;border-radius:10px;overflow:hidden;background:#161b22;transition:border-color .15s}
+.card:hover{border-color:#a78bfa}
+.shot{height:240px;overflow:hidden;background:#fff;border-bottom:1px solid #30363d}
+.shot iframe{width:1500px;height:1030px;border:0;transform:scale(.335);transform-origin:0 0;pointer-events:none}
+.meta{padding:11px 14px}.n{font-size:11px;color:#8b949e;letter-spacing:.05em}
+.t{font-weight:700;font-size:15px;margin:3px 0}.lay{font-size:11px;color:#6e7681}
+.lay.sig{color:#a78bfa}
+a.full{color:#58a6ff;font-size:12.5px;text-decoration:none}a.full:hover{text-decoration:underline}
+.note{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px 20px;font-size:13px;color:#9da7b3;margin-top:26px}
+.note b{color:#a78bfa}.note code{background:#0d1117;padding:1px 6px;border-radius:4px;color:#e6edf3;font-size:12px}</style>
+
+<h1>연서 대화형 — 3층 조립(Zen Garden)으로 만든 30 스타일</h1>
+<div class="sub"><b>새 파이프라인 실증</b>: HTML 통짜 생성이 아니라 <b>스켈레톤 1개 + base 1개 + tokens 30 + signature 6</b>을 조립. 30장의 body가 <b>바이트 동일</b> — 콘텐츠 동일성이 구조적 보장.</div>
+<div>
+<span class="b">coverage-lint 30/30</span>
+<span class="b g">body 바이트 동일 30/30</span>
+<span class="b p">signature 6 · 토큰전용 24</span>
+</div>
+
+<div class="grid" id="g"></div>
+
+<div class="note"><b>이건 도구의 새 엔진이다.</b> 예전엔 스타일마다 HTML을 통째로 만들어 "같은 6마디"를 프롬프트로 부탁했는데(부탁은 샌다), 여기선 <b>DOM(스켈레톤)을 고정</b>하고 CSS 3층만 갈아끼운다: <code>base</code>(원형 B 공용·토큰 먹음) + <code>tokens/NN</code>(색·형태·밀도, 원형 무관·재사용) + <code>signature/NN--B</code>(구조가 강한 스타일만 — 04·05·07·09·10·18). 그래서 <b>30장 body가 문자 그대로 동일</b>하고 콘텐츠 드리프트가 물리적으로 불가능하다. 게이트도 <code>archetype-lint</code>가 아니라 <code>selector-coverage</code>(환각 셀렉터·누락 영역 = CSS 실패 전 집합) 하나로 대체.<br><br><b>알려진 후속(품질 패스)</b>: ① 토큰전용 24개 중 구조가 필요한 것들에 signature 추가 ② 웹폰트 로딩(@import) — 지금은 토큰 폰트가 시스템 폴백. 파이프라인 자체는 확정.</div>
+
+<script>
+const S=[[1,'SF HUD',0],[2,'공공 포털',0],[3,'트렌디 SaaS',0],[4,'밀집 터미널',1],[5,'브루탈리즘',1],[6,'글래스모피즘',0],[7,'미니멀 모노크롬',1],[8,'럭셔리 다크',0],[9,'레트로 픽셀',1],[10,'에디토리얼',1],[11,'네이처 오가닉',0],[12,'뉴모피즘',0],[13,'오로라',0],[14,'벤토',0],[15,'클레이모피즘',0],[16,'머티리얼',0],[17,'Y2K',0],[18,'스위스',1],[19,'맥시멀리즘',0],[20,'다크 애널리틱스',0],[21,'AI 프로덕트',0],[22,'핀테크 소프트',0],[23,'엔터프라이즈',0],[24,'헬스케어',0],[25,'커머스',0],[26,'다크 미니멀',0],[27,'웜 프로',0],[28,'접근성',0],[29,'컬러풀 모던',0],[30,'데이터 어드민',0]];
+const g=document.getElementById('g');
+S.forEach(([n,name,sig])=>{const nn=String(n).padStart(2,'0');const f=`style-${nn}.html`;
+const d=document.createElement('div');d.className='card';
+d.innerHTML=`<div class="shot"><iframe src="${f}" loading="lazy" scrolling="no"></iframe></div><div class="meta"><div class="n">STYLE ${nn}</div><div class="t">${name}</div><div class="lay ${sig?'sig':''}">${sig?'base + tokens + signature':'base + tokens (토큰전용)'}</div><a class="full" href="${f}" target="_blank">전체 화면 →</a></div>`;
+g.appendChild(d);});
+</script>

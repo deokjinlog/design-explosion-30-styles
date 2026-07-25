@@ -1,0 +1,103 @@
+/* signature/style-05--B.css — 05 브루탈리즘의 "구조적 시그니처".
+   토큰(색·radius)만으론 안 되는 것 = 두꺼운 하드 보더 + 오프셋 하드섀도(blur 0) + 대문자 라벨 + 찍히는(stamping) hover.
+   색·radius는 전부 tokens 몫 — 여기선 border-width/box-shadow-offset/transform/text-transform만 다룬다. */
+
+/* ── 말풍선: 각진 하드 박스 + 오프셋 하드섀도(blur 0). hover 시 그림자가 줄며 박스가 찍힌다 */
+.bubble{
+  border:4px solid var(--border);
+  box-shadow:6px 6px 0 var(--border);
+  transition:transform .08s, box-shadow .08s;
+}
+.msg[data-speaker=me] .bubble{
+  border-color:var(--border);
+  box-shadow:6px 6px 0 var(--border);
+}
+.bubble:hover{
+  transform:translate(3px,3px);
+  box-shadow:3px 3px 0 var(--border);
+}
+
+/* ── 초안 제안 카드 · 컴포저: 같은 하드박스 규율 (카드는 hover/active까지 눌린다) */
+.card{
+  border:4px solid var(--border);
+  box-shadow:8px 8px 0 var(--border);
+  transition:transform .08s, box-shadow .08s;
+}
+.card:hover{
+  transform:translate(4px,4px);
+  box-shadow:4px 4px 0 var(--border);
+}
+.card:active{
+  transform:translate(8px,8px);
+  box-shadow:0 0 0 var(--border);
+}
+.composer{
+  border:4px solid var(--border);
+  box-shadow:6px 6px 0 var(--border);
+}
+
+/* ── 버튼류 · 사이드바 활성 스레드: 하드박스 + 찍히는 hover/active */
+.primary,
+.ghost,
+.send,
+.newbtn,
+.icon{
+  border:3px solid var(--border);
+  box-shadow:4px 4px 0 var(--border);
+  transition:transform .08s, box-shadow .08s;
+}
+.primary:hover,
+.ghost:hover,
+.send:hover,
+.newbtn:hover,
+.icon:hover{
+  transform:translate(2px,2px);
+  box-shadow:2px 2px 0 var(--border);
+}
+.primary:active,
+.ghost:active,
+.send:active,
+.newbtn:active,
+.icon:active{
+  transform:translate(4px,4px);
+  box-shadow:0 0 0 var(--border);
+}
+.thread.is-active{
+  outline:0;
+  border:3px solid var(--border);
+  box-shadow:4px 4px 0 var(--border);
+}
+
+/* ── 대문자 라벨: UI 칩·태그류만 (본문 .text·.card-title·.card-excerpt는 가독성 위해 그대로) */
+.meta,
+.thread-label,
+.card-eyebrow,
+.hint,
+.lbl,
+.brandname,
+.me-name,
+.primary,
+.ghost,
+.send{
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+
+/* ── 접근성: hover/active 이동은 제거하되 섀도 축소는 유지 (스타일 정의서 규정) */
+@media (prefers-reduced-motion:reduce){
+  .bubble:hover,
+  .card:hover,
+  .card:active,
+  .primary:hover,
+  .ghost:hover,
+  .send:hover,
+  .newbtn:hover,
+  .icon:hover,
+  .primary:active,
+  .ghost:active,
+  .send:active,
+  .newbtn:active,
+  .icon:active{
+    transform:none;
+  }
+}

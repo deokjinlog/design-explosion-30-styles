@@ -1,0 +1,15 @@
+/* tokens/style-28.css — 28 하이컨트라스트 접근성. 변수만. */
+:root{
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --ink:#111111;
+  --muted:#2A2A2A;
+  --accent:#0B5FFF;
+  --radius:8px;
+  --space:20px;
+  --border:#111111;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Inter',system-ui,sans-serif;
+  --elevation:0.2;
+  --type-scale:1.9;
+}

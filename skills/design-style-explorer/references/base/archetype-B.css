@@ -1,0 +1,56 @@
+/* base/archetype-B.css — 원형 B(대화형) 공용 컴포넌트. 원형당 1개.
+   모든 값을 토큰(var)으로 받는다. 스타일이 안 바뀌어도 이 파일은 그대로.
+   토큰이 없으면 아래 :root 폴백을 쓴다(=기본 모던 챗). */
+:root{
+  --bg:#ffffff; --surface:#ffffff; --ink:#1f2430; --muted:#6b7280;
+  --accent:#4f46e5; --radius:14px; --space:16px; --border:#e3e7ee;
+  --font:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif; --font-ui:var(--font);
+  --bubble-ai-bg:var(--surface); --bubble-me-bg:var(--accent); --bubble-me-ink:#ffffff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.55}
+
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+.nav{display:flex;flex-direction:column;gap:calc(var(--space)*.85);padding:var(--space);border-right:1px solid var(--border);height:100vh}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:26px;height:26px;flex:none;background:var(--accent);color:#fff;border-radius:calc(var(--radius)*.5);display:grid;place-items:center;font-weight:800}
+.brandname{font-weight:800;font-size:16px}
+.newbtn{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:calc(var(--radius)*.55);padding:8px 10px;cursor:pointer;color:var(--ink);font:inherit}
+.threads{display:flex;flex-direction:column;gap:2px}
+.thread{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:calc(var(--radius)*.5);text-decoration:none;color:var(--ink)}
+.thread-icon{width:16px;height:16px;flex:none;border-radius:5px;background:var(--muted);opacity:.5}
+.thread.is-active{background:var(--surface);outline:1px solid var(--border)}
+.me{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:12px;border-top:1px solid var(--border)}
+.me-av{width:24px;height:24px;flex:none;background:var(--ink);color:var(--bg);border-radius:50%;display:grid;place-items:center;font-size:11px}
+
+.main{display:flex;flex-direction:column;background:var(--bg)}
+.banner{padding:10px var(--space);color:var(--muted);border-bottom:1px solid var(--border);font-size:12.5px}
+.convo{flex:1;display:flex;flex-direction:column;gap:calc(var(--space)*.7);padding:var(--space)}
+.msg{display:flex;gap:8px;align-items:flex-end;max-width:72%}
+.msg[data-speaker=me]{align-self:flex-end;flex-direction:row-reverse}
+.msg[data-cont] .av{visibility:hidden}
+.av{width:30px;height:30px;flex:none;background:var(--accent);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:12px}
+.bubble{background:var(--bubble-ai-bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 13px}
+.msg[data-speaker=me] .bubble{background:var(--bubble-me-bg);color:var(--bubble-me-ink);border-color:transparent}
+.text{font-size:14px}
+.meta{display:block;margin-top:3px;font-size:11px;color:var(--muted)}
+
+.card{margin:calc(var(--space)*.3) var(--space);border:1px solid var(--border);border-radius:var(--radius);padding:var(--space);background:var(--surface)}
+.card-eyebrow{font-size:11px;color:var(--muted)}
+.card-title{font-size:20px;font-weight:800;margin:3px 0 8px}
+.card-actions{display:flex;gap:8px;margin-top:12px}
+.primary{background:var(--accent);color:#fff;border:0;border-radius:calc(var(--radius)*.55);padding:8px 15px;font-weight:700;cursor:pointer}
+.ghost{background:transparent;color:var(--ink);border:1px solid var(--border);border-radius:calc(var(--radius)*.55);padding:8px 15px;cursor:pointer}
+
+.typing{padding:6px var(--space);color:var(--muted);font-size:12.5px}
+
+.composer{display:flex;gap:8px;align-items:center;margin:var(--space);padding:8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+.composer textarea{flex:1;border:0;background:transparent;font:inherit;color:var(--ink);resize:none;outline:none}
+.icon{width:32px;height:32px;flex:none;border:1px solid var(--border);border-radius:calc(var(--radius)*.5);background:transparent;color:var(--ink)}
+.send{background:var(--accent);color:#fff;border:0;border-radius:calc(var(--radius)*.55);padding:8px 15px;font-weight:700}
+.hint{font-size:11px;color:var(--muted)}
+
+.hook{display:none}
+@media (max-width:900px){ .app{grid-template-columns:1fr} .nav{height:auto;border-right:0;border-bottom:1px solid var(--border)} }
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

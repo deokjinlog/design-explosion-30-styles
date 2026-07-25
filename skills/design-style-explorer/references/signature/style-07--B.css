@@ -1,0 +1,19 @@
+/* signature/style-07--B.css — 07 미니멀 모노크롬의 "구조적 시그니처".
+   토큰(색·폰트·radius)만으론 안 되는 것 = 말풍선을 통째로 지워 문예 대본의 대사 한 줄로 만드는 것.
+   화자 구분은 색이 아니라 좌우 정렬 + 화자명 라벨 하나. 아바타는 없다.
+   여기 없는 건 전부 base+tokens로 이미 충분하다는 뜻 — 뺄 수 있는 건 다 뺐다. */
+
+/* 말풍선 크롬 제거 — me 버블의 accent 배경/흰 글씨까지 벗긴다(안 벗기면 흰 글씨가 흰 배경에 묻힌다) */
+.bubble{ background:none; border:0; padding:0; border-radius:0 }
+.msg[data-speaker=me] .bubble{ background:none; color:var(--ink) }
+
+/* 화자는 좌/우 정렬로만 나뉜다 */
+.msg{ max-width:60ch; align-items:flex-start }
+.msg[data-speaker=me]{ align-self:flex-end; text-align:right }
+.av{ display:none }
+
+/* 색 대신 화자명 라벨 — 대본처럼 대사 위 한 줄, 이어지는 말엔 생략(반복 안 함) */
+.text::before{ display:block; margin-bottom:8px; font-size:11px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--muted) }
+.msg[data-speaker=ai] .text::before{ content:"연서" }
+.msg[data-speaker=me] .text::before{ content:"지민" }
+.msg[data-cont] .text::before{ content:none }

@@ -1,0 +1,48 @@
+/* signature/style-09--B.css — 09 레트로 픽셀의 "구조적 시그니처".
+   토큰(색·폰트·radius)만으론 안 되는 것 = 말풍선의 계단형(2단) 픽셀 코너(clip-path) +
+   하드 이중 그림자(blur:0), 활성 스레드의 ▶ 커서, 스레드 도트 강조.
+   색은 전부 var(토큰) 참조 — 이 파일에 하드코딩 hex 없음. 없는 요소는 만들지 않는다. */
+
+/* ===== 말풍선 — 계단형 픽셀 코너 + 하드 이중 그림자 =====
+   base가 --radius:0으로 각은 세워두지만, "계단"은 border-radius로 못 만든다
+   (라운드 아니면 직각뿐) → clip-path 다각형으로 네 모서리를 2단 계단으로 깎는다.
+   그림자도 blur 없이 두 겹 오프셋만으로 쌓아 픽셀 판화 느낌을 낸다. */
+.bubble{
+  border:2px solid var(--border);
+  border-radius:0;
+  clip-path:polygon(
+    0 8px,4px 8px,4px 4px,8px 4px,8px 0,
+    calc(100% - 8px) 0,calc(100% - 8px) 4px,calc(100% - 4px) 4px,calc(100% - 4px) 8px,100% 8px,
+    100% calc(100% - 8px),calc(100% - 4px) calc(100% - 8px),calc(100% - 4px) calc(100% - 4px),calc(100% - 8px) calc(100% - 4px),calc(100% - 8px) 100%,
+    8px 100%,8px calc(100% - 4px),4px calc(100% - 4px),4px calc(100% - 8px),0 calc(100% - 8px)
+  );
+  box-shadow:4px 4px 0 var(--border),8px 8px 0 var(--bg);
+}
+.msg{ max-width:76% } /* 이중 그림자(최대 8px)가 다음 말풍선과 안 겹치게 여유 확보 */
+
+/* 아바타 원형(border-radius:50%)은 base 안에 하드코딩돼 있어 --radius 토큰이 못 건드림
+   → 픽셀 캐릭터는 원이 아니라 각져야 하니 시그니처가 직접 각을 세운다 */
+.av,.me-av{ border-radius:0 }
+
+/* ===== 활성 스레드 — ▶ 선택 커서(::after) =====
+   base의 outline 강조 대신 게임 메뉴 문법의 좌측 커서로 대체 */
+.thread{ position:relative; padding-left:20px }
+.thread.is-active{ outline:0 }
+.thread.is-active::after{
+  content:"▶";
+  position:absolute; left:6px; top:50%;
+  transform:translateY(-50%);
+  color:var(--accent);
+  font-size:10px;
+  animation:cursor-blink 1s steps(1,end) infinite; /* prefers-reduced-motion은 base 전역 규칙이 이미 정지시킴 */
+}
+@keyframes cursor-blink{ 50%{opacity:0} }
+
+/* ===== 스레드 도트 강조 — thread-icon을 각진 픽셀 LED 도트로 ===== */
+.thread-icon{
+  width:6px; height:6px;
+  border-radius:0;
+  opacity:1;
+  background:var(--muted);
+}
+.thread.is-active .thread-icon{ background:var(--accent) }

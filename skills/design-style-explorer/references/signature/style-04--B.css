@@ -1,0 +1,35 @@
+/* signature/style-04--B.css — 04 터미널의 "구조적 시그니처".
+   토큰(색·폰트·radius)만으론 안 되는 것 = 버블 크롬 제거 + 화자 프리픽스 + 프롬프트 라인.
+   일부 스타일만 이 파일이 필요(뭉친 7개는 토큰만으로 되니 이 파일 없음). */
+
+/* 버블을 벗겨 텍스트 행으로 (base 의 버블 스타일을 덮음) */
+.bubble{ background:none; border:0; padding:2px 0; border-radius:0 }
+.msg{ max-width:100%; align-items:flex-start }
+.msg[data-speaker=me]{ flex-direction:row; align-self:stretch }
+.av{ display:none }
+
+/* 화자 프리픽스 — data-speaker 훅으로 */
+.text{ white-space:pre-wrap }
+.text::before{ font-weight:700 }
+.msg[data-speaker=ai] .text::before{ content:"연서 > "; color:#3fb950 }
+.msg[data-speaker=me] .text::before{ content:"지민 $ "; color:#e3b341 }
+.meta{ display:inline; color:#3a444f }
+.meta::before{ content:"  " }
+
+/* 사이드바를 터미널 트리처럼 */
+.thread-icon{ display:none }
+.thread::before{ content:"~/ "; color:var(--muted) }
+.thread.is-active{ outline:0; background:#161b22 }
+.thread.is-active::after{ content:" █"; color:#e3b341 }
+.newbtn .ico{ display:none }
+.newbtn::before{ content:"$ " }
+
+/* 배너·타이핑·초안 카드 프리픽스 */
+.banner::before{ content:"// " }
+.typing::before{ content:"> " }
+.card{ border-left:2px solid #3fb950 }
+.card-title::before{ content:"# " }
+
+/* 컴포저 = 프롬프트 라인 */
+.composer::before{ content:"지민@yeonseo:~/할머니의라디오$"; color:#3fb950; font-size:12px; white-space:nowrap }
+.icon{ border-style:dashed }

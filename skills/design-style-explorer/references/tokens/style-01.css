@@ -1,0 +1,15 @@
+/* tokens/style-01.css — 01 SF 게임 HUD. 변수만. */
+:root{
+  --bg:#050810;
+  --surface:#0A1526;
+  --ink:#C9EEF7;
+  --muted:#5D8FA3;
+  --accent:#00E5FF;
+  --radius:0px;
+  --space:12px;
+  --border:#0A6E82;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Share Tech Mono','Orbitron',monospace;
+  --elevation:0.9;
+  --type-scale:1.9;
+}

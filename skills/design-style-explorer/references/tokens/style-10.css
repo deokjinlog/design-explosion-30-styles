@@ -1,0 +1,15 @@
+/* tokens/style-10.css — 10 에디토리얼 매거진. 변수만. */
+:root{
+  --bg:#FAF7F2;
+  --surface:#FAF7F2;
+  --ink:#1C1B18;
+  --muted:#6B655C;
+  --accent:#A32638;
+  --radius:0px;
+  --space:16px;
+  --border:#D8D2C6;
+  --font:'Pretendard',-apple-system,sans-serif;
+  --font-ui:'Noto Serif KR',serif;
+  --elevation:0;
+  --type-scale:1.8;
+}

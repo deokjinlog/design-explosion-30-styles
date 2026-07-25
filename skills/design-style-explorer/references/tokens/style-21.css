@@ -1,0 +1,15 @@
+/* tokens/style-21.css — 21 AI 프로덕트. 변수만. */
+:root{
+  --bg:#FAFAFB;
+  --surface:#FFFFFF;
+  --ink:#16161D;
+  --muted:#8A8A99;
+  --accent:#7C5CFF;
+  --radius:16px;
+  --space:20px;
+  --border:#E8E8EE;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Inter',system-ui,sans-serif;
+  --elevation:0.6;
+  --type-scale:1.7;
+}

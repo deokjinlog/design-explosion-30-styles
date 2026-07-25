@@ -1,0 +1,15 @@
+/* tokens/style-04.css — 04 고밀도 터미널. 변수만. */
+:root{
+  --bg:#0A0C10;
+  --surface:#0E1116;
+  --ink:#C8CDD4;
+  --muted:#5B6472;
+  --accent:#F5A623;
+  --radius:0px;
+  --space:10px;
+  --border:#1A1E24;
+  --font:'IBM Plex Mono','JetBrains Mono',ui-monospace,'Pretendard',monospace;
+  --font-ui:var(--font);
+  --elevation:0;
+  --type-scale:1.3;
+}

@@ -1,0 +1,15 @@
+/* tokens/style-16.css — 16 머티리얼. 변수만. */
+:root{
+  --bg:#FEF7FF;
+  --surface:#F3EDF7;
+  --ink:#1D1B20;
+  --muted:#49454F;
+  --accent:#6750A4;
+  --radius:12px;
+  --space:16px;
+  --border:#79747E;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Roboto',system-ui,sans-serif;
+  --elevation:0.5;
+  --type-scale:1.8;
+}

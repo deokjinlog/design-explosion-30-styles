@@ -1,0 +1,15 @@
+/* tokens/style-23.css — 23 엔터프라이즈 B2B. 변수만. */
+:root{
+  --bg:#F4F5F7;
+  --surface:#FFFFFF;
+  --ink:#172B4D;
+  --muted:#6B778C;
+  --accent:#0052CC;
+  --radius:4px;
+  --space:16px;
+  --border:#DFE1E6;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Inter',system-ui,sans-serif;
+  --elevation:0.3;
+  --type-scale:1.5;
+}

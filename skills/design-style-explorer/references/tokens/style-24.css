@@ -1,0 +1,15 @@
+/* tokens/style-24.css — 24 헬스케어 웰니스. 변수만. */
+:root{
+  --bg:#FBFCFD;
+  --surface:#FFFFFF;
+  --ink:#2E3A46;
+  --muted:#8A9AA8;
+  --accent:#4A90D9;
+  --radius:20px;
+  --space:24px;
+  --border:#E8EDF1;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Nunito Sans',sans-serif;
+  --elevation:0.5;
+  --type-scale:1.5;
+}

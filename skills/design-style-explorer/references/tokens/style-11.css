@@ -1,0 +1,15 @@
+/* tokens/style-11.css — 11 네이처 오가닉. 변수만. */
+:root{
+  --bg:#F4F1E8;
+  --surface:#FAF7EF;
+  --ink:#2B2A26;
+  --muted:#8BA888;
+  --accent:#2D4A3E;
+  --radius:28px;
+  --space:18px;
+  --border:#DDD5C0;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:var(--font);
+  --elevation:0.3;
+  --type-scale:1.5;
+}

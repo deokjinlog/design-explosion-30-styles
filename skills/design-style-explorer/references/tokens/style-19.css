@@ -1,0 +1,15 @@
+/* tokens/style-19.css — 19 맥시멀리즘. 변수만. */
+:root{
+  --bg:#FFF8E7;
+  --surface:#FFFFFF;
+  --ink:#0A0A0A;
+  --muted:#6B6455;
+  --accent:#FF2E93;
+  --radius:20px;
+  --space:10px;
+  --border:#0A0A0A;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Space Grotesk',sans-serif;
+  --elevation:1.0;
+  --type-scale:2.2;
+}

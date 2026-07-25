@@ -220,7 +220,12 @@ skills/design-style-explorer/references/
 5. **게이트: `selector-coverage`(환각·누락)** — `archetype-lint` 은퇴. 콘텐츠 동일성은 조립이 구조적 보장(별도 검사 불필요). `style-lint`는 토큰/시그니처 대상 스타일 금칙으로 축소 존치.
 6. 갤러리(동일)
 
-**실행 순서**: ① 조립기 확정(✅) → ② 원형 B 하나 end-to-end 배선(스켈레톤/base를 `references/`로 승격 + 30 tokens 적용 + 갤러리 조립) → ③ 검증 → ④ 원형 A·D 확장 → ⑤ SKILL.md 문구 갱신 → ⑥ 라이브 3데모 재빌드.
+**실행 순서**: ① 조립기 확정(✅) → ② 원형 B end-to-end 배선 **(✅ 2026-07-26)** → ③ 검증(✅) → ④ 원형 A·D 확장 → ⑤ SKILL.md 문구 갱신 → ⑥ 라이브 3데모 재빌드.
+
+**② 완료** — 자산을 `skills/design-style-explorer/references/`(skeletons·base·tokens 30·signature 6·assemble.py·coverage-lint.py)로 승격하고, **references/에서 30 스타일 조립** → `docs/design-gallery/2026-07-26-yeonseo-zen/`:
+- **coverage-lint 30/30 PASS** · **30장 body 바이트 동일(3771자)** = 콘텐츠 동일성 구조적 보장(드리프트 물리적 불가능)
+- 6개 signature(04·05·07·09·10·18) + 24개 토큰전용 — 뭉친 것은 시그니처 불필요(Phase1 지도대로)
+- **"설계 → 작동하는 도구" 달성.** 후속 품질 패스: 나머지 signature·웹폰트 로딩(@import).
 
 **열린 질문**: signature 필요 스타일 수(뭉친 것 제외 → 대략 04·05·07·08·09·10·17·18 등 구조 강한 것만), `style-lint` 존치 범위, 콘택트시트 UX(2b) 시점.
 

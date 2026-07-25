@@ -1,0 +1,49 @@
+/* signature/style-10--B.css — 10 에디토리얼 매거진의 "구조적 시그니처".
+   토큰(색·세리프·radius)만으론 안 되는 것 =
+   수평 괘선 뼈대(수직 괘선 금지) + 화자를 좌우 정렬로만 구분하는 지면 문단(말풍선 크롬 제거)
+   + 문예지 발췌 카드(제호 이중 괘선 + 드롭캡) + 첫 발화 드롭캡. */
+
+/* 사이드바 — 본문과 가르는 세로 경계선을 없애고, 목차처럼 가로줄로만 구획 */
+.nav{ border-right:0; border-bottom:4px double var(--ink) }
+.brand{ padding-bottom:calc(var(--space)*.6); border-bottom:1px solid var(--border) }
+.newbtn{ border-radius:0; border-style:solid; border-width:1px 0 }
+.thread{ border-radius:0; border-bottom:1px solid var(--border) }
+.thread-icon{ display:none }
+.thread.is-active{ outline:0; font-weight:700; border-bottom:2px solid var(--accent) }
+.me{ border-top:2px solid var(--ink) }
+
+/* 배너 — 지면 맨 위 러닝헤드, 위아래 헤어라인만 */
+.banner{ text-align:center; letter-spacing:.05em; border-top:1px solid var(--border) }
+
+/* 대화 — 말풍선 크롬을 벗겨 지면 문단으로. 화자는 좌우 정렬로만 구분, 문단 사이는 헤어라인 */
+.msg{ max-width:80%; align-items:flex-start; padding-bottom:calc(var(--space)*.6); border-bottom:1px solid var(--border) }
+.msg[data-speaker=ai]{ text-align:left }
+.msg[data-speaker=me]{ text-align:right }
+.av{ display:none }
+.bubble{ background:none; border:0; border-radius:0; padding:0 }
+.text{ display:block; text-align:justify; text-indent:1em }
+.msg[data-speaker=me] .text{ text-align:right; text-indent:0 }
+.meta{ display:block }
+
+/* 첫 발화 — 지면의 시작을 드롭캡으로 알린다 */
+.convo > .msg:first-child .text::first-letter{
+  float:left; font-size:2.6em; line-height:.78; font-weight:700;
+  padding:.04em .09em 0 0;
+}
+
+/* 초안 카드 — 문예지 발췌: 제호(이중 괘선)와 드롭캡 리드 문단 */
+.card{ border:0; border-top:4px double var(--ink); border-bottom:1px solid var(--border); border-radius:0; padding:calc(var(--space)*1.1) 0 }
+.card-eyebrow{ text-align:center; letter-spacing:.28em; text-transform:uppercase; padding-bottom:calc(var(--space)*.5); border-bottom:1px solid var(--border) }
+.card-title{ text-align:center; padding:calc(var(--space)*.5) 0; border-bottom:1px solid var(--border) }
+.card-excerpt{ text-align:justify; padding-top:calc(var(--space)*.5) }
+.card-excerpt::first-letter{ float:left; font-size:3.1em; line-height:.75; font-weight:700; padding:.03em .08em 0 0 }
+.card-actions{ justify-content:center; border-top:1px solid var(--border); padding-top:calc(var(--space)*.6) }
+.primary,.ghost{ border-radius:0 }
+
+/* 타이핑 표시 — 지면 각주줄 */
+.typing{ border-top:1px solid var(--border); text-align:center }
+
+/* 컴포저 — 지면 맨 아래, 위쪽 헤어라인만 (세로선 없음) */
+.composer{ border:0; border-top:2px solid var(--ink); border-radius:0; padding:calc(var(--space)*.6) 0 0 }
+.icon{ border-radius:0; border-style:solid; border-width:0 0 1px }
+.send{ border-radius:0 }

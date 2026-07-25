@@ -1,0 +1,15 @@
+/* tokens/style-08.css — 08 럭셔리 다크. 변수만. */
+:root{
+  --bg:#0E0D0B;
+  --surface:#171512;
+  --ink:#EDE8DF;
+  --muted:#8A8477;
+  --accent:#C9A96A;
+  --radius:6px;
+  --space:18px;
+  --border:#3A3226;
+  --font:'Pretendard',-apple-system,sans-serif;
+  --font-ui:'Cormorant Garamond','Pretendard',serif;
+  --elevation:0.5;
+  --type-scale:2.1;
+}

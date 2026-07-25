@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>archetype-B.v1 — 3층 조립 슬라이스 (04 터미널)</title>
+<!-- ===== 3층 Zen Garden 조립 =====
+     이 HTML(스켈레톤 계약)은 절대 안 바뀐다. 아래 3개 link만 바꾸면 다른 스타일.
+       base   = 원형 B 공용 컴포넌트 (토큰 먹음)     ← 원형당 1개
+       tokens = 스타일 변수 (원형 무관, 재사용)       ← 링크만 바꾸면 다른 스타일
+       signature = 그 스타일의 구조적 시그니처         ← 일부 스타일만
+     다른 스타일로 보려면 tokens/signature 두 줄만 교체. -->
+<style>
+/* ==== archetype-B.css ==== */
+/* base/archetype-B.css — 원형 B(대화형) 공용 컴포넌트. 원형당 1개.
+   모든 값을 토큰(var)으로 받는다. 스타일이 안 바뀌어도 이 파일은 그대로.
+   토큰이 없으면 아래 :root 폴백을 쓴다(=기본 모던 챗). */
+:root{
+  --bg:#ffffff; --surface:#ffffff; --ink:#1f2430; --muted:#6b7280;
+  --accent:#4f46e5; --radius:14px; --space:16px; --border:#e3e7ee;
+  --font:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif; --font-ui:var(--font);
+  --bubble-ai-bg:var(--surface); --bubble-me-bg:var(--accent); --bubble-me-ink:#ffffff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.55}
+
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+.nav{display:flex;flex-direction:column;gap:calc(var(--space)*.85);padding:var(--space);border-right:1px solid var(--border);height:100vh}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:26px;height:26px;flex:none;background:var(--accent);color:#fff;border-radius:calc(var(--radius)*.5);display:grid;place-items:center;font-weight:800}
+.brandname{font-weight:800;font-size:16px}
+.newbtn{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:calc(var(--radius)*.55);padding:8px 10px;cursor:pointer;color:var(--ink);font:inherit}
+.threads{display:flex;flex-direction:column;gap:2px}
+.thread{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:calc(var(--radius)*.5);text-decoration:none;color:var(--ink)}
+.thread-icon{width:16px;height:16px;flex:none;border-radius:5px;background:var(--muted);opacity:.5}
+.thread.is-active{background:var(--surface);outline:1px solid var(--border)}
+.me{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:12px;border-top:1px solid var(--border)}
+.me-av{width:24px;height:24px;flex:none;background:var(--ink);color:var(--bg);border-radius:50%;display:grid;place-items:center;font-size:11px}
+
+.main{display:flex;flex-direction:column;background:var(--bg)}
+.banner{padding:10px var(--space);color:var(--muted);border-bottom:1px solid var(--border);font-size:12.5px}
+.convo{flex:1;display:flex;flex-direction:column;gap:calc(var(--space)*.7);padding:var(--space)}
+.msg{display:flex;gap:8px;align-items:flex-end;max-width:72%}
+.msg[data-speaker=me]{align-self:flex-end;flex-direction:row-reverse}
+.msg[data-cont] .av{visibility:hidden}
+.av{width:30px;height:30px;flex:none;background:var(--accent);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:12px}
+.bubble{background:var(--bubble-ai-bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 13px}
+.msg[data-speaker=me] .bubble{background:var(--bubble-me-bg);color:var(--bubble-me-ink);border-color:transparent}
+.text{font-size:14px}
+.meta{display:block;margin-top:3px;font-size:11px;color:var(--muted)}
+
+.card{margin:calc(var(--space)*.3) var(--space);border:1px solid var(--border);border-radius:var(--radius);padding:var(--space);background:var(--surface)}
+.card-eyebrow{font-size:11px;color:var(--muted)}
+.card-title{font-size:20px;font-weight:800;margin:3px 0 8px}
+.card-actions{display:flex;gap:8px;margin-top:12px}
+.primary{background:var(--accent);color:#fff;border:0;border-radius:calc(var(--radius)*.55);padding:8px 15px;font-weight:700;cursor:pointer}
+.ghost{background:transparent;color:var(--ink);border:1px solid var(--border);border-radius:calc(var(--radius)*.55);padding:8px 15px;cursor:pointer}
+
+.typing{padding:6px var(--space);color:var(--muted);font-size:12.5px}
+
+.composer{display:flex;gap:8px;align-items:center;margin:var(--space);padding:8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+.composer textarea{flex:1;border:0;background:transparent;font:inherit;color:var(--ink);resize:none;outline:none}
+.icon{width:32px;height:32px;flex:none;border:1px solid var(--border);border-radius:calc(var(--radius)*.5);background:transparent;color:var(--ink)}
+.send{background:var(--accent);color:#fff;border:0;border-radius:calc(var(--radius)*.55);padding:8px 15px;font-weight:700}
+.hint{font-size:11px;color:var(--muted)}
+
+.hook{display:none}
+@media (max-width:900px){ .app{grid-template-columns:1fr} .nav{height:auto;border-right:0;border-bottom:1px solid var(--border)} }
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+
+/* ==== style-28.css ==== */
+/* tokens/style-28.css — 28 하이컨트라스트 접근성. 변수만. */
+:root{
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --ink:#111111;
+  --muted:#2A2A2A;
+  --accent:#0B5FFF;
+  --radius:8px;
+  --space:20px;
+  --border:#111111;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Inter',system-ui,sans-serif;
+  --elevation:0.2;
+  --type-scale:1.9;
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="nav" data-region="nav">
+    <div class="brand"><span class="logo">연</span><b class="brandname">연서</b></div>
+    <button class="newbtn"><span class="ico">＋</span><span class="lbl">새 이야기</span></button>
+    <nav class="threads">
+      <a class="thread" href="#"><span class="thread-icon"></span><span class="thread-label">비 오는 정거장</span></a>
+      <a class="thread is-active" href="#"><span class="thread-icon"></span><span class="thread-label">할머니의 라디오</span></a>
+      <a class="thread" href="#"><span class="thread-icon"></span><span class="thread-label">이름 없는 등대지기</span></a>
+      <a class="thread" href="#"><span class="thread-icon"></span><span class="thread-label">3층 그 방</span></a>
+    </nav>
+    <div class="me"><span class="me-av">지</span><span class="me-name">지민</span></div>
+  </aside>
+
+  <main class="main">
+    <div class="banner" data-region="banner"><i class="hook" aria-hidden="true"></i>초안은 자동 저장돼요 · 마음에 들면 이어쓰기로 계속</div>
+
+    <section class="convo" data-region="conversation">
+      <div class="msg" data-speaker="ai">
+        <div class="av" aria-hidden="true">연</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">안녕하세요, 연서예요. 오늘은 어떤 이야기를 함께 써볼까요? 거창하지 않아도 괜찮아요 — 최근에 마음에 걸린 장면 하나, 잊히지 않는 얼굴 하나면 충분해요. 그게 첫 문장이 되거든요.</p><span class="meta">오후 9:14</span></div>
+      </div>
+      <div class="msg" data-speaker="me">
+        <div class="av" aria-hidden="true">지</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">할머니.</p><span class="meta">오후 9:15</span></div>
+      </div>
+      <div class="msg" data-speaker="ai" data-cont="1">
+        <div class="av" aria-hidden="true">연</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">할머니. 좋아요.</p><span class="meta">오후 9:15</span></div>
+      </div>
+      <div class="msg" data-speaker="ai" data-cont="1">
+        <div class="av" aria-hidden="true">연</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">그 할머니를 떠올리면 가장 먼저 어떤 감각이 오나요? 냄새, 소리, 손의 온도 — 무엇이든요.</p><span class="meta">오후 9:15</span></div>
+      </div>
+      <div class="msg" data-speaker="me">
+        <div class="av" aria-hidden="true">지</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">여름마다 할머니 집에 가면 마루에서 라디오 소리가 났어요. 트로트였는데 지직거리는 잡음이 늘 섞여 있었고, 할머니는 그 잡음까지 좋아하셨어요. 이제 그 라디오도 없고 할머니도 안 계신데, 가끔 지하철에서 비슷한 잡음이 들리면 그 마루로 순간 이동한 것 같아요. 그 느낌을 이야기로 붙잡고 싶어요.</p><span class="meta">오후 9:17</span></div>
+      </div>
+      <div class="msg" data-speaker="ai">
+        <div class="av" aria-hidden="true">연</div>
+        <div class="bubble"><i class="hook" aria-hidden="true"></i><p class="text">좋아요. 그 잡음이 이야기의 심장이 될 것 같아요. 이렇게 시작해볼까요?</p><span class="meta">오후 9:18</span></div>
+      </div>
+
+      <article class="card" data-region="response-card">
+        <i class="hook" aria-hidden="true"></i>
+        <div class="card-eyebrow">제목(가제)</div>
+        <h3 class="card-title">잡음의 온도</h3>
+        <p class="card-excerpt">여름은 늘 지직거리는 소리로 시작됐다. 할머니의 라디오는 트로트와 잡음을 구별하지 않았고, 나도 그걸 배웠다. 소리의 흠집마다 여름 냄새가 뱄다.</p>
+        <div class="card-actions"><button class="primary">이어쓰기</button><button class="ghost">다른 제안</button></div>
+      </article>
+
+      <div class="typing" aria-live="polite">연서가 다음 문장을 쓰는 중…</div>
+    </section>
+
+    <form class="composer" data-region="composer" onsubmit="return false">
+      <button type="button" class="icon" aria-label="첨부">＋</button>
+      <textarea rows="1" placeholder="이야기의 다음 조각을 들려주세요…"></textarea>
+      <button type="button" class="icon" aria-label="음성">🎤</button>
+      <button type="submit" class="send">보내기</button>
+      <span class="hint">Shift+Enter 줄바꿈</span>
+    </form>
+  </main>
+</div>
+</body>
+</html>
