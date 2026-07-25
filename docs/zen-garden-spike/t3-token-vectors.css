@@ -1,0 +1,12 @@
+/* T3 — 뭉친 7개를 "토큰만"으로 인코딩.
+   각 스타일 = 8개 안팎의 CSS 변수. 시그니처 CSS 없음(=토큰만으로 표현되나 테스트).
+   값은 각 style-NN.md 팔레트·특징에서 추출. accent 는 주 브랜드색.
+   cluster.py 가 이 파일을 파싱 → hex→HSL → 좌표 거리 → 클러스터. */
+
+.style-03 { /* trendy-saas   */ --accent:#7C5CFF; --radius:14px; --space:16px; --elevation:0.65; --type-scale:1.9; }
+.style-16 { /* material      */ --accent:#6750A4; --radius:12px; --space:12px; --elevation:0.70; --type-scale:1.7; }
+.style-21 { /* ai-product    */ --accent:#6A47F5; --radius:12px; --space:16px; --elevation:0.50; --type-scale:1.8; }
+.style-22 { /* fintech-soft  */ --accent:#3182F6; --radius:20px; --space:14px; --elevation:0.55; --type-scale:1.7; }
+.style-24 { /* healthcare    */ --accent:#4A90D9; --radius:20px; --space:16px; --elevation:0.50; --type-scale:1.6; }
+.style-25 { /* commerce      */ --accent:#FF5A5F; --radius:16px; --space:12px; --elevation:0.60; --type-scale:1.8; }
+.style-29 { /* vibrant-modern*/ --accent:#635BFF; --radius:14px; --space:14px; --elevation:0.65; --type-scale:1.8; }
