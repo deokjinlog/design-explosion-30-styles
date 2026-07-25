@@ -1,0 +1,15 @@
+/* tokens/style-07.css — 07 미니멀 모노크롬. 변수만. */
+:root{
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --ink:#111111;
+  --muted:#767676;
+  --accent:#FF4D00;
+  --radius:0px;
+  --space:24px;
+  --border:#E5E5E5;
+  --font:'Pretendard',-apple-system,sans-serif;
+  --font-ui:var(--font);
+  --elevation:0;
+  --type-scale:2.2;
+}

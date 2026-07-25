@@ -1,0 +1,15 @@
+/* tokens/style-29.css — 29 컬러풀 모던. 변수만. */
+:root{
+  --bg:#FFFFFF;
+  --surface:#F6F9FC;
+  --ink:#0A2540;
+  --muted:#425466;
+  --accent:#635BFF;
+  --radius:16px;
+  --space:16px;
+  --border:#E3E8EF;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Inter','Plus Jakarta Sans',sans-serif;
+  --elevation:0.7;
+  --type-scale:2.0;
+}

@@ -1,0 +1,15 @@
+/* tokens/style-05.css — 05 브루탈리즘. 변수만. */
+:root{
+  --bg:#FFFFFF;
+  --surface:#E7E7E7;
+  --ink:#000000;
+  --muted:#1A1A1A;
+  --accent:#FF3B00;
+  --radius:0px;
+  --space:16px;
+  --border:#000000;
+  --font:'Pretendard',-apple-system,sans-serif;
+  --font-ui:'Archivo Black','Pretendard',sans-serif;
+  --elevation:0.8;
+  --type-scale:2.2;
+}

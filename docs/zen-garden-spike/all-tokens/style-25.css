@@ -1,0 +1,15 @@
+/* tokens/style-25.css — 25 커머스 리테일. 변수만. */
+:root{
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --ink:#1B1533;
+  --muted:#6B6480;
+  --accent:#FF5A5F;
+  --radius:16px;
+  --space:12px;
+  --border:#F0E9F5;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Manrope',sans-serif;
+  --elevation:0.8;
+  --type-scale:1.9;
+}

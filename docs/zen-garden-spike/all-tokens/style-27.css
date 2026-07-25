@@ -1,0 +1,15 @@
+/* tokens/style-27.css — 27 웜 프로페셔널. 변수만. */
+:root{
+  --bg:#FAF6F0;
+  --surface:#FFFDF9;
+  --ink:#3A342E;
+  --muted:#6B6157;
+  --accent:#C97B5A;
+  --radius:14px;
+  --space:24px;
+  --border:#E7DDCF;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Mulish','Nunito Sans',sans-serif;
+  --elevation:0.4;
+  --type-scale:1.6;
+}

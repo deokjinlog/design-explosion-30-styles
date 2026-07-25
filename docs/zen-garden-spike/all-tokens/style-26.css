@@ -1,0 +1,15 @@
+/* tokens/style-26.css — 26 다크 프로 미니멀. 변수만. */
+:root{
+  --bg:#0E0E11;
+  --surface:#131317;
+  --ink:#EDEDEF;
+  --muted:#A0A0A8;
+  --accent:#8B8BF5;
+  --radius:10px;
+  --space:20px;
+  --border:#232326;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Inter',system-ui,sans-serif;
+  --elevation:0.1;
+  --type-scale:1.4;
+}

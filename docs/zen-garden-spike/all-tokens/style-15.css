@@ -1,0 +1,15 @@
+/* tokens/style-15.css — 15 클레이모피즘. 변수만. */
+:root{
+  --bg:#F4F1FF;
+  --surface:#FBF9FF;
+  --ink:#4A4266;
+  --muted:#7A7296;
+  --accent:#B8B3F5;
+  --radius:32px;
+  --space:24px;
+  --border:#EDE9FB;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Quicksand',sans-serif;
+  --elevation:1.0;
+  --type-scale:1.7;
+}

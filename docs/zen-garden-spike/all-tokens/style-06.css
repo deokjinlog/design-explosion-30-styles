@@ -1,0 +1,15 @@
+/* tokens/style-06.css — 06 글래스모피즘. 변수만. */
+:root{
+  --bg:#7C3AED;
+  --surface:#F1EEFC;
+  --ink:#FFFFFF;
+  --muted:#D8D3EE;
+  --accent:#F0ABFC;
+  --radius:22px;
+  --space:16px;
+  --border:#E6E1F7;
+  --font:'Pretendard',-apple-system,sans-serif;
+  --font-ui:var(--font);
+  --elevation:1.0;
+  --type-scale:1.7;
+}

@@ -208,6 +208,7 @@ map/        (토큰 파싱 → 좌표 → 빈 셀 감지)
 - [x] **T2** — 정보구조 분기 → 원형당 스켈레톤 ~1개(넉넉한 훅 전제) 확정
 - [x] **T3** — 토큰전용 변별력 → 7개 실질 ~4그룹, "병합보다 재샘플" 확정
 - [x] **3층 마이그레이션 첫 슬라이스** (2026-07-26 · `docs/zen-garden-spike/migration-slice/`): 스켈레톤 `archetype-B.v1.html`(T2 훅 포함) + `base/archetype-B.css`(토큰 먹는 공용) + `tokens/style-04.css`·`tokens/style-22.css` + `signature/style-04--B.css`. **04(시그니처 필요)와 22(토큰만, 시그니처 없음) 둘 다 같은 base·같은 스켈레톤에서 커버리지 게이트 통과** → 파이프라인 확정. 22가 시그니처 없이 된 것 = T3 "토큰전용 변주" 분류 실증.
-- [ ] **확장(반복 노동)**: 30 스타일 MD → `tokens/`(+필요시 `signature/`) · 원형 A·D `base/` 저작 · 스킬 배선(SKILL.md 워크플로 = 토큰/시그니처 생성 → 스켈레톤 조립 → 커버리지 린트) · `archetype-lint`→`selector-coverage` 교체
+- [x] **30 스타일 → `tokens/` 전량 + 좌표 지도** (2026-07-26 · `docs/zen-garden-spike/all-tokens/` 30개 + `map.py`): T3를 30개로 확장. **측정 결과: 파랑/보라·둥근·소프트 코너에 절반이 뭉침**(파랑계열 ~10개), 낭비쌍 12개(07↔18·14↔22·03·21·29 등), **격자 72셀 중 53셀(웜·초록·각진) 비어있음**. 최고유=04 터미널·08 럭셔리(0.95). → **병합이 아니라 재샘플**: 낭비 슬롯을 빈 코너로 옮기면 30개 그대로 고르게 퍼짐. 한계: 토큰거리는 색·형태 변주 유사도만(구조적 차이는 signature 층).
+- [ ] **확장 잔여**: 시그니처 필요한 스타일만 `signature/` · 원형 A·D `base/` · 스킬 배선(SKILL.md → 토큰/시그니처 생성+조립+coverage-lint) · `archetype-lint`→`selector-coverage`
 - [ ] 마이그레이션 착수 후 → 공개 `README.md` 반영
 - [ ] 마이그레이션 착수 후 → 공개 `README.md`에 반영(게이트 둘 → selector-coverage 후계자 등)

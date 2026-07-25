@@ -1,0 +1,15 @@
+/* tokens/style-13.css — 13 오로라 그라디언트. 변수만. */
+:root{
+  --bg:#0A0A12;
+  --surface:#14141C;
+  --ink:#E8E9F2;
+  --muted:#8A8DA6;
+  --accent:#7C5CFF;
+  --radius:18px;
+  --space:16px;
+  --border:#1F1F2C;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Inter',system-ui,sans-serif;
+  --elevation:0.6;
+  --type-scale:1.7;
+}

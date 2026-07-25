@@ -1,0 +1,15 @@
+/* tokens/style-17.css — 17 Y2K 베이퍼웨이브. 변수만. */
+:root{
+  --bg:#1A0B2E;
+  --surface:#2D0B45;
+  --ink:#E7EEF7;
+  --muted:#A99BC7;
+  --accent:#FF2FB9;
+  --radius:14px;
+  --space:16px;
+  --border:#A24BFF;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Orbitron','Chakra Petch',sans-serif;
+  --elevation:0.9;
+  --type-scale:1.9;
+}

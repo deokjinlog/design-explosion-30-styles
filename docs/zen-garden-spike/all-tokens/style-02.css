@@ -1,0 +1,15 @@
+/* tokens/style-02.css — 02 공공데이터 포털. 변수만. */
+:root{
+  --bg:#F5F6F8;
+  --surface:#FFFFFF;
+  --ink:#1A1A1A;
+  --muted:#55606B;
+  --accent:#00447C;
+  --radius:0px;
+  --space:12px;
+  --border:#D5DBE1;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:var(--font);
+  --elevation:0;
+  --type-scale:1.4;
+}

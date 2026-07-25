@@ -1,0 +1,15 @@
+/* tokens/style-20.css — 20 다크 대시보드. 변수만. */
+:root{
+  --bg:#0d1117;
+  --surface:#161b22;
+  --ink:#c9d1d9;
+  --muted:#8b949e;
+  --accent:#2dd4bf;
+  --radius:6px;
+  --space:10px;
+  --border:#30363d;
+  --font:'Pretendard','Inter',system-ui,sans-serif;
+  --font-ui:var(--font);
+  --elevation:0.15;
+  --type-scale:1.4;
+}

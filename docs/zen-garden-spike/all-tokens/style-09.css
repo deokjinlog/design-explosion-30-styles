@@ -1,0 +1,15 @@
+/* tokens/style-09.css — 09 레트로 픽셀. 변수만. */
+:root{
+  --bg:#1A1C2C;
+  --surface:#29366F;
+  --ink:#F4F4F4;
+  --muted:#7A82A8;
+  --accent:#38B764;
+  --radius:0px;
+  --space:12px;
+  --border:#4A5490;
+  --font:'DungGeunMo','Pretendard',monospace;
+  --font-ui:'Press Start 2P','DungGeunMo',monospace;
+  --elevation:0.6;
+  --type-scale:1.3;
+}

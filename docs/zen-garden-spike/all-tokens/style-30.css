@@ -1,0 +1,15 @@
+/* tokens/style-30.css — 30 데이터 리치 라이트. 변수만. */
+:root{
+  --bg:#F9FAFB;
+  --surface:#FFFFFF;
+  --ink:#111827;
+  --muted:#6B7280;
+  --accent:#2563EB;
+  --radius:8px;
+  --space:10px;
+  --border:#E5E7EB;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:'Inter',system-ui,sans-serif;
+  --elevation:0.2;
+  --type-scale:1.5;
+}

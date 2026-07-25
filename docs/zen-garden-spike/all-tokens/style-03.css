@@ -1,0 +1,15 @@
+/* tokens/style-03.css — 03 트렌디 SaaS. 변수만. */
+:root{
+  --bg:#FBFAFF;
+  --surface:#FFFFFF;
+  --ink:#17143A;
+  --muted:#7B7897;
+  --accent:#7C5CFF;
+  --radius:24px;
+  --space:16px;
+  --border:#ECE9FB;
+  --font:'Inter','Pretendard',-apple-system,sans-serif;
+  --font-ui:var(--font);
+  --elevation:0.7;
+  --type-scale:2.0;
+}

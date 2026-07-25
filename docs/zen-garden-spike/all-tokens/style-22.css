@@ -1,0 +1,15 @@
+/* tokens/style-22.css — 22 핀테크 소프트. 변수만. */
+:root{
+  --bg:#F4F6F8;
+  --surface:#FFFFFF;
+  --ink:#1B1D28;
+  --muted:#8B95A1;
+  --accent:#3182F6;
+  --radius:20px;
+  --space:16px;
+  --border:#E5E8EB;
+  --font:'Pretendard',system-ui,-apple-system,sans-serif;
+  --font-ui:var(--font);
+  --elevation:0.5;
+  --type-scale:1.7;
+}
