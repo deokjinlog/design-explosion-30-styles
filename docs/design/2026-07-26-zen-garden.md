@@ -220,9 +220,13 @@ skills/design-style-explorer/references/
 5. **게이트: `selector-coverage`(환각·누락)** — `archetype-lint` 은퇴. 콘텐츠 동일성은 조립이 구조적 보장(별도 검사 불필요). `style-lint`는 토큰/시그니처 대상 스타일 금칙으로 축소 존치.
 6. 갤러리(동일)
 
-**실행 순서**: ① 조립기 확정(✅) → ② 원형 B end-to-end 배선(✅) → ③ 검증(✅) → ④ 원형 확장 **(D ✅ · A 남음)** → ⑤ SKILL.md 문구 갱신 → ⑥ 라이브 3데모 재빌드.
+**실행 순서**: ① 조립기 확정(✅) → ② 원형 B 배선(✅) → ③ 검증(✅) → ④ 원형 확장 **(A·B·D 세 원형 모두 ✅)** → ⑤ SKILL.md 문구 갱신 → ⑥ 라이브 3데모 재빌드.
 
-**④ 원형 D 확장 완료** (2026-07-26 · `references/skeletons/archetype-D.v1.html`+`base/archetype-D.css` · `docs/design-gallery/2026-07-26-fashion-zen/`): 여덟시 상품목록 D 스켈레톤+base 저작, **B에 쓴 그 30 토큰을 그대로 재사용** → coverage 30/30 · body 바이트 동일(11750자). **토큰이 원형 무관임을 실증**(같은 파일이 B 대화형·D 컬렉션 양쪽에서 작동). D-signature는 후속(현재 토큰전용). + 린트 개선: HTML 주석 스트립(주석 속 data-region 오탐 수정).
+**④ 원형 확장 완료 — A·B·D 세 원형 모두 3층으로** (2026-07-26):
+- B 대화 `2026-07-26-yeonseo-zen/` (signature 6) · D 컬렉션 `2026-07-26-fashion-zen/` · A 대시보드 `2026-07-26-fintech-zen/` — 각 30스타일, coverage 30/30, body 바이트 동일.
+- **`tokens/style-NN.css` 한 파일이 A·B·D 세 원형에서 모두 작동** = 토큰 원형 무관 최종 실증. 원형별로 다른 건 `skeletons/`·`base/`뿐(각 1개), tokens 30은 전 원형 공용.
+- A는 KPI·추이·도넛·목표·표(가장 다른 뼈대)도 순수 CSS/SVG·토큰 먹는 base로 처리.
+- 현재 D·A는 토큰전용(signature 미저작), B는 signature 6. + 린트 개선: HTML 주석 스트립(주석 속 data-region 오탐 수정).
 
 **② 완료** — 자산을 `skills/design-style-explorer/references/`(skeletons·base·tokens 30·signature 6·assemble.py·coverage-lint.py)로 승격하고, **references/에서 30 스타일 조립** → `docs/design-gallery/2026-07-26-yeonseo-zen/`:
 - **coverage-lint 30/30 PASS** · **30장 body 바이트 동일(3771자)** = 콘텐츠 동일성 구조적 보장(드리프트 물리적 불가능)
