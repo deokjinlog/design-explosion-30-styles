@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>archetype-D.v1 — 3층 조립 슬라이스 (중고거래 마켓 상품 목록 · 03 트렌디 SaaS)</title>
+<!-- ===== 3층 Zen Garden 조립 =====
+     이 HTML(스켈레톤 계약)은 절대 안 바뀐다. 아래 link만 바꾸면 다른 스타일.
+       base   = 원형 D 공용 컴포넌트 (토큰 먹음)     ← 원형당 1개
+       tokens = 스타일 변수 (원형 무관, 재사용)       ← 링크만 바꾸면 다른 스타일
+       signature = 그 스타일의 구조적 시그니처         ← 일부 스타일만 (아직 없음)
+     다른 스타일로 보려면 tokens/signature 줄만 교체. -->
+<link rel="stylesheet" href="../../../skills/design-style-explorer/references/base/archetype-D.css">
+<link rel="stylesheet" href="../../../skills/design-style-explorer/references/tokens/style-03.css">
+<!-- <link rel="stylesheet" href="../signature/style-03--D.css"> -->
+</head>
+<body>
+<div class="app">
+  <header class="identity" data-region="identity">
+    <a class="brand" href="#"><i class="hook" aria-hidden="true"></i><span class="logo">모</span><b class="brandname">모아마켓</b></a>
+    <nav class="categories" aria-label="주요 카테고리">
+      <a class="cat is-active" href="#">디지털</a>
+      <a class="cat" href="#">가구/인테리어</a>
+      <a class="cat" href="#">의류</a>
+      <a class="cat" href="#">유아</a>
+      <a class="cat is-sale" href="#">티켓/교환권</a>
+    </nav>
+    <form class="search" role="search" onsubmit="return false">
+      <input type="search" placeholder="물건, 동네 검색" aria-label="중고 물건 검색">
+      <button class="search-btn" type="submit" aria-label="검색"><i class="hook" aria-hidden="true"></i><span class="ico">🔍</span></button>
+    </form>
+    <div class="identity-actions">
+      <button class="cart-btn" type="button" aria-label="채팅, 읽지 않은 메시지 3개">
+        <i class="hook" aria-hidden="true"></i><span class="ico">💬</span><span class="cart-count">3</span>
+      </button>
+      <span class="avatar" aria-hidden="true">👤</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="filter" data-region="filter" aria-label="상품 필터">
+      <div class="filter-group">
+        <h3 class="filter-title">카테고리</h3>
+        <ul class="filter-list">
+          <li><a class="filter-item is-active" href="#">디지털</a></li>
+          <li><a class="filter-item" href="#">가구/인테리어</a></li>
+          <li><a class="filter-item" href="#">의류</a></li>
+          <li><a class="filter-item" href="#">유아</a></li>
+          <li><a class="filter-item" href="#">티켓/교환권</a></li>
+        </ul>
+      </div>
+
+      <div class="filter-group">
+        <h3 class="filter-title">가격대</h3>
+        <div class="price-range">
+          <input class="price-slider" type="range" min="0" max="1000000" value="1000000" aria-label="최대 가격, 0원에서 1,000,000원 이상">
+          <div class="price-labels"><span>₩0</span><span>₩1,000,000+</span></div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h3 class="filter-title">거래 방식</h3>
+        <div class="size-chips">
+          <button class="chip is-active" type="button">직거래</button>
+          <button class="chip" type="button">택배</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h3 class="filter-title">상품 상태</h3>
+        <div class="swatch-grid">
+          <button class="colorchip is-active" type="button" style="--sw:#22c55e" aria-label="새상품"><i class="hook" aria-hidden="true"></i></button>
+          <button class="colorchip" type="button" style="--sw:#9ca3af" aria-label="중고"><i class="hook" aria-hidden="true"></i></button>
+        </div>
+      </div>
+
+      <div class="filter-group filter-toggles">
+        <label class="toggle-row"><span>역삼동</span><input class="toggle" type="checkbox" checked><i class="hook" aria-hidden="true"></i></label>
+        <label class="toggle-row"><span>인근 동네 포함</span><input class="toggle" type="checkbox"><i class="hook" aria-hidden="true"></i></label>
+      </div>
+
+      <button class="filter-reset" type="reset">필터 초기화</button>
+    </aside>
+
+    <main class="results-col">
+      <div class="results" data-region="results">
+        <h1 class="result-count">역삼동 근처 <b>2,481</b>개</h1>
+        <label class="sort">정렬
+          <select class="sort-select">
+            <option selected>최신순</option>
+            <option>인기순</option>
+            <option>저가순</option>
+            <option>가까운순</option>
+          </select>
+        </label>
+      </div>
+
+      <section class="collection" data-region="collection" aria-label="상품 목록">
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">아</span></div>
+          <span class="badge badge--best">직거래</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기, 12명이 찜함"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span><span class="cart-count">12</span></button>
+          <div class="card-body">
+            <span class="brand">3분 전</span>
+            <h3 class="name">아이폰 14 Pro 128GB 딥퍼플</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#4b3869"></i><i style="--sw:#1f2430"></i><i style="--sw:#9b99a6"></i></div>
+            <div class="price-row">
+              <span class="price-was">₩850,000</span>
+              <span class="price-now">₩780,000</span>
+              <span class="discount">8%</span>
+            </div>
+            <div class="rating"><span class="stars">역삼동</span><span class="review-count">동네인증</span></div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">이</span></div>
+          <span class="badge badge--low">택배불가</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기, 5명이 찜함"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span><span class="cart-count">5</span></button>
+          <div class="card-body">
+            <span class="brand">1시간 전</span>
+            <h3 class="name">이케아 4인용 원목 식탁 + 의자 4개 세트 — 직접 조립해 3개월 사용, 상판 흠집 거의 없음, 직거래만 가능</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#c9a267"></i><i style="--sw:#8b5e3c"></i></div>
+            <div class="price-row">
+              <span class="price-now">₩120,000</span>
+            </div>
+            <div class="rating"><span class="stars">삼성동</span><span class="review-count">동네인증</span></div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">나</span></div>
+          <span class="badge badge--new">새상품</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기, 31명이 찜함"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span><span class="cart-count">31</span></button>
+          <div class="card-body">
+            <span class="brand">어제</span>
+            <h3 class="name">나이키 에어포스1 270mm</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#ffffff"></i><i style="--sw:#141414"></i></div>
+            <div class="price-row">
+              <span class="price-now">₩45,000</span>
+            </div>
+            <div class="rating rating--missing" aria-label="지역 정보 없음">—</div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">다</span></div>
+          <span class="badge badge--ship">예약중</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기, 8명이 찜함"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span><span class="cart-count">8</span></button>
+          <div class="card-body">
+            <span class="brand">2일 전</span>
+            <h3 class="name">다이슨 V11 무선청소기</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#6b46c1"></i><i style="--sw:#c0c0c0"></i></div>
+            <div class="price-row">
+              <span class="price-now">₩290,000</span>
+            </div>
+            <div class="rating"><span class="stars">대치동</span><span class="review-count">동네인증</span></div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">스</span></div>
+          <span class="badge badge--ship">택배</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기, 2명이 찜함"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span><span class="cart-count">2</span></button>
+          <div class="card-body">
+            <span class="brand">방금</span>
+            <h3 class="name">스타벅스 e카드 5만원권</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#00704a"></i><i style="--sw:#ffffff"></i></div>
+            <div class="price-row">
+              <span class="price-now">₩46,000</span>
+            </div>
+            <div class="rating"><span class="stars">온라인</span><span class="review-count">전국가능</span></div>
+          </div>
+        </article>
+
+        <article class="item-card" data-region="item-card">
+          <div class="thumb"><i class="hook" aria-hidden="true"></i><span class="thumb-initial">유</span></div>
+          <span class="badge badge--best">나눔</span>
+          <button class="heart" type="button" aria-pressed="false" aria-label="찜하기, 44명이 찜함"><i class="hook" aria-hidden="true"></i><span class="ico">♡</span><span class="cart-count">44</span></button>
+          <div class="card-body">
+            <span class="brand">5분 전</span>
+            <h3 class="name">유아 원목 침대</h3>
+            <div class="swatches" aria-hidden="true"><i style="--sw:#efe6d8"></i><i style="--sw:#7c7a4a"></i></div>
+            <div class="price-row">
+              <span class="price-now">₩0</span>
+            </div>
+            <div class="rating"><span class="stars">도곡동</span><span class="review-count">동네인증</span></div>
+          </div>
+        </article>
+
+      </section>
+
+      <nav class="action" data-region="action" aria-label="페이지네이션">
+        <ul class="pager">
+          <li><button class="page-btn prev" type="button" disabled aria-label="이전 페이지">‹</button></li>
+          <li><button class="page-btn is-active" type="button" aria-current="page">1</button></li>
+          <li><button class="page-btn" type="button">2</button></li>
+          <li><button class="page-btn" type="button">3</button></li>
+          <li class="ellipsis" aria-hidden="true">…</li>
+          <li><button class="page-btn" type="button">41</button></li>
+          <li><button class="page-btn next" type="button" aria-label="다음 페이지">›</button></li>
+        </ul>
+        <button class="more-btn" type="button">더 보기</button>
+      </nav>
+
+      <!-- 빈 상태 영역(원형 D 권장) — 실제 서비스에선 필터 결과 0건일 때만 노출되지만,
+           이 스켈레톤은 30개 스타일이 견고성 상태를 동일하게 검증하도록 항상 렌더한다. -->
+      <section class="empty" data-region="empty" aria-label="빈 상태 예시">
+        <div class="empty-illust" aria-hidden="true"><i class="hook" aria-hidden="true"></i></div>
+        <h2 class="empty-title">이 조건에 맞는 물건이 없어요</h2>
+        <p class="empty-desc">필터를 줄이거나 키워드 알림을 켜보세요.</p>
+        <button class="empty-cta" type="button">키워드 알림 받기</button>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

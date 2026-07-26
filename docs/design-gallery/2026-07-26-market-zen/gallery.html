@@ -1,0 +1,37 @@
+<!doctype html><meta charset="utf-8"><title>중고거래 마켓 — 새 도메인 실전 (3층 조립) 30 스타일</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>*{box-sizing:border-box}body{font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;margin:0 auto;padding:28px;background:#0d1117;color:#e6edf3;line-height:1.5;max-width:1500px}
+h1{font-size:23px;margin:0 0 4px}.sub{color:#8b949e;font-size:14px;margin-bottom:10px}.sub b{color:#c9d1d9}
+.b{display:inline-block;font-size:12px;background:#238636;color:#fff;padding:3px 10px;border-radius:99px;margin:0 6px 4px 0}
+.b.g{background:#1f6feb}.b.p{background:#8957e5}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-top:22px}
+.card{border:1px solid #30363d;border-radius:10px;overflow:hidden;background:#161b22;transition:border-color .15s}
+.card:hover{border-color:#a78bfa}
+.shot{height:240px;overflow:hidden;background:#fff;border-bottom:1px solid #30363d}
+.shot iframe{width:1500px;height:1030px;border:0;transform:scale(.335);transform-origin:0 0;pointer-events:none}
+.meta{padding:11px 14px}.n{font-size:11px;color:#8b949e;letter-spacing:.05em}
+.t{font-weight:700;font-size:15px;margin:3px 0}.lay{font-size:11px;color:#6e7681}
+a.full{color:#58a6ff;font-size:12.5px;text-decoration:none}a.full:hover{text-decoration:underline}
+.note{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px 20px;font-size:13px;color:#9da7b3;margin-top:26px}
+.note b{color:#a78bfa}.note code{background:#0d1117;padding:1px 6px;border-radius:4px;color:#e6edf3;font-size:12px}</style>
+
+<h1>중고거래 마켓 — <b style="color:#7ee2b8">새 도메인을 새 방식으로 처음부터</b> 만든 30 스타일</h1>
+<div class="sub"><b>실전 테스트</b>: 완전히 새 도메인(모아마켓). 새 스켈레톤 <b>1개</b>만 저작하고(중고거래 콘텐츠), <b>base-D와 30 토큰은 그대로 재사용</b>. "새 콘텐츠" 변수만 격리해 파이프라인이 실제로 뭘 만드는지 확인.</div>
+<div>
+<span class="b">coverage-lint 30/30</span>
+<span class="b g">body 바이트 동일 30/30</span>
+<span class="b p">base·tokens 재사용(새 도메인)</span>
+</div>
+
+<div class="grid" id="g"></div>
+
+<div class="note"><b>이게 새 방식의 실전 답이다.</b> 새 도메인 = <b>스켈레톤 하나</b>(그 도메인 콘텐츠를 원형 D 클래스 계약에 담아) 저작 + <code>base/archetype-D.css</code>·<code>tokens/NN</code> 재사용 → 30 스타일. <b>패션용으로 쓴 그 base-D 파일 하나가 중고거래 콘텐츠도 그대로 스타일</b>(base는 원형 무관·도메인 무관, 스켈레톤만 콘텐츠별). 30장 body 바이트 동일 = 콘텐츠 동일성 구조적 보장, coverage 게이트 전수 통과.<br><br>견고성도 그대로: 아주 긴 제목(이케아 식탁), 지역 결측 <code>—</code>(나이키), 나눔 <code>₩0</code>(유아 침대), 큰 가격 <code>₩780,000</code>. 지금은 D-signature 미저작(토큰전용) — 구조 강한 스타일 보강 + 웹폰트가 후속.</div>
+
+<script>
+const N=['SF HUD','공공 포털','트렌디 SaaS','밀집 터미널','브루탈리즘','글래스모피즘','미니멀 모노크롬','럭셔리 다크','레트로 픽셀','에디토리얼','네이처 오가닉','뉴모피즘','오로라','벤토','클레이모피즘','머티리얼','Y2K','스위스','맥시멀리즘','다크 애널리틱스','AI 프로덕트','핀테크 소프트','엔터프라이즈','헬스케어','커머스','다크 미니멀','웜 프로','접근성','컬러풀 모던','데이터 어드민'];
+const g=document.getElementById('g');
+N.forEach((name,i)=>{const nn=String(i+1).padStart(2,'0');const f=`style-${nn}.html`;
+const d=document.createElement('div');d.className='card';
+d.innerHTML=`<div class="shot"><iframe src="${f}" loading="lazy" scrolling="no"></iframe></div><div class="meta"><div class="n">STYLE ${nn}</div><div class="t">${name}</div><div class="lay">base-D + tokens (재사용)</div><a class="full" href="${f}" target="_blank">전체 화면 →</a></div>`;
+g.appendChild(d);});
+</script>
