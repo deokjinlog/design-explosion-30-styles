@@ -94,11 +94,16 @@
 
 ---
 
-## 다음 방향 — Zen Garden 3층 (설계 진행 중)
+## 생성 엔진 — Zen Garden 3층 (구축됨)
 
-HTML을 스타일마다 통짜 생성하던 걸 → **DOM 하나 고정(스켈레톤) + 3층 CSS(토큰/베이스/시그니처)**로 전환 중입니다. `archetype-lint`를 구조(illegal state 표현 불가능)로 대체하고, 고른 결과물이 그대로 디자인 토큰 세트가 됩니다.
+HTML을 스타일마다 통짜 생성하던 걸 → **DOM 하나 고정(스켈레톤) + CSS 3층**(base·tokens·signature)만 만들어 조립합니다. 콘텐츠 동일성이 **구조적으로 보장**되고(프롬프트로 부탁 안 함), `archetype-lint`는 `coverage-lint`(환각 셀렉터·누락 영역)로 교체됐습니다.
 
-→ 결정 기록: [`docs/design/2026-07-26-zen-garden.md`](docs/design/2026-07-26-zen-garden.md)
+- **tokens 30개는 원형 무관** — A 대시보드·B 대화·D 컬렉션이 같은 파일을 공유. 원형별로 다른 건 스켈레톤·base 각 1개뿐.
+- **스타일 1개 추가 = CSS ~2KB** (tokens + 구조적이면 signature), 세 원형 즉시 적용. 클린룸 검증 완료.
+- 새 파이프라인 갤러리: [핀테크(A)](https://deokjinlog.github.io/design-explosion-30-styles/design-gallery/2026-07-26-fintech-zen/gallery.html) · [연서(B)](https://deokjinlog.github.io/design-explosion-30-styles/design-gallery/2026-07-26-yeonseo-zen/gallery.html) · [패션(D)](https://deokjinlog.github.io/design-explosion-30-styles/design-gallery/2026-07-26-fashion-zen/gallery.html)
+- 방법서 [`references/3-layer-pipeline.md`](skills/design-style-explorer/references/3-layer-pipeline.md) · 결정·검증 기록 [`docs/design/2026-07-26-zen-garden.md`](docs/design/2026-07-26-zen-garden.md)
+
+**📈 전체 진행 여정 한눈에 보기** → [`docs/progress.html`](https://deokjinlog.github.io/design-explosion-30-styles/progress.html) (세 데모 · 재설계 · 검증 3종 · 3층 구축 · 클린룸 · 커밋 타임라인)
 
 ---
 
