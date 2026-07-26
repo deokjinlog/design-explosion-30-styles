@@ -1,0 +1,77 @@
+/* signature/style-18--D.css — 18 스위스 인터내셔널의 "구조적 시그니처" (원형 D · 컬렉션/상품 그리드).
+   토큰(색·폰트·radius)만으론 안 되는 것 =
+   ① 카드가 아니라 "격자 셀"로 — 하드라인(헤어라인)이 실제로 이어지는 연속 격자, 그림자·리프트 제거
+   ② 12컬럼 비대칭 스팬 리듬 — repeat(3,1fr) 균등분할은 관공서 톤, 정보량이 폭을 정하는 5·4·3 교차 리듬
+   ③ 상품 정보 타이포 계층 — 브랜드 라벨(작게·트래킹) · 상품명(중간) · 가격(대형·tabular-nums) 극단 대비
+   ④ 빨강 액센트 예산 1점 — base 는 var(--accent) 를 로고·배지·토글·슬라이더·필터활성 등 12곳에 흘려보낸다.
+      전부 잉크로 환수하고, 남은 유일한 빨강은 "세일" 내비게이션 탭 — 활성/세일의 그 1점.
+   (뭉친 스타일과 달리 18은 이 파일 없이는 그냥 커머스 그리드 — 격자·헤어라인·타이포 규율이 정체성의 전부) */
+
+/* ── ① 격자 셀: 개별 카드가 아니라 이어진 헤어라인 (gap 제거 + 1px 보더 겹침으로 더블라인 방지) ── */
+.collection{ gap:0; }
+.item-card{
+  margin:-1px 0 0 -1px;
+  transition:border-color .1s ease;   /* base 의 transform/box-shadow 전환 대신 색 전환만 */
+}
+.item-card:hover,.item-card:focus-within{
+  transform:none;                     /* base 의 translateY 리프트 제거 — 스위스는 뜨지 않는다 */
+  box-shadow:none;                    /* base 의 드롭섀도 제거 */
+  border-color:var(--ink);
+  z-index:2;                          /* 진한 보더가 이웃 셀의 겹친 보더 위로 확실히 보이도록 */
+}
+
+/* ── ② 12컬럼 비대칭 스팬 — 5·4·3 / 3·4·5 교차 리듬(대칭 3등분 금지) ── */
+.collection{ grid-template-columns:repeat(12,1fr); }
+.item-card:nth-child(6n+1){ grid-column:span 5; }
+.item-card:nth-child(6n+2){ grid-column:span 4; }
+.item-card:nth-child(6n+3){ grid-column:span 3; }
+.item-card:nth-child(6n+4){ grid-column:span 3; }
+.item-card:nth-child(6n+5){ grid-column:span 4; }
+.item-card:nth-child(6n+6){ grid-column:span 5; }
+@media (max-width:1024px){
+  .collection{ grid-template-columns:repeat(2,1fr); }
+  .item-card{ grid-column:auto; }
+}
+@media (max-width:640px){
+  .collection{ grid-template-columns:1fr; }
+}
+
+/* ── ③ 상품 정보 타이포 계층: 라벨(작게·트래킹) → 상품명(중간) → 가격(대형·tabular) ── */
+.card-body .brand{
+  font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+}
+.name{ font-size:14.5px; font-weight:700; letter-spacing:-.005em; }
+.price-now{ font-size:19px; font-weight:800; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+.price-was{ font-size:11px; font-variant-numeric:tabular-nums; }
+.discount{ color:var(--ink); font-weight:800; }  /* 색 강조 대신 굵기 강조 — 빨강 예산은 세일 탭 하나뿐 */
+
+.result-count{
+  display:flex; align-items:baseline; gap:7px;
+  font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+}
+.result-count b{
+  font-size:32px; font-weight:800; letter-spacing:-.02em; color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ── ④ 빨강 예산 1점: "세일" 탭만 남기고 전부 잉크로 환수 ──
+   base+tokens 만으론 로고·카트배지·필터활성·색상칩활성·슬라이더·토글·배지(신상/무료배송)·
+   빈상태 CTA 까지 var(--accent) 가 번져 나온다(스위스 규율 위반). */
+.logo{ background:var(--ink); }
+.cat.is-active{ box-shadow:inset 0 -2px 0 var(--ink); }
+.cart-count{ background:var(--ink); border-radius:0; }
+.filter-item.is-active{ color:var(--ink); }
+.colorchip.is-active{ box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--ink); }
+.price-slider{ accent-color:var(--ink); }
+.toggle{ accent-color:var(--ink); }
+.badge--new{ color:var(--ink); border-color:var(--ink); }
+.badge--ship{ background:var(--ink); }
+.empty-cta{ background:var(--ink); }
+/* .cat.is-sale 는 base 의 color:var(--accent) 그대로 둔다 — 화면 전체에서 유일한 빨강 1점 */
+
+/* ── 장식성 원형은 전부 직각으로: radius 0 은 카드뿐 아니라 예외 없음 ── */
+.avatar{ border-radius:0; }
+.heart{ border-radius:0; }
+.colorchip{ border-radius:0; }
+.swatches i{ border-radius:0; }
+.empty-illust{ border-radius:0; }

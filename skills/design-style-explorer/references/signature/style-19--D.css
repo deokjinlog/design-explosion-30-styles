@@ -1,0 +1,191 @@
+/* signature/style-19--D.css — 19 맥시멀리즘 × 원형 D(컬렉션 그리드)의 "구조적 시그니처".
+   토큰(색·radius)만으론 안 되는 것 = 형광 다색 충돌 + 패턴 배경 + 스티커 남발 + 겹치는 회전.
+   tokens/style-19.css는 --accent 단색 하나뿐이라 "5색+ 동시 충돌"은 여기서 하드코딩으로 강제한다
+   (04 터미널 시그니처가 화자색을 하드코딩한 것과 같은 이유 — 토큰 1개로는 이 구조를 못 낸다).
+   본문 가독 앵커(.name/.price-now/.card-body 등)는 절대 건드리지 않는다 — 흰 카드 위 잉크블랙 유지. */
+
+/* ===== 배경: 조용한 구간을 만들지 않는다 — 도트 + 사선 텍스처가 항상 살아있음 ===== */
+body{
+  background:
+    radial-gradient(circle, #FFE9B0 2.5px, transparent 3px) 0 0/26px 26px,
+    repeating-linear-gradient(45deg, #FFE9B0 0 3px, transparent 3px 20px),
+    var(--bg);
+}
+.identity{
+  background:
+    repeating-linear-gradient(45deg, rgba(198,255,0,.08) 0 4px, transparent 4px 14px),
+    var(--surface);
+  border-bottom:4px solid var(--border);
+  box-shadow:0 4px 0 #FF6B00;
+}
+.filter{
+  border:3px solid var(--border);
+  background:
+    repeating-linear-gradient(45deg, rgba(0,56,255,.05) 0 4px, transparent 4px 14px),
+    repeating-linear-gradient(-45deg, rgba(255,46,147,.05) 0 4px, transparent 4px 14px),
+    var(--surface);
+}
+
+/* ===== 헤더 로고·버튼: 회전 + 스티커(hook을 ::before 아이콘으로 점등) ===== */
+.identity .brand{ position:relative; transform:rotate(-4deg) }
+.logo{ border:3px solid var(--border); box-shadow:3px 3px 0 #0038FF; transform:rotate(6deg) }
+.brandname{ display:inline-block; transform:rotate(-2deg); -webkit-text-stroke:.4px var(--ink) }
+.identity .brand .hook{
+  display:block; position:absolute; top:-14px; right:-18px;
+  font-size:18px; color:#FF6B00; transform:rotate(18deg); z-index:2;
+}
+.identity .brand .hook::before{ content:"✦" }
+
+.search{ border:2px solid var(--border) }
+.search-btn{ position:relative }
+.search-btn .hook{
+  display:block; position:absolute; top:-9px; left:-7px;
+  font-size:13px; color:#0038FF; transform:rotate(-18deg);
+}
+.search-btn .hook::before{ content:"⚡" }
+
+.cart-btn{ transform:rotate(-8deg) }
+.cart-btn .hook{
+  display:block; position:absolute; top:-9px; right:-9px;
+  font-size:17px; color:#FF2E93; transform:rotate(14deg); z-index:2;
+}
+.cart-btn .hook::before{ content:"★" }
+
+.cat.is-sale{
+  display:inline-block; background:#FF2E93; color:#fff; font-weight:800;
+  padding:3px 8px; border-radius:6px; border:2px solid var(--border);
+  transform:rotate(-4deg);
+}
+.cat.is-active{ box-shadow:none; border-bottom:3px solid var(--ink) }
+
+/* ===== 필터: 활성 상태는 형광 색면 + 하드보더 + 회전, 컬러칩 활성엔 별 스티커 ===== */
+.filter-item.is-active{
+  background:#C6FF00; color:var(--ink); font-weight:800;
+  border:3px solid var(--border); border-radius:6px;
+  transform:rotate(-2deg); box-shadow:4px 4px 0 var(--border);
+}
+.chip.is-active{
+  background:#FF6B00; color:var(--ink); border:3px solid var(--border);
+  transform:rotate(4deg) scale(1.05); box-shadow:3px 3px 0 var(--border);
+}
+.colorchip{ border:2px solid var(--border) }
+.colorchip.is-active{
+  box-shadow:0 0 0 2px var(--bg),0 0 0 4px #FF2E93;
+  transform:scale(1.15) rotate(-10deg);
+}
+.colorchip.is-active .hook{
+  display:flex; align-items:center; justify-content:center;
+  position:absolute; top:-9px; right:-9px; width:15px; height:15px;
+  background:#FFE500; border:2px solid var(--border); border-radius:50%;
+  font-size:8px; transform:rotate(16deg); z-index:2;
+}
+.colorchip.is-active .hook::before{ content:"★" }
+.toggle:checked + .hook{
+  display:inline-block; color:#FF2E93; font-size:12px;
+  margin-left:6px; transform:rotate(-12deg);
+}
+.toggle:checked + .hook::before{ content:"✦" }
+.filter-reset{
+  border:2.5px solid var(--border); font-weight:800;
+  box-shadow:3px 3px 0 #C6FF00; transition:transform .1s,box-shadow .1s;
+}
+.filter-reset:hover{ box-shadow:1px 1px 0 #C6FF00; transform:translate(2px,2px) }
+
+/* ===== 결과 헤더: 개수 배지화 + 회전 ===== */
+.result-count{ display:inline-block; transform:rotate(-1.5deg) }
+.result-count b{
+  display:inline-block; background:#C6FF00; color:var(--ink);
+  padding:1px 8px; border:2px solid var(--border); border-radius:6px;
+  transform:rotate(3deg); box-shadow:3px 3px 0 var(--border);
+}
+.results{ border-bottom:3px solid var(--border) }
+.sort-select{ border:2px solid var(--border); font-weight:700 }
+
+/* ===== 컬렉션: 회전·겹침·하드 오프셋 이중 그림자 — 카드마다 다른 각도/색 ===== */
+.collection{ gap:calc(var(--space)*2.4) }
+.item-card{
+  --card-rot:0deg; --card-glow:#FF2E93;
+  overflow:visible; border:3px solid var(--border); border-radius:14px;
+  transform:rotate(var(--card-rot));
+  box-shadow:8px 8px 0 var(--card-glow),14px 14px 0 var(--border);
+}
+.item-card:hover,.item-card:focus-within{
+  transform:rotate(calc(var(--card-rot) * -1)) translateY(-6px);
+  box-shadow:14px 14px 0 var(--card-glow),20px 20px 0 var(--border);
+}
+.item-card:nth-child(6n+1){ --card-rot:-3deg; --card-glow:#FF2E93; z-index:1 }
+.item-card:nth-child(6n+2){ --card-rot:2deg;  --card-glow:#C6FF00; margin-top:14px; z-index:2 }
+.item-card:nth-child(6n+3){ --card-rot:-2deg; --card-glow:#0038FF; }
+.item-card:nth-child(6n+4){ --card-rot:3deg;  --card-glow:#FF6B00; }
+.item-card:nth-child(6n+5){ --card-rot:-4deg; --card-glow:#00E5FF; margin-top:16px; z-index:2 }
+.item-card:nth-child(6n+6){ --card-rot:2.5deg;--card-glow:#FF5CC8; margin-top:-8px }
+
+.thumb{
+  overflow:visible; border-bottom:3px solid var(--border);
+  background:
+    repeating-linear-gradient(90deg, rgba(0,56,255,.08) 0 6px, transparent 6px 14px),
+    var(--bg);
+}
+.thumb .hook{
+  display:flex; align-items:center; justify-content:center;
+  position:absolute; top:-14px; right:-14px; width:32px; height:32px;
+  background:#FFE500; border:2.5px solid var(--border); border-radius:50%;
+  box-shadow:3px 3px 0 var(--border); transform:rotate(-12deg); font-size:15px; z-index:3;
+}
+.item-card:nth-child(6n+1) .thumb .hook::before{ content:"★"; color:#FF2E93 }
+.item-card:nth-child(6n+2) .thumb .hook::before{ content:"⚡"; color:#0038FF }
+.item-card:nth-child(6n+3) .thumb .hook::before{ content:"✦"; color:#FF6B00 }
+.item-card:nth-child(6n+4) .thumb .hook::before{ content:"★"; color:#00E5FF }
+.item-card:nth-child(6n+5) .thumb .hook::before{ content:"⚡"; color:#FF2E93 }
+.item-card:nth-child(6n+6) .thumb .hook::before{ content:"✦"; color:#C6FF00 }
+
+.badge{
+  border:2.5px solid var(--border); font-weight:800; text-transform:uppercase;
+  letter-spacing:.03em; transform:rotate(-6deg); box-shadow:3px 3px 0 var(--border);
+  top:-8px; left:-8px; z-index:4;
+}
+.item-card:nth-child(even) .badge{ transform:rotate(6deg) }
+.badge--best{ background:#FF2E93; color:#fff }
+.badge--new{ background:#C6FF00; color:var(--ink) }
+.badge--ship{ background:#0038FF; color:#fff }
+.badge--low{ background:#FFE500; color:var(--ink) }
+.badge--low::before{ content:"⚡ " }
+
+.heart{ border:2.5px solid var(--border); box-shadow:2px 2px 0 var(--border); transform:rotate(8deg); transition:transform .1s,background .1s }
+.heart:hover{ transform:rotate(-8deg) scale(1.1); background:#FF5CC8 }
+.heart .hook{
+  display:block; position:absolute; bottom:-8px; left:-8px;
+  font-size:12px; color:#0038FF; transform:rotate(20deg); z-index:2;
+}
+.heart .hook::before{ content:"✦" }
+.item-card:nth-child(odd) .heart .hook{ color:#FF6B00 }
+.item-card:nth-child(odd) .heart .hook::before{ content:"⚡" }
+
+/* ===== 페이지네이션 ===== */
+.page-btn{ border:2.5px solid var(--border); font-weight:700; transition:transform .1s,box-shadow .1s }
+.page-btn.is-active{ background:#FF6B00; color:var(--ink); transform:rotate(-4deg); box-shadow:2px 2px 0 var(--border) }
+.more-btn{ border:3px solid var(--border); font-weight:800; box-shadow:3px 3px 0 #0038FF; transform:rotate(1deg); transition:transform .1s,box-shadow .1s }
+.more-btn:hover{ box-shadow:1px 1px 0 #0038FF; transform:translate(2px,2px) rotate(1deg) }
+
+/* ===== 빈 상태: 패턴 + 회전 일러스트 + 스티커 ===== */
+.empty{
+  border:3px dashed var(--border);
+  background:
+    repeating-linear-gradient(45deg, rgba(255,46,147,.06) 0 6px, transparent 6px 14px),
+    var(--surface);
+}
+.empty-illust{
+  position:relative; border:3px solid var(--border); background:#C6FF00; transform:rotate(-8deg);
+}
+.empty-illust .hook{
+  display:flex; align-items:center; justify-content:center; position:absolute; inset:0; font-size:22px; color:var(--ink);
+}
+.empty-illust .hook::before{ content:"⚡" }
+.empty-cta{ border:3px solid var(--border); font-weight:800; box-shadow:4px 4px 0 #FF2E93; transform:rotate(-2deg); transition:transform .1s,box-shadow .1s }
+.empty-cta:hover{ box-shadow:2px 2px 0 #FF2E93; transform:translate(2px,2px) rotate(-2deg) }
+
+/* ===== 접근성: 형광 배경에도 묻히지 않는 이중 아웃라인 (검정+흰) ===== */
+:is(.cat,.chip,.colorchip,.filter-item,.page-btn,.more-btn,.filter-reset,.empty-cta,.heart,.cart-btn,.search-btn,.sort-select,.toggle,.price-slider):focus-visible{
+  outline:3px solid var(--ink); outline-offset:2px;
+  box-shadow:0 0 0 2px var(--bg),0 0 0 5px var(--ink);
+}

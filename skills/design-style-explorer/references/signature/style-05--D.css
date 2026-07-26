@@ -1,0 +1,44 @@
+/* signature/style-05--D.css — 05 브루탈리즘의 "구조적 시그니처" (원형 D: 컬렉션/상품 그리드).
+   토큰(색·radius)만으론 안 되는 것 = 두꺼운 하드 보더 + 오프셋 하드섀도(blur 0) + 대문자 라벨 + 찍히는(stamping) hover.
+   색·radius는 전부 tokens 몫 — 여기선 border-width/box-shadow-offset/transform/text-transform만 다룬다. */
+
+/* ── 상품 카드: 각진 하드 박스 + 오프셋 하드섀도(blur 0). hover 시 그림자가 줄며 카드가 찍힌다 */
+.item-card{
+  border:5px solid var(--border);
+  box-shadow:8px 8px 0 var(--border);
+  transition:transform .08s, box-shadow .08s;
+}
+.item-card:hover,
+.item-card:focus-within{
+  transform:translate(4px,4px);
+  box-shadow:4px 4px 0 var(--border);
+}
+
+/* ── 배지: 색으로 종류를 구분해도 박스는 규율대로 하드하게 (블러 0, 얇은 선 금지) */
+.badge{
+  border:2px solid var(--border);
+  box-shadow:3px 3px 0 var(--border);
+}
+
+/* ── 대문자 라벨: 태그·칩·브랜드명·버튼류만 (본문인 상품명 .name은 가독성 위해 그대로) */
+.brand,
+.brandname,
+.badge,
+.cat,
+.chip,
+.sort,
+.filter-reset,
+.more-btn,
+.empty-cta,
+.page-btn{
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+
+/* ── 접근성: hover 이동은 제거하되 섀도 축소는 유지 (스타일 정의서 규정, 색 변화 없음) */
+@media (prefers-reduced-motion:reduce){
+  .item-card:hover,
+  .item-card:focus-within{
+    transform:none;
+  }
+}
