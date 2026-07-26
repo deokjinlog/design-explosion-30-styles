@@ -59,6 +59,7 @@ a.inline{color:#8ab4ff;text-decoration:none}a.inline:hover{text-decoration:under
     <a href="#tests">③ 검증 3종</a>
     <a href="#engine">④ 3층 엔진</a>
     <a href="#cleanroom">⑤ 클린룸·지도</a>
+    <a href="#realrun">⑥ 실전(새 도메인)</a>
     <a href="#timeline">📜 타임라인</a>
   </nav>
 </header>
@@ -148,6 +149,23 @@ signature/style-NN--X.css             <span class="c">구조 강한 스타일만
     <span class="q">스타일 1개 추가 비용</span><span class="a"><b>tokens 357B + signature 1842B</b> (전부)</span>
   </div>
   <div class="note"><b>디자인 공간 지도(<code>map.py</code>)</b>가 밝혀낸 것: 30개가 "다양"한 게 아니라 <b>파랑·보라·둥근·소프트 코너에 절반이 뭉쳐</b>있고(파랑계열 ~10개), 격자 72셀 중 <b>53셀(웜·초록·각진)이 비었다</b>. 낭비 슬롯을 빈 코너로 재샘플하면 30개 그대로 고르게 퍼진다 — 클린룸이 그 능력을 실증. <a class="inline" href="zen-garden-spike/clean-room-test/style-31.html">31 웜 레터프레스 열기 →</a></div>
+</section>
+
+<section id="realrun">
+  <h2><span class="k">PART 6</span>실전 — 새 도메인을 이렇게 만들었어요 (중고거래 마켓)</h2>
+  <p class="desc">"새 방식이 <b>새 도메인</b>에서 뭘 만드나"를 실제로 돌린 기록. 완전히 새 도메인(<b>모아마켓</b>)인데 <b>새로 만든 건 스켈레톤 1개뿐</b> — 나머지는 재사용.</p>
+  <div class="diagram">① 콘텐츠 스펙          <span class="c">중고거래 6물건 (긴 제목·지역결측 —·나눔 ₩0·₩780,000)</span>
+② 스켈레톤 1개 저작    <span class="c">archetype-D 클래스 계약 그대로 + 콘텐츠만 중고거래  ← 유일한 신규 저작</span>
+③ 재사용               <span class="c">base/archetype-D.css (패션에 쓴 그 파일) + tokens 30  ← 0 저작</span>
+④ assemble 30 + 게이트  <span class="c">coverage 30/30 · body 바이트 동일(10490자) · 콘텐츠 전부</span></div>
+  <div style="margin:14px 0 4px"><span class="pill">새 도메인 비용 = 스켈레톤 1개</span><span class="pill">base-D가 패션·중고거래 둘 다 스타일</span></div>
+  <a class="card" href="design-gallery/2026-07-26-market-zen/gallery.html" style="margin-top:12px;display:block">
+    <span class="tag" style="background:#3a1d2e;color:#f0a3c6">D 컬렉션 · 새 도메인</span>
+    <div class="cardname">중고거래 마켓 · 30 스타일 (실전 조립)</div>
+    <div class="cardwhy">패션용 <code>base-D</code>가 중고거래 콘텐츠도 그대로 스타일 = <b>base는 도메인 무관</b>. 스켈레톤만 콘텐츠별.</div>
+    <span class="open">갤러리 열기 →</span>
+  </a>
+  <div class="note"><b>정직하게 — 아직 100% 자동은 아니다.</b> 이번엔 콘텐츠 스펙은 사람이 정하고 스켈레톤은 브리핑받은 에이전트가 저작했다. "도메인만 던지면 SKILL.md 혼자 인터뷰→원형→스켈레톤→갤러리 완주"는 SKILL.md 본문을 새 파이프라인으로 정합화하면서 가까워지는 중 — 파이프라인 <i>기계장치</i>는 이렇게 확정됐다.</div>
 </section>
 
 <section id="timeline">
