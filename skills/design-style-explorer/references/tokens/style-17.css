@@ -1,4 +1,6 @@
 /* tokens/style-17.css — 17 Y2K 베이퍼웨이브. 변수만. */
+/* @gfont Chakra+Petch:wght@500;600;700 */
+/* @gfont Black+Han+Sans */
 :root{
   --bg:#1A0B2E;
   --surface:#2D0B45;
@@ -8,8 +10,8 @@
   --radius:14px;
   --space:16px;
   --border:#A24BFF;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Orbitron','Chakra Petch',sans-serif;
+  --font:'Chakra Petch','Black Han Sans',sans-serif;
+  --font-ui:'Chakra Petch','Black Han Sans',sans-serif;
   --elevation:0.9;
-  --type-scale:1.9;
+  --type-scale:1.35;
 }

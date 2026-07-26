@@ -1,4 +1,6 @@
 /* tokens/style-08.css — 08 럭셔리 다크. 변수만. */
+/* @gfont Cormorant+Garamond:wght@500;600;700 */
+/* @gfont Nanum+Myeongjo:wght@400;700;800 */
 :root{
   --bg:#0E0D0B;
   --surface:#171512;
@@ -8,8 +10,8 @@
   --radius:6px;
   --space:18px;
   --border:#3A3226;
-  --font:'Pretendard',-apple-system,sans-serif;
-  --font-ui:'Cormorant Garamond','Pretendard',serif;
+  --font:'Cormorant Garamond','Nanum Myeongjo',serif;
+  --font-ui:'Cormorant Garamond','Nanum Myeongjo',serif;
   --elevation:0.5;
-  --type-scale:2.1;
+  --type-scale:1.6;
 }

@@ -25,10 +25,10 @@ a.full{color:#58a6ff;font-size:12.5px;text-decoration:none}a.full:hover{text-dec
 
 <div class="grid" id="g"></div>
 
-<div class="note"><b>이게 새 방식의 실전 답이다.</b> 새 도메인 = <b>스켈레톤 하나</b>(그 도메인 콘텐츠를 원형 D 클래스 계약에 담아) 저작 + <code>base/archetype-D.css</code>·<code>tokens/NN</code> 재사용 → 30 스타일. <b>패션용으로 쓴 그 base-D 파일 하나가 중고거래 콘텐츠도 그대로 스타일</b>(base는 원형 무관·도메인 무관, 스켈레톤만 콘텐츠별). 30장 body 바이트 동일 = 콘텐츠 동일성 구조적 보장, coverage 게이트 전수 통과.<br><br>견고성도 그대로: 아주 긴 제목(이케아 식탁), 지역 결측 <code>—</code>(나이키), 나눔 <code>₩0</code>(유아 침대), 큰 가격 <code>₩780,000</code>. <b>구조 강한 6개(04·05·09·10·18·19)는 패션과 같은 D-signature가 그대로 걸려</b> — 시그니처는 원형 D 클래스 계약만 겨냥하니 도메인 무관, 중고거래 콘텐츠에도 스프레드시트·픽셀·신문·스위스·맥시멀 구조가 똑같이 적용된다. 나머지 24개는 토큰전용, 웹폰트가 후속.</div>
+<div class="note"><b>이게 새 방식의 실전 답이다.</b> 새 도메인 = <b>스켈레톤 하나</b>(그 도메인 콘텐츠를 원형 D 클래스 계약에 담아) 저작 + <code>base/archetype-D.css</code>·<code>tokens/NN</code> 재사용 → 30 스타일. <b>패션용으로 쓴 그 base-D 파일 하나가 중고거래 콘텐츠도 그대로 스타일</b>(base는 원형 무관·도메인 무관, 스켈레톤만 콘텐츠별). 30장 body 바이트 동일 = 콘텐츠 동일성 구조적 보장, coverage 게이트 전수 통과.<br><br>견고성도 그대로: 아주 긴 제목(이케아 식탁), 지역 결측 <code>—</code>(나이키), 나눔 <code>₩0</code>(유아 침대), 큰 가격 <code>₩780,000</code>. <b>구조 강한 6개(04·05·09·10·18·19)는 패션과 같은 D-signature가 그대로 걸려</b> — 시그니처는 원형 D 클래스 계약만 겨냥하니 도메인 무관, 중고거래 콘텐츠에도 스프레드시트·픽셀·신문·스위스·맥시멀 구조가 똑같이 적용된다. 나머지 24개는 구조 signature 대기.<br><br><b>서체 재접지 완료</b>: 각 사조 정본 서체 <b>22종 실로드</b> + 산업 라벨 10종을 출처 있는 디자인 언어(Bauhaus·De Stijl·IBM Carbon·Material 3·Memphis…)로 교체 — <a href="../../design/2026-07-26-type-and-source-grounding.md">출처·서체 문서</a>.</div>
 
 <script>
-const N=['SF HUD','공공 포털','트렌디 SaaS','밀집 터미널','브루탈리즘','글래스모피즘','미니멀 모노크롬','럭셔리 다크','레트로 픽셀','에디토리얼','네이처 오가닉','뉴모피즘','오로라','벤토','클레이모피즘','머티리얼','Y2K','스위스','맥시멀리즘','다크 애널리틱스','AI 프로덕트','핀테크 소프트','엔터프라이즈','헬스케어','커머스','다크 미니멀','웜 프로','접근성','컬러풀 모던','데이터 어드민'];
+const N=['SF HUD','GOV.UK 공공','shadcn/ui','밀집 터미널','Neubrutalism','글래스모피즘','Braun 미니멀','럭셔리 다크','레트로 픽셀','에디토리얼','네이처 오가닉','뉴모피즘','오로라','벤토','클레이모피즘','Material 3','Y2K','스위스','맥시멀리즘','다크 애널리틱스','Riso 인쇄','De Stijl','IBM Carbon','Bauhaus','Shopify Polaris','다크 미니멀','웜 프로','접근성','Memphis','Ant Design 밀집'];
 const g=document.getElementById('g');
 N.forEach((name,i)=>{const nn=String(i+1).padStart(2,'0');const f=`style-${nn}.html`;
 const d=document.createElement('div');d.className='card';

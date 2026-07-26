@@ -1,4 +1,6 @@
 /* tokens/style-10.css — 10 에디토리얼 매거진. 변수만. */
+/* @gfont Playfair+Display:wght@500;700;900 */
+/* @gfont Noto+Serif+KR:wght@400;600;900 */
 :root{
   --bg:#FAF7F2;
   --surface:#FAF7F2;
@@ -8,8 +10,8 @@
   --radius:0px;
   --space:16px;
   --border:#D8D2C6;
-  --font:'Pretendard',-apple-system,sans-serif;
-  --font-ui:'Noto Serif KR',serif;
+  --font:'Noto Serif KR','Playfair Display',serif;
+  --font-ui:'Playfair Display','Noto Serif KR',serif;
   --elevation:0;
-  --type-scale:1.8;
+  --type-scale:1.618;
 }

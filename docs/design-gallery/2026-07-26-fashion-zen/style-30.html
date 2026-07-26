@@ -11,6 +11,7 @@
        signature = 그 스타일의 구조적 시그니처         ← 일부 스타일만 (아직 없음)
      다른 스타일로 보려면 tokens/signature 줄만 교체. -->
 <!-- -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ==== archetype-D.css ==== */
 /* base/archetype-D.css — 원형 D(컬렉션형) 공용 컴포넌트. 원형당 1개.
@@ -166,19 +167,21 @@ button,input,select{font:inherit;color:inherit}
 
 /* ==== style-30.css ==== */
 /* tokens/style-30.css — 30 데이터 리치 라이트. 변수만. */
+/* @gfont Inter:wght@400;500;600 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
-  --bg:#F9FAFB;
-  --surface:#FFFFFF;
-  --ink:#111827;
-  --muted:#6B7280;
-  --accent:#2563EB;
-  --radius:8px;
+  --bg:#FFFFFF;
+  --surface:#FAFAFA;
+  --ink:#1F1F1F;
+  --muted:#8C8C8C;
+  --accent:#1677FF;
+  --radius:2px;
   --space:10px;
-  --border:#E5E7EB;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Inter',system-ui,sans-serif;
+  --border:#F0F0F0;
+  --font:'Inter','Noto Sans KR',sans-serif;
+  --font-ui:'Inter','Noto Sans KR',sans-serif;
   --elevation:0.2;
-  --type-scale:1.5;
+  --type-scale:1.125;
 }
 
 </style>

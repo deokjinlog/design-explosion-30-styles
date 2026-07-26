@@ -1,4 +1,6 @@
 /* tokens/style-18.css — 18 스위스 인터내셔널. 변수만. */
+/* @gfont Archivo:wght@400;500;600;700;800;900 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
   --bg:#FFFFFF;
   --surface:#FFFFFF;
@@ -8,8 +10,8 @@
   --radius:0px;
   --space:24px;
   --border:#E4E4E4;
-  --font:'Helvetica Neue','Inter','Pretendard',sans-serif;
-  --font-ui:'Inter','Helvetica Neue',sans-serif;
+  --font:'Archivo','Helvetica Neue','Noto Sans KR',sans-serif;
+  --font-ui:'Archivo','Helvetica Neue',sans-serif;
   --elevation:0;
-  --type-scale:2.2;
+  --type-scale:1.5;
 }

@@ -1,15 +1,18 @@
 /* tokens/style-24.css — 24 헬스케어 웰니스. 변수만. */
+/* @gfont Poppins:wght@500;600;700 */
+/* @gfont Bungee */
+/* @gfont Black+Han+Sans */
 :root{
-  --bg:#FBFCFD;
+  --bg:#F2EFE6;
   --surface:#FFFFFF;
-  --ink:#2E3A46;
-  --muted:#8A9AA8;
-  --accent:#4A90D9;
-  --radius:20px;
+  --ink:#1A1A1A;
+  --muted:#555555;
+  --accent:#E30613;
+  --radius:0px;
   --space:24px;
-  --border:#E8EDF1;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Nunito Sans',sans-serif;
+  --border:#1A1A1A;
+  --font:'Poppins','Black Han Sans',sans-serif;
+  --font-ui:'Bungee','Poppins',sans-serif;
   --elevation:0.5;
-  --type-scale:1.5;
+  --type-scale:1.45;
 }

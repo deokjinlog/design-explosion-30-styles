@@ -28,7 +28,7 @@ a.full{color:#58a6ff;font-size:12.5px;text-decoration:none}a.full:hover{text-dec
 <div class="note"><b>가장 다른 원형까지 3층으로.</b> 대시보드는 KPI·추이 라인·도넛·목표바·표 — 대화창과 완전히 다른 뼈대인데, <b>같은 조립기·같은 게이트·같은 30 토큰</b>으로 처리됐다. 스켈레톤 <code>archetype-A.v1.html</code>(핀그리드·조단위 GMV·6행 표) + base <code>archetype-A.css</code>(차트·도넛·스파크라인 전부 순수 CSS/SVG, 토큰 먹음) + <code>tokens/NN</code>. <b><code>tokens/style-20.css</code> 한 파일이 A·B·D 세 갤러리에서 다 작동</b> — 색·형태·밀도는 원형과 무관하니까.<br><br>이로써 <b>A(대시보드)·B(대화)·D(컬렉션) 세 원형이 모두 새 파이프라인으로.</b> 지금은 A-signature 미저작(토큰전용). 후속: signature 보강·웹폰트 로딩·SKILL.md 배선.</div>
 
 <script>
-const N=['SF HUD','공공 포털','트렌디 SaaS','밀집 터미널','브루탈리즘','글래스모피즘','미니멀 모노크롬','럭셔리 다크','레트로 픽셀','에디토리얼','네이처 오가닉','뉴모피즘','오로라','벤토','클레이모피즘','머티리얼','Y2K','스위스','맥시멀리즘','다크 애널리틱스','AI 프로덕트','핀테크 소프트','엔터프라이즈','헬스케어','커머스','다크 미니멀','웜 프로','접근성','컬러풀 모던','데이터 어드민'];
+const N=['SF HUD','GOV.UK 공공','shadcn/ui','밀집 터미널','Neubrutalism','글래스모피즘','Braun 미니멀','럭셔리 다크','레트로 픽셀','에디토리얼','네이처 오가닉','뉴모피즘','오로라','벤토','클레이모피즘','Material 3','Y2K','스위스','맥시멀리즘','다크 애널리틱스','Riso 인쇄','De Stijl','IBM Carbon','Bauhaus','Shopify Polaris','다크 미니멀','웜 프로','접근성','Memphis','Ant Design 밀집'];
 const g=document.getElementById('g');
 N.forEach((name,i)=>{const nn=String(i+1).padStart(2,'0');const f=`style-${nn}.html`;
 const d=document.createElement('div');d.className='card';

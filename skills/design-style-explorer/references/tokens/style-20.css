@@ -1,4 +1,7 @@
 /* tokens/style-20.css — 20 다크 대시보드. 변수만. */
+/* @gfont IBM+Plex+Sans:wght@400;500;600 */
+/* @gfont IBM+Plex+Mono:wght@400;500 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
   --bg:#0d1117;
   --surface:#161b22;
@@ -8,8 +11,8 @@
   --radius:6px;
   --space:10px;
   --border:#30363d;
-  --font:'Pretendard','Inter',system-ui,sans-serif;
-  --font-ui:var(--font);
+  --font:'IBM Plex Sans','Noto Sans KR',sans-serif;
+  --font-ui:'IBM Plex Sans','Noto Sans KR',sans-serif;
   --elevation:0.15;
-  --type-scale:1.4;
+  --type-scale:1.15;
 }

@@ -1,4 +1,6 @@
 /* tokens/style-12.css — 12 뉴모피즘 소프트. 변수만. */
+/* @gfont Nunito:wght@400;600;700;800 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
   --bg:#E4E9F2;
   --surface:#E4E9F2;
@@ -8,8 +10,8 @@
   --radius:18px;
   --space:14px;
   --border:#C3CAD6;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:var(--font);
+  --font:'Nunito','Noto Sans KR',sans-serif;
+  --font-ui:'Nunito','Noto Sans KR',sans-serif;
   --elevation:0.9;
-  --type-scale:1.6;
+  --type-scale:1.25;
 }

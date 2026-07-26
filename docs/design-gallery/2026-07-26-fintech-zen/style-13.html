@@ -11,6 +11,7 @@
        signature = 그 스타일의 구조적 시그니처         ← 일부 스타일만 (아직 없음)
      다른 스타일로 보려면 tokens/signature 줄만 교체. -->
 <!-- -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ==== archetype-A.css ==== */
 /* base/archetype-A.css — 원형 A(대시보드형) 공용 컴포넌트. 원형당 1개.
@@ -195,6 +196,8 @@ table{border-collapse:collapse;width:100%}
 
 /* ==== style-13.css ==== */
 /* tokens/style-13.css — 13 오로라 그라디언트. 변수만. */
+/* @gfont Space+Grotesk:wght@400;500;700 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
   --bg:#0A0A12;
   --surface:#14141C;
@@ -204,10 +207,10 @@ table{border-collapse:collapse;width:100%}
   --radius:18px;
   --space:16px;
   --border:#1F1F2C;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Inter',system-ui,sans-serif;
+  --font:'Space Grotesk','Noto Sans KR',sans-serif;
+  --font-ui:'Space Grotesk','Noto Sans KR',sans-serif;
   --elevation:0.6;
-  --type-scale:1.7;
+  --type-scale:1.3;
 }
 
 </style>

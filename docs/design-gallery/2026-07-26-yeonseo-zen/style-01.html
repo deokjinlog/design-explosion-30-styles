@@ -10,6 +10,7 @@
        tokens = 스타일 변수 (원형 무관, 재사용)       ← 링크만 바꾸면 다른 스타일
        signature = 그 스타일의 구조적 시그니처         ← 일부 스타일만
      다른 스타일로 보려면 tokens/signature 두 줄만 교체. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Orbitron:wght@700;900&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ==== archetype-B.css ==== */
 /* base/archetype-B.css — 원형 B(대화형) 공용 컴포넌트. 원형당 1개.
@@ -72,6 +73,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14p
 
 /* ==== style-01.css ==== */
 /* tokens/style-01.css — 01 SF 게임 HUD. 변수만. */
+/* @gfont Rajdhani:wght@500;600;700 */
+/* @gfont Orbitron:wght@700;900 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
   --bg:#050810;
   --surface:#0A1526;
@@ -81,10 +85,10 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14p
   --radius:0px;
   --space:12px;
   --border:#0A6E82;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Share Tech Mono','Orbitron',monospace;
+  --font:'Rajdhani','Noto Sans KR',sans-serif;
+  --font-ui:'Orbitron','Rajdhani',sans-serif;
   --elevation:0.9;
-  --type-scale:1.9;
+  --type-scale:1.3;
 }
 
 </style>

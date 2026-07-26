@@ -11,6 +11,7 @@
        signature = 그 스타일의 구조적 시그니처         ← 일부 스타일만 (아직 없음)
      다른 스타일로 보려면 tokens/signature 줄만 교체. -->
 <!-- -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* ==== archetype-A.css ==== */
 /* base/archetype-A.css — 원형 A(대시보드형) 공용 컴포넌트. 원형당 1개.
@@ -195,6 +196,8 @@ table{border-collapse:collapse;width:100%}
 
 /* ==== style-04.css ==== */
 /* tokens/style-04.css — 04 고밀도 터미널. 변수만. */
+/* @gfont IBM+Plex+Mono:wght@400;500;600 */
+/* @gfont Nanum+Gothic+Coding:wght@400;700 */
 :root{
   --bg:#0A0C10;
   --surface:#0E1116;
@@ -204,10 +207,10 @@ table{border-collapse:collapse;width:100%}
   --radius:0px;
   --space:10px;
   --border:#1A1E24;
-  --font:'IBM Plex Mono','JetBrains Mono',ui-monospace,'Pretendard',monospace;
-  --font-ui:var(--font);
+  --font:'IBM Plex Mono','Nanum Gothic Coding',monospace;
+  --font-ui:'IBM Plex Mono','Nanum Gothic Coding',monospace;
   --elevation:0;
-  --type-scale:1.3;
+  --type-scale:1.15;
 }
 
 </style>

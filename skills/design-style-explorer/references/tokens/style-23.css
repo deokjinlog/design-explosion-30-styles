@@ -1,15 +1,17 @@
 /* tokens/style-23.css — 23 엔터프라이즈 B2B. 변수만. */
+/* @gfont IBM+Plex+Sans:wght@400;500;600 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
-  --bg:#F4F5F7;
-  --surface:#FFFFFF;
-  --ink:#172B4D;
-  --muted:#6B778C;
-  --accent:#0052CC;
-  --radius:4px;
+  --bg:#FFFFFF;
+  --surface:#F4F4F4;
+  --ink:#161616;
+  --muted:#525252;
+  --accent:#0F62FE;
+  --radius:0px;
   --space:16px;
-  --border:#DFE1E6;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Inter',system-ui,sans-serif;
+  --border:#E0E0E0;
+  --font:'IBM Plex Sans','Noto Sans KR',sans-serif;
+  --font-ui:'IBM Plex Sans','Noto Sans KR',sans-serif;
   --elevation:0.3;
-  --type-scale:1.5;
+  --type-scale:1.2;
 }

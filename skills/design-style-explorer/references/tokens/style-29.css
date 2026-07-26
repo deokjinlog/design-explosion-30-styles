@@ -1,15 +1,18 @@
 /* tokens/style-29.css — 29 컬러풀 모던. 변수만. */
+/* @gfont Fredoka:wght@500;600;700 */
+/* @gfont Righteous */
+/* @gfont Jua */
 :root{
-  --bg:#FFFFFF;
-  --surface:#F6F9FC;
-  --ink:#0A2540;
-  --muted:#425466;
-  --accent:#635BFF;
-  --radius:16px;
+  --bg:#FDF3E7;
+  --surface:#FFFFFF;
+  --ink:#1B1B3A;
+  --muted:#6A6A8A;
+  --accent:#FF3D7F;
+  --radius:12px;
   --space:16px;
-  --border:#E3E8EF;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Inter','Plus Jakarta Sans',sans-serif;
+  --border:#1B1B3A;
+  --font:'Fredoka','Jua',sans-serif;
+  --font-ui:'Righteous','Fredoka',sans-serif;
   --elevation:0.7;
-  --type-scale:2.0;
+  --type-scale:1.35;
 }

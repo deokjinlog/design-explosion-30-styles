@@ -1,4 +1,6 @@
 /* tokens/style-15.css — 15 클레이모피즘. 변수만. */
+/* @gfont Fredoka:wght@400;500;600;700 */
+/* @gfont Jua */
 :root{
   --bg:#F4F1FF;
   --surface:#FBF9FF;
@@ -8,8 +10,8 @@
   --radius:32px;
   --space:24px;
   --border:#EDE9FB;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Quicksand',sans-serif;
+  --font:'Fredoka','Jua',sans-serif;
+  --font-ui:'Fredoka','Jua',sans-serif;
   --elevation:1.0;
-  --type-scale:1.7;
+  --type-scale:1.3;
 }

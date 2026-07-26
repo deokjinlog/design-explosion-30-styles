@@ -1,4 +1,6 @@
 /* tokens/style-14.css — 14 벤토 그리드. 변수만. */
+/* @gfont Sora:wght@400;500;600;700 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
   --bg:#F4F4F5;
   --surface:#FFFFFF;
@@ -8,8 +10,8 @@
   --radius:22px;
   --space:16px;
   --border:#E4E4E7;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:var(--font);
+  --font:'Sora','Noto Sans KR',sans-serif;
+  --font-ui:'Sora','Noto Sans KR',sans-serif;
   --elevation:0.4;
-  --type-scale:2.0;
+  --type-scale:1.25;
 }

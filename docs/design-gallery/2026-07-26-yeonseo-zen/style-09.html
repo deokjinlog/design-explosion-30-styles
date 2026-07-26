@@ -10,6 +10,7 @@
        tokens = 스타일 변수 (원형 무관, 재사용)       ← 링크만 바꾸면 다른 스타일
        signature = 그 스타일의 구조적 시그니처         ← 일부 스타일만
      다른 스타일로 보려면 tokens/signature 두 줄만 교체. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 /* ==== archetype-B.css ==== */
 /* base/archetype-B.css — 원형 B(대화형) 공용 컴포넌트. 원형당 1개.
@@ -72,6 +73,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14p
 
 /* ==== style-09.css ==== */
 /* tokens/style-09.css — 09 레트로 픽셀. 변수만. */
+/* @gfont VT323 */
+/* @gfont Press+Start+2P */
 :root{
   --bg:#1A1C2C;
   --surface:#29366F;
@@ -81,10 +84,10 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14p
   --radius:0px;
   --space:12px;
   --border:#4A5490;
-  --font:'DungGeunMo','Pretendard',monospace;
-  --font-ui:'Press Start 2P','DungGeunMo',monospace;
+  --font:'DungGeunMo','VT323',monospace;
+  --font-ui:'VT323','DungGeunMo',monospace;
   --elevation:0.6;
-  --type-scale:1.3;
+  --type-scale:1.2;
 }
 
 

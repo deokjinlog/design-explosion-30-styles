@@ -1,4 +1,6 @@
 /* tokens/style-13.css — 13 오로라 그라디언트. 변수만. */
+/* @gfont Space+Grotesk:wght@400;500;700 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
   --bg:#0A0A12;
   --surface:#14141C;
@@ -8,8 +10,8 @@
   --radius:18px;
   --space:16px;
   --border:#1F1F2C;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Inter',system-ui,sans-serif;
+  --font:'Space Grotesk','Noto Sans KR',sans-serif;
+  --font-ui:'Space Grotesk','Noto Sans KR',sans-serif;
   --elevation:0.6;
-  --type-scale:1.7;
+  --type-scale:1.3;
 }

@@ -1,4 +1,6 @@
 /* tokens/style-26.css — 26 다크 프로 미니멀. 변수만. */
+/* @gfont Inter:wght@300;400;500;600 */
+/* @gfont Noto+Sans+KR:wght@300;400;500 */
 :root{
   --bg:#0E0E11;
   --surface:#131317;
@@ -8,8 +10,8 @@
   --radius:10px;
   --space:20px;
   --border:#232326;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Inter',system-ui,sans-serif;
+  --font:'Inter','Noto Sans KR',sans-serif;
+  --font-ui:'Inter','Noto Sans KR',sans-serif;
   --elevation:0.1;
   --type-scale:1.4;
 }

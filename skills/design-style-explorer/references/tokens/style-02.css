@@ -1,15 +1,17 @@
 /* tokens/style-02.css — 02 공공데이터 포털. 변수만. */
+/* @gfont Public+Sans:wght@400;600;700 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
-  --bg:#F5F6F8;
+  --bg:#FFFFFF;
   --surface:#FFFFFF;
-  --ink:#1A1A1A;
-  --muted:#55606B;
-  --accent:#00447C;
+  --ink:#0B0C0C;
+  --muted:#505A5F;
+  --accent:#1D70B8;
   --radius:0px;
   --space:12px;
-  --border:#D5DBE1;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:var(--font);
+  --border:#B1B4B6;
+  --font:'Public Sans','Noto Sans KR',sans-serif;
+  --font-ui:'Public Sans','Noto Sans KR',sans-serif;
   --elevation:0;
-  --type-scale:1.4;
+  --type-scale:1.2;
 }

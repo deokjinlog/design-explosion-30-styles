@@ -1,15 +1,18 @@
 /* tokens/style-21.css — 21 AI 프로덕트. 변수만. */
+/* @gfont Work+Sans:wght@400;500;600 */
+/* @gfont Syne:wght@600;700;800 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
-  --bg:#FAFAFB;
-  --surface:#FFFFFF;
-  --ink:#16161D;
-  --muted:#8A8A99;
-  --accent:#7C5CFF;
-  --radius:16px;
+  --bg:#F3EEE6;
+  --surface:#F3EEE6;
+  --ink:#1A1A2E;
+  --muted:#5B5B7A;
+  --accent:#FF4D6D;
+  --radius:0px;
   --space:20px;
-  --border:#E8E8EE;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Inter',system-ui,sans-serif;
+  --border:#1A1A2E;
+  --font:'Work Sans','Noto Sans KR',sans-serif;
+  --font-ui:'Syne','Work Sans',sans-serif;
   --elevation:0.6;
-  --type-scale:1.7;
+  --type-scale:1.3;
 }

@@ -25,10 +25,10 @@ a.full{color:#58a6ff;font-size:12.5px;text-decoration:none}a.full:hover{text-dec
 
 <div class="grid" id="g"></div>
 
-<div class="note"><b>원형 D를 3층으로.</b> 스켈레톤 <code>archetype-D.v1.html</code>(여덟시 상품목록·264개, 고정 DOM) + base <code>archetype-D.css</code>(토큰 먹는 공용 그리드·카드·필터) + <code>tokens/NN</code>. <b>이 tokens 30개는 연서 대화형 데모와 문자 그대로 같은 파일</b> — 색·형태·밀도는 원형과 무관하니까. 30장 body 바이트 동일, coverage 게이트 전수 통과.<br><br><b>구조 강한 6개(04 터미널·05 브루탈·09 픽셀·10 에디토리얼·18 스위스·19 맥시멀)는 D-signature 저작 완료</b> — "같은 그리드에 색만" 이 아니라 스프레드시트 셀·픽셀 클립·신문 마스트헤드·비대칭 12열·카드 회전 같은 <b>구조 차이가 눈에 보인다</b>(signature는 DOM 불변·CSS만 추가라 body는 여전히 바이트 동일). 나머지 24개는 토큰전용. 웹폰트 로딩이 후속 품질 패스.</div>
+<div class="note"><b>원형 D를 3층으로.</b> 스켈레톤 <code>archetype-D.v1.html</code>(여덟시 상품목록·264개, 고정 DOM) + base <code>archetype-D.css</code>(토큰 먹는 공용 그리드·카드·필터) + <code>tokens/NN</code>. <b>이 tokens 30개는 연서 대화형 데모와 문자 그대로 같은 파일</b> — 색·형태·밀도는 원형과 무관하니까. 30장 body 바이트 동일, coverage 게이트 전수 통과.<br><br><b>구조 강한 6개(04 터미널·05 브루탈·09 픽셀·10 에디토리얼·18 스위스·19 맥시멀)는 D-signature 저작 완료</b> — "같은 그리드에 색만" 이 아니라 스프레드시트 셀·픽셀 클립·신문 마스트헤드·비대칭 12열·카드 회전 같은 <b>구조 차이가 눈에 보인다</b>(signature는 DOM 불변·CSS만 추가라 body는 여전히 바이트 동일). 나머지 24개는 구조 signature 대기(다음 배치).<br><br><b>서체 재접지 완료</b>: 30 스타일이 각 사조의 정본 서체 <b>22종을 실제 웹폰트로 로드</b>(Playfair·Cormorant·IBM Plex·Space Mono·VT323·Roboto·Fraunces·Atkinson…). 산업 라벨 10종(헬스케어·핀테크·엔터프라이즈…)은 출처 있는 디자인 언어(Bauhaus·De Stijl·IBM Carbon·Material 3·Memphis…)로 교체 — <a href="../../design/2026-07-26-type-and-source-grounding.md">출처·서체 문서</a>.</div>
 
 <script>
-const N=['SF HUD','공공 포털','트렌디 SaaS','밀집 터미널','브루탈리즘','글래스모피즘','미니멀 모노크롬','럭셔리 다크','레트로 픽셀','에디토리얼','네이처 오가닉','뉴모피즘','오로라','벤토','클레이모피즘','머티리얼','Y2K','스위스','맥시멀리즘','다크 애널리틱스','AI 프로덕트','핀테크 소프트','엔터프라이즈','헬스케어','커머스','다크 미니멀','웜 프로','접근성','컬러풀 모던','데이터 어드민'];
+const N=['SF HUD','GOV.UK 공공','shadcn/ui','밀집 터미널','Neubrutalism','글래스모피즘','Braun 미니멀','럭셔리 다크','레트로 픽셀','에디토리얼','네이처 오가닉','뉴모피즘','오로라','벤토','클레이모피즘','Material 3','Y2K','스위스','맥시멀리즘','다크 애널리틱스','Riso 인쇄','De Stijl','IBM Carbon','Bauhaus','Shopify Polaris','다크 미니멀','웜 프로','접근성','Memphis','Ant Design 밀집'];
 const g=document.getElementById('g');
 N.forEach((name,i)=>{const nn=String(i+1).padStart(2,'0');const f=`style-${nn}.html`;
 const d=document.createElement('div');d.className='card';

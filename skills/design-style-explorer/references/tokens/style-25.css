@@ -1,15 +1,17 @@
 /* tokens/style-25.css — 25 커머스 리테일. 변수만. */
+/* @gfont Inter:wght@400;500;600;700 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
-  --bg:#FFFFFF;
+  --bg:#F6F6F7;
   --surface:#FFFFFF;
-  --ink:#1B1533;
-  --muted:#6B6480;
-  --accent:#FF5A5F;
-  --radius:16px;
+  --ink:#202223;
+  --muted:#6D7175;
+  --accent:#008060;
+  --radius:8px;
   --space:12px;
-  --border:#F0E9F5;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Manrope',sans-serif;
+  --border:#E1E3E5;
+  --font:'Inter','Noto Sans KR',sans-serif;
+  --font-ui:'Inter','Noto Sans KR',sans-serif;
   --elevation:0.8;
-  --type-scale:1.9;
+  --type-scale:1.2;
 }

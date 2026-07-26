@@ -17,10 +17,19 @@ css_paths = sys.argv[3:]
 combined = "\n\n".join(f"/* ==== {p.split('/')[-1]} ==== */\n" + open(p, encoding="utf-8").read()
                        for p in css_paths)
 
+# @gfont 지시자 수집 → Google Fonts <link> 로 hoist (토큰이 자기 정본 서체를 선언)
+gfonts = re.findall(r'/\*\s*@gfont\s+([^*]+?)\s*\*/', combined)
+fontlink = ""
+if gfonts:
+    fams = "".join("&family=" + g.strip().replace(" ", "+") for g in dict.fromkeys(gfonts))
+    fontlink = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
+                '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+                f'<link href="https://fonts.googleapis.com/css2?{fams.lstrip("&")}&display=swap" rel="stylesheet">\n')
+
 # 스켈레톤의 외부 3층 <link> 는 제거(인라인으로 대체)
 html = re.sub(r'\s*<link rel="stylesheet"[^>]*>', '', skeleton)
-# <style> 로 head 끝에 주입
-html = html.replace('</head>', f'<style>\n{combined}\n</style>\n</head>')
+# 폰트 <link> + <style> 로 head 끝에 주입
+html = html.replace('</head>', f'{fontlink}<style>\n{combined}\n</style>\n</head>')
 
 open(out_path, "w", encoding="utf-8").write(html)
 print(f"조립: {out_path} ({len(html)} bytes) ← {len(css_paths)}개 CSS 인라인")

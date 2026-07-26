@@ -1,15 +1,17 @@
 /* tokens/style-16.css — 16 머티리얼. 변수만. */
+/* @gfont Roboto:wght@400;500;700 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
   --bg:#FEF7FF;
-  --surface:#F3EDF7;
+  --surface:#FFFFFF;
   --ink:#1D1B20;
   --muted:#49454F;
   --accent:#6750A4;
-  --radius:12px;
+  --radius:16px;
   --space:16px;
-  --border:#79747E;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Roboto',system-ui,sans-serif;
+  --border:#CAC4D0;
+  --font:'Roboto','Noto Sans KR',sans-serif;
+  --font-ui:'Roboto','Noto Sans KR',sans-serif;
   --elevation:0.5;
-  --type-scale:1.8;
+  --type-scale:1.25;
 }

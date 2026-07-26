@@ -1,4 +1,7 @@
 /* tokens/style-19.css — 19 맥시멀리즘. 변수만. */
+/* @gfont Bungee */
+/* @gfont Space+Grotesk:wght@400;500;700 */
+/* @gfont Black+Han+Sans */
 :root{
   --bg:#FFF8E7;
   --surface:#FFFFFF;
@@ -8,8 +11,8 @@
   --radius:20px;
   --space:10px;
   --border:#0A0A0A;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Space Grotesk',sans-serif;
+  --font:'Space Grotesk','Black Han Sans',sans-serif;
+  --font-ui:'Bungee','Black Han Sans',sans-serif;
   --elevation:1.0;
-  --type-scale:2.2;
+  --type-scale:1.5;
 }

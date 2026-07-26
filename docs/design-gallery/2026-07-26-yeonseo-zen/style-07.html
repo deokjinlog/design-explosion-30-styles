@@ -10,6 +10,7 @@
        tokens = 스타일 변수 (원형 무관, 재사용)       ← 링크만 바꾸면 다른 스타일
        signature = 그 스타일의 구조적 시그니처         ← 일부 스타일만
      다른 스타일로 보려면 tokens/signature 두 줄만 교체. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ==== archetype-B.css ==== */
 /* base/archetype-B.css — 원형 B(대화형) 공용 컴포넌트. 원형당 1개.
@@ -72,19 +73,21 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14p
 
 /* ==== style-07.css ==== */
 /* tokens/style-07.css — 07 미니멀 모노크롬. 변수만. */
+/* @gfont Archivo:wght@400;500;600;700 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
-  --bg:#FFFFFF;
+  --bg:#F4F4F2;
   --surface:#FFFFFF;
-  --ink:#111111;
-  --muted:#767676;
-  --accent:#FF4D00;
+  --ink:#1A1A1A;
+  --muted:#7A7A78;
+  --accent:#E8500E;
   --radius:0px;
   --space:24px;
-  --border:#E5E5E5;
-  --font:'Pretendard',-apple-system,sans-serif;
-  --font-ui:var(--font);
+  --border:#DCDCD8;
+  --font:'Archivo','Noto Sans KR',sans-serif;
+  --font-ui:'Archivo','Noto Sans KR',sans-serif;
   --elevation:0;
-  --type-scale:2.2;
+  --type-scale:1.5;
 }
 
 

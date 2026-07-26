@@ -1,15 +1,18 @@
 /* tokens/style-05.css — 05 브루탈리즘. 변수만. */
+/* @gfont Space+Mono:wght@400;700 */
+/* @gfont Archivo+Black */
+/* @gfont Noto+Sans+KR:wght@400;700 */
 :root{
   --bg:#FFFFFF;
-  --surface:#E7E7E7;
+  --surface:#FFFFFF;
   --ink:#000000;
-  --muted:#1A1A1A;
-  --accent:#FF3B00;
+  --muted:#000000;
+  --accent:#FF5227;
   --radius:0px;
   --space:16px;
   --border:#000000;
-  --font:'Pretendard',-apple-system,sans-serif;
-  --font-ui:'Archivo Black','Pretendard',sans-serif;
+  --font:'Space Mono','Noto Sans KR',monospace;
+  --font-ui:'Archivo Black','Space Mono',sans-serif;
   --elevation:0.8;
-  --type-scale:2.2;
+  --type-scale:1.4;
 }

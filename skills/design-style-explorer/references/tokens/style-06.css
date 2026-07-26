@@ -1,4 +1,6 @@
 /* tokens/style-06.css — 06 글래스모피즘. 변수만. */
+/* @gfont Poppins:wght@400;500;600 */
+/* @gfont Noto+Sans+KR:wght@400;500;700 */
 :root{
   --bg:#7C3AED;
   --surface:#F1EEFC;
@@ -8,8 +10,8 @@
   --radius:22px;
   --space:16px;
   --border:#E6E1F7;
-  --font:'Pretendard',-apple-system,sans-serif;
-  --font-ui:var(--font);
+  --font:'Poppins','Noto Sans KR',sans-serif;
+  --font-ui:'Poppins','Noto Sans KR',sans-serif;
   --elevation:1.0;
-  --type-scale:1.7;
+  --type-scale:1.25;
 }

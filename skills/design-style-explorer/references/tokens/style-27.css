@@ -1,4 +1,6 @@
 /* tokens/style-27.css — 27 웜 프로페셔널. 변수만. */
+/* @gfont Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700 */
+/* @gfont Gowun+Batang:wght@400;700 */
 :root{
   --bg:#FAF6F0;
   --surface:#FFFDF9;
@@ -8,8 +10,8 @@
   --radius:14px;
   --space:24px;
   --border:#E7DDCF;
-  --font:'Pretendard',system-ui,-apple-system,sans-serif;
-  --font-ui:'Mulish','Nunito Sans',sans-serif;
+  --font:'Newsreader','Gowun Batang',serif;
+  --font-ui:'Newsreader','Gowun Batang',serif;
   --elevation:0.4;
-  --type-scale:1.6;
+  --type-scale:1.5;
 }
