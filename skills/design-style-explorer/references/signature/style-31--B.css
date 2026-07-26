@@ -1,0 +1,31 @@
+/* signature/style-31--B.css — 31 웜 레터프레스의 "구조적 시그니처".
+   토큰(색·radius·elevation)만으론 안 되는 것 = 각진 아바타(원형이 base에 리터럴 박혀있음) +
+   활판 눌림 텍스트 + 괘선(이중선 인쇄 프레임) + 마진 잉크선 + 인쇄체 타이포(대문자·자간).
+   색은 대부분 tokens 몫 — 여기선 var(--accent)/var(--border)만 참조, 새 색 안 만듦. */
+
+/* base가 .av/.me-av/.thread-icon 에 radius를 var(--radius) 아닌 리터럴(50%/5px)로 박아둠
+   → --radius:0(각진) 이어도 여긴 안 따라옴. 여기서만 각지게 풀어준다. */
+.av{ border-radius:0 }
+.me-av{ border-radius:0 }
+.thread-icon{ border-radius:0 }
+
+/* 활판 눌림 텍스트 — 크림 종이에 눌린 잉크(밝은 하이라이트 한 겹, 아래로) */
+.text, .card-title, .brandname{
+  text-shadow:0 1px 0 rgba(255,255,255,.55);
+}
+.brandname{ text-transform:uppercase; letter-spacing:.16em }
+.meta{ text-transform:uppercase; letter-spacing:.08em }
+.card-eyebrow{ text-transform:uppercase; letter-spacing:.12em }
+
+/* 괘선(letterhead rule) — 배너·컴포저를 이중선 인쇄 프레임으로 */
+.banner{ border-bottom-style:double; border-bottom-width:3px }
+.composer{ border-style:double; border-width:3px }
+.newbtn{ border-style:dashed; border-width:2px }
+
+/* 응답 카드 = 마진 잉크선(전체 테두리 대신 두꺼운 좌측 한 줄) + 인쇄 장식 기호 */
+.card{ border:0; border-left:5px solid var(--accent); padding-left:calc(var(--space)*.9) }
+.card-title::before{ content:"❧ " }
+
+/* 진행중 스레드 = 배경 강조 대신 밑줄 + 인쇄 화살표 마커 */
+.thread.is-active{ background:transparent; outline:0; border-bottom:1px solid var(--accent) }
+.thread.is-active::before{ content:"▸ "; color:var(--accent); font-weight:700 }

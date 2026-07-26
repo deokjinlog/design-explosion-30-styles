@@ -12,6 +12,16 @@ description: 사용자가 도메인(제품·서비스 주제)을 지정하면 �
 
 ## 워크플로
 
+> ## 🔧 생성 엔진 — 3층 파이프라인 (기본 · 2026-07 전환)
+>
+> **스타일마다 HTML을 통짜 생성하지 않는다.** DOM(스켈레톤)을 고정하고 **CSS 3층**(base·tokens·signature)만 만들어 `assemble.py`로 자립 HTML로 조립한다. 콘텐츠 동일성은 스켈레톤이 **구조적으로 보장**(프롬프트로 "같은 콘텐츠 지켜라" 부탁 불필요), 게이트는 `coverage-lint` 하나(환각 셀렉터·누락 영역).
+>
+> - **자산**: `references/skeletons/` · `base/` · `tokens/`(01~30, **원형 무관·공유**) · `signature/`(구조 강한 스타일만) · `assemble.py` · `coverage-lint.py`
+> - **방법·상세는 반드시 이 문서대로**: **`references/3-layer-pipeline.md`**
+> - 아래 **2단계 "시안 생성"은 이 파이프라인으로 수행**: 스타일당 `tokens/style-NN.css`(+구조적이면 `signature/style-NN--X.css`) 생성 → `assemble.py` 조립 → `coverage-lint` PASS. HTML 통짜 생성 금지.
+> - 새 원형 = `skeletons/`·`base/` 2개만 저작(tokens 30 재사용). `archetype-lint`는 `coverage-lint`로 교체됨. 다양성은 `map.py` 좌표로 측정해 빈 코너를 재샘플.
+> - 세 원형(A 대시보드·B 대화·D 컬렉션) 조립 데모: `docs/design-gallery/2026-07-26-{fintech,yeonseo,fashion}-zen/`.
+
 ### 1단계 — 도메인 접수 · 콘텐츠 인터뷰 · 스펙 확정
 
 > ⛔ **대시보드로 직행하지 마라.** 대시보드는 11개 원형 중 하나일 뿐이다. 도메인에 안 맞는 원형을 고르면 시안 30개가 아무리 잘 나와도 **비교할 수 없는 갤러리**가 된다 (references/archetypes.md 서두의 실제 사고 사례).

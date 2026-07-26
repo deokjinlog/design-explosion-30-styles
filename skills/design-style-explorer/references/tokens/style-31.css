@@ -1,0 +1,15 @@
+/* tokens/style-31.css — 31 웜 레터프레스. 변수만. */
+:root{
+  --bg:#F3E9D6;
+  --surface:#ECE0C7;
+  --ink:#2B2118;
+  --muted:#8B7862;
+  --accent:#C1652E;
+  --radius:0px;
+  --space:14px;
+  --border:#C2A783;
+  --font:'Nanum Myeongjo','Noto Serif KR',Georgia,'Times New Roman',serif;
+  --font-ui:var(--font);
+  --elevation:0;
+  --type-scale:1.15;
+}
