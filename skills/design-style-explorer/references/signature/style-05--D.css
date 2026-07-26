@@ -1,44 +1,190 @@
-/* signature/style-05--D.css — 05 브루탈리즘의 "구조적 시그니처" (원형 D: 컬렉션/상품 그리드).
-   토큰(색·radius)만으론 안 되는 것 = 두꺼운 하드 보더 + 오프셋 하드섀도(blur 0) + 대문자 라벨 + 찍히는(stamping) hover.
-   색·radius는 전부 tokens 몫 — 여기선 border-width/box-shadow-offset/transform/text-transform만 다룬다. */
+/* signature/style-05--D.css — 05 NEUBRUTALISM (원형 D: 컬렉션/상품 그리드)
+   정본 시그니처 (NN/g Neubrutalism): 회색조에서도 강하게 박히게.
+     · 카드·버튼·배지·칩·인풋 = 3px 하드보더 + 오프셋 하드섀도(blur 0)
+     · hover = 섀도 줄고 translate → "눌리는(stamping)" 느낌
+     · flat 원색 채움 (그라디언트·blur 섀도 절대 금지)
+     · radius 0 예외없음 — base의 50% 원형 잔재까지 각지게
+     · 액센트 #FF5227를 블록으로 과감히, 그 위 글자는 검정(가독성)
+     · 관습 깨는 배치(살짝 어긋난 회전) · 두꺼운 검은 언더라인 링크
+   색·서체·radius 값 자체는 tokens 몫. 여기선 border-width / shadow-offset /
+   transform / 각짐 / block-fill / underline 만 다룬다. 구조 override only. */
 
-/* ── 상품 카드: 각진 하드 박스 + 오프셋 하드섀도(blur 0). hover 시 그림자가 줄며 카드가 찍힌다 */
-.item-card{
-  border:5px solid var(--border);
-  box-shadow:8px 8px 0 var(--border);
-  transition:transform .08s, box-shadow .08s;
-}
-.item-card:hover,
-.item-card:focus-within{
-  transform:translate(4px,4px);
-  box-shadow:4px 4px 0 var(--border);
+/* ── 0. 각짐 강제: base에 literal로 남은 50%·둥근 잔재를 전부 각지게 ── */
+.logo,.cart-count,.avatar,.colorchip,.heart,.swatches i,.empty-illust,
+.search,.search-btn,.cart-btn,.chip,.badge,.filter-item,.sort-select,
+.filter-reset,.page-btn,.more-btn,.empty-cta,.item-card,.thumb,.filter,.empty{
+  border-radius:0;
 }
 
-/* ── 배지: 색으로 종류를 구분해도 박스는 규율대로 하드하게 (블러 0, 얇은 선 금지) */
-.badge{
-  border:2px solid var(--border);
+/* ── 1. identity: 헤더 하단 두꺼운 검은 선 ── */
+.identity{border-bottom:4px solid var(--border);background:var(--bg)}
+
+.brand{text-decoration:none}
+.logo{
+  background:var(--accent);color:var(--ink);
+  border:3px solid var(--border);box-shadow:4px 4px 0 var(--border);
+  transform:rotate(-3deg);
+}
+.brandname{font-weight:800}
+
+/* 두꺼운 검은 언더라인 링크 — nav 카테고리 */
+.cat{font-weight:700;padding-bottom:3px}
+.cat:hover{box-shadow:inset 0 -3px 0 var(--border)}
+.cat.is-active{color:var(--ink);box-shadow:inset 0 -4px 0 var(--accent)}
+.cat.is-sale{color:var(--accent)}
+
+/* 검색창 = 인풋 → 하드박스 */
+.search{
+  border:3px solid var(--border);box-shadow:4px 4px 0 var(--border);
+  background:var(--surface);
+}
+.search input{font-weight:700}
+.search-btn{
+  background:var(--accent);border:2px solid var(--border);
+  width:24px;height:24px;
+}
+
+/* 장바구니·아바타 = 각진 하드 버튼 블록 */
+.cart-btn{
+  background:var(--surface);border:2px solid var(--border);
+  box-shadow:2px 2px 0 var(--border);width:30px;height:30px;
+}
+.cart-count{background:var(--accent);color:var(--ink);border:2px solid var(--border);font-weight:800}
+.avatar{
+  background:var(--surface);border:3px solid var(--border);
   box-shadow:3px 3px 0 var(--border);
 }
 
-/* ── 대문자 라벨: 태그·칩·브랜드명·버튼류만 (본문인 상품명 .name은 가독성 위해 그대로) */
-.brand,
-.brandname,
-.badge,
-.cat,
-.chip,
-.sort,
-.filter-reset,
-.more-btn,
-.empty-cta,
-.page-btn{
-  text-transform:uppercase;
-  letter-spacing:.03em;
+/* ── 2. filter: 사이드 패널 = 큰 하드박스 ── */
+.filter{
+  border:4px solid var(--border);box-shadow:8px 8px 0 var(--border);
+  background:var(--surface);
+}
+/* 섹션 제목 = 검은 블록 라벨 (흰 글자) */
+.filter-title{
+  display:inline-block;background:var(--ink);color:var(--bg);
+  padding:3px 7px;font-weight:800;
+}
+/* 필터 링크 — 언더라인, active는 액센트 블록 */
+.filter-item{font-weight:600}
+.filter-item:hover{box-shadow:inset 0 -3px 0 var(--border)}
+.filter-item.is-active{
+  background:var(--accent);color:var(--ink);font-weight:800;
+  border:2px solid var(--border);box-shadow:3px 3px 0 var(--border);
 }
 
-/* ── 접근성: hover 이동은 제거하되 섀도 축소는 유지 (스타일 정의서 규정, 색 변화 없음) */
+/* 사이즈 칩 = 하드박스 + 눌림, active는 액센트 블록 */
+.chip{
+  border:3px solid var(--border);box-shadow:3px 3px 0 var(--border);
+  font-weight:700;transition:transform .08s,box-shadow .08s;
+}
+.chip:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--border)}
+.chip.is-active{background:var(--accent);border-color:var(--border);color:var(--ink)}
+
+/* 색상칩 = 각진 하드박스, 원색 채움(--sw) 그대로, active는 액센트 오프셋 */
+.colorchip{border:3px solid var(--border);box-shadow:3px 3px 0 var(--border)}
+.colorchip.is-active{box-shadow:0 0 0 3px var(--bg),4px 4px 0 var(--accent)}
+
+/* 가격 슬라이더 트랙 = 각진 선 */
+.price-slider{border:2px solid var(--border);padding:2px;background:var(--surface)}
+
+/* 초기화 = 하드박스 버튼 + 눌림 */
+.filter-reset{
+  border:3px solid var(--border);box-shadow:4px 4px 0 var(--border);
+  background:var(--surface);color:var(--ink);font-weight:700;
+  transition:transform .08s,box-shadow .08s;
+}
+.filter-reset:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--border)}
+
+/* ── 3. results: 결과 헤더 하단 두꺼운 선 + 카운트 액센트 블록 ── */
+.results{border-bottom:4px solid var(--border)}
+.result-count b{
+  background:var(--accent);color:var(--ink);
+  border:2px solid var(--border);padding:0 6px;
+}
+.sort-select{
+  border:3px solid var(--border);box-shadow:3px 3px 0 var(--border);
+  background:var(--surface);color:var(--ink);font-weight:700;
+}
+
+/* ── 4. collection / item-card: 히어로 하드박스 + 스탬핑 hover ── */
+.item-card{
+  border:4px solid var(--border);box-shadow:8px 8px 0 var(--border);
+  transition:transform .08s,box-shadow .08s;
+}
+.item-card:hover,
+.item-card:focus-within{
+  transform:translate(4px,4px);box-shadow:2px 2px 0 var(--border);
+}
+
+.thumb{border-bottom:3px solid var(--border)}
+.thumb-initial{color:var(--ink);opacity:1;font-weight:800}
+
+/* 배지 = 하드박스, flat 원색, 액센트 위 글자는 검정, 살짝 어긋난 회전 */
+.badge{
+  border:2px solid var(--border);box-shadow:3px 3px 0 var(--border);
+  font-weight:800;transform:rotate(-3deg);
+}
+.badge--best{background:var(--ink);color:var(--bg)}
+.badge--new{background:var(--accent);color:var(--ink);border-color:var(--border)}
+.badge--ship{background:var(--accent);color:var(--ink)}
+.badge--low{background:var(--bg);color:var(--ink);border:2px solid var(--border)}
+
+/* 찜 버튼 = 각진 하드박스 */
+.heart{
+  background:var(--surface);border:2px solid var(--border);
+  box-shadow:2px 2px 0 var(--border);
+}
+
+/* 할인율 = 액센트 블록 (검은 글자) */
+.price-now{font-weight:800}
+.discount{
+  background:var(--accent);color:var(--ink);
+  border:2px solid var(--border);padding:0 5px;font-weight:800;
+}
+/* 색상 미리보기 스와치도 각지게 */
+.swatches i{border:2px solid var(--border)}
+
+/* ── 5. action / 페이지네이션: 하드박스 버튼, active는 액센트 블록 ── */
+.page-btn{
+  border:3px solid var(--border);box-shadow:3px 3px 0 var(--border);
+  background:var(--surface);color:var(--ink);font-weight:700;
+  transition:transform .08s,box-shadow .08s;
+}
+.page-btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:1px 1px 0 var(--border)}
+.page-btn.is-active{background:var(--accent);border-color:var(--border);color:var(--ink)}
+.more-btn{
+  border:3px solid var(--border);box-shadow:4px 4px 0 var(--border);
+  background:var(--surface);color:var(--ink);font-weight:700;
+  transition:transform .08s,box-shadow .08s;
+}
+.more-btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--border)}
+
+/* ── 6. empty: 점선 → 실선 하드박스, CTA는 액센트 블록 ── */
+.empty{
+  border:4px solid var(--border);box-shadow:8px 8px 0 var(--border);
+  background:var(--surface);
+}
+.empty-illust{border:3px solid var(--border);border-style:solid}
+.empty-title{font-weight:800}
+.empty-cta{
+  background:var(--accent);color:var(--ink);
+  border:3px solid var(--border);box-shadow:5px 5px 0 var(--border);
+  font-weight:800;transition:transform .08s,box-shadow .08s;
+}
+.empty-cta:hover{transform:translate(2px,2px);box-shadow:3px 3px 0 var(--border)}
+
+/* ── 7. 대문자 라벨: 태그·칩·브랜드·버튼류만 (본문 .name은 가독성 위해 제외) ── */
+.brand,.brandname,.badge,.cat,.chip,.sort,.filter-title,
+.filter-reset,.more-btn,.empty-cta,.page-btn{
+  text-transform:uppercase;letter-spacing:.03em;
+}
+
+/* ── 8. 접근성: hover 이동(translate)은 제거하되 섀도 축소는 유지 (색 변화 없음) ── */
 @media (prefers-reduced-motion:reduce){
-  .item-card:hover,
-  .item-card:focus-within{
+  .item-card:hover,.item-card:focus-within,
+  .chip:hover,.filter-reset:hover,.page-btn:hover:not(:disabled),
+  .more-btn:hover,.empty-cta:hover{
     transform:none;
   }
 }

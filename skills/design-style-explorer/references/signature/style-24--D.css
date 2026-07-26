@@ -1,0 +1,120 @@
+/* signature/style-24--D.css — 24 Bauhaus 의 "구조적 시그니처" (원형 D · 컬렉션/상품 그리드).
+   토큰(빨강 accent·radius 0·굵은 잉크 보더)만으론 안 되는 것 =
+   ① 기하 도형이 주인공 — 썸네일마다 원(::before)·정사각(thumb-initial 블록)·삼각형(::after) 3원형을
+      얹고, 카드 순번에 따라 원색 3(빨강 var(--accent)·노랑 #FFD500·파랑 #005BBB)을 돌려 칠한다.
+   ② 원색 3 배분 — 로고=파랑, 활성 탭/필터=노랑, 배지·할인·CTA=빨강. 이 셋 외 색은 안 쓴다(잉크·회색 뿐).
+   ③ 각(角) 규율 — base 가 50% 원형으로 박아둔 잔재(카트배지·아바타·색칩·하트·색점·빈상태)를 전부
+      radius:0 으로 덮어 각지게. 단 Bauhaus 장식 도형(썸네일 원·빈상태 원)만 예외적으로 원 허용.
+   ④ 굵은 검은 라인 — 헤어라인(1px)을 2~3px solid 잉크로 승격, 소프트 섀도/리프트는 플랫 오프셋 블록으로.
+   (이 파일 없이는 그냥 커머스 그리드 — 원색 도형·직각·굵은 라인이 Bauhaus 정체성의 전부) */
+
+/* ===== identity — 굵은 밑줄 격자 헤더, 로고=파랑 사각 마크 ===== */
+.identity{ border-bottom:3px solid var(--ink); }
+.brand .logo, .logo{ background:#005BBB; color:var(--surface); border:2px solid var(--ink); border-radius:0; font-weight:800; }
+.brandname{ text-transform:uppercase; letter-spacing:.04em; font-weight:800; }
+.categories .cat, .cat{ text-transform:uppercase; font-weight:700; letter-spacing:.02em; }
+.cat.is-active{ box-shadow:none; background:#FFD500; color:var(--ink); border:2px solid var(--ink); padding:4px 8px; }
+.cat.is-sale{ color:var(--accent); }                       /* 세일=빨강 1점 유지 */
+.search{ border:2px solid var(--ink); border-radius:0; }
+.search-btn{ border-radius:0; }
+.identity-actions .cart-btn, .cart-btn{ border-radius:0; }
+.cart-count{ background:var(--accent); border:1.5px solid var(--ink); border-radius:0; color:var(--surface); }
+.avatar{ border-radius:0; border:2px solid var(--ink); }
+
+/* ===== filter — 굵은 잉크 박스, 각진 칩, 노랑 활성 블록 ===== */
+.filter{ border:3px solid var(--ink); border-radius:0; background:var(--surface); }
+.filter-group{ }                                           /* region 크롬 유지 */
+.filter-title{ color:var(--ink); font-weight:800; border-bottom:2px solid var(--ink); padding-bottom:4px; }
+.filter-list{ }
+.filter-item{ border-radius:0; }
+.filter-item.is-active{ background:#FFD500; color:var(--ink); box-shadow:none; border:2px solid var(--ink); font-weight:800; }
+.size-chips .chip, .chip{ border:2px solid var(--ink); border-radius:0; font-weight:700; }
+.chip.is-active{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+.swatch-grid .colorchip, .colorchip{ border-radius:0; border:2px solid var(--ink); }   /* --sw 실색상은 유지, 각만 세움 */
+.colorchip.is-active{ box-shadow:none; outline:3px solid var(--accent); outline-offset:2px; }
+.price-slider{ accent-color:var(--accent); }
+.toggle{ accent-color:#005BBB; }
+.filter-reset{ border:2px solid var(--ink); border-radius:0; background:transparent; font-weight:800; text-transform:uppercase; }
+
+/* ===== results — 굵은 밑줄 제호, 대문자 헤드라인, 빨강 카운트 ===== */
+.results{ border-bottom:3px solid var(--ink); }
+.result-count{ text-transform:uppercase; font-weight:800; letter-spacing:.02em; }
+.result-count b{ color:var(--accent); }
+.sort-select{ border:2px solid var(--ink); border-radius:0; font-weight:700; }
+
+/* ===== collection — 균등 격자, 도형이 숨 쉬게 gap 확보 ===== */
+.collection{ gap:var(--space); }
+
+/* ===== item-card — 굵은 잉크 프레임, 리프트 대신 플랫 오프셋 블록 ===== */
+.item-card{ border:3px solid var(--ink); border-radius:0; background:var(--surface); overflow:hidden; }
+.item-card:hover, .item-card:focus-within{ transform:none; box-shadow:6px 6px 0 0 var(--ink); }  /* 소프트 섀도 금지 → 하드 오프셋 */
+
+/* ── 썸네일 = Bauhaus 캔버스: 원(::before) · 사각(initial 블록) · 삼각(::after) ── */
+.thumb{ background:var(--bg); border-bottom:3px solid var(--ink); overflow:hidden; }
+.thumb::before{                                            /* 원 — 예외적으로 원형 허용 */
+  content:""; position:absolute; z-index:0;
+  width:60%; aspect-ratio:1; border-radius:50%;
+  top:-12%; left:-14%; border:3px solid var(--ink);
+  background:var(--accent);
+}
+.thumb::after{                                             /* 삼각형 — border 트릭 */
+  content:""; position:absolute; z-index:0;
+  right:8%; bottom:7%; width:0; height:0;
+  border-left:32px solid transparent; border-right:32px solid transparent;
+  border-bottom:54px solid #005BBB;
+}
+.thumb-initial{                                            /* 정사각 블록 — 글자를 흰 사각에 담아 가독성 + 세 번째 도형 */
+  position:relative; z-index:1; opacity:1; color:var(--ink); font-weight:800;
+  width:1.7em; height:1.7em; line-height:1;
+  display:grid; place-items:center;
+  background:var(--surface); border:3px solid var(--ink);
+}
+/* 카드 순번마다 원색 3 회전 — 원과 삼각을 서로 다른 원색으로 */
+.item-card:nth-child(3n+1) .thumb::before{ background:var(--accent); }
+.item-card:nth-child(3n+2) .thumb::before{ background:#FFD500; }
+.item-card:nth-child(3n+3) .thumb::before{ background:#005BBB; }
+.item-card:nth-child(3n+1) .thumb::after{ border-bottom-color:#005BBB; }
+.item-card:nth-child(3n+2) .thumb::after{ border-bottom-color:var(--accent); }
+.item-card:nth-child(3n+3) .thumb::after{ border-bottom-color:#FFD500; }
+
+/* ── 배지 = 각진 원색 플랫 블록 (사각 도형 역할) ── */
+.badge{ border-radius:0; border:2px solid var(--ink); font-weight:800; text-transform:uppercase; letter-spacing:.02em; }
+.badge--best{ background:var(--ink); color:var(--surface); }
+.badge--new{ background:#FFD500; color:var(--ink); }
+.badge--ship{ background:#005BBB; color:var(--surface); }
+.badge--low{ background:var(--surface); color:var(--ink); border-style:solid; }
+
+/* ── 하트 = 각진 사각 버튼 ── */
+.heart{ border-radius:0; border:2px solid var(--ink); }
+
+/* ── 상품 정보 타이포 · 할인=빨강 블록 ── */
+.card-body .brand{ text-transform:uppercase; letter-spacing:.08em; font-weight:700; }
+.name{ font-weight:800; letter-spacing:-.005em; }
+.price-now{ font-weight:800; }
+.discount{ background:var(--accent); color:var(--surface); padding:1px 6px; font-weight:800; }
+.swatches i{ border-radius:0; border:1.5px solid var(--ink); }   /* 실색상 유지, 원형만 각지게 */
+.rating .stars{ color:var(--ink); }
+
+/* ===== action — 굵은 윗선, 각진 페이지 버튼, 파랑 활성 ===== */
+.action{ border-top:3px solid var(--ink); padding-top:var(--space); }
+.pager{ }
+.page-btn{ border:2px solid var(--ink); border-radius:0; font-weight:700; }
+.page-btn.is-active{ background:#005BBB; border-color:var(--ink); color:var(--surface); }
+.page-btn.prev, .page-btn.next{ border-radius:0; }
+.ellipsis{ color:var(--ink); font-weight:800; }
+.more-btn{ border:2px solid var(--ink); border-radius:0; font-weight:800; text-transform:uppercase; }
+
+/* ===== empty — 굵은 박스 + Bauhaus 원(노랑) 위에 삼각(파랑) 삽화, 빨강 CTA ===== */
+.empty{ border:3px solid var(--ink); border-radius:0; }
+.empty-illust{                                             /* 원 — 예외적으로 원형 허용 */
+  position:relative; overflow:hidden;
+  border-radius:50%; border:3px solid var(--ink); background:#FFD500;
+}
+.empty-illust::before{                                     /* 삼각형 */
+  content:""; position:absolute; left:50%; top:54%; transform:translate(-50%,-50%);
+  width:0; height:0;
+  border-left:13px solid transparent; border-right:13px solid transparent;
+  border-bottom:21px solid #005BBB;
+}
+.empty-title{ text-transform:uppercase; font-weight:800; }
+.empty-cta{ background:var(--accent); color:var(--surface); border:2px solid var(--ink); border-radius:0; font-weight:800; text-transform:uppercase; }

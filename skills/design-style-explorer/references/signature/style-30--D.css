@@ -1,0 +1,91 @@
+/* signature/style-30--D.css — 30 "Ant Design 밀집"의 구조적 시그니처 (원형 D · 컬렉션/상품 그리드).
+   토큰(색 #1677FF · radius 2 · border #F0F0F0)만으론 안 되는 것 = 밀도 그 자체.
+   base+tokens 만 먹이면 그냥 "각진 커머스 그리드"다. Ant 고밀도의 정체성은 아래 5가지 구조 규율:
+   ① 초고밀도 스케일 — 본문 13px·타이트 라인높이, 패딩 반으로(행 느낌 ~32px), 컴팩트 4열 그리드
+   ② 원형 잔재 제거 — base 가 곳곳에 남긴 border-radius:50% 를 전부 var(--radius)(=2px)로 각지게
+   ③ 플랫·헤어라인 — 카드 리프트/큰 소프트섀도 금지, hover 는 미세 1px 섀도만(뜨지 않는다)
+   ④ 배지/칩/하트 축소 — 정보 밀도 최대: 장식 요소를 작게, tabular-nums 로 숫자 정렬
+   ⑤ 액센트 예산 — #1677FF 는 링크·선택·주요버튼(Ant 의 primary blue)에만. 새 장식 액센트 금지.
+   (색·radius 값은 전부 tokens 몫 — 여기선 크기/패딩/라인높이/그리드/섀도/각짐만 다룬다) */
+
+/* ── ① 초고밀도 타이포 스케일 ── */
+body{ font-size:13px; line-height:1.4; }
+
+/* ── identity: 촘촘한 상단 툴바 (세로 여백 압축) ── */
+.identity{ padding:5px 12px; gap:14px; }
+.logo{ width:22px; height:22px; font-size:12px; }
+.brandname{ font-size:14px; }
+.cat{ font-size:13px; padding:3px 2px; }
+.search{ padding:4px 8px; max-width:320px; }
+.search input{ font-size:13px; }
+.identity-actions{ gap:8px; }
+.cart-btn{ width:26px; height:26px; }
+.cart-count{ border-radius:var(--radius); min-width:14px; height:14px; font-size:9px; }
+.avatar{ width:24px; height:24px; border-radius:var(--radius); font-size:12px; }
+
+/* ── filter: 리스트/테이블 느낌의 조밀한 정렬 (행 ~30px) ── */
+.filter{ padding:12px; gap:14px; }
+.filter-group{ gap:6px; }
+.filter-title{ font-size:11px; letter-spacing:.02em; }
+.filter-item{ padding:4px 8px; font-size:13px; }
+.size-chips{ gap:5px; }
+.chip{ padding:3px 8px; font-size:12px; }
+.swatch-grid{ gap:6px; }
+.colorchip{ width:22px; height:22px; border-radius:var(--radius); }
+.price-labels{ font-size:11px; }
+.toggle-row{ font-size:12px; }
+.toggle{ width:14px; height:14px; }
+.filter-reset{ padding:6px; font-size:12px; }
+
+/* ── results 헤더: 컴팩트 · 카운트 tabular ── */
+.results{ padding-bottom:8px; }
+.result-count{ font-size:14px; font-weight:600; }
+.result-count b{ font-variant-numeric:tabular-nums; }
+.sort{ font-size:12px; }
+.sort-select{ padding:4px 8px; font-size:12px; }
+
+/* ── ① 컴팩트 4열 그리드 (정보 밀도 최대). base 의 media 가 이 파일보다 앞서 로드되므로 반응형 재선언 필수 ── */
+.collection{ grid-template-columns:repeat(4,1fr); gap:10px; }
+@media (max-width:1024px){ .collection{ grid-template-columns:repeat(3,1fr); } }
+@media (max-width:640px){ .collection{ grid-template-columns:repeat(2,1fr); } }
+
+/* ── ③ 카드: 플랫 헤어라인. 리프트(translateY)·큰 소프트섀도 제거, hover 는 미세 1px 섀도만 ── */
+.item-card{ transition:box-shadow .12s ease, border-color .12s ease; }
+.item-card:hover,
+.item-card:focus-within{
+  transform:none;
+  box-shadow:0 1px 3px -1px rgba(0,0,0,.12);
+  border-color:var(--muted);
+}
+
+/* ── ④ 썸네일/배지/하트 축소 ── */
+.thumb-initial{ font-size:32px; }
+.badge{ top:6px; left:6px; padding:1px 6px; font-size:10px; font-weight:600; letter-spacing:0; }
+.heart{ top:6px; right:6px; width:22px; height:22px; border-radius:var(--radius); }
+.heart .ico{ font-size:12px; }
+
+/* ── 카드 본문: 여백 반으로, 타이포 계층 (라벨 작게 → 상품명 중간 → 가격 tabular) ── */
+.card-body{ padding:8px 10px; gap:3px; }
+.card-body .brand{ font-size:11px; }
+.name{ font-size:13px; font-weight:600; line-height:1.35; min-height:calc(1.35em*2); }
+.swatches{ gap:4px; }
+.swatches i{ width:12px; height:12px; border-radius:var(--radius); }
+.price-row{ gap:6px; }
+.price-was{ font-size:11px; font-variant-numeric:tabular-nums; }
+.price-now{ font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; }
+.discount{ font-size:11px; }
+.rating{ font-size:11px; }
+.review-count{ font-variant-numeric:tabular-nums; }
+
+/* ── action(페이지네이션): 촘촘한 소형 버튼 ── */
+.action{ gap:10px; padding-top:8px; }
+.pager{ gap:3px; }
+.page-btn{ min-width:28px; height:28px; font-size:12px; }
+.more-btn{ padding:5px 14px; font-size:12px; }
+
+/* ── empty: 컴팩트 · ② 원형 일러스트도 각지게 ── */
+.empty{ padding:32px 12px; }
+.empty-illust{ border-radius:var(--radius); width:48px; height:48px; }
+.empty-title{ font-size:14px; }
+.empty-desc{ font-size:12px; }
+.empty-cta{ padding:6px 16px; font-size:13px; }  /* ⑤ primary blue 유지 — Ant 의 주요버튼 */

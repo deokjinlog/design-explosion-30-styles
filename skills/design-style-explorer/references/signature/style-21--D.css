@@ -1,0 +1,119 @@
+/* signature/style-21--D.css — 21 Riso 인쇄(Risograph) × 원형 D(컬렉션/상품 그리드)의 "구조적 시그니처".
+   토큰(뉴스프린트 배경·리소핑크 --accent·radius 0)만으론 안 되는 것 = 스팟 인쇄 그 자체다:
+   ① 스팟 2색만 — 리소핑크 var(--accent) + 리소블루 #2D5BFF. mix-blend-mode:multiply 로 겹쳐 제3색을 흉내낸다.
+      (풀컬러·사진풍 그라디언트 금지. 잉크는 두 판(pink판/blue판)으로만 찍힌다.)
+   ② 미스레지스트레이션(판 오정합) — 같은 형태를 1~3px 어긋나게 다른 스팟색으로 겹쳐 인쇄. 썸네일·헤드라인·배지에.
+   ③ 하프톤 스크린 — repeating radial-gradient 점 패턴으로 잉크 망점을 깐다. 종이 위 거친 그레인.
+   ④ 잉크가 뭉친 듯 flat·직각(radius 0) — base 의 50% 원형 잔재와 리프트/드롭섀도를 전부 환수.
+   본문 가독 앵커(.name/.price-now/.card-body 등)의 오정합은 "읽히는 한도"의 고스트로만 — 글자를 못 읽게 하지 않는다.
+   회색조로 뽑아도 pink판/blue판/오프셋이 서로 다른 망점·위치라 구조로 구분된다. */
+
+:root{ --riso-blue:#2D5BFF; }   /* 제2 스팟색. base/tokens 어디도 안 건드리고 이것만 추가 */
+
+/* ── ① 종이: 뉴스프린트 위 미세 잉크 그레인(망점) — 조용한 면에도 인쇄 질감이 항상 살아있음 ── */
+body{
+  background:
+    radial-gradient(rgba(26,26,46,.05) .6px, transparent .8px) 0 0/4px 4px,
+    var(--bg);
+}
+.identity{ border-bottom:2px solid var(--ink); }
+.filter{ border:1.5px solid var(--ink); }
+.search{ border:1.5px solid var(--ink); }
+
+/* ── ② 헤드라인·라벨 오정합: 스팟블루 고스트를 text-shadow 로 1~2px 어긋나게(글자 자체는 잉크블랙, 가독 유지) ── */
+.brandname{ text-shadow:1.5px 1.5px 0 var(--riso-blue); }
+.result-count b{ color:var(--accent); text-shadow:2px 2px 0 var(--riso-blue); }  /* 핑크판 숫자 + 블루판 오정합 */
+.name{ text-shadow:1.2px 1.2px 0 rgba(45,91,255,.85); }                          /* 상품명: 옅은 블루 고스트만 — 2줄 클램프 가독 유지 */
+
+/* ── ③ 썸네일: 2색 하프톤 스팟 인쇄 + 판 오정합 ──
+   ::before = 리소핑크 망점판, ::after = 리소블루 망점판을 서로 어긋나게(offset) 겹치고 둘 다 multiply.
+   두 판의 점이 겹치는 곳이 어두워지며 "제3색"이 태어난다. 오버플로 숨겨 옆 카드로 안 번지게. */
+.thumb{ background:var(--bg); overflow:hidden; }
+.thumb::before,.thumb::after{ content:""; position:absolute; inset:0; pointer-events:none; mix-blend-mode:multiply; }
+.thumb::before{
+  background:radial-gradient(var(--accent) 34%, transparent 36%) 0 0/7px 7px;
+  transform:translate(-1.5px,-1.5px);
+}
+.thumb::after{
+  background:radial-gradient(var(--riso-blue) 32%, transparent 34%) 0 0/7px 7px;
+  transform:translate(2px,2.5px);   /* 핑크판과 3~4px 어긋남 = 미스레지스트레이션 */
+}
+.thumb-initial{
+  position:relative; z-index:2; opacity:1;   /* 망점판 위로 — 글자는 또렷하게 */
+  color:var(--ink); font-weight:800;
+  text-shadow:2px 2px 0 var(--riso-blue);     /* 글자에도 판 오정합 */
+  mix-blend-mode:multiply;
+}
+
+/* ── ④ 배지: 스팟 단색 flat + ::after 로 같은 형태를 오프셋 겹쳐 인쇄(오정합) ──
+   ::after(::before 아님 — base 의 .badge--low::before "●" 불릿을 보존)를 z-index:-1 로 뒤에 깔고 multiply. */
+.badge{
+  border:1.5px solid var(--ink); border-radius:0; font-weight:800;
+  text-transform:uppercase; letter-spacing:.02em; isolation:isolate;
+}
+.badge::after{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:var(--riso-blue); mix-blend-mode:multiply;
+  transform:translate(2px,2px);
+}
+.badge--best{ background:var(--accent); color:var(--bg); }
+.badge--ship{ background:var(--riso-blue); color:var(--bg); }
+.badge--ship::after{ background:var(--accent); }   /* 파란 판엔 핑크 판이 어긋나 겹침 */
+.badge--new{ background:var(--bg); color:var(--riso-blue); border-color:var(--riso-blue); }
+.badge--low{ background:var(--bg); color:var(--ink); border:1.5px dashed var(--ink); }
+
+/* ── ⑤ 카드: flat 스팟 인쇄면 — 리프트/드롭섀도 제거, hover 는 판이 밀린 듯 하드 오프셋(오정합 노출) ── */
+.collection{ gap:calc(var(--space)*1.2); }
+.item-card{
+  border:1.5px solid var(--ink); box-shadow:none;
+  transition:box-shadow .12s ease, transform .12s ease;
+}
+.item-card:hover,.item-card:focus-within{
+  transform:none;                                  /* base 의 translateY 리프트 제거 — 인쇄물은 뜨지 않는다 */
+  box-shadow:3px 3px 0 var(--riso-blue);           /* 스팟블루 판이 밀린 미스프린트 */
+}
+
+/* ── ⑥ 인터랙션/활성 상태: 두 스팟색을 번갈아 배정해 화면에 pink판·blue판이 공존 ── */
+.cat.is-active{ box-shadow:inset 0 -2px 0 var(--accent); }
+.filter-item.is-active{ background:var(--accent); color:var(--bg); box-shadow:none; }
+.chip.is-active{ background:var(--riso-blue); border-color:var(--ink); color:var(--bg); }
+.colorchip.is-active{ box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--riso-blue); }
+.results{ border-bottom:1.5px solid var(--ink); }
+.sort-select{ border:1.5px solid var(--ink); }
+.page-btn{ border:1.5px solid var(--ink); }
+.page-btn.is-active{
+  background:var(--accent); border-color:var(--ink); color:var(--bg);
+  box-shadow:2px 2px 0 var(--riso-blue);           /* 활성 페이지도 판 오정합 */
+}
+.more-btn{ border:1.5px solid var(--ink); box-shadow:2px 2px 0 var(--riso-blue); }
+.filter-reset{ border:1.5px solid var(--ink); }
+.empty-cta{ box-shadow:3px 3px 0 var(--riso-blue); }  /* 핑크 CTA + 블루 오정합 */
+
+/* ── ⑦ base 의 50% 원형 잔재 환수: 잉크는 직각으로 뭉친다(radius 0) ── */
+.cart-count{ border-radius:0; }
+.avatar{ border-radius:0; border-color:var(--ink); }
+.colorchip{ border-radius:0; border-color:var(--ink); }
+.swatches i{ border-radius:0; border-color:var(--ink); }
+.heart{
+  border-radius:0; border:1.5px solid var(--ink); background:var(--bg);
+  box-shadow:1.5px 1.5px 0 var(--riso-blue);        /* 하트 버튼도 오정합 겹인쇄 */
+}
+.empty-illust{ border-radius:0; }
+
+/* ── ⑧ 빈 상태: 일러스트를 2색 하프톤 스팟 인쇄면으로 ── */
+.empty{ border:1.5px dashed var(--ink); }
+.empty-illust{
+  position:relative; overflow:hidden; border:1.5px solid var(--ink);
+  background:
+    radial-gradient(var(--accent) 34%, transparent 36%) 0 0/6px 6px,
+    var(--bg);
+}
+.empty-illust::after{
+  content:""; position:absolute; inset:0; pointer-events:none; mix-blend-mode:multiply;
+  background:radial-gradient(var(--riso-blue) 32%, transparent 34%) 1.5px 2px/6px 6px;  /* 블루판 오정합 */
+}
+
+/* ── ⑨ 접근성: 하프톤/오정합 위에서도 초점이 묻히지 않게 잉크 아웃라인 ── */
+:is(.cat,.chip,.colorchip,.filter-item,.page-btn,.more-btn,.filter-reset,.empty-cta,.heart,.cart-btn,.search-btn,.sort-select):focus-visible{
+  outline:2.5px solid var(--ink); outline-offset:2px;
+}

@@ -1,0 +1,112 @@
+/* signature/style-22--D.css — 22 De Stijl / 몬드리안의 "구조적 시그니처" (원형 D · 컬렉션/상품 그리드).
+   토큰(--accent 빨강 · --border/--ink 검정 · --radius 0)만으론 안 되는 것 =
+   ① 검은 굵은 격자선이 주인공 — 카드·필터·섹션 사이를 4~6px solid 검정 선이 실제로 가른다.
+      base 의 얇은 1px 헤어라인·드롭섀도·리프트를 걷어내고, gap 을 검은 선으로 채운 연속 격자로 재편.
+   ② 원색 3블록 비대칭 배치 — 빨강(--accent)·파랑(#0B4EA2)·노랑(#F4C500)을 썸네일/배지/필터셀
+      "몇 개만" flat 하게 채운다(nth-child 로 손으로 고른 몬드리안 비대칭 구성 — 균등 반복 금지).
+   ③ 곡선 전멸 — base 가 border-radius:50% 를 직접 박은 원형 잔재(스와치·컬러칩·아바타·카운트·
+      하트·빈상태 일러스트)를 전부 각지게 환수. 소프트 섀도·그라디언트 0.
+   나머지는 흰 여백. 화면의 색은 원색 3(빨/파/노) + 검정 + 흰색 뿐.
+   (이 파일 없이는 그냥 커머스 그리드 — 검은 선의 규율과 원색 블록이 정체성의 전부) */
+
+:root{
+  --blue:#0B4EA2;      /* 몬드리안 파랑 */
+  --yellow:#F4C500;    /* 몬드리안 노랑 */
+  --line:6px;          /* 주(主) 격자선 — 격자·섹션 경계 */
+  --line2:4px;         /* 종(從) 분할선 — 카드 내부·그룹 분할 */
+}
+
+/* ═══ ③ 원형 잔재 각짐 — 몬드리안에 곡선은 없다 ═══ */
+.swatches i,.colorchip,.avatar,.cart-count,.heart,.empty-illust{ border-radius:0; }
+
+/* ═══ ① identity — 굵은 검은 하단선으로 상단 바를 못 박는다 ═══ */
+.identity{ border-bottom:var(--line) solid var(--ink); }
+.search{ border:2px solid var(--ink); border-radius:0; }
+.search-btn{ color:var(--ink); }
+.cart-count{ background:var(--accent); border:1px solid var(--ink); }   /* 빨강 각블록 */
+.avatar{ border:2px solid var(--ink); background:var(--surface); }
+
+/* ═══ ① 컬렉션 — gap 을 검은 선으로: 연속 검은 격자(카드 사이가 곧 선) ═══
+   부모 배경을 검정으로 깔고 gap·바깥테를 굵게 두면, 카드 사이 여백이 곧 격자선이 된다.
+   base 의 repeat(3,1fr) 컬럼과 반응형(2열/1열)은 그대로 상속 — 선만 얹으므로 별도 미디어쿼리 불필요. */
+.collection{
+  gap:var(--line);
+  background:var(--ink);
+  border:var(--line) solid var(--ink);
+  padding:0;
+}
+.item-card{
+  border:0;
+  border-radius:0;
+  background:var(--surface);
+}
+.item-card:hover,.item-card:focus-within{
+  transform:none;        /* 몬드리안 셀은 뜨지 않는다 — base 의 translateY 리프트 제거 */
+  box-shadow:none;       /* 소프트 드롭섀도 금지 */
+}
+
+/* ═══ ② 썸네일 — 원색 블록 비대칭(손으로 고른 3셀: 빨/파/노, 나머지는 흰 여백) ═══
+   카드 상단(원색/흰 사각) → 굵은 검은 가로선 → 하단 정보(흰 사각): 몬드리안 셀 구성. */
+.thumb{
+  aspect-ratio:3/4;
+  background:var(--surface);
+  border-bottom:var(--line2) solid var(--ink);
+}
+.thumb-initial{ opacity:1; color:var(--ink); font-weight:800; }
+.item-card:nth-child(1) .thumb{ background:var(--accent); }   /* 빨강 (좌상단) */
+.item-card:nth-child(3) .thumb{ background:var(--blue);   }   /* 파랑 (중앙) */
+.item-card:nth-child(6) .thumb{ background:var(--yellow); }   /* 노랑 (우하단) */
+.item-card:nth-child(1) .thumb-initial,
+.item-card:nth-child(3) .thumb-initial{ color:var(--surface); }  /* 빨/파 위 흰 글자 */
+.item-card:nth-child(6) .thumb-initial{ color:var(--ink); }      /* 노 위 검은 글자 */
+
+/* ═══ ② 배지 — 원색 flat 블록 + 검은 두른선 ═══ */
+.badge{
+  border:3px solid var(--ink);
+  border-radius:0;
+  padding:3px 8px;
+  font-weight:800;
+  letter-spacing:.01em;
+}
+.badge--best{ background:var(--ink);    color:var(--surface); }  /* 검정 */
+.badge--new{  background:var(--yellow); color:var(--ink);     }  /* 노랑 */
+.badge--ship{ background:var(--blue);   color:var(--surface); }  /* 파랑 */
+.badge--low{  background:var(--accent); color:var(--surface); border-style:solid; }  /* 빨강 */
+.badge--low::before{ content:""; }   /* base 의 원형 점 제거 — 플랫 블록으로 */
+
+/* 하트 — 원형 잔재 각짐 + 검은 두른선 */
+.heart{ border:3px solid var(--ink); background:var(--surface); }
+
+/* 상품 정보 타이포 — 가격은 굵은 검정, 할인은 빨강 원색 1점 */
+.price-now{ font-weight:800; }
+.discount{ color:var(--accent); font-weight:800; }
+
+/* ═══ ① filter — 굵은 검은 테두리 + 그룹 사이 검은 분할선 ═══ */
+.filter{ border:var(--line) solid var(--ink); border-radius:0; }
+.filter-group{ padding-bottom:calc(var(--space)*.85); border-bottom:var(--line2) solid var(--ink); }
+.filter-toggles{ border-bottom:0; }   /* 마지막 그룹은 선 없음(하단 reset 앞) */
+.filter-title{ color:var(--ink); font-weight:800; }
+.filter-item.is-active{
+  background:var(--blue); color:var(--surface);   /* ② 필터 활성 = 파랑 flat 블록 */
+  box-shadow:none; font-weight:800; border-radius:0;
+}
+.chip{ border:2px solid var(--ink); border-radius:0; font-weight:700; }
+.chip.is-active{ background:var(--ink); color:var(--surface); }
+.colorchip{ border:2px solid var(--ink); }
+.filter-reset{ border:3px solid var(--ink); border-radius:0; font-weight:800; color:var(--ink); }
+
+/* ═══ ① results — 굵은 검은 하단선으로 목록 헤더를 가른다 ═══ */
+.results{ border-bottom:var(--line) solid var(--ink); }
+.result-count b{ color:var(--accent); }   /* 개수 = 빨강 원색 1점 */
+.sort-select{ border:2px solid var(--ink); border-radius:0; }
+
+/* ═══ ① action(페이지네이션) — 굵은 검은 상단선 + 각진 버튼 ═══ */
+.action{ border-top:var(--line2) solid var(--ink); padding-top:var(--space); }
+.page-btn{ border:2px solid var(--ink); border-radius:0; }
+.page-btn.is-active{ background:var(--ink); color:var(--surface); }
+.more-btn{ border:3px solid var(--ink); border-radius:0; font-weight:800; color:var(--ink); }
+
+/* ═══ empty — 굵은 검은 실선 테두리 + 각진 일러스트/CTA ═══ */
+.empty{ border:var(--line) solid var(--ink); border-radius:0; }
+.empty-illust{ border:var(--line2) solid var(--ink); }
+.empty-cta{ background:var(--accent); color:var(--surface); border:3px solid var(--ink); border-radius:0; font-weight:800; }
