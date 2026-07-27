@@ -184,6 +184,77 @@ button,input,select{font:inherit;color:inherit}
   --type-scale:1.25;
 }
 
+
+/* ==== style-14--D.css ==== */
+/* signature/style-14--D.css — 14 벤토 그리드 × 원형 D(컬렉션 그리드)의 "구조적 시그니처".
+   토큰(색·radius 22)만으론 안 나오는 것 = 레이아웃 재편 그 자체.
+   base는 .collection 을 균일 3열로 깔지만, 벤토의 정체성은 "크기가 다른 셀이
+   맞물린 모자이크"다 — 그래서 여기서 .collection 을 다열 그리드로 재편하고
+   .item-card 를 nth-child 로 대(2×2)·중(2×1)·소(1×1) 3종 타일로 span 시킨다.
+   콘텐츠(body)는 Zen Garden 고정이라 못 늘린다 → 순수 CSS grid-span 만으로 크기 차등.
+
+   타일 6장(스켈레톤에 item-card 정확히 6개)의 정본 배치 — 빈틈 없이 테셀레이션:
+     ┌───────────┬─────┬───┐
+     │           │  B  │ C │   A = 1번(2×2, 히어로)
+     │     A     ├──┬──┴───┤   B = 2번(2×1)  C = 3번(1×1)
+     │           │D │   ?  │   D = 4번(1×1)
+     ├─────┬─────┴──┴──────┤   E = 5번(2×1)  F = 6번(2×1)
+     │  E  │       F        │
+     └─────┴────────────────┘
+   auto-flow:dense 로 자동배치가 위 형태로 딱 맞물린다(홀 방지).
+
+   가독 앵커(.name/.price-now 클램프·잉크블랙)는 유지. 큰 타일만 제목/이미지 확대.
+   반응형은 base 의 max-width 폴백을 non-media 규칙이 덮는 "카스케이드 함정"을
+   피하려고 signature 안에서 미디어쿼리를 다시 선언한다(아래 ▼ 반응형). */
+
+/* ===== 컬렉션: 4열 벤토 모자이크 — 넉넉한 gap, 고정 행높이로 span 이 크기로 환산 ===== */
+.collection{
+  grid-template-columns:repeat(4,1fr);
+  grid-auto-rows:200px;
+  grid-auto-flow:dense;
+  gap:calc(var(--space)*0.95);
+  align-items:stretch;
+}
+
+/* 벤토에선 각 카드가 자기 셀을 꽉 채우는 "타일" — 썸네일 고정비(3/4)를 풀고
+   card-body 밑 남는 공간을 이미지가 전부 먹게(flex:1) 한다. 큰 타일=큰 이미지가 공짜. */
+.item-card{ height:100% }
+.thumb{ aspect-ratio:auto; flex:1 1 auto; min-height:0 }
+
+/* ----- 타일 크기 3종: 대(2×2) · 중(2×1) · 소(1×1) ----- */
+.item-card:nth-child(6n+1){ grid-column:span 2; grid-row:span 2 } /* A 히어로 */
+.item-card:nth-child(6n+2){ grid-column:span 2 }                  /* B 와이드 */
+.item-card:nth-child(6n+3){ grid-column:span 1 }                  /* C 소형 */
+.item-card:nth-child(6n+4){ grid-column:span 1 }                  /* D 소형 */
+.item-card:nth-child(6n+5){ grid-column:span 2 }                  /* E 와이드 */
+.item-card:nth-child(6n+6){ grid-column:span 2 }                  /* F 와이드 */
+
+/* ----- 큰 타일은 정보를 크게: 제목 3줄까지·가격 확대·이니셜 확대·여백 확대 ----- */
+.item-card:nth-child(6n+1) .card-body{ padding:calc(var(--space)*1.15); gap:8px }
+.item-card:nth-child(6n+1) .thumb-initial{ font-size:88px }
+.item-card:nth-child(6n+1) .name{
+  font-size:20px; line-height:1.3; -webkit-line-clamp:3; min-height:calc(1.3em*2);
+}
+.item-card:nth-child(6n+1) .price-now{ font-size:22px }
+.item-card:nth-child(6n+1) .price-row{ gap:9px }
+
+/* ===== ▼ 반응형 — base 폴백을 non-media 규칙이 덮는 함정을 막기 위해 재선언 =====
+   좁아지면 벤토를 버리고 균일 그리드로 폴백: span 전부 리셋 + 썸네일 고정비 복원 +
+   큰-타일 확대 리셋. ( .collection .item-card = nth-child 와 동일 특정도(0,2,0),
+   소스상 더 뒤라 이김 → span/확대를 안전하게 되돌린다 ) */
+@media (max-width:1024px){
+  .collection{ grid-template-columns:repeat(2,1fr); grid-auto-rows:auto; grid-auto-flow:row }
+  .collection .item-card{ grid-column:auto; grid-row:auto; height:auto }
+  .thumb{ aspect-ratio:3/4; flex:0 0 auto; min-height:0 }
+  .collection .item-card .card-body{ padding:calc(var(--space)*.7); gap:5px }
+  .collection .item-card .thumb-initial{ font-size:44px }
+  .collection .item-card .name{ font-size:14px; line-height:1.35; -webkit-line-clamp:2; min-height:calc(1.35em*2) }
+  .collection .item-card .price-now{ font-size:16px }
+}
+@media (max-width:640px){
+  .collection{ grid-template-columns:1fr }
+}
+
 </style>
 </head>
 <body>

@@ -1,5 +1,8 @@
 # STYLE 03 — 트렌디 SaaS (매력 축: 생동감)
 
+> ⚠️ **정체성 갱신(2026-07-26)**: 이 스타일은 산업 라벨 "트렌디 SaaS"에서 출처 있는 디자인 언어 **"shadcn/ui"** 로 재접지됐습니다. **정본 정의**는 `tokens/style-03.css` + `signature/style-03--D.css` + [`docs/design/2026-07-26-type-and-source-grounding.md`](../../../../docs/design/2026-07-26-type-and-source-grounding.md) 를 따르세요. 아래 본문(구 산업 라벨 v2 스펙)은 참조용 — full 재작성은 후속.
+
+
 매력 가설: "살아있네?" — 지금 이 순간의 데이터라는 감각.
 고도화 = 로드 연출 + 숨쉬는 디테일. 마스터 프롬프트 뒤에 붙여 사용한다.
 

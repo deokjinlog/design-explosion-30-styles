@@ -1,0 +1,143 @@
+/* signature/style-12--D.css — 12 뉴모피즘의 "구조적 시그니처" (원형 D · 컬렉션/상품 그리드).
+   토큰(회색 배경 #E4E9F2 · 소프트 radius · 미세 액센트)만으론 안 되는 것 =
+   ① 이중 섀도가 전부 — 모든 표면이 배경과 같은 회색인데도 형태가 보이는 이유는
+      오직 그림자다. 어두운(#c3c8d1)/밝은(#fff) 한 쌍(blur=오프셋 2배)이 만드는 볼록/오목.
+      base 가 준 1px 보더·플랫 대비 배경·드롭섀도를 전부 걷어내고 이 한 문법으로 대체.
+   ② 볼록(raised)=조작하는 것 — 카드·배지·칩·아이콘 버튼·페이지 버튼·CTA 는 튀어나온다(--nm-out).
+      오목(inset)=담거나 눌린 것 — 인풋·셀렉트·썸네일 우물, 그리고 선택/활성(pressed) 상태(--nm-in).
+      이게 뉴모피즘의 진짜 문법(볼록=convex 조작, 오목=concave 함몰). 보더는 어디에도 없다.
+   ③ 단색 팔레트 — 카드도 흰색이 아니라 배경과 같은 #E4E9F2. 색은 액센트(파랑)만 미세하게
+      (할인·활성 필터·CTA 몇 점). base 의 검정 채움 배지·라인스루만 대비 잔재를 회색+섀도로 환수.
+   ④ 원형 잔재는 뉴모답게 유지 — base 가 border-radius:50% 를 박은 아바타·카트카운트·컬러칩·
+      하트·빈상태 일러스트는 곡선 그대로 두되, 하드 보더를 벗기고 볼록/오목 섀도를 입힌다.
+   (이 파일 없이는 그냥 흰 커머스 그리드 — 회색 단색 위 볼록/오목 이중섀도가 정체성의 전부) */
+
+:root{
+  --nm-dark:#c3c8d1;                                             /* 어두운 짝 — 우하단 그림자 */
+  --nm-light:#ffffff;                                            /* 밝은 짝 — 좌상단 하이라이트 */
+  --nm-out:    8px 8px 16px var(--nm-dark), -8px -8px 16px var(--nm-light);   /* 볼록(카드·패널·정본) */
+  --nm-out-sm: 5px 5px 10px var(--nm-dark), -5px -5px 10px var(--nm-light);   /* 볼록(작은 칩·버튼) */
+  --nm-out-lg:10px 10px 20px var(--nm-dark),-10px -10px 20px var(--nm-light); /* 볼록(hover 더 뜸) */
+  --nm-in:    inset 6px 6px 12px var(--nm-dark), inset -6px -6px 12px var(--nm-light); /* 오목(우물·큰 함몰) */
+  --nm-in-sm: inset 4px 4px 8px var(--nm-dark),  inset -4px -4px 8px var(--nm-light);  /* 오목(작은 pressed) */
+}
+
+/* ═══ ④ 원형 하드코딩 요소 — 곡선은 유지, 하드 보더만 제거 ═══ */
+.avatar,.colorchip,.heart,.empty-illust{ border:0; }
+.swatches i{ border:0; }                                          /* 14px 색 점 — 보더만 제거, 곡선 유지 */
+
+/* ═══ ① identity — 하드 하단선 제거, 로고/아이콘만 볼록 ═══ */
+.identity{ border-bottom:0; }
+.logo{ box-shadow:var(--nm-out-sm); }                             /* 액센트 로고 = 작은 볼록 타일 */
+.cat.is-active{                                                   /* ② 활성 탭 = 눌린(오목) 알약 */
+  color:var(--ink); box-shadow:var(--nm-in-sm);
+  border-radius:calc(var(--radius)*.6); padding:5px 12px;
+}
+.search{                                                          /* ② 검색 = 오목 우물(인풋은 함몰) */
+  border:0; background:var(--surface); box-shadow:var(--nm-in);
+  border-radius:calc(var(--radius)*.9); padding:8px 14px;
+}
+.search-btn{                                                      /* 우물 속 작은 볼록 돋보기 버튼 */
+  box-shadow:var(--nm-out-sm); border-radius:50%;
+  width:26px; height:26px; color:var(--ink);
+}
+.cart-btn{ box-shadow:var(--nm-out-sm); border-radius:50%; }      /* 볼록 원형 아이콘 버튼 */
+.cart-count{ box-shadow:2px 2px 4px var(--nm-dark),-1px -1px 2px var(--nm-light); } /* 액센트 카운트 살짝 뜸 */
+.avatar{ background:var(--surface); box-shadow:var(--nm-out-sm); }/* 볼록 원형 아바타 */
+
+/* ═══ ① filter — 볼록 패널, 선택은 오목 ═══ */
+.filter{                                                          /* 필터 = 크게 뜬 볼록 패널 */
+  border:0; background:var(--surface);
+  box-shadow:var(--nm-out); border-radius:calc(var(--radius)*1.1);
+}
+.filter-item.is-active{                                           /* ② 활성 필터 = 눌린 오목 슬롯 */
+  background:var(--surface); color:var(--accent); font-weight:700;
+  box-shadow:var(--nm-in-sm); border-radius:calc(var(--radius)*.55);
+}
+.chip{                                                            /* 사이즈 칩 = 작은 볼록 */
+  border:0; background:var(--surface); color:var(--ink);
+  box-shadow:var(--nm-out-sm); border-radius:calc(var(--radius)*.6);
+}
+.chip.is-active{                                                  /* ② 선택 칩 = 오목 함몰 */
+  background:var(--surface); color:var(--accent); font-weight:700;
+  box-shadow:var(--nm-in-sm);
+}
+.colorchip{ box-shadow:var(--nm-out-sm); }                        /* 색 스와치 = 볼록 원반 */
+.colorchip.is-active{ box-shadow:0 0 0 3px var(--accent), var(--nm-out-sm); } /* 선택 = 액센트 링 + 볼록 */
+.filter-reset{                                                    /* 볼록 알약 버튼 */
+  border:0; background:var(--surface); color:var(--ink); font-weight:700;
+  box-shadow:var(--nm-out-sm); border-radius:calc(var(--radius)*.7);
+}
+.filter-reset:active{ box-shadow:var(--nm-in-sm); }              /* 누르면 함몰 */
+
+/* ═══ ① results — 하드 하단선 제거, 셀렉트는 오목 우물 ═══ */
+.results{ border-bottom:0; }
+.result-count b{ color:var(--accent); }                          /* 개수 = 미세 액센트 1점 */
+.sort-select{                                                     /* ② 정렬 셀렉트 = 오목 우물(인풋) */
+  border:0; background:var(--surface); box-shadow:var(--nm-in-sm);
+  border-radius:calc(var(--radius)*.6);
+}
+
+/* ═══ ①② 컬렉션 — 볼록 카드가 회색 위에 떠 있다(섀도만으로 형태) ═══
+   base 의 repeat(3,1fr)·반응형(2열/1열)은 상속. gap 만 섀도 숨쉴 만큼 넓힌다. */
+.collection{ gap:calc(var(--space)*1.7); }
+.item-card{                                                       /* 정본 = 크게 뜬 볼록 카드, 보더 0 */
+  border:0; background:var(--surface);
+  box-shadow:var(--nm-out); border-radius:calc(var(--radius)*1.15);
+}
+.item-card:hover,.item-card:focus-within{                        /* hover = 더 튀어오름(리프트+깊은 볼록) */
+  transform:translateY(-2px); box-shadow:var(--nm-out-lg);
+}
+.thumb{                                                           /* ② 썸네일 = 오목 우물(사진 함몰) */
+  background:var(--surface); border-bottom:0;
+  box-shadow:var(--nm-in);
+}
+.thumb-initial{                                                   /* 이니셜 = 살짝 각인된 회색 글자 */
+  opacity:1; color:var(--muted);
+  text-shadow:1px 1px 1px var(--nm-light),-1px -1px 1px var(--nm-dark);
+}
+
+/* ═══ ② 배지 — 검정 채움/보더 잔재 제거, 회색 볼록 칩 + 액센트 글자만 ═══ */
+.badge{
+  background:var(--surface); border:0;
+  box-shadow:var(--nm-out-sm); border-radius:calc(var(--radius)*.55);
+}
+.badge--best{ color:var(--ink); }                                /* 강조는 진한 잉크 */
+.badge--new{ color:var(--accent); }                              /* 미세 액센트 */
+.badge--ship{ color:var(--accent); }
+.badge--low{ color:var(--muted); }
+.badge--low::before{ content:"● "; font-size:8px; color:var(--accent); } /* 점만 액센트, dashed 보더 제거 */
+
+/* ═══ ④ 하트 — 볼록 원형 버튼, 누르면 함몰 ═══ */
+.heart{ background:var(--surface); box-shadow:var(--nm-out-sm); }
+.heart:active{ box-shadow:var(--nm-in-sm); }
+
+/* 상품 정보 타이포 — 회색 단색 위 미세 액센트 1점(할인) */
+.name{ color:var(--ink); }
+.price-now{ color:var(--ink); font-weight:800; }
+.discount{ color:var(--accent); font-weight:800; }
+
+/* ═══ ① action(페이지네이션) — 볼록 버튼, 현재 페이지는 오목 ═══ */
+.page-btn{
+  border:0; background:var(--surface); color:var(--ink);
+  box-shadow:var(--nm-out-sm); border-radius:calc(var(--radius)*.55);
+}
+.page-btn.is-active{                                             /* ② 현재 페이지 = 눌린 오목 */
+  background:var(--surface); color:var(--accent); font-weight:700;
+  box-shadow:var(--nm-in-sm);
+}
+.page-btn:disabled{ box-shadow:none; }                          /* 비활성 = 평평(뜨지도 눌리지도 않음) */
+.more-btn{                                                       /* 볼록 알약 버튼 */
+  border:0; background:var(--surface); color:var(--ink); font-weight:700;
+  box-shadow:var(--nm-out-sm); border-radius:calc(var(--radius)*.7);
+}
+.more-btn:active{ box-shadow:var(--nm-in-sm); }
+
+/* ═══ empty — dashed 보더 제거, 오목 우물(비어서 파인 영역) + 볼록 액센트 CTA ═══ */
+.empty{
+  border:0; background:var(--surface);
+  box-shadow:var(--nm-in); border-radius:calc(var(--radius)*1.2);
+}
+.empty-illust{ background:var(--surface); box-shadow:var(--nm-in-sm); } /* 오목 원형 일러스트 자리 */
+.empty-cta{ box-shadow:var(--nm-out-sm); border-radius:calc(var(--radius)*.7); } /* 볼록 액센트 CTA */
+.empty-cta:active{ box-shadow:var(--nm-in-sm); }

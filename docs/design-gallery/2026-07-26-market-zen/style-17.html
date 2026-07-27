@@ -184,6 +184,222 @@ button,input,select{font:inherit;color:inherit}
   --type-scale:1.35;
 }
 
+
+/* ==== style-17--D.css ==== */
+/* signature/style-17--D.css — 17 Y2K 베이퍼웨이브의 "구조적 시그니처" (원형 D · 컬렉션/상품 그리드).
+   토큰(다크퍼플 #1A0B2E · 핫핑크 #FF2FB9 · 서페이스 #2D0B45)만으론 안 나오는,
+   2000년대 사이버/베이퍼웨이브를 구조로 끌어온 것 =
+   ① 크롬/글로시 베벨 — 실버 크롬 그라디언트 + 인셋 하이라이트로 iMac Aqua 식 광택 버튼.
+      1차 버튼(필터초기화·더보기)·베스트 배지·활성 사이즈칩에 은빛 베벨을 박는다.
+   ② 홀로그램/이리데센스 — 무지개 conic-gradient 를 padding-box/border-box 이중배경으로
+      "테두리만 무지개"로 만들어 카드·필터패널·신상배지·빈상태 일러스트에 홀로 테를 두른다.
+   ③ 블롭 · 스타 — ::before/::after 로 반짝이 별(✦)과 물방울 radial 블롭을 여백·모서리에.
+      썸네일엔 대각 홀로 시머(sheen)가 흐른다.
+   ④ 네온 글로우 · 버블 pill — 핫핑크/시안 text-shadow 글로우, 모든 버튼 radius=999(버블),
+      1차 CTA(빈상태)는 핑크 글로시 버블. 카드 radius 도 크게(둥근 버블).
+   색은 원칙적으로 var(토큰). 단 Y2K 2차 네온인 시안은 토큰 슬롯이 없어 하드코딩
+   (--y2k-cyan #2FE4FF, 보조 홀로 퍼플 #B96BFF, 금별 #FFE45E — style-04 로그색 예외와 동일 취급).
+   base 의 50% 원형(아바타·색상칩·하트·카트카운트)은 Y2K 버블답게 그대로 살린다.
+   텍스트는 어두운 퍼플 위 네온으로만 — 장식은 전부 여백·모서리·테두리에 둬 가독성 유지.
+   스켈레톤에 실재하는 클래스만 건드린다(환각 0). */
+
+:root{
+  --y2k-cyan:#2FE4FF;                  /* Y2K 2차 네온(시안) — 토큰에 슬롯 없어 하드코딩 */
+  --y2k-purple:#B96BFF;                /* 보조 홀로 퍼플 */
+  --y2k-gold:#FFE45E;                  /* 평점 별의 금색 */
+  --pill:999px;                        /* 버블 pill 반경 */
+  /* 크롬 실버 그라디언트(위 하이라이트 → 은빛 → 아래 반사) */
+  --chrome:linear-gradient(180deg,#ffffff 0%,#eef0f8 16%,#c8cce1 47%,#aeb3ce 53%,#e9ecf7 82%,#ffffff 100%);
+  --chrome-edge:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -2px 3px rgba(70,70,110,.55),inset 0 9px 9px -7px rgba(255,255,255,.8);
+  /* 홀로그램 무지개 conic — 테두리 전용 */
+  --holo:conic-gradient(from 140deg,#FF2FB9,#2FE4FF,#B96BFF,#7CFFC4,#FFE45E,#FF2FB9);
+  /* 네온 글로우 */
+  --glow-pink:0 0 6px rgba(255,47,185,.9),0 0 16px rgba(255,47,185,.55);
+  --glow-cyan:0 0 6px rgba(47,228,255,.9),0 0 16px rgba(47,228,255,.5);
+  /* 글로시 하이글로스 하이라이트(버블 상단 광택) */
+  --gloss:inset 0 1px 0 rgba(255,255,255,.85),inset 0 10px 10px -8px rgba(255,255,255,.6);
+  /* 핑크 글로시 버블 표면 */
+  --bubble-pink:linear-gradient(180deg,#FF7FD4 0%,var(--accent) 55%,#D6008C 100%);
+}
+
+/* ── ① identity: 다크 퍼플 네온 바 + 홀로 로고 버블 ── */
+.identity{
+  background:linear-gradient(180deg,#241042 0%,var(--bg) 100%);
+  border-bottom:2px solid var(--accent);
+  box-shadow:0 0 20px rgba(255,47,185,.35);
+}
+.logo{                                 /* 홀로 글로시 버블 로고 */
+  background:var(--holo);
+  color:#20103a;
+  box-shadow:var(--gloss),0 0 12px rgba(255,47,185,.6);
+  text-shadow:0 1px 0 rgba(255,255,255,.6);
+}
+.brandname{ color:var(--ink); text-shadow:var(--glow-pink); letter-spacing:.02em; }
+.brandname::after{ content:" ✦"; color:var(--y2k-cyan); text-shadow:var(--glow-cyan); }
+.cat.is-active{ box-shadow:inset 0 -2px 0 var(--accent),0 4px 10px -4px rgba(255,47,185,.7); text-shadow:var(--glow-pink); }
+.cat.is-sale{ color:var(--y2k-cyan); text-shadow:var(--glow-cyan); }
+.search{                               /* 글래시 pill 검색 */
+  border-radius:var(--pill); border-color:var(--border);
+  background:color-mix(in srgb,var(--surface) 80%,transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 0 12px rgba(162,75,255,.2);
+}
+.cart-count{ box-shadow:var(--glow-pink),var(--gloss); }
+.avatar{                               /* 글로시 크롬 버블 아바타 */
+  background:radial-gradient(circle at 30% 25%,#fff 0%,#cfd2e6 32%,#8a8fb8 100%);
+  border-color:rgba(255,255,255,.45);
+  box-shadow:var(--gloss),0 0 8px rgba(162,75,255,.4);
+}
+
+/* ── ②③ filter: 홀로 테두리 버블 패널 + 물방울 블롭 ── */
+.filter{
+  border:2px solid transparent;
+  background:linear-gradient(var(--surface),var(--surface)) padding-box, var(--holo) border-box;
+  border-radius:calc(var(--radius)*1.5);
+  box-shadow:0 0 24px rgba(162,75,255,.25),var(--gloss);
+  position:relative; overflow:hidden;
+}
+.filter::before{                       /* 물방울 블롭(시안) — 우상단 모서리 */
+  content:""; position:absolute; z-index:0; pointer-events:none;
+  width:170px; height:170px; right:-55px; top:-45px;
+  background:radial-gradient(circle,rgba(47,228,255,.35),transparent 68%);
+  filter:blur(6px);
+}
+.filter-group{ position:relative; z-index:1; }
+.filter-title{ color:var(--y2k-cyan); text-shadow:var(--glow-cyan); }
+.filter-item.is-active{                /* 핑크 네온 버블 */
+  background:var(--bubble-pink); color:#2a0a20;
+  border-radius:var(--pill); box-shadow:var(--gloss),0 0 10px rgba(255,47,185,.5);
+}
+.chip{
+  border-radius:var(--pill); border-color:var(--border);
+  background:color-mix(in srgb,var(--surface) 70%,#000);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.chip.is-active{                       /* 크롬 실버 베벨 칩 */
+  background:var(--chrome); color:#1A0B2E; border-color:#fff;
+  box-shadow:var(--chrome-edge),0 0 8px rgba(255,255,255,.4);
+  text-shadow:0 1px 0 rgba(255,255,255,.6);
+}
+.colorchip.is-active{ box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent),0 0 12px var(--accent); }
+.filter-reset{                         /* 크롬 실버 베벨 pill 버튼 */
+  border:1px solid rgba(255,255,255,.6); border-radius:var(--pill);
+  background:var(--chrome); color:#1A0B2E; font-weight:800;
+  box-shadow:var(--chrome-edge),0 4px 10px rgba(0,0,0,.4);
+  text-shadow:0 1px 0 rgba(255,255,255,.7);
+}
+
+/* ── ④ results: 네온 라인 + 핫핑크 카운트 글로우 ── */
+.results{ border-bottom:2px solid var(--accent); box-shadow:0 2px 12px -6px rgba(255,47,185,.6); }
+.result-count{ text-shadow:0 0 8px rgba(162,75,255,.4); }
+.result-count b{ text-shadow:var(--glow-pink); }
+.sort-select{
+  border-radius:var(--pill); border-color:var(--border);
+  background:color-mix(in srgb,var(--surface) 75%,#000);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+/* ── collection: 버블 간격 ── */
+.collection{ gap:calc(var(--space)*1.25); }
+
+/* ── ②③ item-card: 홀로 테두리 버블 카드 + 시머 썸네일 ── */
+.item-card{
+  border:2px solid transparent;
+  background:linear-gradient(var(--surface),var(--surface)) padding-box, var(--holo) border-box;
+  border-radius:calc(var(--radius)*1.4);
+  box-shadow:0 6px 20px -10px rgba(162,75,255,.5),var(--gloss);
+}
+.item-card:hover,.item-card:focus-within{
+  transform:translateY(-4px) scale(1.01);
+  box-shadow:0 14px 30px -12px rgba(255,47,185,.6),0 0 24px rgba(47,228,255,.35),var(--gloss);
+}
+.thumb{                                /* 홀로 틴트 배경 */
+  background:linear-gradient(135deg,rgba(47,228,255,.18),rgba(255,47,185,.15) 45%,rgba(185,107,255,.2)),var(--bg);
+  border-bottom-color:var(--border);
+}
+.thumb::before{                        /* 대각 홀로 시머(sheen) 흐름 */
+  content:""; position:absolute; inset:-50% -20%;
+  background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.35) 50%,transparent 60%);
+  transform:translateX(-60%);
+  animation:y2k-sheen 3.4s ease-in-out infinite;
+}
+.thumb::after{                         /* ✦ 반짝이 별 — 모서리 */
+  content:"✦"; position:absolute; top:8px; right:10px;
+  color:var(--y2k-cyan); font-size:13px; text-shadow:var(--glow-cyan);
+  animation:y2k-twinkle 2.2s ease-in-out infinite;
+}
+.thumb-initial{ position:relative; z-index:1; opacity:.75; color:var(--ink); text-shadow:0 0 12px rgba(255,47,185,.5); }
+
+.badge{ border-radius:var(--pill); box-shadow:var(--gloss); font-weight:800; letter-spacing:.02em; }
+.badge--best{                          /* 크롬 실버 베벨 */
+  background:var(--chrome); color:#1A0B2E; border:1px solid #fff;
+  box-shadow:var(--chrome-edge); text-shadow:0 1px 0 rgba(255,255,255,.7);
+}
+.badge--ship{                          /* 시안 네온 버블 */
+  background:linear-gradient(180deg,#8CF6FF,var(--y2k-cyan)); color:#062a30;
+  box-shadow:var(--gloss),0 0 10px rgba(47,228,255,.5);
+}
+.badge--new{ background:var(--holo); color:#1a0b2e; }   /* 홀로 이리데센스 배지 */
+.badge--new::before{ content:"✦ "; }
+.badge--low{ background:color-mix(in srgb,var(--surface) 60%,#000); color:var(--ink); border:1px dashed var(--accent); }
+.heart{                                /* 글로시 크롬 버블(원형 유지) */
+  background:radial-gradient(circle at 32% 28%,#fff,#dfe2f2 35%,#9aa0c8 100%);
+  border-color:rgba(255,255,255,.5);
+  box-shadow:var(--gloss),0 0 10px rgba(162,75,255,.4);
+}
+.heart .ico{ color:var(--accent); }
+.card-body .brand{ color:var(--y2k-cyan); }
+.price-now{ text-shadow:0 0 8px rgba(255,47,185,.4); }
+.discount{ text-shadow:var(--glow-pink); }
+.rating .stars{ color:var(--y2k-gold); text-shadow:0 0 8px rgba(255,228,94,.5); }
+
+/* ── action: 버블 pill 페이저 + 크롬 더보기 ── */
+.action{ gap:calc(var(--space)*1.1); }
+.page-btn{
+  border-radius:var(--pill); border-color:var(--border);
+  background:color-mix(in srgb,var(--surface) 70%,#000);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.page-btn.is-active{                    /* 핫핑크 네온 버블 */
+  background:var(--bubble-pink); border-color:#fff; color:#2a0a20;
+  box-shadow:var(--gloss),var(--glow-pink);
+}
+.page-btn:disabled{ opacity:.35; }
+.ellipsis{ color:var(--y2k-purple); }
+.more-btn{                              /* 크롬 실버 베벨 pill */
+  border-radius:var(--pill); border:1px solid rgba(255,255,255,.6);
+  background:var(--chrome); color:#1A0B2E; font-weight:800;
+  box-shadow:var(--chrome-edge),0 4px 10px rgba(0,0,0,.4);
+  text-shadow:0 1px 0 rgba(255,255,255,.7);
+}
+
+/* ── empty: 물방울 블롭 배경 + 홀로 일러스트 + ✦ 별 타이틀 + 핑크 글로시 CTA ── */
+.empty{
+  border:2px dashed var(--accent); border-radius:calc(var(--radius)*2);
+  background:
+    radial-gradient(circle at 15% 20%,rgba(47,228,255,.15),transparent 42%),
+    radial-gradient(circle at 85% 80%,rgba(255,47,185,.15),transparent 42%),
+    var(--surface);
+  box-shadow:var(--gloss),0 0 24px rgba(162,75,255,.2);
+  position:relative; overflow:hidden;
+}
+.empty-illust{                          /* 홀로 테두리 오브 */
+  border:2px solid transparent;
+  background:linear-gradient(var(--surface),var(--surface)) padding-box, var(--holo) border-box;
+  box-shadow:0 0 16px rgba(255,47,185,.4);
+}
+.empty-title{ color:var(--ink); text-shadow:var(--glow-pink); }
+.empty-title::before{ content:"✦ "; color:var(--y2k-cyan); text-shadow:var(--glow-cyan); }
+.empty-title::after{ content:" ✦"; color:var(--y2k-cyan); text-shadow:var(--glow-cyan); }
+.empty-cta{                             /* 핑크 글로시 버블 1차 CTA */
+  border-radius:var(--pill); background:var(--bubble-pink); color:#fff; font-weight:800;
+  box-shadow:var(--gloss),0 4px 16px rgba(255,47,185,.55);
+  text-shadow:0 1px 2px rgba(0,0,0,.3);
+}
+
+/* ── Y2K 모션(reduced-motion 은 base 가 전역 차단) ── */
+@keyframes y2k-sheen{ 0%{transform:translateX(-60%)} 55%,100%{transform:translateX(180%)} }
+@keyframes y2k-twinkle{ 0%,100%{opacity:.4;transform:scale(.8) rotate(0deg)} 50%{opacity:1;transform:scale(1.15) rotate(20deg)} }
+
 </style>
 </head>
 <body>

@@ -184,6 +184,158 @@ button,input,select{font:inherit;color:inherit}
   --type-scale:1.3;
 }
 
+
+/* ==== style-28--D.css ==== */
+/* signature/style-28--D.css — 28 "하이컨트라스트 접근성"의 원형 D 구조 시그니처
+   (원형 D · 컬렉션/상품 그리드). WCAG AAA·고대비 정본.
+   토큰(액센트 #0B5FFF · radius 8 · ink/border #111 · Atkinson Hyperlegible)만으론
+   부족한 것 = 접근성 그 자체의 구조 규율. base+tokens 만 먹이면 "각진 커머스 그리드"다.
+   접근성의 정체성은 아래 6가지 구조 규율:
+     ① 강한 포커스 링(핵심) — 모든 인터랙티브에 :focus-visible 3px 파란 아웃라인(offset 3px).
+        offset 이 요소와 링 사이에 흰 여백을 만들어 파란 버튼 위에서도 링이 뜬다. outline:none 절대 금지.
+     ② 고대비 2px 검은 보더 — 헤어라인(1px) 금지, 모든 경계 2px #111.
+     ③ 큰 터치 타깃 — 버튼·칩 min-height 44px, 넉넉한 간격.
+     ④ 큰 폰트·명확한 상태 — 16px+ 본문, hover/active 뚜렷, 밑줄 링크, muted 라벨을 잉크로.
+     ⑤ 상태를 색만이 아니라 형태로 — 선택=체크(✓)+보더, 세일=아이콘(●), 가격하락=▼ 아이콘.
+     ⑥ 차분·기능적 — radius 작게(토큰 8), base 하드코딩 50% 원형 잔재 전부 각지게, 리프트/장식 제거.
+   구조 override 전용 — base/archetype-D.css 위에 얹는다. 실존 클래스만(환각 0). */
+
+/* ── ① 강한 포커스 링(핵심): 모든 인터랙티브. outline:none 금지 ── */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible{
+  outline:3px solid var(--accent);
+  outline-offset:3px;
+}
+/* base 가 검색 인풋에 걸어둔 outline:none 을 확실히 복구(더 높은 특이도) */
+.search input:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+
+/* ── ② 고대비 2px 검은 보더 — 헤어라인 금지 ── */
+.identity{ border-bottom-width:2px; }
+.search{ border-width:2px; }
+.filter{ border-width:2px; }
+.results{ border-bottom-width:2px; padding-bottom:14px; }
+.chip{ border-width:2px; }
+.sort-select{ border-width:2px; }
+.item-card{ border-width:2px; }
+.thumb{ border-bottom-width:2px; }
+.badge--new{ border-width:2px; }
+.badge--low{ border-width:2px; }
+.heart{ border-width:2px; }
+.avatar{ border-width:2px; }
+.page-btn{ border-width:2px; }
+.filter-reset{ border-width:2px; }
+.more-btn{ border-width:2px; }
+.filter-item.is-active{ box-shadow:inset 0 0 0 2px var(--border); }
+.empty{ border-width:2px; border-style:solid; }        /* dashed → solid 고대비 */
+
+/* ── ③ 큰 터치 타깃 — 버튼·칩 min 44px, 넉넉한 간격 ── */
+.identity{ gap:20px; }
+.categories{ gap:16px; }
+.cat{ padding:10px 6px; }
+.search{ padding:8px 12px; }
+.search input{ padding:6px 2px; }
+.search-btn{ width:32px; height:32px; }
+.cart-btn{ width:40px; height:40px; }
+.filter-item{ padding:11px 12px; }
+.chip{ min-height:44px; padding:8px 16px; }
+.swatch-grid{ grid-template-columns:repeat(3,1fr); gap:12px; }  /* 3열로 큰 스와치 */
+.colorchip{ width:100%; min-height:44px; }
+.toggle-row{ min-height:44px; }
+.toggle{ width:22px; height:22px; }
+.price-slider{ height:28px; }
+.filter-reset{ min-height:44px; }
+.sort-select{ min-height:44px; padding:8px 12px; }
+.collection{ gap:24px; }                                /* 넉넉한 카드 간격 */
+.card-body{ padding:16px; gap:8px; }
+.heart{ width:40px; height:40px; }
+.action{ gap:20px; padding-top:14px; }
+.pager{ gap:6px; }
+.page-btn{ min-width:44px; height:44px; }
+.more-btn{ min-height:44px; padding:11px 24px; }
+.empty-cta{ min-height:44px; padding:13px 26px; }
+
+/* ── ④ 큰 폰트·명확한 상태·밑줄 링크 (muted → 잉크로 대비 ↑) ── */
+body{ font-size:16px; line-height:1.6; }
+.brandname{ font-size:18px; }
+.cat{ font-size:15px; text-decoration:underline; text-underline-offset:3px; }
+.cat.is-active{ text-decoration-thickness:3px; box-shadow:inset 0 -3px 0 var(--accent); }
+.filter-title{ font-size:13px; color:var(--ink); }
+.filter-item{ font-size:15px; text-decoration:underline; text-underline-offset:2px; }
+.result-count{ font-size:22px; }
+.sort{ font-size:14px; color:var(--ink); }
+.chip{ font-size:15px; }
+.name{ font-size:16px; line-height:1.4; min-height:calc(1.4em*2); }
+.card-body .brand{ font-size:13px; font-weight:700; color:var(--ink); }
+.price-was{ font-size:14px; }
+.price-now{ font-size:19px; }
+.discount{ font-size:15px; font-weight:800; }
+.rating{ font-size:14px; color:var(--ink); }
+.review-count{ color:var(--muted); }
+.page-btn{ font-size:15px; }
+.more-btn{ font-size:15px; }
+.empty-title{ font-size:20px; }
+.empty-desc{ font-size:15px; color:var(--ink); }
+.empty-cta{ font-size:16px; }
+
+/* hover/active 를 뚜렷하게 — 색만이 아니라 보더/밑줄로 (장식 리프트 없음) */
+.cat:hover{ text-decoration-thickness:3px; }
+.filter-item:hover,
+.filter-reset:hover,
+.more-btn:hover,
+.sort-select:hover,
+.page-btn:hover:not(:disabled){
+  border-color:var(--accent);
+  box-shadow:inset 0 0 0 2px var(--accent);
+}
+.chip:hover:not(.is-active),
+.colorchip:hover,
+.heart:hover{
+  border-color:var(--accent);
+  box-shadow:inset 0 0 0 2px var(--accent);
+}
+/* 카드 hover/focus — base 의 리프트(translateY) 제거, 뚜렷한 액센트 보더로 대체 ── */
+.item-card{ transition:border-color .12s ease, box-shadow .12s ease; }
+.item-card:hover,
+.item-card:focus-within{
+  transform:none;
+  border-color:var(--accent);
+  box-shadow:inset 0 0 0 2px var(--accent);
+}
+
+/* ── ⑤ 상태를 색만이 아니라 형태로 — 선택=체크(✓), 세일=●, 가격하락=▼ ── */
+.chip.is-active::before{ content:"✓ "; font-weight:800; }
+.filter-item.is-active{ text-decoration:none; }
+.filter-item.is-active::before{ content:"✓ "; color:var(--accent); font-weight:800; }
+.cat.is-sale::before{ content:"● "; font-size:.7em; vertical-align:2px; }
+/* 색상 칩 선택: 색 ring 대신 각진 3px 아웃라인 + 코너 체크 배지(스와치 색과 무관하게 판독) */
+.colorchip.is-active{
+  box-shadow:none;
+  outline:3px solid var(--accent);
+  outline-offset:2px;
+}
+.colorchip.is-active::after{
+  content:"✓";
+  position:absolute; right:-3px; bottom:-3px;
+  width:20px; height:20px; border-radius:var(--radius);
+  background:var(--accent); color:var(--bg);
+  font-size:13px; font-weight:800; line-height:20px; text-align:center;
+}
+/* 현재 페이지: 반전(base) 유지 + 밑줄로 형태 강조 */
+.page-btn.is-active{ text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:3px; }
+/* 가격 하락(세일)을 색이 아니라 아이콘+텍스트로 */
+.discount::before{ content:"▼ "; font-size:11px; }
+
+/* ── ⑥ base 하드코딩 50% 원형 잔재 정리 → 토큰 radius(8)로 각지게. 차분·기능적 ── */
+.cart-count{ border-radius:var(--radius); min-width:18px; height:18px; font-size:11px; border:2px solid var(--bg); }
+.avatar{ border-radius:var(--radius); width:36px; height:36px; }
+.colorchip,
+.heart,
+.swatches i,
+.empty-illust{ border-radius:var(--radius); }
+.empty-illust{ border-width:2px; }
+
 </style>
 </head>
 <body>

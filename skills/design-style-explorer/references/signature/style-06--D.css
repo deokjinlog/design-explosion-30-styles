@@ -1,0 +1,191 @@
+/* signature/style-06--D.css — 06 GLASSMORPHISM (원형 D: 컬렉션/상품 그리드)
+   정본 시그니처 (프로스티드 글래스): 보라 배경(#7C3AED) 위에 유리가 떠 있게.
+     · 카드·필터·검색·배지·칩·페이지네이션 = backdrop-filter:blur(16px) saturate(180%)
+       + 반투명 흰 채움 rgba(255,255,255,.10~.20) + 1px 밝은 테두리 rgba(255,255,255,.25)
+       + 부드러운 확산 섀도 0 8px 32px rgba(0,0,0,.15)
+     · 배경에 컬러 그라디언트 블롭(body::before radial-gradient ×4) → blur가 실제로 보이게
+     · 카드가 유리처럼 떠 있는 느낌 · radius 크게(토큰 22px 그대로)
+     · 어두운 보라 배경엔 흰 글자(--ink) 유지 — 반투명이 가독 해치지 않게
+     · base의 50% 원형 잔재(아바타·하트·색상칩 등)는 글래스에 어울리므로 그대로 둔다
+   색·서체·radius 값 자체는 tokens 몫. 여기선 반투명 채움 / blur / 밝은 테두리 /
+   확산 섀도 / 유리 떠오름 만 다룬다. 구조 override only. */
+
+/* ── 0. 배경 블롭 레이어 — 유리 뒤 컬러 그라디언트 (blur가 실제로 보이게) ── */
+body{position:relative}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(42vw 42vw at 12% 16%, rgba(240,171,252,.55), transparent 60%),
+    radial-gradient(40vw 40vw at 88% 10%, rgba(96,165,250,.48), transparent 60%),
+    radial-gradient(46vw 46vw at 80% 88%, rgba(52,211,153,.42), transparent 62%),
+    radial-gradient(36vw 36vw at 18% 94%, rgba(251,146,60,.40), transparent 60%);
+}
+
+/* ── 1. identity: 헤더 = 상단 글래스 바 ── */
+.identity{
+  background:rgba(255,255,255,.10);
+  border-bottom:1px solid rgba(255,255,255,.22);
+  box-shadow:0 8px 32px rgba(0,0,0,.12);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  backdrop-filter:blur(16px) saturate(180%);
+  position:sticky;top:0;z-index:5;
+}
+.brandname{color:var(--ink)}
+.cat{color:var(--muted)}
+.cat.is-active{color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent)}
+
+/* 검색창 = 프로스티드 글래스 필 */
+.search{
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:0 8px 24px rgba(0,0,0,.10);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  backdrop-filter:blur(16px) saturate(180%);
+}
+.search input{color:var(--ink)}
+.search input::placeholder{color:var(--muted)}
+
+/* 장바구니·아바타 = 작은 글래스 원 */
+.cart-btn{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.25);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+}
+.avatar{
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.3);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+}
+
+/* ── 2. filter: 사이드 패널 = 큰 글래스 판 ── */
+.filter{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 8px 32px rgba(0,0,0,.15);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  backdrop-filter:blur(16px) saturate(180%);
+}
+.filter-title{color:var(--muted)}
+.filter-item{color:var(--ink)}
+.filter-item.is-active{
+  background:rgba(255,255,255,.18);color:var(--ink);font-weight:700;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);
+}
+
+/* 사이즈 칩 = 글래스 칩, active는 밝은 프로스트 */
+.chip{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.25);color:var(--ink);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+.chip.is-active{background:rgba(255,255,255,.9);color:var(--bg);border-color:rgba(255,255,255,.6)}
+
+/* 색상칩 = --sw 채움 유지, 테두리만 밝게 (원형 그대로) */
+.colorchip{border:1px solid rgba(255,255,255,.45)}
+
+/* 초기화 = 글래스 버튼 */
+.filter-reset{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.28);color:var(--ink);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+
+/* ── 3. results: 결과 헤더 ── */
+.results{border-bottom:1px solid rgba(255,255,255,.20)}
+.result-count{color:var(--ink)}
+.result-count b{color:var(--accent)}
+.sort{color:var(--muted)}
+.sort-select{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.28);color:var(--ink);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+.sort-select option{color:var(--bg);background:var(--surface)}
+
+/* ── 4. collection / item-card: 유리처럼 떠 있는 히어로 카드 ── */
+.collection{gap:calc(var(--space)*1.3)}
+.item-card{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 8px 32px rgba(0,0,0,.18);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  backdrop-filter:blur(16px) saturate(180%);
+}
+.item-card:hover,.item-card:focus-within{
+  transform:translateY(-4px);
+  box-shadow:0 18px 46px rgba(0,0,0,.30);
+  border-color:rgba(255,255,255,.4);
+}
+.thumb{
+  background:rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(255,255,255,.18);
+}
+.thumb-initial{color:var(--ink);opacity:.7}
+
+/* 배지 = 프로스티드 태그 (변종별 색조는 유지하되 유리화) */
+.badge{
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.3);color:var(--ink);
+  box-shadow:0 4px 16px rgba(0,0,0,.12);
+  -webkit-backdrop-filter:blur(8px) saturate(160%);
+  backdrop-filter:blur(8px) saturate(160%);
+}
+.badge--best{background:rgba(255,255,255,.9);color:var(--bg);border-color:rgba(255,255,255,.6)}
+.badge--new{background:rgba(240,171,252,.25);color:var(--ink);border-color:rgba(240,171,252,.55)}
+.badge--ship{background:rgba(240,171,252,.85);color:var(--bg);border-color:rgba(255,255,255,.4)}
+.badge--low{background:rgba(255,255,255,.10);color:var(--ink);border:1px solid rgba(255,255,255,.3)}
+
+/* 찜 버튼 = 글래스 원 */
+.heart{
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.3);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+}
+.heart .ico{color:var(--ink)}
+
+/* 가격·할인 대비 확보 */
+.price-now{color:var(--ink)}
+.discount{color:var(--accent)}
+
+/* ── 5. action / 페이지네이션: 프로스티드 바 안에 글래스 버튼 ── */
+.action{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:var(--radius);
+  padding:calc(var(--space)*.6);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+.page-btn{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.25);color:var(--ink);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+.page-btn.is-active{background:rgba(255,255,255,.9);color:var(--bg);border-color:rgba(255,255,255,.6)}
+.more-btn{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.28);color:var(--ink);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+
+/* ── 6. empty: 점선 → 밝은 글래스 판, CTA는 밝은 프로스트 ── */
+.empty{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 8px 32px rgba(0,0,0,.15);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  backdrop-filter:blur(16px) saturate(180%);
+}
+.empty-illust{border:1px dashed rgba(255,255,255,.45)}
+.empty-title{color:var(--ink)}
+.empty-desc{color:var(--muted)}
+.empty-cta{
+  background:rgba(255,255,255,.9);color:var(--bg);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+
+/* ── 7. 접근성: hover 떠오름(translate)만 제거, 색·섀도는 유지 ── */
+@media (prefers-reduced-motion:reduce){
+  .item-card:hover,.item-card:focus-within{transform:none}
+}

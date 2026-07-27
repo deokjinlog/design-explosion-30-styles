@@ -184,6 +184,149 @@ button,input,select{font:inherit;color:inherit}
   --type-scale:1.2;
 }
 
+
+/* ==== style-02--D.css ==== */
+/* signature/style-02--D.css — 02 "GOV.UK 공공"의 구조적 시그니처 (원형 D · 컬렉션/상품 그리드).
+   토큰(색 #1D70B8 · radius 0 · border #B1B4B6)만으론 GOV.UK 가 안 된다. 정본(design-system.service.gov.uk)의
+   정체성은 색이 아니라 "상호작용의 규율"이다. base+tokens 만 먹이면 그냥 "각진 파란 커머스"일 뿐:
+   ① 노란 포커스 스테이트 — a/button/input/select/칩/필터/페이저 :focus 에 노랑 하이라이트 + 검은 하단 바.
+      GOV.UK 의 유일무이한 시그니처. base 는 focus 상태가 아예 없다 → 이 파일 없이는 접근성 정체성이 통째로 빔.
+   ② 두꺼운 검은 언더라인 링크 — .cat/.filter-item 에 밑줄, hover 시 굵게(2→4px). 링크는 반드시 밑줄.
+   ③ 좌측 굵은 파란 마커 바 — 활성 네비/필터에 4~5px inset 파란 바(레이아웃 밀지 않는 hard 마커).
+   ④ radius 0 예외 없음 — base 가 남긴 50% 원형(로고/카트뱃지/아바타/색상칩/하트/스와치/일러스트) 전부 각지게.
+   ⑤ 1px 하드 라인만 · 소프트 섀도 금지 — 카드 리프트(translateY)+드롭섀도 제거, 폼필드 2px 검은 보더.
+   ⑥ 주요 버튼 = 파란 솔리드 + 하단 2px 어두운 그림자 바(GOV.UK 버튼), :active 시 눌림.
+   (색·radius 값 자체는 tokens 몫. 여기선 포커스/밑줄/마커/각짐/하드라인/버튼 구조만 override) */
+
+/* ── ④ radius 0 예외 없음: base 의 50% 원형 잔재를 전부 직각으로 ── */
+.logo,
+.cart-count,
+.avatar,
+.colorchip,
+.heart,
+.empty-illust{ border-radius:0; }
+.swatches i{ border-radius:0; }
+
+/* ── identity: 넓은 여백 + 하단 검은 하드 룰(GOV.UK 헤더 경계) ── */
+.identity{ padding:14px 16px; gap:20px; border-bottom:2px solid #0B0C0C; }
+.logo{ background:var(--accent); }
+.brandname{ font-weight:800; letter-spacing:-.01em; }
+.avatar{ border:1px solid #0B0C0C; }
+.cart-count{ background:var(--accent); }
+
+/* ── ② 두꺼운 검은 언더라인 링크 (검정 텍스트 · hover 시 굵게) ── */
+.cat,
+.filter-item{
+  color:#0B0C0C;
+  text-decoration:underline;
+  text-decoration-color:#0B0C0C;
+  text-decoration-thickness:2px;
+  text-underline-offset:3px;
+}
+.cat:hover,
+.filter-item:hover{ text-decoration-thickness:4px; color:#0B0C0C; }
+.cat.is-sale{ color:var(--accent); text-decoration-color:var(--accent); }
+
+/* ── ③ 좌측 굵은 파란 마커 바: 활성 네비/필터 (inset box-shadow = 레이아웃 안 밀리는 hard 마커) ── */
+.cat.is-active{
+  color:#0B0C0C; font-weight:700;
+  box-shadow:inset 4px 0 0 0 var(--accent);   /* base 의 inset 밑줄 대체 */
+  padding-left:8px; text-decoration-thickness:3px;
+}
+.filter-item.is-active{
+  background:transparent; color:#0B0C0C; font-weight:700;
+  box-shadow:inset 5px 0 0 0 var(--accent);   /* base 의 inset 1px 회색 보더 대체 */
+}
+
+/* ── filter: 넓은 여백 + 검은 하드 경계, 섹션 헤더는 굵은 검정 ── */
+.filter{ gap:20px; border-color:#0B0C0C; }
+.filter-title{ color:#0B0C0C; font-size:12px; font-weight:700; }
+.chip{ border:2px solid #0B0C0C; }
+.colorchip{ border:1px solid #0B0C0C; }
+.heart{ border:1px solid #0B0C0C; }
+.filter-reset{ border:2px solid #0B0C0C; box-shadow:0 2px 0 #929191; font-weight:700; }
+.search{ border:2px solid #0B0C0C; }        /* GOV.UK 인풋: 2px 검은 보더 */
+.sort-select{ border:2px solid #0B0C0C; font-weight:600; }
+
+/* ── ⑤ results: 굵은 대문자 헤드라인 · 검은 하드 룰 ── */
+.results{ border-bottom:2px solid #0B0C0C; }
+.result-count{
+  font-size:24px; font-weight:800; letter-spacing:-.01em;
+  text-transform:uppercase; color:#0B0C0C;
+}
+.result-count b{ color:var(--accent); font-variant-numeric:tabular-nums; }
+
+/* ── ⑤ collection/card: 리프트·드롭섀도 금지, hover 는 1px 검은 하드 라인만 ── */
+.collection{ gap:20px; }
+.item-card{ transition:border-color .1s ease; }
+.item-card:hover,
+.item-card:focus-within{
+  transform:none;                 /* base 의 translateY 리프트 제거 */
+  box-shadow:none;                /* base 의 소프트 드롭섀도 제거 */
+  border-color:#0B0C0C;           /* 하드 라인 강조 */
+}
+.name{ color:#0B0C0C; }
+.price-now{ color:#0B0C0C; font-variant-numeric:tabular-nums; }
+.price-was{ font-variant-numeric:tabular-nums; }
+
+/* ── action(페이지네이션): 검은 하드 보더, secondary 버튼도 GOV.UK 버튼 패밀리 ── */
+.action{ gap:16px; }
+.page-btn{ border-color:#0B0C0C; }
+.page-btn.is-active{ background:var(--accent); border-color:var(--accent); }
+.more-btn{ border:2px solid #0B0C0C; box-shadow:0 2px 0 #929191; font-weight:700; }
+
+/* ── ⑥ empty: 하드 경계 + 주요 버튼(파란 솔리드 + 하단 2px 어두운 그림자 바) ── */
+.empty{ border:2px solid #0B0C0C; }
+.empty-illust{ border:2px solid #0B0C0C; }
+.empty-title{ text-transform:uppercase; letter-spacing:.01em; color:#0B0C0C; }
+.empty-cta{
+  background:var(--accent); color:#FFFFFF; font-weight:700;
+  box-shadow:0 2px 0 #0B0C0C;     /* GOV.UK 버튼 하단 바(그린 대신 검정) */
+}
+.empty-cta:hover{ background:#155A92; }
+.empty-cta:active{ box-shadow:0 0 0 #0B0C0C; transform:translateY(2px); }
+
+/* ══ ① GOV.UK 노란 포커스 스테이트 (시그니처) — 파일 맨 끝에 두어 활성/컴포넌트 규칙을 확실히 이긴다 ══
+   정본: outline 3px 노랑 + box-shadow(위 노랑 2px / 아래 검정 4px) = 노란 하이라이트 + 검은 하단 바.
+   폼필드(input/select)는 노란 배경을 주지 않아 입력 텍스트 가독성 유지 — 링 + 하단 바만. */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+.cat:focus,
+.filter-item:focus,
+.chip:focus,
+.colorchip:focus,
+.page-btn:focus,
+.heart:focus,
+.empty-cta:focus,
+.more-btn:focus,
+.filter-reset:focus,
+.sort-select:focus,
+.search-btn:focus,
+.cart-btn:focus{
+  outline:3px solid #FFDD00;
+  outline-offset:0;
+  box-shadow:0 -2px #FFDD00, 0 4px #0B0C0C;
+}
+/* 링크·버튼 계열만 노란 하이라이트(배경). 폼필드는 제외해 가독성 보존. */
+a:focus,
+button:focus,
+.cat:focus,
+.filter-item:focus,
+.chip:focus,
+.page-btn:focus,
+.heart:focus,
+.empty-cta:focus,
+.more-btn:focus,
+.filter-reset:focus,
+.search-btn:focus,
+.cart-btn:focus{
+  background-color:#FFDD00;
+  color:#0B0C0C;
+  text-decoration:none;
+}
+
 </style>
 </head>
 <body>
