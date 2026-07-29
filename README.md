@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.4.0-ec4899?style=flat-square&labelColor=0d1117">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.5.0-ec4899?style=flat-square&labelColor=0d1117">
   <img alt="Claude Code" src="https://img.shields.io/badge/Claude%20Code-Plugin-a78bfa?style=flat-square&labelColor=0d1117">
   <img alt="Styles" src="https://img.shields.io/badge/styles-30-ec4899?style=flat-square&labelColor=0d1117">
   <img alt="Zero deps" src="https://img.shields.io/badge/dependencies-zero-22c55e?style=flat-square&labelColor=0d1117">
@@ -52,22 +52,17 @@
 
 ## 생성 엔진 — Zen Garden 3층
 
-[CSS Zen Garden](http://www.csszengarden.com/)의 계보(하나의 markup, N개 CSS)를 파이프라인으로:
+[CSS Zen Garden](http://www.csszengarden.com/)의 계보(하나의 markup, N개 CSS)를 파이프라인으로. 스타일 1개 = **CSS 3층**을 스켈레톤에 입힌 것 — 세 층은 재사용 범위가 다릅니다:
 
-```
-스켈레톤 1개 (콘텐츠 DOM, 고정)
-        +
-base.css + tokens/NN.css + signature/NN.css  (스타일 30벌)
-        ↓  assemble.py 인라인
-30장 자립 HTML — <body>는 30장 바이트까지 동일, <style>만 다름
-```
+| 층 | 맡는 것 | 재사용 범위 |
+|---|---|---|
+| **base** | 원형의 부품 조립(형태·배치, 값은 `var()`로 비움) | 원형당 1개 — 30 스타일 공유 |
+| **tokens/NN** | 스타일의 값 12개(색·폰트·radius·스케일) | 스타일당 1개 — 원형·도메인 무관 |
+| **signature/NN** | 값으론 안 되는 구조(도형·격자·하드섀도…) | 구조형 스타일만(D 21·A 10·B 17) |
 
-품질은 **두 겹**으로, 성격이 다릅니다:
+`assemble.py`(스크립트, LLM 토큰 0)가 셋을 스켈레톤에 인라인 → **30장 자립 HTML, `<body>`는 바이트까지 동일하고 `<style>`만 다릅니다.** 콘텐츠 동일성을 AI에게 부탁하지 않고 구조로 보장하는 것 — 30장을 나란히 놓으면 다른 건 오직 스타일입니다.
 
-- **화면 틀림 → 구조로 예방.** 원형 D를 고르면 D 스켈레톤이 나오고, 거기엔 대시보드를 *넣을 수가 없습니다*. (구버전은 대화형 제품에 대시보드를 오이식하고도 스타일 규칙은 다 지켜 통과했습니다 — 그래서 사후 적발 린트가 필요했죠. 지금은 그 사고 자체가 안 납니다.)
-- **CSS 배선 → `coverage-lint`가 검사.** 스켈레톤의 실존 클래스를 기준으로, 없는 클래스를 지어냈나(환각 셀렉터)·빠뜨린 구역이 있나(누락 영역)를 봅니다.
-
-<sub>즉 <b>&lt;body&gt; 바이트 동일 = 콘텐츠 동일성을 AI에게 부탁하지 않고 구조로 보장</b>. 30장을 나란히 놓으면 다른 건 오직 스타일입니다.</sub>
+품질은 두 겹: **화면 틀림은 스켈레톤이 구조로 예방**(원형 D엔 대시보드를 넣을 수 없음 — 사후 린트가 아니라 애초에 사고가 안 남), **CSS 배선은 `coverage-lint`가 검사**(환각 셀렉터·누락 영역 0).
 
 ---
 
@@ -94,7 +89,7 @@ base.css + tokens/NN.css + signature/NN.css  (스타일 30벌)
 - **디자인 운동**: Swiss · Bauhaus · De Stijl · Memphis · Neubrutalism · Editorial · Riso
 - **모프/시대**: Glassmorphism · Neumorphism · Claymorphism · Y2K · SF HUD · 레트로 픽셀
 
-**정본 서체 22종을 실제 웹폰트로 로드**(Playfair·Cormorant·IBM Plex·Space Mono·VT323·Roboto·Atkinson…)하고, 원형 D **구조 시그니처 21/30**을 저작해 회색조에서도 구조로 갈리게 했습니다. 출처·서체·차별화 축 전체 → [`docs/design/2026-07-26-type-and-source-grounding.md`](docs/design/2026-07-26-type-and-source-grounding.md).
+**정본 서체 22종을 실제 웹폰트로 로드**(Playfair·Cormorant·IBM Plex·Space Mono·VT323·Roboto·Atkinson…)하고, 세 원형에 **구조 시그니처**(D 21·A 10·B 17)를 저작해 회색조에서도 구조로 갈리게 했습니다 — Material 3·Carbon·Ant·SF HUD는 세 원형에 같은 토큰 어휘로 일관 저작. 출처·서체·차별화 축 전체 → [`docs/design/2026-07-26-type-and-source-grounding.md`](docs/design/2026-07-26-type-and-source-grounding.md).
 
 ---
 
