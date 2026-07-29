@@ -1,0 +1,146 @@
+/* signature/style-06--B.css — 06 GLASSMORPHISM (원형 B: 대화형)
+   정본 시그니처 (프로스티드 글래스): 보라 배경(#7C3AED) 위에 유리 버블이 떠 있게.
+     · 말풍선(.bubble / me 버블)·컴포저·응답카드·스레드 항목·네비 패널 =
+       backdrop-filter:blur(16px) saturate(180%) (+ -webkit-)
+       + 반투명 흰 채움 rgba(255,255,255,.10~.18) + 1px 밝은 테두리 rgba(255,255,255,.22~.35)
+       + 부드러운 확산 섀도 0 8px 32px rgba(0,0,0,.15)
+     · 대화 영역 뒤에 컬러 그라디언트 블롭(body::before radial-gradient ×4) → blur가 실제로 보이게
+       (.main 을 투명 처리해서 블롭이 대화 영역까지 비치게)
+     · radius 크게(토큰 22px 그대로) · me 버블은 핑크 톤 프로스트로, 상대 버블은 뉴트럴 화이트 프로스트로 톤차 구분
+     · 어두운 보라 배경엔 흰 글자(--ink) 유지 — 반투명이 가독성 해치지 않게
+   색·서체·radius 값 자체는 tokens 몫. 여기선 반투명 채움 / blur / 밝은 테두리 /
+   확산 섀도 / 유리 떠오름 만 다룬다. 구조 override only. */
+
+/* ── 0. 배경 블롭 레이어 — 유리 뒤 컬러 그라디언트 (blur가 실제로 보이게) ── */
+body{position:relative}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(42vw 42vw at 12% 16%, rgba(240,171,252,.55), transparent 60%),
+    radial-gradient(40vw 40vw at 88% 10%, rgba(96,165,250,.48), transparent 60%),
+    radial-gradient(46vw 46vw at 80% 88%, rgba(52,211,153,.42), transparent 62%),
+    radial-gradient(36vw 36vw at 18% 94%, rgba(251,146,60,.40), transparent 60%);
+}
+/* .main 의 불투명 보라 배경을 걷어내 블롭이 대화 영역까지 비치게 */
+.main{background:transparent}
+.convo{position:relative;z-index:0}
+
+/* ── 1. nav: 프로스티드 사이드 패널 ── */
+.nav{
+  background:rgba(255,255,255,.08);
+  border-right:1px solid rgba(255,255,255,.20);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  backdrop-filter:blur(16px) saturate(180%);
+}
+.brandname,.me-name{color:var(--ink)}
+.newbtn{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.28);color:var(--ink);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+/* 스레드 항목 = 글래스 필, active 는 밝은 프로스트 */
+.thread{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.14);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+}
+.thread-label{color:var(--ink)}
+.thread.is-active{
+  outline:0;
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.35);
+  box-shadow:0 4px 16px rgba(0,0,0,.12);
+}
+.me{border-top:1px solid rgba(255,255,255,.18)}
+
+/* ── 2. banner: 상단 프로스티드 스트립 ── */
+.banner{
+  background:rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(255,255,255,.18);
+  color:var(--muted);
+  -webkit-backdrop-filter:blur(12px) saturate(160%);
+  backdrop-filter:blur(12px) saturate(160%);
+}
+
+/* ── 3. convo / 말풍선: 유리처럼 떠 있는 버블 ── */
+.av{
+  background:rgba(240,171,252,.30);
+  border:1px solid rgba(255,255,255,.35);color:var(--ink);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+}
+/* 상대(AI) 버블 = 뉴트럴 화이트 프로스트 */
+.bubble{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 8px 32px rgba(0,0,0,.15);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  backdrop-filter:blur(16px) saturate(180%);
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+.bubble:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 40px rgba(0,0,0,.24);
+}
+/* 내(me) 버블 = 핑크 톤 프로스트로 톤차 구분 */
+.msg[data-speaker=me] .bubble{
+  background:rgba(240,171,252,.20);
+  border:1px solid rgba(240,171,252,.50);
+  color:var(--ink);
+}
+.text{color:var(--ink)}
+.meta{color:var(--muted)}
+
+/* ── 4. response-card: 유리 히어로 카드 ── */
+.card{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 8px 32px rgba(0,0,0,.18);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  backdrop-filter:blur(16px) saturate(180%);
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+.card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 18px 46px rgba(0,0,0,.30);
+  border-color:rgba(255,255,255,.4);
+}
+.card-eyebrow{color:var(--muted)}
+.card-title{color:var(--ink)}
+.card-excerpt{color:var(--muted)}
+/* 주 CTA = 밝은 프로스트(대비 확보: 어두운 보라 글자), 보조 = 글래스 아웃라인 */
+.primary,.send{
+  background:rgba(255,255,255,.92);color:var(--bg);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+.ghost{
+  background:rgba(255,255,255,.10);color:var(--ink);
+  border:1px solid rgba(255,255,255,.28);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+
+/* ── 5. typing: 은은한 상태 텍스트 ── */
+.typing{color:var(--muted)}
+
+/* ── 6. composer: 프로스티드 입력 바 ── */
+.composer{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 8px 32px rgba(0,0,0,.15);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  backdrop-filter:blur(16px) saturate(180%);
+}
+.composer textarea{color:var(--ink)}
+.composer textarea::placeholder{color:var(--muted)}
+.icon{
+  background:rgba(255,255,255,.10);color:var(--ink);
+  border:1px solid rgba(255,255,255,.25);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+}
+.hint{color:var(--muted)}
+
+/* ── 7. 접근성: hover 떠오름(translate)만 제거, 색·섀도는 유지 ── */
+@media (prefers-reduced-motion:reduce){
+  .bubble:hover,.card:hover{transform:none}
+}

@@ -90,6 +90,74 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14p
   --type-scale:1.2;
 }
 
+
+/* ==== style-23--B.css ==== */
+/* signature/style-23--B.css — 23 IBM Carbon · 원형 B(대화) 구조 시그니처
+   IBM Carbon Design System 정본(carbondesignsystem.com) — 대화 화면에 적용:
+     · border-radius 0 예외없음 (base 하드코딩 50%/px 원형 잔재 전부 각지게 — 아바타=스퀘어)
+     · 2px 하드 보더 · 소프트 섀도 전면 금지 → 각진 상자 + 하드 라인으로만 구획
+     · 말풍선: 각진 상자 + 2px 보더 (me=IBM블루 보더/배경, 상대=회색 보더)
+     · 스레드 목록: 1px 하드 라인으로 촘촘히 구획, 활성 좌측 2px 파란 마커
+     · 컴포저/입력: 각진 필드 + 포커스 2px 블루 inset 링
+     · IBM Plex(토큰) · 넓은 자간 기능 라벨 · send=각진 솔리드 블루(box-shadow:none)
+     · 액센트(IBM블루 #0F62FE)는 버튼/포커스/액티브 마커에만, 장식 0
+   구조 override 전용 — base/archetype-B.css 위에 얹는다(뒤에 로드=동급 특이도 승).
+   실존 클래스만(환각 0). */
+
+/* ── 0. 각지게: base 하드코딩 원형 잔재 전부 무력화 (아바타=각진 스퀘어) ── */
+.logo,
+.av,
+.me-av,
+.thread-icon{ border-radius:0 }
+
+/* ── 1. Carbon 포커스 시그니처: 2px 블루 하드 아웃라인(soft 섀도 대신) ── */
+a:focus-visible,
+button:focus-visible,
+textarea:focus-visible{ outline:2px solid var(--accent); outline-offset:1px }
+
+/* ── 2. 말풍선 = 각진 상자 + 2px 하드 보더 ── */
+/* 상대(AI) = 회색 2px 보더 (bare .bubble 은 base 1px 를 동급 특이도로 덮음) */
+.bubble{ border:2px solid var(--border); border-radius:0 }
+/* me = IBM블루 보더/배경(솔리드). base 의 .msg[..me] .bubble{border-color:transparent}
+   가 (0,2,0)이라 bare .bubble 로는 못 이김 → 동급 특이도 규칙을 뒤에 둬서 승. */
+.msg[data-speaker=me] .bubble{ border:2px solid var(--accent) }
+
+/* ── 3. 스레드 목록 = 1px 하드 라인으로 촘촘히 구획 ── */
+.threads{ gap:0; border-top:1px solid var(--border) }
+.thread{ border-bottom:1px solid var(--border); border-radius:0 }
+/* 도트 = 각진 솔리드 상태 마커 (반투명 제거) */
+.thread-icon{ opacity:1; background:var(--muted) }
+/* 활성 = outline 제거 + 회색 레이어 + 좌측 2px 파란 inset 마커 (Carbon 선택 상태) */
+.thread.is-active{ outline:0; background:var(--surface); box-shadow:inset 2px 0 0 var(--accent); font-weight:600 }
+.thread.is-active .thread-icon{ background:var(--accent) }
+
+/* ── 4. banner = Carbon 인라인 알림 (좌측 2px 블루 마커) ── */
+.banner{ border-left:2px solid var(--accent) }
+
+/* ── 5. 응답 카드 = Carbon 정보 타일 (각진 + 좌측 2px 블루 inset 마커) ── */
+.card{ border-radius:0; box-shadow:inset 2px 0 0 var(--accent) }
+.card-eyebrow{ text-transform:uppercase; letter-spacing:.08em }
+
+/* ── 6. 컴포저 = 각진 Carbon 텍스트 필드 (포커스 2px 블루 inset 링) ── */
+.composer{ border-radius:0 }
+.composer:focus-within{ outline:2px solid var(--accent); outline-offset:-2px }
+.composer textarea:focus-visible{ outline:0 }   /* 컨테이너 링이 대신하므로 내부 링 제거 */
+.icon{ border-radius:0 }
+
+/* ── 7. 버튼 = 각진 솔리드 블루 (soft 섀도 전면 제거, Carbon primary hover) ── */
+.send,
+.primary{ border-radius:0; box-shadow:none }
+.send:hover,
+.primary:hover{ background:#0353E9 }             /* Carbon $button-primary-hover */
+.ghost,
+.newbtn{ border-radius:0; box-shadow:none }
+.ghost:hover,
+.newbtn:hover{ background:var(--surface) }
+
+/* ── 8. 넓은 자간 기능 라벨 (meta 타임스탬프 · hint) ── */
+.meta,
+.hint{ letter-spacing:.04em }
+
 </style>
 </head>
 <body>

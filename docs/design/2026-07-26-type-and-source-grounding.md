@@ -105,7 +105,12 @@
 | Riso | 스팟 2색 · `mix-blend-mode:multiply` · 오프셋 | 풀컬러 사진 · 그라디언트 |
 | 에디토리얼 | Playfair 디스플레이 대형 · 2단 · 드롭캡 | 산세리프 본문 |
 
-**진행 상태**: 서체·스케일·틴트·팔레트 재접지 = **완료**. 원형 D 구조 signature = **21/30 완료** — 01·02·04·05·06·09·10·12·14·15·16·17·18·19·21·22·23·24·28·29·30 (SF HUD·GOV.UK·터미널·Neubrutal·글래스·픽셀·에디토리얼·뉴모·벤토·클레이·Material 3·Y2K·스위스·맥시멀·Riso·De Stijl·Carbon·Bauhaus·접근성·Memphis·Ant). 나머지 9종(03 shadcn·07 Braun·08 럭셔리·11 오가닉·13 오로라·20 다크애널·25 Polaris·26 다크미니멀·27 웜프로)은 토큰전용 — 원래 저구조(미니멀·다크서브틀·세리프웜) 사조라 서체·팔레트·스케일로 충분히 차별. 산업 라벨 12종 prompt MD엔 정체성 갱신 노트 삽입(정본=tokens+signature+본 문서). 원형 A·B용 구조 signature 확장은 후속.
+**진행 상태**: 서체·스케일·틴트·팔레트 재접지 = **완료**. 원형 D 구조 signature = **21/30 완료** — 01·02·04·05·06·09·10·12·14·15·16·17·18·19·21·22·23·24·28·29·30 (SF HUD·GOV.UK·터미널·Neubrutal·글래스·픽셀·에디토리얼·뉴모·벤토·클레이·Material 3·Y2K·스위스·맥시멀·Riso·De Stijl·Carbon·Bauhaus·접근성·Memphis·Ant). 나머지 9종(03 shadcn·07 Braun·08 럭셔리·11 오가닉·13 오로라·20 다크애널·25 Polaris·26 다크미니멀·27 웜프로)은 토큰전용 — 원래 저구조(미니멀·다크서브틀·세리프웜) 사조라 서체·팔레트·스케일로 충분히 차별. 산업 라벨 12종 prompt MD엔 정체성 갱신 노트 삽입(정본=tokens+signature+본 문서).
+
+**원형 확장(2026-07-27)**: D(21/30)에 이어 A(대시보드)·B(대화)에도 구조 signature 저작 —
+- **A 6종**(fintech-zen): IBM Carbon(1px 하드그리드로 KPI/차트 봉합)·Material 3(토널4단·엘리베이션5단)·Ant(밀집)·Neubrutal(하드섀도 KPI)·Swiss(1px헤어라인 12열·비대칭 6·2·2·2·빨강1점)·De Stijl(검은 격자·원색블록).
+- **B 12종**(yeonseo-zen): 기존 04·05·07·09·10·18 + 신규 06 Glass(프로스티드 버블)·12 Neu(볼록/함몰 버블)·15 Clay(통통 버블)·16 Material 3(me=primary container)·23 Carbon(각진 2px 버블)·30 Ant(밀집).
+- Material 3·Carbon·Ant는 D·A·B 3원형에 **같은 토큰 어휘**(m3-surf/elevation, 1px 하드그리드, 밀집)로 일관 저작 — 한 사조가 원형 넘어 정체성 유지.
 
 ## 검증
 

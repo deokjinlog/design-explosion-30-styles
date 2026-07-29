@@ -90,6 +90,62 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14p
   --type-scale:1.125;
 }
 
+
+/* ==== style-30--B.css ==== */
+/* signature/style-30--B.css — 30 Ant Design(고밀도)의 "구조적 시그니처".
+   토큰(색 #1677FF · radius 2 · space 10)만으론 안 되는 것 =
+   초고밀도(폰트 12~13 · 패딩 축소 · 타이트 간격) + 각진 아바타(원형이 base에 50% 리터럴로 박힘)
+   + 컴팩트 스레드행(~32px)에 1px 라인 구획 + 낮은 컴포저 + 조밀 메타.
+   액센트는 대부분 base가 이미 var(--accent) — me버블·send·primary는 자동으로 #1677FF.
+   여기선 활성 스레드 하이라이트에 Ant controlItemBgActive(#E6F4FF) 한 색만 참조. */
+
+/* ── 초고밀도: 전역 폰트/줄간격 축소 ── */
+body{ font-size:13px; line-height:1.5 }
+
+/* ── 각진 아바타(원형 잔재 제거) — base가 .av/.me-av 50%, .thread-icon 5px 리터럴로 박아둠
+      → 여기서만 --radius:2 로 풀어 작고 각지게 ── */
+.av{ border-radius:var(--radius); width:26px; height:26px; font-size:11px }
+.me-av{ border-radius:var(--radius); width:22px; height:22px; font-size:10px }
+.thread-icon{ border-radius:var(--radius); width:14px; height:14px }
+.logo{ width:22px; height:22px; font-size:12px }
+
+/* ── 말풍선 촘촘: 패딩 축소 · 간격 타이트 · 미세 보더 유지 ── */
+.convo{ gap:5px; padding:calc(var(--space)*.9) }
+.msg{ gap:6px; max-width:78% }
+.bubble{ padding:5px 9px }
+.text{ font-size:13px; line-height:1.45 }
+.meta{ margin-top:1px; font-size:10.5px }
+
+/* ── 컴팩트 스레드 목록: 행 ~32px + 1px 라인 구획(Ant 메뉴 밀집) ── */
+.nav{ gap:calc(var(--space)*.6); padding:calc(var(--space)*.9) }
+.brandname{ font-size:14px }
+.newbtn{ padding:5px 9px; font-size:12.5px }
+.threads{ gap:0; border-top:1px solid var(--border) }
+.thread{ padding:6px 8px; font-size:12.5px; border-radius:0; border-bottom:1px solid var(--border) }
+.thread.is-active{ background:#E6F4FF; outline:0; color:var(--accent) }
+.me{ padding-top:8px }
+.me-name{ font-size:12.5px }
+
+/* ── 배너·타이핑 조밀 ── */
+.banner{ padding:6px calc(var(--space)*.9); font-size:12px }
+.typing{ padding:4px calc(var(--space)*.9); font-size:11.5px }
+
+/* ── 응답 카드 컴팩트(고밀도) ── */
+.card{ margin:calc(var(--space)*.2) calc(var(--space)*.9); padding:calc(var(--space)*.9) }
+.card-eyebrow{ font-size:10.5px }
+.card-title{ font-size:15px; margin:2px 0 5px }
+.card-excerpt{ font-size:12.5px; line-height:1.45 }
+.card-actions{ margin-top:8px; gap:6px }
+.primary{ padding:4px 12px; font-size:12.5px; font-weight:600 }
+.ghost{ padding:4px 12px; font-size:12.5px }
+
+/* ── 낮은 컴포저: 높이 축소 · 조밀 정렬 ── */
+.composer{ margin:calc(var(--space)*.9); padding:4px 5px; gap:5px }
+.composer textarea{ font-size:13px }
+.icon{ width:26px; height:26px; border-radius:var(--radius) }
+.send{ padding:5px 12px; font-size:12.5px; font-weight:600 }
+.hint{ font-size:10.5px }
+
 </style>
 </head>
 <body>

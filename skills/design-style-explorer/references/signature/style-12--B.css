@@ -1,0 +1,63 @@
+/* signature/style-12--B.css — 12 뉴모피즘의 "구조적 시그니처"(원형 B 대화).
+   토큰(색·radius)만으론 안 되는 것 = 이 스타일의 전부인 "이중 섀도(soft UI)".
+   base는 표면마다 1px 하드 보더 + 플랫 배경을 깔지만, 뉴모피즘은 보더가 0이고
+   같은 배경색(#E4E9F2)에서 밝은 빛(위-왼) + 어두운 그늘(아래-오)로만 입체를 만든다.
+     · 볼록(raised)  = 바깥 이중섀도 → 상대 말풍선·컴포저·스레드·응답카드·send·아바타
+     · 함몰(inset)   = 안쪽 이중섀도 → 내 말풍선·입력창(textarea)·활성 스레드(눌린 선택)
+   섀도 색은 배경 동일 색조의 명/암 쌍이라 토큰 var 아닌 리터럴 hex가 정본이다(고정값).
+   그 외의 색은 전부 var(--accent) 미세 사용 — 표면은 모두 배경과 같은 단색. */
+
+:root{
+  --nu:      8px 8px 16px #c3c8d1, -8px -8px 16px #ffffff;         /* 정본 볼록(대형 표면) */
+  --nu-in:   inset 6px 6px 12px #c3c8d1, inset -6px -6px 12px #ffffff; /* 정본 함몰(담긴 느낌) */
+  --nu-2:    5px 5px 10px #c3c8d1, -5px -5px 10px #ffffff;         /* 볼록(사이드바 칩) — 스택 겹침 완화용 축소 */
+  --nu-2in:  inset 5px 5px 10px #c3c8d1, inset -5px -5px 10px #ffffff;
+  --nu-3:    4px 4px 8px #c3c8d1, -4px -4px 8px #ffffff;           /* 볼록(소형: 아이콘·아바타) */
+  --nu-3in:  inset 2px 2px 4px #c3c8d1, inset -2px -2px 4px #ffffff;
+}
+
+/* ===== 사이드바(nav 영역) — 하드 보더 제거, 배경은 본문과 같은 단색 ===== */
+.nav{ border-right:0 }
+.me{ border-top:0; margin-top:auto }
+
+/* 새 이야기 버튼 = 볼록 칩 */
+.newbtn{ border:0; border-radius:14px; box-shadow:var(--nu-2) }
+
+/* 스레드 목록 = 볼록 칩들. 각 칩의 섀도가 서로 안 먹게 gap을 넉넉히(base 2px→) */
+.threads{ gap:calc(var(--space)*.85) }
+.thread{ border:0; border-radius:14px; box-shadow:var(--nu-2) }
+/* 활성 = "눌린" 선택(함몰) + 액센트 텍스트. base의 outline 하드선은 제거 */
+.thread.is-active{ background:var(--surface); outline:0; color:var(--accent); box-shadow:var(--nu-2in) }
+/* 스레드 도트 = 살짝 파인 원형 홈, 활성만 액센트로 채움 */
+.thread-icon{ border-radius:50%; opacity:1; background:var(--surface); box-shadow:var(--nu-3in) }
+.thread.is-active .thread-icon{ background:var(--accent); box-shadow:none }
+
+/* 아바타 — 원형(50%)은 유지하되 뉴모답게 부드러운 볼록 디스크 + 액센트 모노그램 */
+.av{ background:var(--surface); color:var(--accent); box-shadow:var(--nu-3) }
+.me-av{ background:var(--surface); color:var(--accent); box-shadow:var(--nu-3) }
+
+/* ===== 배너(banner 영역) — 하드 밑줄 제거, 단색 위 부드러운 안내 ===== */
+.banner{ border-bottom:0 }
+
+/* ===== 대화(conversation 영역) — 말풍선 겹침 방지로 여백 확대 ===== */
+.convo{ gap:calc(var(--space)*1.7); padding:calc(var(--space)*1.4) }
+
+/* 상대 말풍선 = 정본 볼록(보더 0, 배경=본문 단색, 부드러운 라운드) */
+.bubble{ background:var(--surface); border:0; border-radius:20px; box-shadow:var(--nu) }
+/* 내 말풍선 = 함몰(담긴 느낌). base가 넣는 파란 배경/흰 글씨/투명보더를 단색+본문잉크로 되돌림 */
+.msg[data-speaker=me] .bubble{ background:var(--surface); color:var(--ink); border:0; box-shadow:var(--nu-in) }
+
+/* ===== 응답 카드(response-card 영역) = 정본 볼록 패널 ===== */
+.card{ border:0; border-radius:20px; box-shadow:var(--nu) }
+/* 카드 액션: 이어쓰기=볼록(액센트 텍스트), 다른 제안=함몰(보조=눌린 느낌) */
+.primary{ background:var(--surface); color:var(--accent); border-radius:12px; box-shadow:var(--nu-2) }
+.ghost{ background:var(--surface); color:var(--ink); border:0; border-radius:12px; box-shadow:var(--nu-2in) }
+
+/* ===== 컴포저(composer 영역) = 볼록 바 안에 함몰 입력창 ===== */
+.composer{ border:0; border-radius:20px; box-shadow:var(--nu) }
+/* 입력창(textarea) = 함몰된 홈. base는 transparent/보더0이라 배경·패딩·라운드를 여기서 부여 */
+.composer textarea{ background:var(--surface); border-radius:14px; padding:9px 12px; box-shadow:var(--nu-in) }
+/* 첨부·음성 아이콘 = 소형 볼록 버튼(하드 보더 제거) */
+.icon{ border:0; border-radius:12px; background:var(--surface); box-shadow:var(--nu-3) }
+/* 보내기 = 정본 볼록 CTA(단색 표면 + 액센트 텍스트, 원색 채움 아님) */
+.send{ background:var(--surface); color:var(--accent); border-radius:14px; box-shadow:var(--nu) }

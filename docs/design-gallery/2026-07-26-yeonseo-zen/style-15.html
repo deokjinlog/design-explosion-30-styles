@@ -90,6 +90,165 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14p
   --type-scale:1.3;
 }
 
+
+/* ==== style-15--B.css ==== */
+/* signature/style-15--B.css — 15 클레이모피즘의 "구조적 시그니처" (원형 B · 대화/글쓰기 챗).
+   토큰(라일락 #F4F1FF · radius 32)만으론 안 나오는 것 = 점토처럼 부풀어 오른 말풍선.
+   정본 규칙(원형 D와 동일한 점토 어휘를 대화 화면에 이식):
+     ① 통통한 점토 말풍선 = 큰 radius + 이중 그림자.
+        · 바깥 컬러 소프트섀도  0 12px 24px rgba(accent,.28)     (라일락 확산광 = 떠 있는 부피)
+        · 안쪽 위 하이라이트    inset 0 6px 12px rgba(255,255,255,.9)
+        · 안쪽 아래 그늘        inset 0 -6px 12px rgba(0,0,0,.08)  → 볼록하게 부푼 표면.
+     ② me 버블 ≠ 상대 버블 = 색/그림자 톤으로 구분.
+        · 상대(ai) = 흰 점토(surface + 옅은 라일락 확산광).
+        · 나(me)   = 라일락 점토(accent 틴트 배경 + 더 진한 확산광). 텍스트는 잉크(가독성 유지).
+     ③ 말풍선·컴포저·스레드·응답카드·send 전부 폭신하게. send/버튼은 pill 통통.
+        hover = 탄성(오버슈트로 살짝 부풀거나 눌림).
+     ④ 하드 보더/플랫/각짐 금지 → 실선·헤어라인·outline 전부 제거, 그림자가 곧 경계.
+   base의 원형 잔재(아바타·로고·스레드 아이콘)는 점토답게 통통한 블롭으로 유지.
+   색·radius 기준값은 전부 var(토큰). 여기선 구조(부피감·형태·상태)만 강제한다. */
+
+:root{
+  /* 볼록 점토(raised) — 바깥 라일락 확산광 + 위 하이라이트 + 아래 그늘 */
+  --clay: 0 12px 24px color-mix(in srgb, var(--accent) 28%, transparent),
+          inset 0 6px 12px rgba(255,255,255,.9),
+          inset 0 -6px 12px rgba(0,0,0,.08);
+  /* me 버블 전용 — 라일락을 더 진하게 뿜는 확산광 (화자 구분의 두 번째 축) */
+  --clay-me: 0 12px 24px color-mix(in srgb, var(--accent) 42%, transparent),
+             inset 0 6px 12px rgba(255,255,255,.75),
+             inset 0 -6px 12px rgba(0,0,0,.10);
+  /* hover — 더 부푼 상태 */
+  --clay-lift: 0 18px 34px color-mix(in srgb, var(--accent) 38%, transparent),
+               inset 0 6px 14px rgba(255,255,255,.95),
+               inset 0 -6px 14px rgba(0,0,0,.09);
+  /* 작은 원형 블롭용(아바타·로고·스레드 아이콘·아이콘 버튼) */
+  --clay-sm: 0 6px 14px color-mix(in srgb, var(--accent) 30%, transparent),
+             inset 0 3px 6px rgba(255,255,255,.9),
+             inset 0 -3px 6px rgba(0,0,0,.08);
+  /* 눌린/파인 표면(배너·타이핑·힌트 스트립) — 하이라이트/그늘 반전 */
+  --clay-press: inset 0 7px 14px rgba(0,0,0,.10),
+                inset 0 -6px 12px rgba(255,255,255,.85);
+  /* 버튼 눌림(hover press) */
+  --clay-press-sm: inset 0 4px 8px rgba(0,0,0,.12),
+                   inset 0 -3px 6px rgba(255,255,255,.8);
+  --ease-clay: cubic-bezier(.34,1.56,.64,1);   /* 오버슈트 = 말랑 탄성 */
+  --pill:999px;
+}
+
+/* ── nav: 하드 보더 제거, 오른쪽으로 퍼지는 소프트 그림자만 ── */
+.nav{
+  border-right:0;
+  background:var(--bg);
+  box-shadow:8px 0 22px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.logo{ border-radius:calc(var(--radius)*.4); box-shadow:var(--clay-sm); }
+
+/* 새 이야기 = 통통한 라일락 알약 CTA, hover 탄성으로 부풂 */
+.newbtn{
+  border:0; border-radius:var(--pill); padding:11px 14px;
+  background:color-mix(in srgb, var(--accent) 42%, var(--surface)); color:var(--ink); font-weight:600;
+  box-shadow:var(--clay-sm);
+  transition:box-shadow .2s var(--ease-clay), transform .12s var(--ease-clay);
+}
+.newbtn:hover{ transform:translateY(-2px); box-shadow:var(--clay-lift); }
+
+/* 스레드 = 통통한 알약. 활성은 흰 점토로 튀어나옴(outline 대신 clay) */
+.threads{ gap:6px; }
+.thread{
+  border-radius:var(--pill); padding:9px 12px;
+  transition:box-shadow .2s var(--ease-clay), transform .12s var(--ease-clay);
+}
+.thread:hover{ transform:translateX(2px); }
+.thread.is-active{
+  outline:0; background:var(--surface); box-shadow:var(--clay-sm);
+}
+.thread-icon{ border-radius:50%; box-shadow:var(--clay-sm); opacity:1; background:color-mix(in srgb, var(--accent) 45%, var(--surface)); }
+
+/* 내 프로필 = 하드 보더 제거, 통통한 아바타 블롭 */
+.me{ border-top:0; box-shadow:var(--clay-press); border-radius:var(--pill); padding:10px 12px; margin-top:auto; }
+.me-av{ box-shadow:var(--clay-sm); }
+
+/* ── banner: 헤어라인 제거, 파인 점토 well 스트립 ── */
+.banner{
+  border-bottom:0; margin:var(--space) var(--space) 0; border-radius:var(--pill);
+  background:var(--surface); box-shadow:var(--clay-press-sm); padding:11px 18px;
+}
+
+/* ── conversation: 점토 버블 사이 넉넉한 숨통 ── */
+.convo{ gap:calc(var(--space)*.75); padding:var(--space) calc(var(--space)*1.1); }
+
+/* 아바타 = 통통한 원형 블롭 */
+.av{ box-shadow:var(--clay-sm); }
+
+/* ── ①② bubble: 부풀어 오른 점토. 보더 제거 + 큰 radius + 두꺼운 패딩 + 이중 그림자 ── */
+.bubble{
+  border:0; border-radius:var(--radius); padding:14px 18px;
+  background:var(--surface);
+  box-shadow:var(--clay);
+}
+/* 나(me) = 라일락 점토. 색+그림자 톤 둘 다로 상대와 구분. 텍스트는 잉크로 가독성 유지 */
+.msg[data-speaker=me] .bubble{
+  background:color-mix(in srgb, var(--accent) 52%, var(--surface));
+  color:var(--ink); border-color:transparent;
+  box-shadow:var(--clay-me);
+}
+.meta{ color:var(--muted); }
+.msg[data-speaker=me] .meta{ color:color-mix(in srgb, var(--ink) 62%, transparent); }
+
+/* ── ③ response-card: 부풀어 오른 큰 점토 패널. hover 탄성 확대 ── */
+.card{
+  border:0; border-radius:calc(var(--radius)*1.05); padding:calc(var(--space)*1.05);
+  margin:calc(var(--space)*.4) calc(var(--space)*1.1);
+  background:var(--surface); box-shadow:var(--clay);
+  transition:transform .25s var(--ease-clay), box-shadow .25s var(--ease-clay);
+}
+.card:hover{ transform:translateY(-3px) scale(1.008); box-shadow:var(--clay-lift); }
+.card-actions{ gap:calc(var(--space)*.5); margin-top:calc(var(--space)*.7); }
+
+/* 이어쓰기 = 통통한 라일락 알약(주액션), hover 눌림 */
+.primary{
+  border:0; border-radius:var(--pill); padding:11px 22px; font-weight:700;
+  background:var(--accent); color:var(--ink); box-shadow:var(--clay-sm);
+  transition:box-shadow .18s var(--ease-clay), transform .1s var(--ease-clay);
+}
+.primary:hover{ transform:translateY(1px); box-shadow:var(--clay-press-sm); }
+/* 다른 제안 = 통통한 흰 점토 알약, hover 부풂 */
+.ghost{
+  border:0; border-radius:var(--pill); padding:11px 22px;
+  background:var(--surface); color:var(--ink); box-shadow:var(--clay-sm);
+  transition:box-shadow .18s var(--ease-clay), transform .1s var(--ease-clay);
+}
+.ghost:hover{ transform:translateY(-2px); box-shadow:var(--clay-lift); }
+
+/* ── typing: 파인 점토 well 안의 상태 텍스트 ── */
+.typing{
+  margin:0 calc(var(--space)*1.1); padding:9px 16px; border-radius:var(--pill);
+  background:var(--surface); box-shadow:var(--clay-press-sm); color:var(--muted);
+  align-self:flex-start; font-style:italic;
+}
+
+/* ── ③④ composer: 부풀어 오른 점토 바(raised pill). 보더 제거 + 두꺼운 패딩 ── */
+.composer{
+  border:0; border-radius:var(--radius); padding:10px 12px; gap:10px;
+  margin:0 var(--space) var(--space);
+  background:var(--surface); box-shadow:var(--clay);
+}
+/* 첨부/음성 = 통통한 원형 점토 블롭, hover 탄성 */
+.icon{
+  border:0; width:38px; height:38px; border-radius:50%;
+  background:var(--surface); color:var(--ink); box-shadow:var(--clay-sm);
+  transition:box-shadow .18s var(--ease-clay), transform .12s var(--ease-clay);
+}
+.icon:hover{ transform:translateY(-2px); box-shadow:var(--clay-lift); }
+/* 보내기 = 통통한 라일락 pill, hover 눌림(pressed) */
+.send{
+  border:0; border-radius:var(--pill); padding:11px 22px; font-weight:700;
+  background:var(--accent); color:var(--ink); box-shadow:var(--clay-sm);
+  transition:box-shadow .18s var(--ease-clay), transform .1s var(--ease-clay);
+}
+.send:hover{ transform:translateY(1px); box-shadow:var(--clay-press-sm); }
+.hint{ color:var(--muted); }
+
 </style>
 </head>
 <body>

@@ -1,0 +1,123 @@
+/* signature/style-16--B.css — 16 머티리얼 디자인 3 의 "구조적 시그니처" (원형 B · 대화 화면).
+   토큰(색·radius·서체)만으론 안 되는 것, m3.material.io 정본에서 구조로 끌어온 것 =
+   ① 토널 서피스 — 표면마다 primary(#6750A4) 틴트를 섞어 순백이 아니라 보라가 밴 톤 계단.
+      내(me) 말풍선 = primary container(연보라) + on-primary-container(어두운 보라 글자),
+      상대 말풍선·응답카드·컴포저·사이드바 = surface container 톤(순백 아님). 회색조로 찍어도 층이 보인다.
+   ② 엘리베이션 — 대화는 elevation 절제: 말풍선은 flat 톤(그림자 없음). 대신 응답카드·컴포저·
+      새이야기 FAB 는 M3 그림자 사다리(key + ambient 2겹, 정본 값) 1~2단, hover 한 단계 상승.
+   ③ 반경 규율 — 말풍선·카드 16(토큰 그대로), send·newbtn·primary·ghost 는 pill(999),
+      스레드 항목 12, 컴포저 아이콘은 원형(pill). 아바타(.av·.me-av)의 원형(50%)은 base 그대로 둔다.
+   ④ FAB — .send = primary(accent) 원형/pill + 상시 elevation 3 → hover 4(on-primary 흰 상태 레이어).
+      .newbtn = primary container extended-FAB(pill + elevation). 활성 스레드 = primary container pill + 상태 레이어.
+   ⑤ 상태 레이어 — hover 에 primary 8% 오버레이(스레드·버튼·카드). primary 채움 버튼 위는 on-primary 흰 8%.
+   색·서체·radius 기준값은 전부 var(토큰). 여기선 구조(톤 계단·그림자·형태·상태)만 강제한다.
+   가독성: me 말풍선은 연보라 위 어두운 보라 글자(on-primary-container), 상대 말풍선은 near-white 톤 위 dark ink 로 대비 넉넉. */
+
+:root{
+  /* M3 elevation 5단 (key shadow + ambient shadow — 정본 값) */
+  --m3-e1:0 1px 2px 0 rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+  --m3-e2:0 1px 2px 0 rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
+  --m3-e3:0 1px 3px 0 rgba(0,0,0,.30), 0 4px 8px 3px rgba(0,0,0,.15);
+  --m3-e4:0 2px 3px 0 rgba(0,0,0,.30), 0 6px 10px 4px rgba(0,0,0,.15);
+  --m3-e5:0 4px 4px 0 rgba(0,0,0,.30), 0 8px 12px 6px rgba(0,0,0,.15);
+  /* 토널 서피스 계단 — surface 에 primary 를 섞을수록 "높은" 컨테이너 */
+  --m3-surf1:color-mix(in srgb, var(--surface) 95%, var(--accent));  /* container low     ~5%  · 사이드바·응답카드 */
+  --m3-surf2:color-mix(in srgb, var(--surface) 92%, var(--accent));  /* container         ~8%  · 상대 말풍선·컴포저 */
+  --m3-surf3:color-mix(in srgb, var(--surface) 89%, var(--accent));  /* container high    ~11% · 배너 */
+  --m3-surf4:color-mix(in srgb, var(--surface) 86%, var(--accent));  /* container highest ~14% */
+  /* primary container (내 말풍선·활성 스레드·newbtn) + 그 위 글자색(on-primary-container) */
+  --m3-pc:color-mix(in srgb, var(--accent) 20%, var(--surface));
+  --m3-on-pc:color-mix(in srgb, var(--accent) 72%, #000);
+  /* 상태 레이어 — hover primary 8% / 필드·헤어라인 톤 아웃라인 */
+  --m3-state:color-mix(in srgb, var(--accent) 8%, transparent);
+  --m3-outline:color-mix(in srgb, var(--border) 55%, var(--accent));
+  --m3-pill:999px;
+  --m3-ease:.18s cubic-bezier(.2,0,0,1);
+}
+
+/* ── ① 사이드바(nav) = surface container low 톤 + 톤 아웃라인 헤어라인 ── */
+.nav{ background:var(--m3-surf1); border-right-color:var(--m3-outline); }
+
+/* newbtn = M3 extended FAB(새 이야기): primary container + pill + elevation 1 → hover 2 + 상태 레이어 ── ③④ */
+.newbtn{
+  background:var(--m3-pc); color:var(--m3-on-pc); border:0;
+  border-radius:var(--m3-pill); box-shadow:var(--m3-e1); font-weight:700;
+  transition:box-shadow var(--m3-ease);
+}
+.newbtn:hover{
+  box-shadow:var(--m3-e2);
+  background-image:linear-gradient(var(--m3-state),var(--m3-state));
+}
+
+/* ── ③⑤ 스레드 항목 = 반경 12 + hover 상태 레이어 ── */
+.thread{ border-radius:calc(var(--radius)*.75); transition:background var(--m3-ease); }  /* 16*.75 = 12 */
+.thread:hover{ background-image:linear-gradient(var(--m3-state),var(--m3-state)); }
+.thread-icon{ background:var(--accent); opacity:.55; }
+/* ④ 활성 스레드 = primary container pill + 상태 레이어(선택 지표) — base 의 outline 제거 */
+.thread.is-active{
+  outline:0; border:0;
+  background:var(--m3-pc); color:var(--m3-on-pc);
+  border-radius:var(--m3-pill);
+}
+.thread.is-active .thread-icon{ background:var(--m3-on-pc); opacity:.85; }
+
+/* ── ① 배너 = surface container high 톤(대화 위 안내 서피스) + 톤 헤어라인 ── */
+.banner{ background:var(--m3-surf3); border-bottom-color:var(--m3-outline); }
+
+/* ── ①② 대화 영역: elevation 절제 — 말풍선은 flat 톤(그림자 없음) ── */
+.convo{ gap:calc(var(--space)*.8); }
+/* 상대(ai) 말풍선 = surface container 톤 + 보더 제거(톤이 경계). 반경 16(토큰) */
+.bubble{ background:var(--m3-surf2); border:0; }
+/* 내(me) 말풍선 = primary container 연보라 + on-primary-container 어두운 글자(가독성) */
+.msg[data-speaker=me] .bubble{
+  background:var(--m3-pc); color:var(--m3-on-pc); border:0;
+}
+.meta{ opacity:.85; }
+
+/* ── ①② 응답 카드 = surface container low 톤 + elevation 1, hover 2단 상승 + 상태 레이어 ── */
+.card{
+  background:var(--m3-surf1); border:0; box-shadow:var(--m3-e1);
+  transition:transform var(--m3-ease), box-shadow var(--m3-ease);
+}
+.card:hover{
+  transform:translateY(-2px); box-shadow:var(--m3-e2);
+  background-image:linear-gradient(var(--m3-state),var(--m3-state));
+}
+
+/* ③ 이어쓰기 = M3 filled 버튼: pill + elevation 1 → hover 2, on-primary 흰 상태 레이어 */
+.primary{
+  border-radius:var(--m3-pill); box-shadow:var(--m3-e1);
+  transition:box-shadow var(--m3-ease);
+}
+.primary:hover{
+  box-shadow:var(--m3-e2);
+  background-image:linear-gradient(rgba(255,255,255,.08),rgba(255,255,255,.08));
+}
+/* ③⑤ 다른 제안 = M3 outlined 버튼: pill + 톤 아웃라인 + hover primary 8% 상태 레이어 */
+.ghost{
+  border-radius:var(--m3-pill); border-color:var(--m3-outline);
+  transition:background var(--m3-ease);
+}
+.ghost:hover{ background-image:linear-gradient(var(--m3-state),var(--m3-state)); }
+
+/* ── ① 타이핑 인디케이터 = muted 유지(톤 계단 위 부가 텍스트) ── */
+.typing{ color:var(--muted); }
+
+/* ── ①② 컴포저 = surface container 톤 + elevation 2(떠 있는 입력바) + 보더 제거 ── */
+.composer{ background:var(--m3-surf2); border:0; box-shadow:var(--m3-e2); }
+/* 첨부·음성 아이콘 = M3 standard icon 버튼: 원형(pill) + hover 상태 레이어 */
+.icon{
+  border-radius:var(--m3-pill); border-color:var(--m3-outline);
+  transition:background var(--m3-ease);
+}
+.icon:hover{ background-image:linear-gradient(var(--m3-state),var(--m3-state)); }
+
+/* ── ④ 보내기 = M3 FAB: primary(accent) + pill + 상시 elevation 3 → hover 4 (on-primary 흰 상태 레이어) ── */
+.send{
+  border-radius:var(--m3-pill); box-shadow:var(--m3-e3);
+  transition:box-shadow var(--m3-ease);
+}
+.send:hover{
+  box-shadow:var(--m3-e4);
+  background-image:linear-gradient(rgba(255,255,255,.08),rgba(255,255,255,.08));
+}
