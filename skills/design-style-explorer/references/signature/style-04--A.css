@@ -1,0 +1,126 @@
+/* signature/style-04--A.css — 04 고밀도 터미널의 "구조적 시그니처" (원형 A · 대시보드).
+   터미널은 데이터 대시보드에 특히 잘 맞는다 — 숫자 리드아웃 + 셀 그리드가 곧 정체성.
+   토큰(색·radius #0/서체 IBM Plex Mono)만으론 안 되는 것, prompts/style-04-dense-terminal 정본에서 구조로 =
+   ① 등폭 데이터 리드아웃 — kpi-value·cell-amount·goal-figures·legend-pct 를 앰버/그린 터미널 컬러로.
+      수치는 이미 tabular-nums 모노(base+토큰) — 여기선 "발광 리드아웃" 색만 입힌다(글자 안 가림).
+   ② 스프레드시트 셀 그리드 — kpi-grid 는 gap:1px + 부모 border 배경으로 셀 분할(카드 사이 여백=1px 하드라인),
+      settle-table 은 셀마다 1px 실선 + 행 zebra + 조밀 패딩. 대시보드가 곧 스프레드시트.
+   ③ 대괄호 라벨 — kpi-label·section-title·period-tab 을 [LABEL] 대문자 모노. 상태·배너·델타를
+      로그 레벨로: OK=green #3DDC84 · WARN/INFO=amber(토큰) · ERROR=red #FF5252 · DIM=muted.
+      OK·ERROR 는 토큰에 슬롯이 없어 하드코딩(정본 팔레트 그대로).
+   ④ 스캔라인 — nav·identity·banner·카드 배경에 자기 background-image 로 미세 수평 스캔라인
+      (오버레이 아님 · 알파 ~2% 라 kpi-value 글자 절대 안 가림).
+   ⑤ 각짐 — radius 0(토큰). base 가 50%/999px 로 하드코딩한 원형 잔재(아바타·범례점·상태알약·
+      델타pill·진행바·빈일러스트)를 여기서 각지게. 커서 깜빡임 액센트를 page-title 에.
+   색·서체·radius 기준값은 전부 var(토큰). 여기선 구조(그리드·라벨·리드아웃색·스캔라인·각짐)만 강제.
+   없는 요소는 만들지 않는다. */
+
+:root{
+  --term-ok:#3DDC84;      /* 로그 OK   (green) */
+  --term-err:#FF5252;     /* 로그 ERROR (red)  */
+  --term-warn:var(--accent);  /* 로그 WARN (amber = 토큰) */
+  --term-dim:var(--muted);    /* 로그 DIM/INFO   */
+  /* 미세 수평 스캔라인 — 카드 자기 background-image. 알파 2%대라 수치 가독성 보존 */
+  --term-scan:repeating-linear-gradient(to bottom, transparent 0 2px, rgba(200,205,212,.022) 2px 3px);
+}
+
+/* ===== 커서 깜빡임 — 터미널 프롬프트 액센트 (reduced-motion 시 base 의 animation:none!important 가 끔) ===== */
+@keyframes term-blink{ 50%{ opacity:0 } }
+
+/* ===== ⑤ base 원형 잔재 각짐 — 터미널엔 곡선이 없다 ===== */
+.user-av,.legend-dot,.note .dot,.goal-bar,.goal-bar-fill,.empty-illust,.kpi-delta.is-down{ border-radius:0 }
+
+/* ===== nav — 스캔라인 서피스 + 각진 아바타 + 활성 포인터 ===== */
+.nav{ background-color:var(--surface); background-image:var(--term-scan); }
+.menu-item{ border-radius:0; letter-spacing:.02em; }
+.menu-item.is-active .menu-label::before{ content:"› "; color:var(--accent); font-weight:700; }
+.brandname{ letter-spacing:.02em; }
+.brandname::before{ content:"~/"; color:var(--muted); }
+
+/* ===== identity — 스캔라인 상단바 + 커서 깜빡이는 페이지 타이틀 ===== */
+.identity{ background-color:var(--surface); background-image:var(--term-scan); }
+.page-title{ text-transform:uppercase; letter-spacing:.03em; }
+.page-title::after{ content:"▋"; color:var(--accent); margin-left:.3ch; animation:term-blink 1.1s steps(1) infinite; }
+
+/* ③ period-tabs(filter) = [LABEL] 브래킷 탭, 활성 = 앰버 밑줄 인디케이터 */
+.period-tabs{ background:transparent; padding:0; gap:3px; }
+.period-tab{ border-radius:0; color:var(--muted); letter-spacing:.02em; }
+.period-tab::before{ content:"["; }
+.period-tab::after{ content:"]"; }
+.period-tab.is-active{ background:transparent; color:var(--accent); font-weight:700; box-shadow:inset 0 -2px 0 var(--accent); }
+
+/* 채널 필터·내보내기 = 명령행 톤(각짐 + $ 커맨드 프리픽스) */
+.channel-select{ border-radius:0; border-color:var(--border); }
+.export-btn{ background:transparent; color:var(--accent); border:1px solid var(--accent); border-radius:0; font-weight:700; }
+.export-btn::before{ content:"$"; font-weight:700; }
+
+/* ===== ④③ banner = [INFO] 로그 라인 (스캔라인 + 앰버 좌측 바) ===== */
+.banner{ background-color:var(--surface); background-image:var(--term-scan); border-left:2px solid var(--accent); }
+.banner-ico{ color:var(--accent); }
+.banner-text::before{ content:"[INFO] "; color:var(--muted); font-weight:700; }
+
+/* ===== ②④ KPI = 스프레드시트 셀 그리드 (1px 하드라인 + 미세 zebra + 스캔라인) ===== */
+.kpi-grid{ gap:1px; background:var(--border); border:1px solid var(--border); padding:0; }
+.kpi-card{
+  border:0; padding:calc(var(--space)*.9) calc(var(--space)*1);
+  background-color:var(--surface); background-image:var(--term-scan);
+}
+.kpi-card:nth-child(2n){ background-color:var(--bg); }   /* 셀 미세 교차(zebra) */
+/* ③ 라벨 = [LABEL] 브래킷 대문자 · ① 값 = 앰버 발광 리드아웃 */
+.kpi-label{ text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+.kpi-label::before{ content:"["; }
+.kpi-label::after{ content:"]"; }
+.kpi-value{ color:var(--accent); letter-spacing:0; }   /* tabular-mono 는 base — 색만 */
+/* ③ 델타 = 로그 레벨 색 (up=OK green / down=ERROR red / flat=DIM) */
+.kpi-delta.is-up{ color:var(--term-ok); }
+.kpi-delta.is-down{ background:transparent; color:var(--term-err); padding:0; }
+.kpi-delta.is-flat{ color:var(--term-dim); }
+.spark-line.is-up{ stroke:var(--term-ok); }
+.spark-line.is-down{ stroke:var(--term-err); }
+.spark-line.is-flat{ stroke:var(--term-dim); }
+
+/* ===== ③④ section-title 공통 = [LABEL] 브래킷 대문자 모노 ===== */
+.section-title{ text-transform:uppercase; letter-spacing:.04em; }
+.section-title::before{ content:"["; color:var(--accent); margin-right:.25ch; }
+.section-title::after{ content:"]"; color:var(--accent); margin-left:.25ch; }
+.section-sub{ text-transform:none; color:var(--muted); }
+
+/* ===== ④ 차트 카드(추이) — 스캔라인 서피스 + 각진 노트점 ===== */
+.chart-trend{ background-color:var(--surface); background-image:var(--term-scan); }
+
+/* ===== ④① 구성비 도넛 — 스캔라인 + 각진 범례점 + 앰버 % 리드아웃 ===== */
+.chart-part{ background-color:var(--surface); background-image:var(--term-scan); }
+.legend-pct{ color:var(--accent); }   /* tabular 는 base — 앰버 리드아웃 */
+
+/* ===== ④① 목표 = 스캔라인 + 세그먼트 진행바 + 앰버/그린 리드아웃 ===== */
+.goal{ background-color:var(--surface); background-image:var(--term-scan); }
+.goal-current{ color:var(--accent); font-variant-numeric:tabular-nums; }   /* 앰버 현재값 */
+.goal-target{ font-variant-numeric:tabular-nums; }
+.goal-pct{ color:var(--term-ok); font-variant-numeric:tabular-nums; }      /* 그린 OK 달성률 */
+.goal-bar{ background:var(--bg); border:1px solid var(--border); }
+.goal-bar-fill{ background-color:var(--accent); background-image:repeating-linear-gradient(90deg, transparent 0 5px, var(--bg) 5px 6px); }  /* [####----] 세그먼트 블록 */
+
+/* ===== ②③ 정산 테이블 = 스프레드시트 셀 그리드 + 행 zebra + [LEVEL] 상태 ===== */
+.table-section{ background-color:var(--surface); background-image:var(--term-scan); }
+.settle-table th,.settle-table td{ border:1px solid var(--border); padding:calc(var(--space)*.42) calc(var(--space)*.6); }
+.settle-table th{ background:var(--bg); color:var(--muted); }
+.settle-table tbody tr:nth-child(2n){ background:rgba(200,205,212,.02); }   /* 행 zebra */
+.cell-amount{ color:var(--accent); }                 /* 금액 = 앰버 리드아웃 */
+.cell-amount--small{ color:var(--muted); }           /* 소액 = DIM(작음 강조 보존) */
+/* ③ 상태 = [LEVEL] 로그 배지 — 알약 채움 제거, 브래킷 + 로그레벨 색 아웃라인 */
+.status{ background:transparent; border-radius:0; padding:1px 6px; letter-spacing:.03em; text-transform:uppercase; }
+.status::before{ content:""; width:auto; height:auto; border-radius:0; background:none; margin:0; font-weight:700; }
+.status--done{ color:var(--term-ok); border:1px solid var(--term-ok); }
+.status--done::before{ content:"[OK] "; }
+.status--pending{ color:var(--accent); border:1px solid var(--accent); }
+.status--pending::before{ content:"[WARN] "; }
+.status--hold{ color:var(--muted); border:1px dashed var(--muted); }
+.status--hold::before{ content:"[HOLD] "; }
+.status--failed{ color:var(--term-err); border:1px solid var(--term-err); }
+.status--failed::before{ content:"[ERR] "; }
+
+/* ===== ④⑤ 빈 상태 = 스캔라인 + 각진 일러스트 + > 커맨드 CTA ===== */
+.empty{ background-color:var(--surface); background-image:var(--term-scan); }
+.empty-illust{ border:1px dashed var(--muted); }
+.empty-cta{ background:transparent; color:var(--accent); border:1px solid var(--accent); border-radius:0; }
+.empty-cta::before{ content:"> "; font-weight:700; }

@@ -1,0 +1,184 @@
+/* signature/style-01--B.css — 01 SF 게임 HUD 의 "구조적 시그니처" (원형 B · 대화/글쓰기 챗).
+   토큰(--bg #050810 · --accent 시안 #00E5FF · --radius 0)만으론 안 나오는, HUD 정본 어휘를
+   대화 화면에 이식한다. style-01--D(그리드)와 같은 5축을 버블·컴포저·스레드로 옮긴 것:
+     ① 코너 브래킷 — 말풍선·응답카드·컴포저 네 모서리에 L자 시안 브래킷(::before 하나에 8개 바를
+        background 로 그려 4모서리 완성 — clip 없이 순수 CSS). 조준 프레임 느낌. filter:drop-shadow 로 발광.
+     ② 각진 컷코너 — clip-path polygon 으로 버블 한쪽 모서리를 사선 컷(HUD 패널 베벨).
+        상대(ai)는 오른쪽 위, 나(me)는 왼쪽 위를 컷 → 서로 "바깥쪽"이 잘린 방향성.
+        clip 이 box-shadow 를 잘라먹으므로, 컷된 요소의 발광은 filter:drop-shadow(=실루엣 추종)로 준다.
+     ③ 시안 글로우 — me 버블·send·활성 스레드에 네온 발광 + 얇은 시안 1px 라인. 상대 버블은 미세 프레임.
+     ④ 스캔라인 — repeating-linear-gradient 를 대화 배경/버블 "자신의 background"로 깐다(오버레이 아님).
+        → 자식 텍스트는 항상 그 위에 그려져(--ink #C9EEF7 on #0A1526) 글자를 절대 가리지 않는다(가독성 사수).
+     ⑤ 등폭 메타/타임스탬프(tabular-nums) · 대문자 자간 라벨 · 시안 데이터 리드아웃 틱(▮).
+   그리고 base 가 직접 박은 border-radius:50% 원형 잔재(아바타·스레드 아이콘)를 각지게 환수 — HUD 에 곡선은 없다.
+   색은 원칙적으로 var(토큰). 발광 틴트만 --accent(#00E5FF)의 rgba 리터럴로 하드코딩(토큰에 알파 슬롯 없음).
+   스켈레톤 실존 클래스만 override. 없는 요소는 만들지 않는다. */
+
+:root{
+  --br:13px;                                    /* 코너 브래킷 팔 길이 */
+  --brw:2px;                                     /* 브래킷 두께(시안 라인) */
+  --cut:12px;                                    /* 각진 컷코너 크기 */
+  --mono:ui-monospace,'Roboto Mono','DejaVu Sans Mono',monospace;
+  --glow:0 0 6px rgba(0,229,255,.55);           /* 시안 네온(#00E5FF) */
+  --glow-lg:0 0 16px rgba(0,229,255,.40);
+  --scan:repeating-linear-gradient(to bottom,rgba(0,229,255,.05) 0 1px,transparent 1px 4px);
+  --frame:rgba(0,229,255,.16);                  /* 상대 버블 미세 프레임 */
+}
+
+/* ═══ ④ 전역 스캔라인 배경 ═══ */
+body{ background:var(--scan),var(--bg); background-attachment:fixed; }
+
+/* ═══ nav — 시안 우측 라인 HUD 패널 ═══ */
+.nav{
+  background:var(--surface);
+  border-right:1px solid var(--accent);
+  box-shadow:1px 0 0 rgba(0,229,255,.22);
+}
+.logo{ box-shadow:var(--glow); font-family:var(--font-ui); }
+.brandname{ font-family:var(--font-ui); letter-spacing:.05em; }
+
+/* 새 이야기 = 컷코너 HUD 버튼(대문자 라벨) */
+.newbtn{
+  clip-path:polygon(0 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%);
+  border:1px solid var(--accent); border-radius:0;
+  background:var(--surface); color:var(--accent);
+  text-transform:uppercase; letter-spacing:.08em; font-weight:700;
+}
+.newbtn:hover{ filter:drop-shadow(var(--glow)); }
+.lbl{ font-family:var(--font-ui); font-size:12px; }
+
+/* 스레드 = 각진 트랙. 활성은 시안 좌측 마커 + 발광 리드아웃 ③ */
+.thread{ text-transform:uppercase; letter-spacing:.04em; }
+.thread-icon{ border-radius:0; background:var(--muted); opacity:.6; }
+.thread.is-active{
+  outline:0; background:var(--surface);
+  border-left:2px solid var(--accent);
+  box-shadow:inset 0 0 14px rgba(0,229,255,.12);
+}
+.thread.is-active .thread-label{ color:var(--accent); text-shadow:var(--glow); }
+.thread.is-active .thread-icon{ background:var(--accent); opacity:1; box-shadow:var(--glow); }
+
+/* 내 프로필 = 시안 상단 라인 + 각진 아바타 */
+.me{ border-top:1px solid var(--accent); }
+.me-av{ border-radius:0; border:1px solid var(--accent); background:var(--surface); color:var(--accent); }
+.me-name{ font-family:var(--mono); letter-spacing:.04em; }
+
+/* ═══ banner — 시안 하단 라인 HUD 리드아웃 스트립 ═══ */
+.banner{
+  border-bottom:1px solid var(--accent);
+  background:var(--surface); color:var(--muted);
+  text-transform:uppercase; letter-spacing:.06em;
+  box-shadow:inset 0 0 14px rgba(0,229,255,.05);
+}
+.banner::before{ content:"▮ "; color:var(--accent); }
+
+/* ═══ ④ conversation — 스캔라인 배경 ═══ */
+.convo{ background:var(--scan),var(--bg); }
+
+/* 아바타 = 각진 시안 두른 HUD 칩 */
+.av{
+  border-radius:0; background:var(--surface);
+  border:1px solid var(--accent); color:var(--accent);
+  font-family:var(--font-ui);
+}
+
+/* ═══ ①②④ bubble — 코너 브래킷 + 사선 컷 + 스캔라인 + 프레임 ═══
+   상대(ai) = 미세 시안 프레임. 오른쪽 위 컷. */
+.bubble{
+  position:relative; border-radius:0;
+  border:1px solid var(--frame);
+  background:var(--scan),var(--surface);
+  color:var(--ink);
+  clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%);
+}
+/* 나(me) = 왼쪽 위 컷 + 시안 실선 + 네온 발광(clip 때문에 drop-shadow 로). 텍스트는 --ink 가독성 유지 ③ */
+.msg[data-speaker=me] .bubble{
+  border:1px solid var(--accent);
+  background:var(--scan),var(--surface);
+  color:var(--ink);
+  clip-path:polygon(var(--cut) 0,100% 0,100% 100%,0 100%,0 var(--cut));
+  filter:drop-shadow(var(--glow-lg));
+}
+
+/* ① 코너 브래킷 — 버블·카드·컴포저 (::before 하나로 4모서리 L, clip 없이 background 8바) */
+.bubble::before,.card::before,.composer::before{
+  content:""; position:absolute; inset:3px; z-index:2; pointer-events:none;
+  background:
+    linear-gradient(var(--accent),var(--accent)) top left,
+    linear-gradient(var(--accent),var(--accent)) top left,
+    linear-gradient(var(--accent),var(--accent)) top right,
+    linear-gradient(var(--accent),var(--accent)) top right,
+    linear-gradient(var(--accent),var(--accent)) bottom left,
+    linear-gradient(var(--accent),var(--accent)) bottom left,
+    linear-gradient(var(--accent),var(--accent)) bottom right,
+    linear-gradient(var(--accent),var(--accent)) bottom right;
+  background-repeat:no-repeat;
+  background-size:
+    var(--br) var(--brw),var(--brw) var(--br),
+    var(--br) var(--brw),var(--brw) var(--br),
+    var(--br) var(--brw),var(--brw) var(--br),
+    var(--br) var(--brw),var(--brw) var(--br);
+  filter:drop-shadow(var(--glow));
+}
+
+.text{ font-size:14px; }
+/* ⑤ 메타/타임스탬프 = 등폭 tabular-nums */
+.meta{ color:var(--muted); font-family:var(--mono); font-variant-numeric:tabular-nums; letter-spacing:.02em; }
+
+/* ═══ typing — 시안 프롬프트 틱 + 대문자 ═══ */
+.typing{ color:var(--muted); font-family:var(--mono); text-transform:uppercase; letter-spacing:.04em; }
+.typing::before{ content:"> "; color:var(--accent); }
+
+/* ═══ ①③④ response-card — 브래킷 HUD 패널 + 스캔라인 + 시안 프레임 발광 ═══ */
+.card{
+  position:relative; border-radius:0;
+  border:1px solid var(--accent);
+  background:var(--scan),var(--surface);
+  box-shadow:var(--glow-lg),inset 0 0 16px rgba(0,229,255,.06);
+}
+.card-eyebrow{ color:var(--accent); text-transform:uppercase; letter-spacing:.1em; font-family:var(--mono); }
+.card-eyebrow::before{ content:"▮ "; }
+.card-title{ font-family:var(--font-ui); color:var(--ink); text-shadow:var(--glow); }
+.card-excerpt{ color:var(--ink); }
+
+/* 이어쓰기 = 발광 시안 컷 버튼(주액션) */
+.primary{
+  clip-path:polygon(0 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%);
+  border:1px solid var(--accent); border-radius:0;
+  background:var(--accent); color:var(--bg);
+  text-transform:uppercase; letter-spacing:.06em; font-weight:800;
+  filter:drop-shadow(var(--glow));
+}
+/* 다른 제안 = 시안 아웃라인 컷 버튼 */
+.ghost{
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);
+  border:1px solid var(--accent); border-radius:0;
+  background:transparent; color:var(--accent);
+  text-transform:uppercase; letter-spacing:.06em;
+}
+.ghost:hover{ filter:drop-shadow(var(--glow)); }
+
+/* ═══ ①③④ composer — 브래킷 HUD 입력 패널 + 스캔라인 + 시안 프레임 ═══ */
+.composer{
+  position:relative; border-radius:0;
+  border:1px solid var(--accent);
+  background:var(--scan),var(--surface);
+  box-shadow:inset 0 0 16px rgba(0,229,255,.06);
+}
+.composer textarea{ color:var(--ink); font-family:var(--font); }
+.composer textarea::placeholder{ color:var(--muted); }
+/* 첨부/음성 = 각진 시안 아이콘 버튼 */
+.icon{
+  border-radius:0; border:1px solid var(--border);
+  background:transparent; color:var(--accent);
+}
+.icon:hover{ border-color:var(--accent); filter:drop-shadow(var(--glow)); }
+/* 보내기 = 네온 발광 시안 컷 버튼 ③ */
+.send{
+  clip-path:polygon(0 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%);
+  border:1px solid var(--accent); border-radius:0;
+  background:var(--accent); color:var(--bg);
+  text-transform:uppercase; letter-spacing:.08em; font-weight:700;
+  filter:drop-shadow(var(--glow-lg));
+}
+.hint{ color:var(--muted); font-family:var(--mono); letter-spacing:.02em; }

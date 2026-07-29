@@ -1,0 +1,85 @@
+/* signature/style-28--B.css — 28 하이컨트라스트 접근성(WCAG AAA)의 "구조적 시그니처".
+   토큰(액센트 #0B5FFF · 검정 보더 #111 · radius 8)만으론 안 되는 것 =
+   ① 절대 안 사라지는 강한 포커스 링(3px solid #0B5FFF · offset 3px) — outline:none 금지
+   ② 고대비 2px 검정 보더(말풍선·컴포저·카드·스레드·버튼) —
+        me = 파란 solid 배경 + 흰 글자,  ai = 흰 배경 + 검은 글자 + 2px 검정 보더
+   ③ 큰 텍스트(본문 16px+ · 행간 1.6) · 큰 터치타깃(44px) · 밑줄 링크
+   ④ 상태를 색이 아니라 형태로: 활성 스레드 = 좌측 굵은 바 + 체크 / 타이핑 = 텍스트 표기
+   차분·기능적. base의 저대비 잔재(muted 톤·저 opacity·1px 얇은 보더) 정리. */
+
+/* ═══ ① 강한 포커스 링 — 핵심. 어떤 요소도 outline:none 으로 안 죽인다 ═══ */
+a:focus-visible,
+button:focus-visible,
+textarea:focus-visible,
+.thread:focus-visible,
+.send:focus-visible{
+  outline:3px solid var(--accent);
+  outline-offset:3px;
+}
+
+/* ═══ ② 큰 텍스트 · 넉넉한 행간 (본문 16px+, 1.6) ═══ */
+body{ font-size:16px; line-height:1.6 }
+.text{ font-size:16px; line-height:1.6 }
+.card-excerpt{ font-size:16px; line-height:1.6 }
+.card-eyebrow{ font-size:13px; color:var(--muted) }
+.card-title{ font-size:22px; line-height:1.3 }
+.meta{ font-size:13px; color:var(--muted) }
+.banner{ font-size:15px; line-height:1.6; color:var(--ink) }
+.hint{ font-size:13px; color:var(--muted) }
+.brandname{ font-size:17px }
+.me-name{ font-size:15px }
+
+/* ═══ ③ 고대비 2px 검정 보더 — 말풍선(형태·색 이중으로 화자 구분) ═══ */
+.bubble{
+  border:2px solid var(--border);            /* ai: 흰 배경 + 검은 글자 + 굵은 검정 보더 */
+  border-radius:var(--radius);
+  padding:12px 15px;
+}
+.msg[data-speaker=me] .bubble{
+  background:var(--accent);                   /* me: 파란 solid 배경 */
+  color:#ffffff;                              /* 흰 글자 */
+  border-color:var(--border);                 /* base가 transparent 로 지운 보더를 2px 검정으로 복구 */
+  font-weight:700;                            /* 파랑 위 흰 글자 가독 보강 */
+}
+
+/* ═══ ③ 고대비 2px 검정 보더 — 컴포저·카드·버튼 ═══ */
+.composer{ border:2px solid var(--border); border-radius:var(--radius) }
+.card{ border:2px solid var(--border); border-radius:var(--radius) }
+.newbtn{ border:2px solid var(--border); border-radius:var(--radius) }
+.icon{ border:2px solid var(--border); border-radius:var(--radius) }
+.primary{ border:2px solid var(--border) }
+.ghost{ border:2px solid var(--border) }
+.send{ border:2px solid var(--border) }
+
+/* ═══ ④ 큰 터치타깃 (min-height 44px) · 굵은 라벨 ═══ */
+.send{ min-height:44px; padding:10px 20px; font-size:15px; font-weight:700 }
+.newbtn{ min-height:44px; padding:10px 14px; font-size:15px; font-weight:700 }
+.thread{ min-height:44px }
+.primary{ min-height:44px; padding:10px 18px; font-size:15px; font-weight:700 }
+.ghost{ min-height:44px; padding:10px 18px; font-size:15px; font-weight:700 }
+.icon{ width:44px; height:44px }
+
+/* ═══ ④ 밑줄 링크 — 스레드는 <a> 링크이므로 라벨에 밑줄로 링크성 명시 ═══ */
+.thread-label{ text-decoration:underline; text-underline-offset:3px }
+
+/* ═══ ⑤ 상태를 색이 아니라 형태로 — 활성 스레드 = 좌측 굵은 바 + 체크 ═══ */
+.thread-icon{ opacity:1; background:var(--muted); border-radius:2px }
+.thread.is-active{
+  background:var(--surface);
+  outline:0;                                  /* base 1px outline 제거 → 좌측 바로 대체 */
+  border-left:6px solid var(--accent);        /* 색맹도 보이는 굵은 좌측 바 */
+  padding-left:3px;                           /* 바 6px + 3px = 비활성 9px 와 정렬 */
+  font-weight:800;
+}
+.thread.is-active .thread-label::after{
+  content:" ✓";                               /* 색이 아닌 '기호'로 선택 표시 */
+  font-weight:800;
+  color:var(--accent);
+}
+
+/* ═══ ⑤ 타이핑 = 색이 아니라 '텍스트'로 명시 (base 이미 텍스트, 대비만 보강) ═══ */
+.typing{
+  color:var(--ink);
+  font-weight:700;
+  padding:10px var(--space);
+}

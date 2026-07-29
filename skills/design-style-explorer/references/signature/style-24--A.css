@@ -1,0 +1,113 @@
+/* signature/style-24--A.css — 24 Bauhaus 의 "구조적 시그니처" (원형 A · 정산 대시보드).
+   토큰(빨강 accent·radius 0·굵은 잉크 보더)만으론 안 되는 것, Bauhaus 정본을 대시보드 구조로 =
+   ① 원색 3 만 — 빨강 var(--accent)·노랑 #FFD500·파랑 #005BBB. 이 셋 + 잉크/회색 외 색은 안 쓴다.
+      로고/도넛 파랑, 활성 탭·목표바·CTA 빨강, 활성 메뉴·경고·표 보류 노랑 식으로 배분.
+   ② 기하 도형이 장식 — kpi-card ::before(원 or 사각)·::after(삼각)를 모서리에 얹고 카드 순번마다
+      원색 3 을 회전. 배너에 파랑 바 + 노랑 사각(ico) + 빨강 원. 도넛은 원색 세그먼트. 빈상태는 노랑 원+파랑 삼각.
+   ③ 각(角) 규율 — base 가 50% 원형으로 박은 잔재(아바타·색점·범례점·상태점·상태알약·목표바·탭 well)를
+      전부 radius:0 으로 덮어 각지게. 단 Bauhaus 장식 원(kpi 원·도넛·빈상태 원)만 예외적으로 원 허용.
+   ④ 굵은 검은 라인 — 헤어라인(1px)을 2~3px solid 잉크로 승격, 격자 분할선·소프트 섀도 대신 플랫 블록.
+   ⑤ 대문자 헤드라인 — section-title·kpi-label·page-title·상태·CTA 를 uppercase + 트래킹.
+   수치 가독성: 원색 블록 위 글자는 대비로 고정(노랑→잉크, 빨강/파랑→흰색), kpi 도형은 z-index:0 로
+   깔고 내용(.kpi-card > *)을 z-index:1 로 띄워 kpi-value 를 도형 위로 뺀다. */
+
+/* ===== nav — 굵은 잉크 우측 라인, 로고=파랑 사각, 활성 메뉴=노랑 블록 ===== */
+.nav{ background:var(--surface); border-right:3px solid var(--ink); }
+.nav .logo{ background:#005BBB; color:var(--surface); border:2px solid var(--ink); border-radius:0; font-weight:800; }
+.brandname{ text-transform:uppercase; letter-spacing:.04em; font-weight:800; }
+.menu-item{ border-radius:0; text-transform:uppercase; letter-spacing:.02em; font-weight:700; }
+.menu-item.is-active{ background:#FFD500; color:var(--ink); box-shadow:none; border-radius:0; font-weight:800; }
+.nav-user{ border-top:2px solid var(--ink); }
+.user-av{ border-radius:0; border:2px solid var(--ink); background:var(--surface); }   /* 50% 원형 잔재 → 사각 */
+
+/* ===== identity — 굵은 잉크 박스, 대문자 제호, 각진 필터 ===== */
+.identity{ border:3px solid var(--ink); border-radius:0; background:var(--surface); }
+.page-title{ text-transform:uppercase; letter-spacing:.03em; font-weight:800; }
+.channel-filter{ text-transform:uppercase; letter-spacing:.02em; font-weight:700; }
+.channel-select{ border:2px solid var(--ink); border-radius:0; background:var(--surface); font-weight:700; }
+/* FAB 대신 각진 빨강 블록 CTA */
+.export-btn{ background:var(--accent); color:var(--surface); border:2px solid var(--ink); border-radius:0; text-transform:uppercase; letter-spacing:.02em; font-weight:800; }
+
+/* ===== filter(period-tabs) — 격자 분할 탭바, 활성 탭=노랑 원색 블록 ===== */
+.period-tabs{ background:transparent; padding:0; gap:0; border:2px solid var(--ink); border-radius:0; }
+.period-tab{ border-radius:0; border-right:2px solid var(--ink); text-transform:uppercase; letter-spacing:.02em; font-weight:700; }
+.period-tab:last-child{ border-right:0; }
+.period-tab.is-active{ background:#FFD500; color:var(--ink); font-weight:800; }   /* 활성 = 원색 블록 */
+
+/* ===== banner — 굵은 잉크 박스 + 파랑 바·노랑 사각·빨강 원 3원색 기하 ===== */
+.banner{ position:relative; overflow:hidden; border:3px solid var(--ink); border-radius:0; background:var(--surface); font-weight:700; padding-left:calc(var(--space)*1.5); }
+.banner::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:14px; background:#005BBB; }   /* 파랑 세로 바 */
+.banner::after{ content:""; position:absolute; right:10px; top:50%; transform:translateY(-50%); width:20px; height:20px; border-radius:50%; background:var(--accent); border:2px solid var(--ink); }   /* 빨강 원(장식) */
+.banner-ico{ display:inline-grid; place-items:center; width:1.7em; height:1.7em; background:#FFD500; color:var(--ink); border:2px solid var(--ink); }   /* 노랑 사각 */
+
+/* ===== kpi — 격자, 굵은 잉크 프레임, 모서리 기하 도형(원·사각·삼각) 원색 회전 ===== */
+.kpi-grid{ gap:var(--space); }
+.kpi-card{ position:relative; overflow:hidden; border:3px solid var(--ink); border-radius:0; background:var(--surface); }
+.kpi-card > *{ position:relative; z-index:1; }                    /* 라벨·수치·스파크를 도형 위로 */
+.kpi-label{ text-transform:uppercase; letter-spacing:.05em; color:var(--ink); font-weight:700; }
+.kpi-value{ color:var(--ink); }                                   /* 흰 카드 위 잉크 = 최대 대비 */
+.kpi-delta.is-up{ color:var(--accent); }                          /* 상승 = 빨강 1점 */
+.kpi-delta.is-down{ border-radius:0; }                            /* 알약 → 사각 블록 */
+/* ::before = 모서리 원/사각 (홀수 원, 짝수 사각) · ::after = 삼각 — z-index:0 로 뒤에 깔림 */
+.kpi-card::before{ content:""; position:absolute; z-index:0; top:-16px; right:-16px; width:52px; height:52px; border:3px solid var(--ink); }
+.kpi-card::after{ content:""; position:absolute; z-index:0; left:12px; bottom:8px; width:0; height:0; border-left:22px solid transparent; border-right:22px solid transparent; border-bottom:34px solid var(--accent); }
+.kpi-card:nth-child(1)::before{ border-radius:50%; background:var(--accent); }   /* 원 · 빨강 */
+.kpi-card:nth-child(2)::before{ border-radius:0;   background:#FFD500; }          /* 사각 · 노랑 */
+.kpi-card:nth-child(3)::before{ border-radius:50%; background:#005BBB; }          /* 원 · 파랑 */
+.kpi-card:nth-child(4)::before{ border-radius:0;   background:var(--accent); }    /* 사각 · 빨강 */
+.kpi-card:nth-child(1)::after{ border-bottom-color:#005BBB; }
+.kpi-card:nth-child(2)::after{ border-bottom-color:var(--accent); }
+.kpi-card:nth-child(3)::after{ border-bottom-color:#FFD500; }
+.kpi-card:nth-child(4)::after{ border-bottom-color:#005BBB; }
+
+/* ===== charts-row: trend + part ===== */
+.charts-row{ gap:var(--space); }
+.chart-trend,.chart-part,.goal,.table-section{ border:3px solid var(--ink); border-radius:0; background:var(--surface); }
+.section-title{ text-transform:uppercase; letter-spacing:.04em; font-weight:800; }
+
+/* ---- trend: 굵은 잉크 선 + 노랑 플랫 면적 + 원색 데이터 마크 ---- */
+.trend-area{ fill:#FFD500; opacity:.9; stroke:none; }             /* 플랫 원색 면적(그라디언트 없음) */
+.trend-line{ stroke:var(--ink); stroke-width:3; }                 /* 굵은 검은 라인 */
+.trend-mark{ fill:var(--accent); stroke:var(--ink); stroke-width:2.5; }
+.trend-mark--peak{ fill:var(--accent); }                          /* 최고 = 빨강 */
+.trend-mark--trough{ fill:#005BBB; stroke:var(--ink); }           /* 최저 = 파랑 */
+.note .dot{ border-radius:0; background:var(--accent); }          /* 색점 → 빨강 사각 */
+.note--trough .dot{ border-radius:0; background:#005BBB; }        /* 파랑 사각 */
+
+/* ---- part: 도넛 = 원색 세그먼트, 범례점 = 각진 원색 칩 ---- */
+.donut-ring{ stroke-width:6; }
+.donut-bg{ stroke:var(--bg); }
+.donut-seg--card{ stroke:var(--accent); }                         /* 빨강 */
+.donut-seg--transfer{ stroke:#FFD500; }                           /* 노랑 */
+.donut-seg--easypay{ stroke:#005BBB; }                            /* 파랑 */
+.donut-seg--etc{ stroke:var(--ink); }                             /* 잉크 */
+.legend-dot{ border-radius:0; }                                   /* 색점 → 사각 */
+.legend-dot--card{ background:var(--accent); }
+.legend-dot--transfer{ background:#FFD500; }
+.legend-dot--easypay{ background:#005BBB; }
+.legend-dot--etc{ background:var(--ink); }
+.legend-pct{ font-weight:800; }
+
+/* ===== goal — 각진 잉크 트랙 + 빨강 원색 진행 블록 ===== */
+.goal-current{ font-weight:800; }
+.goal-pct{ color:var(--accent); font-weight:800; }
+.goal-bar{ border:2px solid var(--ink); border-radius:0; background:var(--surface); overflow:hidden; }
+.goal-bar-fill{ background:var(--accent); border-radius:0; }       /* 원색 블록(빨강) */
+
+/* ===== table — 대문자 헤더, 굵은 잉크 격자선, 각진 원색 상태 블록 ===== */
+.settle-table th{ color:var(--ink); border-bottom:2.5px solid var(--ink); text-transform:uppercase; letter-spacing:.03em; font-weight:800; }
+.settle-table td{ border-bottom:1.5px solid var(--ink); }
+.cell-merchant{ font-weight:800; }
+.status{ border-radius:0; text-transform:uppercase; letter-spacing:.02em; font-weight:800; border:2px solid var(--ink); }
+.status::before{ border-radius:0; }                               /* 상태 점 → 사각 */
+.status--done{ background:#005BBB; color:var(--surface); }        /* 완료 = 파랑 블록 */
+.status--pending{ background:transparent; color:var(--accent); border-color:var(--accent); }  /* 대기 = 빨강 아웃라인 */
+.status--hold{ background:#FFD500; color:var(--ink); border-color:var(--ink); }   /* 보류 = 노랑 블록 */
+.status--failed{ background:var(--ink); color:var(--surface); }   /* 실패 = 잉크 블록 */
+
+/* ===== empty — 굵은 박스 + 노랑 원 위 파랑 삼각 삽화, 빨강 CTA ===== */
+.empty{ border:3px solid var(--ink); border-radius:0; background:var(--surface); }
+.empty-illust{ position:relative; overflow:hidden; border-radius:50%; border:3px solid var(--ink); background:#FFD500; }   /* Bauhaus 원(예외 허용) */
+.empty-illust::before{ content:""; position:absolute; left:50%; top:54%; transform:translate(-50%,-50%); width:0; height:0; border-left:13px solid transparent; border-right:13px solid transparent; border-bottom:22px solid #005BBB; }   /* 파랑 삼각 */
+.empty-title{ text-transform:uppercase; letter-spacing:.02em; font-weight:800; }
+.empty-cta{ background:var(--accent); color:var(--surface); border:2px solid var(--ink); border-radius:0; text-transform:uppercase; letter-spacing:.02em; font-weight:800; }

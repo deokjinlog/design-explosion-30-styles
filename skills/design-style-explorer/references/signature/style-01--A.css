@@ -1,0 +1,182 @@
+/* signature/style-01--A.css — 01 SF 게임 HUD 의 "구조적 시그니처" (원형 A · 정산 대시보드).
+   HUD 는 계기판(대시보드)에 찰떡이다. 토큰(--bg #050810 · --accent 시안 #00E5FF · --radius 0 ·
+   Rajdhani/Orbitron)만으론 안 되는, HUD 정본의 6축을 대시보드에 이식 =
+   ① 코너 브래킷 — kpi-card·차트카드(추이·구성비)·정산표 네 모서리에 L자 시안 브래킷(::before 하나에
+      8개 바를 background 로 그려 4모서리 완성 — clip 없이 순수 CSS). 계기를 겨누는 조준 프레임.
+   ② 각진 컷코너 — clip-path polygon 으로 배너·목표·빈상태 패널과 내보내기/CTA/상태알약의 모서리를
+      사선 컷(HUD 패널 베벨). clip 이 box-shadow 를 잘라먹으므로, 컷된 요소의 발광은
+      filter:drop-shadow(=실루엣 추종)로 준다. → 브래킷 카드와 컷 패널은 서로 다른 요소(충돌 0).
+   ③ 시안 글로우 — kpi-value·트렌드라인·도넛·스파크·목표바에 네온 발광(box/text/drop-shadow) + 얇은 1px 시안 라인.
+   ④ 스캔라인 — repeating-linear-gradient 를 "요소 자신의 background"로 깐다(오버레이 아님).
+      → 자식 수치/라벨은 항상 그 위에 그려져 숫자를 절대 가리지 않는다(가독성 사수).
+   ⑤ 등폭 수치 리드아웃(tabular-nums) + 대문자 자간 라벨(kpi-label). 활성 period-tab = 시안 언더라인 + 글로우.
+   ⑥ radius 0. base 가 직접 박은 50%/999px 원형 잔재(아바타·범례칩·노트닷·상태닷/알약·목표바·빈상태 일러스트·
+      is-down 알약)를 전부 각지게 환수 — HUD 에 곡선은 없다. 단 도넛·스파크·트렌드마크 등 데이터 시각화의
+      SVG 원은 정보라 그대로 두고 발광만 입힌다.
+   색은 원칙적으로 var(토큰). 발광 틴트만 --accent(#00E5FF)의 rgba 리터럴로 하드코딩(토큰에 알파 슬롯 없음).
+   구조 override 만 — 없는 요소는 만들지 않는다. */
+
+:root{
+  --br:14px;                                   /* 코너 브래킷 팔 길이 */
+  --brw:2px;                                   /* 브래킷 두께(시안 라인) */
+  --cut:11px;                                  /* 각진 컷코너 크기 */
+  --glow:0 0 6px rgba(0,229,255,.55);          /* 시안 네온(#00E5FF) */
+  --glow-sm:0 0 4px rgba(0,229,255,.45);
+  --glow-lg:0 0 16px rgba(0,229,255,.35);
+  --scan:repeating-linear-gradient(to bottom,rgba(0,229,255,.05) 0 1px,transparent 1px 4px);
+}
+
+/* ═══ ⑥ 원형 잔재 각짐 — HUD 에 곡선은 없다 (데이터 SVG 원은 제외) ═══ */
+.user-av,.legend-dot,.empty-illust,.goal-bar,.goal-bar-fill{ border-radius:0; }
+.note .dot{ border-radius:0; }                 /* .note .dot(0,2,0) 를 이겨야 함 */
+.status,.status::before,.kpi-delta.is-down{ border-radius:0; }
+
+/* ═══ ④⑤ 전역 — 스캔라인 배경 + 등폭 수치 리드아웃 + 대문자 자간 라벨 ═══ */
+body{ background:var(--scan),var(--bg); background-attachment:fixed; }
+.kpi-value,.kpi-delta,.legend-pct,.cell-amount,.cell-count,.cell-rate,
+.goal-current,.goal-target,.goal-pct{
+  font-variant-numeric:tabular-nums; letter-spacing:.02em;
+}
+.kpi-label{ text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+
+/* ═══ ① 코너 브래킷 — kpi-card·차트카드·정산표 (::before 하나로 4모서리 L) ═══
+   inset 으로 콘텐츠를 안쪽에서 감싸는 조준 프레임. 8개 바(각 모서리 가로+세로)를 background 로
+   배치 → clip 없이 순수 CSS 로 네 모서리 L 완성. pointer-events 없음(수치 클릭 방해 0). */
+.kpi-card,.chart-trend,.chart-part,.table-section{ position:relative; }
+.kpi-card::before,.chart-trend::before,.chart-part::before,.table-section::before{
+  content:""; position:absolute; inset:3px; z-index:2; pointer-events:none;
+  background:
+    linear-gradient(var(--accent),var(--accent)) top left,
+    linear-gradient(var(--accent),var(--accent)) top left,
+    linear-gradient(var(--accent),var(--accent)) top right,
+    linear-gradient(var(--accent),var(--accent)) top right,
+    linear-gradient(var(--accent),var(--accent)) bottom left,
+    linear-gradient(var(--accent),var(--accent)) bottom left,
+    linear-gradient(var(--accent),var(--accent)) bottom right,
+    linear-gradient(var(--accent),var(--accent)) bottom right;
+  background-repeat:no-repeat;
+  background-size:
+    var(--br) var(--brw),var(--brw) var(--br),
+    var(--br) var(--brw),var(--brw) var(--br),
+    var(--br) var(--brw),var(--brw) var(--br),
+    var(--br) var(--brw),var(--brw) var(--br);
+  filter:drop-shadow(var(--glow));
+}
+
+/* ═══ nav — 스캔라인 사이드바 + 시안 로고/브랜드 발광 + 각진 아바타 ═══ */
+.nav{ background:var(--scan),var(--surface); border-right:1px solid var(--border); }
+.logo{ box-shadow:var(--glow); letter-spacing:.02em; }
+.brandname{ font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.04em; text-shadow:var(--glow-sm); }
+.menu-item.is-active{ color:var(--accent); text-shadow:var(--glow-sm); box-shadow:inset 2px 0 0 var(--accent); }
+.user-av{ border:1px solid var(--accent); background:var(--surface); }
+
+/* ═══ identity — HUD 상단 계기바: 시안 하단선(얇은 1px + 발광) + 스캔라인 ═══ */
+.identity{
+  background:var(--scan),var(--surface);
+  border:1px solid var(--border);
+  border-bottom:1px solid var(--accent);
+  box-shadow:0 1px 0 rgba(0,229,255,.25);
+}
+.page-title{ font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.05em; color:var(--ink); text-shadow:var(--glow-sm); }
+
+/* ═══ ⑤ filter(period-tabs) — 트랙 well 제거, 활성 탭 = 시안 언더라인 + 글로우 ═══ */
+.period-tabs{ background:transparent; padding:0; gap:2px; }
+.period-tab{ border-bottom:2px solid transparent; }
+.period-tab.is-active{
+  background:transparent;                       /* base 의 accent 채움 제거 */
+  color:var(--accent); font-weight:800;
+  border-bottom-color:var(--accent);            /* 시안 언더라인 지표 */
+  box-shadow:0 2px 6px -2px rgba(0,229,255,.6); /* 밑줄 아래 발광 */
+  text-shadow:var(--glow-sm);
+}
+.channel-select{ border:1px solid var(--border); background:var(--surface); color:var(--ink); }
+
+/* ═══ ② 내보내기 = 각진 컷 HUD 버튼 + 대문자 + drop-shadow 발광 ═══ */
+.export-btn{
+  clip-path:polygon(0 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%);
+  background:var(--accent); color:var(--bg); font-weight:800;
+  text-transform:uppercase; letter-spacing:.06em;
+  filter:drop-shadow(var(--glow));
+}
+
+/* ═══ ② banner — 컷코너 패널 + 스캔라인 + 시안 좌측 계기선 ═══ */
+.banner{
+  background:var(--scan),var(--surface);
+  border:1px solid var(--border); border-left:2px solid var(--accent);
+  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));
+}
+.banner-ico{ color:var(--accent); text-shadow:var(--glow); }
+
+/* ═══ ①③④ KPI — 스캔라인 카드(브래킷 포함) + 시안 수치 리드아웃, hover 발광 ═══ */
+.kpi-grid{ gap:calc(var(--space)*.9); }         /* region "kpi" 커버(kpi-grid) */
+.kpi-card{ background:var(--scan),var(--surface); border:1px solid var(--border); }
+.kpi-value{ color:var(--ink); text-shadow:var(--glow-sm); }
+.kpi-delta.is-up{ color:var(--accent); text-shadow:var(--glow-sm); }
+.kpi-delta.is-down{ background:transparent; color:var(--ink); border:1px solid var(--muted); padding:2px 8px; }
+.kpi-delta.is-flat{ color:var(--muted); }
+.spark-line.is-up{ stroke:var(--accent); filter:drop-shadow(var(--glow-sm)); }
+
+/* ═══ ①③ 차트 카드 — 스캔라인 + 브래킷 + 발광 라인/도넛 ═══ */
+.charts-row{ gap:calc(var(--space)*.9); }
+.chart-trend,.chart-part{ background:var(--scan),var(--surface); border:1px solid var(--border); }
+.section-title{ text-transform:uppercase; letter-spacing:.05em; }
+.section-title::before{ content:"▮ "; color:var(--accent); }   /* 데이터 리드아웃 틱 */
+/* 추이(선/영역) — 시안 발광 라인 */
+.trend-area{ opacity:.18; }
+.trend-line{ filter:drop-shadow(var(--glow)); }
+.trend-mark{ filter:drop-shadow(var(--glow)); }
+.note .dot{ background:var(--accent); }
+.note--trough .dot{ background:var(--muted); }
+/* 구성비(도넛) — 시안 세그먼트 발광, 배경링은 톤 라인 */
+.donut{ filter:drop-shadow(var(--glow)); }
+.donut-bg{ stroke:var(--border); }
+
+/* ═══ ②③ goal — 컷코너 패널 + 각진 발광 진행바 ═══ */
+.goal{
+  background:var(--scan),var(--surface);
+  border:1px solid var(--border);
+  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));
+}
+.goal-current{ text-shadow:var(--glow-sm); }
+.goal-pct{ color:var(--accent); text-shadow:var(--glow); }
+.goal-bar{ background:var(--bg); border:1px solid var(--border); box-shadow:0 0 8px rgba(0,229,255,.2); }
+.goal-bar-fill{ background:var(--accent); box-shadow:0 0 10px rgba(0,229,255,.5); }
+
+/* ═══ ①③ 정산표 — 스캔라인 카드(브래킷) + 시안 헤더 언더라인 + 행 hover 발광 ═══ */
+.table-section{ background:var(--scan),var(--surface); border:1px solid var(--border); }
+.settle-table th{ color:var(--accent); border-bottom-color:var(--accent); letter-spacing:.08em; }
+.settle-table td{ border-bottom-color:var(--border); }
+.settle-table tbody tr{ transition:background .15s; }
+.settle-table tbody tr:hover{ background:rgba(0,229,255,.05); }
+.cell-amount,.cell-count,.cell-rate{ letter-spacing:.02em; }
+/* 상태 = 각진 컷 HUD 태그(대문자·시안 라인) */
+.status{
+  clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,0 100%);
+  text-transform:uppercase; letter-spacing:.05em;
+}
+.status--done{ background:var(--accent); color:var(--bg); }
+.status--pending{ background:transparent; color:var(--accent); border:1px solid var(--accent); }
+.status--hold{ background:transparent; color:var(--muted); border:1px dashed var(--muted); }
+.status--failed{ background:var(--ink); color:var(--bg); }
+
+/* ═══ ①③ 브래킷 카드 공통 hover — 발광(브래킷 세트는 clip 없음 → box-shadow 안전) ═══ */
+.kpi-card,.chart-trend,.chart-part,.table-section{ transition:border-color .15s,box-shadow .15s; }
+.kpi-card:hover,.chart-trend:hover,.chart-part:hover,.table-section:hover{
+  border-color:var(--accent); box-shadow:var(--glow-lg);
+}
+
+/* ═══ ②③ empty — 컷코너 대시 패널 + 각진 일러스트/CTA + 발광 ═══ */
+.empty{
+  background:var(--scan),var(--surface);
+  border:1px dashed var(--accent);
+  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));
+}
+.empty-illust{ border:1px dashed var(--accent); }
+.empty-title{ color:var(--ink); text-shadow:var(--glow); text-transform:uppercase; letter-spacing:.04em; }
+.empty-desc{ color:var(--muted); }
+.empty-cta{
+  clip-path:polygon(0 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%);
+  background:var(--accent); color:var(--bg); border:0; font-weight:800;
+  text-transform:uppercase; letter-spacing:.06em;
+  filter:drop-shadow(var(--glow));
+}

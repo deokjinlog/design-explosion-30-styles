@@ -1,0 +1,93 @@
+/* signature/style-20--A.css — 20 다크 애널리틱스의 "구조적 시그니처" (원형 A · 대시보드).
+   이름부터 대시보드 전용 스타일 — 토큰(다크 #0d1117 · 틸 #2dd4bf · radius 6)만으론 안 되는,
+   "프로 데이터 대시보드(Grafana/Datadog 계열)"를 구조로 끌어온 것 =
+   ① 조밀 데이터 그리드 — kpi-grid·settle-table 를 gap 1px + 격자 배경(#1f2937 톤)으로 이어붙여
+      셀 사이가 미세 라인 하나로 드러나게. 카드 개별 보더 제거 → 프레임 안에서 셀이 붙는 데이터 매트릭스.
+      행 컴팩트(패딩 축소), 숫자 컬럼 우측 tabular 정렬(cell-amount·cell-count·cell-rate·kpi-value·goal-figures).
+   ② 데이터 발광 — trend-line·spark(상승)·도넛 주세그·추이 피크점에 미세 틸 글로우(drop-shadow 약하게).
+      데이터 자체가 빛나는 계측기 느낌. 크롬(카드·표)은 무광, 발광은 데이터 잉크에만.
+   ③ 얇은 보더 · 낮은 대비 카드 — 카드 표면은 #161b22 그대로, 보더를 격자 라인 톤(#1f2937)으로 낮춰
+      큰 소프트 섀도 0. 위계는 그림자가 아니라 정보 밀도와 발광이 만든다.
+   ④ 소형 대문자 라벨 + 틸 언더라인 — kpi-label·section-title 은 11~12px 대문자 넓은 자간 muted 회색(계기 라벨).
+      활성 period-tab = 틸 채움 → 틸 하단 언더라인(계측 탭). 핵심 수치는 밝은 잉크로 띄워 어두운 표면 위 가독성.
+   ⑤ radius 작게(6, 토큰 그대로) — base 의 50% 원형 잔재(상태 도트·범례 점·아바타)는 계기판 상태등으로 유지.
+   (다크 토큰만으론 "그냥 어두운 대시보드" — 격자 붙임·데이터 발광·계기 라벨이 애널리틱스 정체성의 전부) */
+
+:root{
+  --da-line:#1f2937;   /* 셀 구분 미세 라인 / 저대비 카드 보더 톤 */
+  --da-head:#1c2330;   /* 표 헤더 밴드 (행보다 한 톤 위) */
+  --da-fig:#e6edf3;    /* 핵심 수치 밝은 잉크 — 어두운 표면 위 가독성 */
+  --da-glow:drop-shadow(0 0 3px color-mix(in srgb, var(--accent) 55%, transparent));  /* 데이터 발광(약) */
+}
+
+/* ═══════════ ①③ 저대비 얇은 보더 — 모든 카드 크롬 톤 다운, 소프트 섀도 0 ═══════════ */
+.nav{ border-right-color:var(--da-line); }
+.identity,.banner,.chart-trend,.chart-part,.goal,.table-section{
+  border-color:var(--da-line); box-shadow:none;
+}
+/* 배너 = 좌측 틸 계측 마커(정보 서피스) */
+.banner{ border-left:2px solid var(--accent); }
+/* nav 활성 항목 = 틸 상태등 유지(base inset 바) + 아이콘 발광 */
+.menu-item.is-active .menu-icon{ color:var(--accent); filter:var(--da-glow); }
+
+/* ═══════════ ① 조밀 데이터 그리드 — KPI 를 붙인 격자 매트릭스 ═══════════ */
+/* gap 1px + 격자 배경이 셀 사이에서만 드러나 미세 라인 하나가 됨. 카드 개별 보더/라운드 제거. */
+.kpi-grid{
+  gap:1px; background:var(--da-line);
+  border:1px solid var(--da-line); border-radius:var(--radius); overflow:hidden;
+}
+.kpi-card{
+  border:0; border-radius:0; background:var(--surface);
+  padding:calc(var(--space)*.9); gap:5px;                 /* 행 컴팩트 → 밀도↑ */
+}
+.kpi-label{
+  text-transform:uppercase; letter-spacing:.08em; font-size:11px;
+  color:var(--muted); font-weight:600;                    /* ④ 소형 대문자 계기 라벨 */
+}
+.kpi-value{ color:var(--da-fig); font-size:21px; }        /* 밝은 수치(tabular 는 base 유지) */
+
+/* ═══════════ ② 데이터 발광 — 데이터 잉크에만 미세 틸 글로우 ═══════════ */
+.kpi-spark .spark-line.is-up{ filter:var(--da-glow); }    /* 상승 스파크만 발광 */
+.trend-line{ filter:var(--da-glow); }                     /* 추이 라인 발광 */
+.trend-mark--peak{ filter:var(--da-glow); }               /* 피크 데이터포인트 강조 */
+.donut-seg--card{ filter:var(--da-glow); }                /* 도넛 주세그(카드) 발광 */
+
+/* ═══════════ ④ 소형 대문자 섹션 라벨 + 계측 period-tab ═══════════ */
+.section-title{
+  text-transform:uppercase; letter-spacing:.06em; font-size:12px;
+  color:var(--muted); font-weight:700;
+}
+/* period-tabs: 틸 채움 well → 투명 트랙 + 활성 틸 언더라인(계측 탭) */
+.period-tabs{ background:transparent; padding:0; gap:calc(var(--space)*.5); }
+.period-tab{
+  border-radius:0; padding:6px 10px;
+  border-bottom:2px solid transparent;                    /* 언더라인 자리 예약 */
+}
+.period-tab.is-active{
+  background:transparent; color:var(--accent); font-weight:700;
+  border-bottom-color:var(--accent);                      /* 틸 언더라인 지표 */
+}
+
+/* ═══════════ ①④ 정산 테이블 = 조밀 데이터 그리드(셀 미세 라인 + 헤더 밴드 + 숫자 우측 tabular) ═══════════ */
+.settle-table th,.settle-table td{
+  padding:calc(var(--space)*.5) calc(var(--space)*.55);   /* 행 컴팩트 */
+  border-bottom-color:var(--da-line);
+  border-right:1px solid var(--da-line);                  /* 세로 셀 구분 미세 라인 */
+}
+.settle-table th:last-child,.settle-table td:last-child{ border-right:0; }
+.settle-table th{
+  background:var(--da-head); color:var(--muted);          /* 헤더 밴드 = 행보다 한 톤 위 */
+}
+/* 숫자 컬럼(거래액·건수·승인율) 우측 정렬 — 데이터표 정본, tabular 스캔성↑ */
+.settle-table th:nth-child(2),.settle-table th:nth-child(3),.settle-table th:nth-child(4){ text-align:right; }
+.cell-amount,.cell-count,.cell-rate{ text-align:right; }
+.cell-amount{ color:var(--da-fig); }                      /* 금액 = 밝은 수치 */
+
+/* ═══════════ ① 목표 카드 = tabular 정렬 + 발광 게이지 ═══════════ */
+.goal-figures{ font-variant-numeric:tabular-nums; }
+.goal-current{ color:var(--da-fig); }
+.goal-bar-fill{ box-shadow:0 0 8px -1px color-mix(in srgb, var(--accent) 60%, transparent); }  /* ② 게이지 발광 */
+
+/* ═══════════ ③ 빈 상태 — 저대비 파선 프레임(계측기 대기 슬롯) ═══════════ */
+.empty{ border-color:var(--da-line); }
+.empty-cta{ border-color:var(--da-line); }
