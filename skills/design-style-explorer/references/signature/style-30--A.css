@@ -1,0 +1,91 @@
+/* signature/style-30--A.css — 30 "Ant Design 밀집"의 구조적 시그니처 (원형 A · 정산 대시보드).
+   토큰(색 #1677FF · radius 2 · border #F0F0F0)만으론 안 되는 것 = 대시보드 정보 밀도 그 자체.
+   base+tokens 만 먹이면 그냥 "각진 라이트 대시보드"다. Ant 고밀도의 정체성은 아래 5가지 구조 규율:
+   ① 초고밀도 스케일 — 본문 13px·타이트 라인높이, kpi/카드 패딩 대폭 축소, settle-table 행높이 ~32px
+   ② 원형 잔재 제거 — base 가 남긴 border-radius:50%/999px(아바타·일러스트·상태 pill·게이지)를 var(--radius)(=2px)로 각지게
+   ③ 플랫·헤어라인 — 큰 소프트 섀도 금지(base 도 안 씀 → 안 더한다), 1px 보더·미세 구분선만
+   ④ 수치 tabular-nums — kpi-value·cell-amount·goal-figures 등 숫자를 자리맞춤. 장식 요소는 작게
+   ⑤ 액센트 예산 — #1677FF 는 링크·활성탭·주요버튼(Ant primary blue)에만. 색 배정은 tokens/base 몫이라 여기선 손대지 않는다
+   (색·radius 값은 전부 tokens 몫 — 여기선 크기/패딩/라인높이/그리드/각짐만 다룬다) */
+
+/* ── ① 초고밀도 타이포 스케일 + 사이더 폭 축소 ── */
+body{ font-size:13px; line-height:1.4; }
+.app{ grid-template-columns:200px 1fr; }
+.dashboard{ gap:8px; padding:8px; }
+
+/* ── nav: 촘촘한 사이드바 (세로 여백 압축) ── */
+.nav{ gap:10px; padding:8px; }
+.brand{ padding:4px 2px; }
+.logo{ width:22px; height:22px; font-size:12px; border-radius:var(--radius); }
+.brandname{ font-size:14px; }
+.menu-item{ padding:6px 8px; font-size:13px; border-radius:var(--radius); }
+.menu-icon{ font-size:12px; }
+.nav-user{ padding:6px 4px; gap:8px; }
+.user-av{ width:24px; height:24px; border-radius:var(--radius); font-size:12px; }  /* ② 원형 잔재 → 각짐 */
+.user-name{ font-size:12.5px; }
+.user-team{ font-size:11px; }
+
+/* ── identity: 컴팩트 상단 툴바 ── */
+.identity{ padding:6px 12px; gap:12px; border-radius:var(--radius); }
+.page-title{ font-size:15px; }
+.channel-filter{ font-size:12px; }
+.channel-select{ padding:4px 8px; border-radius:var(--radius); }
+.export-btn{ padding:5px 12px; font-size:12.5px; border-radius:var(--radius); }  /* ⑤ Ant primary blue 버튼 */
+
+/* ── filter (period-tabs): 작은 세그먼트 탭 ── */
+.period-tabs{ padding:2px; gap:2px; border-radius:var(--radius); }
+.period-tab{ padding:4px 10px; font-size:12px; border-radius:var(--radius); }  /* ⑤ 활성 탭만 accent — base 유지 */
+
+/* ── banner: 얇은 정보줄 ── */
+.banner{ padding:6px 12px; font-size:12.5px; border-radius:var(--radius); }
+
+/* ── ① kpi: 밀집 4열 · 패딩 대폭 축소, 수치 가독성은 유지 ── */
+.kpi-grid{ gap:8px; }
+.kpi-card{ padding:10px 12px; gap:4px; border-radius:var(--radius); }
+.kpi-label{ font-size:11.5px; }
+.kpi-value{ font-size:20px; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }  /* ④ 작아도 tabular 정렬로 판독 */
+.kpi-delta{ font-size:12px; }
+.kpi-delta.is-down{ padding:1px 6px; border-radius:var(--radius); }  /* ② pill → 각진 태그 */
+.kpi-spark{ height:28px; }
+
+/* ── charts + goal + table 컨테이너: 여백 축소 · 각짐 (base 가 4개를 한 셀렉터로 묶음) ── */
+.charts-row{ gap:8px; }
+.chart-trend,.chart-part,.goal,.table-section{ padding:12px; border-radius:var(--radius); }
+.section-title{ font-size:13px; margin-bottom:8px; }
+.section-sub{ font-size:11.5px; }
+
+/* ── trend: 밀집 카드에 맞춰 높이 소폭 압축 ── */
+.trend-svg{ height:128px; }
+.trend-notes{ gap:14px; margin-top:6px; }
+.note{ font-size:11.5px; }
+.note .dot{ border-radius:var(--radius); }  /* ② 마커도 각지게 */
+
+/* ── part(donut): 도넛은 SVG 원(차트, 정당) · 범례만 밀집 각짐 ── */
+.donut{ width:120px; height:120px; }
+.donut-legend{ gap:5px; margin-top:8px; }
+.donut-legend li{ font-size:12px; }
+.legend-pct{ font-variant-numeric:tabular-nums; }
+.legend-dot{ width:8px; height:8px; border-radius:var(--radius); }  /* ② 원형 잔재 → 각진 마커 */
+
+/* ── goal: 수치 tabular · 얇은 게이지 ── */
+.goal-figures{ margin-bottom:6px; gap:5px; font-variant-numeric:tabular-nums; }  /* ④ goal-figures 자리맞춤 */
+.goal-current{ font-size:18px; }
+.goal-target{ font-size:13px; }
+.goal-pct{ font-size:14px; }  /* ⑤ accent 유지(달성률 강조) */
+.goal-bar{ height:6px; border-radius:var(--radius); }
+.goal-bar-fill{ border-radius:var(--radius); }
+
+/* ── ① table: 초밀집 정산 테이블 (행 ~32px), zebra 없이 1px 헤어라인만 ── */
+.settle-table th,.settle-table td{ padding:6px 10px; font-size:13px; }  /* 6px*2 + 13px 라인 ≈ 32px 행 */
+.settle-table th{ font-size:11px; letter-spacing:.03em; }
+.cell-amount{ font-variant-numeric:tabular-nums; }  /* ④ 금액 자리맞춤(작아도 판독) */
+.cell-count{ font-variant-numeric:tabular-nums; }
+.status{ padding:2px 8px; font-size:11px; border-radius:var(--radius); }  /* ② 상태 pill → 각진 Ant 태그 */
+.status::before{ border-radius:var(--radius); }
+
+/* ── empty: 컴팩트 · ② 원형 일러스트도 각지게 ── */
+.empty{ padding:24px 12px; border-radius:var(--radius); }
+.empty-illust{ width:44px; height:44px; border-radius:var(--radius); }
+.empty-title{ font-size:14px; }
+.empty-desc{ font-size:12px; }
+.empty-cta{ padding:5px 16px; font-size:12.5px; border-radius:var(--radius); }

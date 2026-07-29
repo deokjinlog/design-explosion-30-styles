@@ -214,6 +214,200 @@ table{border-collapse:collapse;width:100%}
   --type-scale:1.4;
 }
 
+
+/* ==== style-05--A.css ==== */
+/* signature/style-05--A.css — 05 NEUBRUTALISM (원형 A: 정산 대시보드)
+   정본 시그니처 (NN/g Neubrutalism): 회색조에서도 강하게 박히게.
+     · kpi-card·차트카드·표·버튼·탭·배너 = 3px 하드보더 + 오프셋 하드섀도(blur 0)
+     · hover = 섀도 줄고 translate → "눌리는(stamping)" 느낌
+     · flat 원색 채움 (그라디언트·blur 섀도 절대 금지) · radius 0 예외없음
+     · base의 50%/999px 원형 잔재(아바타·도트·상태칩·목표바·is-down 배지)까지 전부 각지게
+     · 액센트 #FF5227를 kpi 강조·활성 period-tab·goal-bar-fill·export-btn에 블록으로, 그 위 글자는 검정
+     · 두꺼운 검은 언더라인·대문자 라벨(kpi-label·section-title)·살짝 어긋난 회전
+   색·서체·radius 값 자체는 tokens 몫. 여기선 border-width / shadow-offset /
+   transform / 각짐 / block-fill / underline 만 다룬다. 구조 override only.
+   kpi-value 수치는 손대지 않음 — 가독성 유지. */
+
+/* ── 0. 각짐 강제: base에 literal로 남은 50%·999px 원형 잔재를 전부 각지게 ── */
+.logo,.user-av,.note .dot,.legend-dot,.status,.status::before,
+.goal-bar,.goal-bar-fill,.kpi-delta.is-down,.empty-illust,
+.channel-select,.kpi-card,.identity,.banner,.chart-trend,.chart-part,
+.goal,.table-section,.period-tabs,.period-tab,.export-btn,.empty,.empty-cta{
+  border-radius:0;
+}
+
+/* ── 1. nav: 우측 두꺼운 검은 경계 + 로고/아바타 각진 하드블록 ── */
+.nav{border-right:4px solid var(--border);background:var(--bg)}
+.brand{text-decoration:none}
+.logo{
+  background:var(--accent);color:var(--ink);
+  border:3px solid var(--border);box-shadow:3px 3px 0 var(--border);
+  transform:rotate(-3deg);
+}
+.brandname{font-weight:800}
+.menu-item{font-weight:700}
+.menu-item.is-active{
+  background:var(--accent);color:var(--ink);
+  border:2px solid var(--border);box-shadow:3px 3px 0 var(--border);
+}
+.user-av{
+  background:var(--surface);border:3px solid var(--border);
+  box-shadow:2px 2px 0 var(--border);font-weight:800;
+}
+
+/* ── 2. identity: 헤더 = 하드박스, 기간탭·채널·내보내기 블록 ── */
+.identity{
+  border:3px solid var(--border);box-shadow:6px 6px 0 var(--border);
+  background:var(--surface);
+}
+.page-title{font-weight:800}
+
+/* 기간 탭 = 각진 하드박스 그룹, active는 액센트 블록(검은 글자) */
+.period-tabs{
+  border:3px solid var(--border);box-shadow:4px 4px 0 var(--border);
+  background:var(--surface);padding:4px;
+}
+.period-tab{
+  font-weight:700;border:2px solid transparent;
+  transition:transform .08s,box-shadow .08s;
+}
+.period-tab:hover{box-shadow:inset 0 -3px 0 var(--border)}
+.period-tab.is-active{
+  background:var(--accent);color:var(--ink);
+  border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);
+}
+
+/* 채널 셀렉트 = 하드박스 인풋 */
+.channel-select{
+  border:3px solid var(--border);box-shadow:3px 3px 0 var(--border);
+  background:var(--surface);color:var(--ink);font-weight:700;
+}
+
+/* 내보내기 = 액센트 하드블록 + 눌림 */
+.export-btn{
+  background:var(--accent);color:var(--ink);
+  border:3px solid var(--border);box-shadow:4px 4px 0 var(--border);
+  font-weight:800;transition:transform .08s,box-shadow .08s;
+}
+.export-btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--border)}
+
+/* ── 3. banner: 각진 하드박스, 액센트 아이콘 ── */
+.banner{
+  border:3px solid var(--border);box-shadow:6px 6px 0 var(--border);
+  background:var(--surface);color:var(--ink);font-weight:700;
+}
+.banner-ico{color:var(--accent)}
+
+/* ── 4. kpi: grid에 섀도 여백 + 각 카드 하드박스 + 살짝 어긋난 회전 + 스탬핑 hover ── */
+.kpi-grid{gap:calc(var(--space)*1.2)}
+.kpi-card{
+  border:3px solid var(--border);box-shadow:6px 6px 0 var(--border);
+  background:var(--surface);
+  transition:transform .08s,box-shadow .08s;
+}
+.kpi-card:nth-child(2){transform:rotate(-1deg)}
+.kpi-card:nth-child(3){transform:rotate(1deg)}
+.kpi-card:hover{transform:translate(3px,3px);box-shadow:3px 3px 0 var(--border)}
+.kpi-card:nth-child(2):hover{transform:translate(3px,3px) rotate(-1deg)}
+.kpi-card:nth-child(3):hover{transform:translate(3px,3px) rotate(1deg)}
+
+/* 라벨 = 대문자 + 두꺼운 액센트 언더라인 (블록 라벨) */
+.kpi-label{
+  color:var(--ink);font-weight:800;align-self:flex-start;
+  box-shadow:inset 0 -4px 0 var(--accent);padding-bottom:2px;
+}
+/* 델타 = 각진 배지 블록 (증가는 액센트, 감소는 검정) */
+.kpi-delta.is-up{
+  background:var(--accent);color:var(--ink);
+  border:2px solid var(--border);padding:2px 8px;font-weight:800;
+}
+.kpi-delta.is-down{
+  background:var(--ink);color:var(--bg);
+  border:2px solid var(--border);font-weight:800;
+}
+/* 스파크라인 = 두껍게 */
+.spark-line{stroke-width:3}
+
+/* ── 5. 차트 카드: trend·part = 하드박스, 선/도넛 두껍게 ── */
+.chart-trend,.chart-part{
+  border:3px solid var(--border);box-shadow:6px 6px 0 var(--border);
+  background:var(--surface);
+}
+.trend-line{stroke-width:3}
+.trend-mark{stroke-width:3;fill:var(--surface)}
+.note .dot{border:2px solid var(--border)}
+.donut-ring{stroke-width:6}
+.legend-dot{border:2px solid var(--border)}
+
+/* ── 6. goal: 하드박스 + 목표바 = 각진 액센트 채움(트랙 하드보더) ── */
+.goal{
+  border:3px solid var(--border);box-shadow:6px 6px 0 var(--border);
+  background:var(--surface);
+}
+.goal-current{font-weight:800}
+.goal-pct{
+  color:var(--ink);background:var(--accent);
+  border:2px solid var(--border);padding:0 8px;font-weight:800;
+}
+.goal-bar{
+  border:3px solid var(--border);background:var(--surface);
+  height:16px;overflow:hidden;
+}
+.goal-bar-fill{background:var(--accent);border-right:3px solid var(--border)}
+
+/* ── 7. table: 컨테이너 하드박스, 헤더 검은 블록, 상태칩 각진 하드박스 ── */
+.table-section{
+  border:3px solid var(--border);box-shadow:6px 6px 0 var(--border);
+  background:var(--surface);
+}
+.settle-table th{
+  background:var(--ink);color:var(--bg);
+  border:2px solid var(--border);font-weight:800;
+}
+.settle-table td{border-bottom:2px solid var(--border)}
+.cell-merchant{font-weight:800}
+.status{
+  border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);
+  font-weight:800;
+}
+.status--done{background:var(--accent);color:var(--ink)}
+.status--pending{background:var(--surface);color:var(--ink);border:2px solid var(--border)}
+.status--hold{background:var(--surface);color:var(--ink);border:2px solid var(--border)}
+.status--failed{background:var(--ink);color:var(--bg)}
+
+/* ── 8. empty: 점선 → 실선 하드박스, illust 각지게, CTA 액센트 블록 ── */
+.empty{
+  border:3px solid var(--border);box-shadow:6px 6px 0 var(--border);
+  background:var(--surface);
+}
+.empty-illust{border:3px solid var(--border);border-style:solid}
+.empty-title{font-weight:800}
+.empty-cta{
+  background:var(--accent);color:var(--ink);
+  border:3px solid var(--border);box-shadow:4px 4px 0 var(--border);
+  font-weight:800;transition:transform .08s,box-shadow .08s;
+}
+.empty-cta:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--border)}
+
+/* ── 9. 대문자 라벨: UI 칩·라벨·버튼류만 (본문 수치·가맹점명은 가독성 위해 제외) ── */
+.brandname,.menu-label,.period-tab,.export-btn,
+.kpi-label,.section-title,.settle-table th,.status,
+.goal-pct,.empty-cta,.empty-title{
+  text-transform:uppercase;letter-spacing:.03em;
+}
+/* section-title = 두꺼운 검은 언더라인 블록 */
+.section-title{
+  display:inline-block;box-shadow:inset 0 -4px 0 var(--border);
+  padding-bottom:2px;font-weight:800;
+}
+
+/* ── 10. 접근성: hover 이동(translate)은 제거하되 섀도 축소·회전은 유지 ── */
+@media (prefers-reduced-motion:reduce){
+  .kpi-card:hover,.export-btn:hover,.empty-cta:hover{transform:none}
+  .kpi-card:nth-child(2):hover{transform:rotate(-1deg)}
+  .kpi-card:nth-child(3):hover{transform:rotate(1deg)}
+}
+
 </style>
 </head>
 <body>

@@ -1,0 +1,73 @@
+/* signature/style-23--A.css — 23 IBM Carbon · 원형 A(대시보드) 구조 시그니처
+   IBM Carbon Design System 정본(carbondesignsystem.com) — 회색조에서도 구조로 구분:
+     · border-radius 0 예외없음 (base 하드코딩 50%/999px 원형 전부 각지게)
+     · 소프트 SaaS 섀도 전면 금지 → 1px/2px 하드 라인·그리드라인으로만 구획
+     · 데이터 그리드: kpi 타일·표 행을 1px 하드 라인으로 촘촘히 (8px 배수 타이트 여백)
+     · period-tab 활성 = 하단 2px 블루 마커, export-btn = 각진 솔리드 블루
+     · IBM Plex(토큰) · 넓은 자간 소형 대문자 라벨(kpi-label·section-title)
+     · 액센트(IBM블루 #0F62FE)는 링크/버튼/포커스/액티브 마커에만, 장식 0
+   구조 override 전용 — base/archetype-A.css 위에 얹는다. 실존 클래스만(환각 0). */
+
+/* ── 0. 각지게: base 하드코딩 50%/999px 원형 잔재 전부 무력화 ── */
+.user-av,
+.empty-illust,
+.legend-dot,
+.note .dot,
+.status,
+.status::before,
+.kpi-delta.is-down,
+.goal-bar,
+.goal-bar-fill{ border-radius:0 }
+
+/* ── 1. Carbon 포커스 시그니처: 2px 블루 하드 아웃라인(soft 섀도 대신) ── */
+a:focus-visible,
+button:focus-visible,
+select:focus-visible{ outline:2px solid var(--accent); outline-offset:1px }
+
+/* ── 2. 8px 2x 그리드: Carbon 스페이싱(12·16)으로 여백 타이트하게 ── */
+.identity{ padding:12px 16px; gap:16px }
+.banner{ padding:12px 16px }
+.kpi-card{ padding:16px }
+.chart-trend,
+.chart-part,
+.goal,
+.table-section{ padding:16px }
+
+/* ── 3. 데이터 그리드: 타일 사이 1px 하드 그리드라인, 개별 보더 제거 ── */
+/* KPI: 4타일을 1px 라인으로 봉합 (카드 개별 보더 제거·gap을 라인으로) */
+.kpi-grid{ gap:1px; background:var(--border); border:1px solid var(--border) }
+.kpi-card{ border:0 }
+/* 차트 행: trend+part를 1px 라인으로 봉합 */
+.charts-row{ gap:1px; background:var(--border); border:1px solid var(--border) }
+.chart-trend,
+.chart-part{ border:0 }
+
+/* ── 4. 데이터 테이블(Carbon data table): 행을 1px 하드 라인으로 촘촘히 ── */
+.settle-table th,
+.settle-table td{ padding:8px 16px }
+.settle-table thead th{ background:var(--surface); border-bottom:1px solid var(--ink); letter-spacing:.06em }
+.settle-table tbody tr:last-child td{ border-bottom:1px solid var(--border) }  /* 마지막 행선 복원 = 그리드 완결 */
+
+/* ── 5. period-tab 활성 = 하단 2px 블루 마커 (솔리드 pill 대신) ── */
+.period-tabs{ background:transparent; padding:0; gap:0; border-bottom:1px solid var(--border) }
+.period-tab{ padding:8px 16px; border-bottom:2px solid transparent }
+.period-tab.is-active{ background:transparent; color:var(--ink); font-weight:600; border-bottom-color:var(--accent) }
+.period-tab:hover{ background:var(--surface); color:var(--ink) }
+
+/* ── 6. export-btn = 각진 솔리드 블루 버튼 (Carbon primary) ── */
+.export-btn{ box-shadow:none }
+.export-btn:hover{ background:#0353E9 }        /* Carbon $button-primary-hover */
+
+/* ── 7. 넓은 자간 소형 대문자 라벨 (kpi-label · section-title) ── */
+.kpi-label{ text-transform:uppercase; letter-spacing:.06em; font-size:11px }
+.section-title{ text-transform:uppercase; letter-spacing:.05em; font-size:12px }
+
+/* ── 8. banner = Carbon 인라인 알림 (좌측 2px 블루 마커) ── */
+.banner{ border-left:2px solid var(--accent) }
+
+/* ── 9. goal-bar = 각진 하드 미터 (track 1px 보더 · fill 솔리드 블루) ── */
+.goal-bar{ background:var(--surface); border:1px solid var(--border) }
+
+/* ── 10. hover 상호작용: 배경 스왑만 (장식 0) ── */
+.channel-select:hover,
+.empty-cta:hover{ background:var(--surface) }

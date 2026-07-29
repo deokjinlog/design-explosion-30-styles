@@ -1,0 +1,117 @@
+/* signature/style-18--A.css — 18 스위스 인터내셔널 타이포그래피 양식(ITS)의 "구조적 시그니처" (원형 A · 대시보드).
+   ITS는 원래 "계기판(Gestaltung)"을 지향한 사조라 대시보드에 특히 잘 맞는다.
+   토큰(색·폰트·radius:0)만으론 안 되는 것 =
+   ① 눈에 보이는 모듈 그리드 — kpi-grid·charts-row·표를 gap 0 + 보더 겹침으로 이어붙여 1px 헤어라인 컬럼 가이드가 실제로 드러나게. 8px 베이스라인.
+   ② 비대칭 KPI — 균등 4분할(관공서 톤) 금지. 12컬럼 위 6·2·2·2 — 첫 카드(핵심 지표)를 3배 크게.
+   ③ flush-left 초대형 타이포 — page-title·section-title·kpi-value 크게·왼쪽·타이트, kpi-label은 11px 대문자 넓은 자간(극단 대비).
+   ④ 빨강 예산 1점 — base+tokens는 var(--accent)(스위스레드)를 로고·활성탭·버튼·델타·스파크·추이·도넛·범례·목표·상태까지 17곳에 흘려보낸다(ITS 규율 위반).
+      전부 잉크/회색조로 환수하고, 남은 유일한 빨강은 계기판의 헤드라인 수치 딱 하나 — 첫 KPI(GMV)의 kpi-value.
+   ⑤ 각지게 — base의 50%/999px 원형·알약 잔재(아바타·델타칩·상태·목표바·범례·빈상태)를 전부 radius 0. box-shadow 일체 금지(위계는 타이포·그리드가).
+   (뭉친 스타일과 달리 18은 이 파일 없이는 그냥 빨간 대시보드 — 격자·헤어라인·타이포 규율이 정체성의 전부) */
+
+/* ═══════════════ ① 눈에 보이는 모듈 그리드 (헤어라인 컬럼 가이드 + 8px 베이스라인) ═══════════════ */
+/* 모듈은 흰 배경(surface==bg)에 1px #E4E4E4 보더로만 구분 — 그림자 없이 헤어라인이 격자를 그린다.
+   내부 셀은 gap 0 + margin -1px 로 이중선을 접어 "이어진 한 장의 격자"로 보이게. */
+.dashboard{ gap:var(--space); }                 /* 24px = 3×8 세로 리듬 */
+.kpi-card,.chart-trend,.chart-part,.goal,.table-section{ padding:var(--space); }  /* 24 = 8px 정렬 */
+.identity,.banner{ padding:16px var(--space); }
+
+/* kpi-grid: 개별 카드가 아니라 이어진 헤어라인 격자 */
+.kpi-grid{ gap:0; }
+.kpi-card{ margin-left:-1px; gap:8px; }          /* 이웃과 좌보더 겹침 → 1px 단일 헤어라인 */
+.kpi-card:first-child{ margin-left:0; }
+
+/* charts-row: 두 차트 모듈 사이 1px 헤어라인 */
+.charts-row{ gap:0; }
+.chart-part{ margin-left:-1px; }
+
+/* 표: 컬럼 사이 세로 헤어라인 룰 → 계기판 데이터표(모듈 그리드가 표 안까지) */
+.settle-table th,.settle-table td{ border-right:1px solid var(--border); }
+.settle-table th:first-child,.settle-table td:first-child{ border-left:1px solid var(--border); }
+.settle-table th:last-child,.settle-table td:last-child{ border-right:0; }
+/* 숫자 컬럼(거래액·건수·승인율)은 우측 정렬 tabular — ITS 표 관례, 가독성↑ */
+.settle-table th:nth-child(2),.settle-table th:nth-child(3),.settle-table th:nth-child(4){ text-align:right; }
+.cell-amount,.cell-count,.cell-rate{ text-align:right; }
+
+/* ═══════════════ ② 비대칭 KPI — 12컬럼 6·2·2·2 (첫 카드가 헤드라인) ═══════════════ */
+.kpi-grid{ grid-template-columns:repeat(12,1fr); }
+.kpi-card:nth-child(1){ grid-column:span 6; }    /* 핵심 지표 크게 */
+.kpi-card:nth-child(2){ grid-column:span 2; }
+.kpi-card:nth-child(3){ grid-column:span 2; }
+.kpi-card:nth-child(4){ grid-column:span 2; }
+@media (max-width:1180px){
+  .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+  .kpi-card{ grid-column:auto; }
+  .kpi-card:nth-child(1){ grid-column:1 / -1; }  /* 헤드라인은 한 줄 전체 */
+}
+@media (max-width:640px){
+  .kpi-grid{ grid-template-columns:1fr; }
+  .kpi-card:nth-child(1){ grid-column:auto; }
+}
+
+/* ═══════════════ ③ flush-left 초대형 타이포 (라벨과 극단 대비) ═══════════════ */
+.page-title{ font-size:30px; font-weight:800; letter-spacing:-.02em; }
+.section-title{ font-size:19px; font-weight:800; letter-spacing:-.01em; margin-bottom:16px; }
+.kpi-value{ font-size:24px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.kpi-card:nth-child(1) .kpi-value{ font-size:46px; line-height:1.02; }  /* 헤드라인 수치 */
+.kpi-label{ font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.goal-current{ font-size:28px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.goal-target,.goal-pct{ font-variant-numeric:tabular-nums; }
+
+/* ═══════════════ ④ 빨강 예산 1점 — 잉여 var(--accent) 전량 환수, 유일한 빨강만 남김 ═══════════════ */
+/* -- 유일한 빨강: 계기판 헤드라인 = 첫 KPI(GMV)의 수치 -- */
+.kpi-card:nth-child(1) .kpi-value{ color:var(--accent); }
+
+/* -- 크롬(로고·메뉴·탭·버튼·배너): 잉크로 환수 -- */
+.nav .logo{ background:var(--ink); }
+.menu-item{ border-left:2px solid transparent; }
+.menu-item.is-active{ box-shadow:none; border-left-color:var(--ink); color:var(--ink); font-weight:800; }
+.export-btn{ background:var(--ink); color:var(--bg); }
+.banner{ border-left:2px solid var(--ink); }
+.banner-ico{ color:var(--ink); }
+
+/* -- KPI 델타·스파크: 방향은 글리프(▲▼)가 말한다, 색은 잉크 -- */
+.kpi-delta.is-up{ color:var(--ink); }
+.spark-line.is-up{ stroke:var(--ink); }
+
+/* -- 추이 차트: 빨강 라인/면 → 잉크 -- */
+.trend-line{ stroke:var(--ink); }
+.trend-area{ fill:var(--ink); opacity:.06; }
+.trend-mark{ stroke:var(--ink); }
+.note .dot{ background:var(--ink); }
+
+/* -- 도넛·범례: 빨강 대신 4단 회색조 램프(111<6B<A6<CF<E4)로 세그먼트 구분 -- */
+.donut-seg--card{ stroke:var(--ink); }
+.donut-seg--transfer{ stroke:var(--muted); }
+.donut-seg--easypay{ stroke:#A6A6A6; }
+.donut-seg--etc{ stroke:#CFCFCF; }
+.legend-dot--card{ background:var(--ink); }
+.legend-dot--transfer{ background:var(--muted); }
+.legend-dot--easypay{ background:#A6A6A6; }
+.legend-dot--etc{ background:#CFCFCF; }
+
+/* -- 목표 바: 빨강 → 잉크 -- */
+.goal-pct{ color:var(--ink); }
+.goal-bar-fill{ background:var(--ink); }
+
+/* -- 상태 배지: 빨강 환수 + 회색조 4상태(채움/외곽/굵은외곽/파선)로 구분 -- */
+.status--done{ background:var(--ink); color:var(--bg); border:0; }        /* 완료 = 검정 채움 */
+.status--pending{ background:none; color:var(--ink); border:1px solid var(--ink); }  /* 대기 = 얇은 외곽 */
+.status--failed{ background:none; color:var(--ink); border:2px solid var(--ink); font-weight:800; }  /* 실패 = 굵은 박스 */
+/* .status--hold 는 base 의 파선 muted 그대로 (보류 = 파선) */
+
+/* ═══════════════ ⑤ 각지게 + 활성 탭 잉크 언더라인 (원형/알약 잔재 제거) ═══════════════ */
+/* period-tab: 빨강 배경 활성 → 하단 2px 잉크 언더라인 */
+.period-tabs{ background:none; padding:0; gap:0; }
+.period-tab{ padding:8px 16px; border-bottom:2px solid transparent; color:var(--muted); }
+.period-tab.is-active{ background:none; color:var(--ink); font-weight:800; border-bottom-color:var(--ink); }
+.channel-select{ border-color:var(--ink); }
+
+/* base 의 50%/999px 원형·알약 잔재 → 각지게 (radius 0 은 예외 없음) */
+.user-av{ border-radius:0; }
+.kpi-delta.is-down{ border-radius:0; }
+.status,.status::before{ border-radius:0; }       /* 알약·원형 점 → 사각 */
+.note .dot,.legend-dot{ border-radius:0; }
+.goal-bar,.goal-bar-fill{ border-radius:0; }
+.empty-illust{ border-radius:0; }
+.empty{ border-style:solid; }                       /* 빈 상태 파선 프레임 → 실선 헤어라인 */

@@ -213,6 +213,150 @@ table{border-collapse:collapse;width:100%}
   --type-scale:1.25;
 }
 
+
+/* ==== style-16--A.css ==== */
+/* signature/style-16--A.css — 16 머티리얼 디자인 3 의 "구조적 시그니처" (원형 A · 대시보드).
+   토큰(색·radius·서체)만으론 안 되는 것, m3.material.io 정본에서 구조로 끌어온 것 =
+   ① 토널 서피스 — 올라간 표면일수록 primary(#6750A4) 틴트를 겹쳐 순백이 아니라 보라가 섞인
+      톤 계단(surface container low→highest). 카드·차트·배너 배경이 회색조로 인쇄해도 층이 보인다.
+   ② 엘리베이션 5단 — kpi-card·차트카드·settle-table·banner 에 M3 그림자 사다리(key + ambient
+      2겹, 정본 값). hover 시 한 단계 상승. FAB(내보내기)만 상시 3단(hover 4).
+   ③ 반경 규율 — 카드 16(토큰 그대로), FAB·pill 버튼·nav 항목은 pill(999),
+      period-tab 는 밑줄 지표(M3 탭). 도넛·스파크·상태알약·아바타의 원형은 base 그대로 둔다.
+   ④ FAB — .export-btn = primary container(연보라 틴트) + on-primary-container 글자 + pill +
+      상시 elevation 3 → hover 4. period-tab 활성 = primary 밑줄 + 상태 레이어.
+   ⑤ 상태 레이어 — hover 에 primary 8% 오버레이(background-image 로 컨테이너 색 위에 얹음).
+   색·서체·radius 기준값은 전부 var(토큰). 여기선 구조(톤 계단·그림자·형태·상태)만 강제한다.
+   수치 가독성 유지: 톤 계단은 순백→95~86% 밝기라 dark ink 대비 넉넉. */
+
+:root{
+  /* M3 elevation 5단 (key shadow + ambient shadow — 정본 값) */
+  --m3-e1:0 1px 2px 0 rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+  --m3-e2:0 1px 2px 0 rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
+  --m3-e3:0 1px 3px 0 rgba(0,0,0,.30), 0 4px 8px 3px rgba(0,0,0,.15);
+  --m3-e4:0 2px 3px 0 rgba(0,0,0,.30), 0 6px 10px 4px rgba(0,0,0,.15);
+  --m3-e5:0 4px 4px 0 rgba(0,0,0,.30), 0 8px 12px 6px rgba(0,0,0,.15);
+  /* 토널 서피스 계단 — surface 에 primary 를 섞을수록 "높은" 컨테이너 */
+  --m3-surf1:color-mix(in srgb, var(--surface) 95%, var(--accent));  /* container low     ~5%  · 콘텐츠 카드 */
+  --m3-surf2:color-mix(in srgb, var(--surface) 92%, var(--accent));  /* container         ~8%  · 상단바 */
+  --m3-surf3:color-mix(in srgb, var(--surface) 89%, var(--accent));  /* container high    ~11% · 배너 */
+  --m3-surf4:color-mix(in srgb, var(--surface) 86%, var(--accent));  /* container highest ~14% · 테이블 헤더 */
+  /* primary container (FAB·nav 활성·활성 탭) + 그 위 글자색(on-primary-container) */
+  --m3-pc:color-mix(in srgb, var(--accent) 20%, var(--surface));
+  --m3-on-pc:color-mix(in srgb, var(--accent) 72%, #000);
+  /* 상태 레이어 — hover primary 8% / 필드 톤 아웃라인 */
+  --m3-state:color-mix(in srgb, var(--accent) 8%, transparent);
+  --m3-outline:color-mix(in srgb, var(--border) 55%, var(--accent));
+  --m3-pill:999px;
+  --m3-ease:.18s cubic-bezier(.2,0,0,1);
+}
+
+/* ── ① 토널 서피스 + ③ nav 항목 pill : navigation drawer ── */
+.nav{ background:var(--m3-surf1); border-right-color:var(--m3-outline); }
+/* M3 navigation drawer 항목 = 풀 pill(999). hover 상태 레이어, 활성 = primary container */
+.menu-item{ border-radius:var(--m3-pill); transition:background var(--m3-ease); }
+.menu-item:hover{ background-image:linear-gradient(var(--m3-state),var(--m3-state)); }
+.menu-item.is-active{
+  background:var(--m3-pc); color:var(--m3-on-pc);
+  box-shadow:none;                       /* base 의 inset accent 바 제거 — pill 컨테이너가 지표 */
+  border-radius:var(--m3-pill);
+}
+
+/* ── ①② 상단 앱바(identity) = container 톤 + elevation 2, 보더 제거(그림자가 경계) ── */
+.identity{ background:var(--m3-surf2); border:0; box-shadow:var(--m3-e2); }
+.page-title{ letter-spacing:0; }         /* Roboto 는 타이트 트래킹 불필요 */
+
+/* period-tabs = M3 탭바: 트랙 well 제거(투명), 각 탭은 밑줄 지표 ── ③④ */
+.period-tabs{ background:transparent; padding:0; border-radius:0; gap:calc(var(--space)*.4); }
+.period-tab{
+  border-radius:calc(var(--radius)*.5) calc(var(--radius)*.5) 0 0;   /* 상태 레이어 상단만 라운드 */
+  border-bottom:2.5px solid transparent;                            /* 지표 자리 예약 */
+  transition:background var(--m3-ease), color var(--m3-ease);
+}
+.period-tab:hover{ background-image:linear-gradient(var(--m3-state),var(--m3-state)); }
+.period-tab.is-active{
+  background:transparent;                                            /* base 의 accent 채움 제거 */
+  background-image:linear-gradient(var(--m3-state),var(--m3-state)); /* 활성 상태 레이어 */
+  color:var(--accent);
+  border-bottom-color:var(--accent);                                 /* primary 밑줄 지표 */
+  font-weight:800;
+}
+
+/* 채널 필터 = M3 outlined 필드 (톤 서피스 + 아웃라인) */
+.channel-select{ background:var(--m3-surf1); border-color:var(--m3-outline); }
+
+/* ── ④ FAB: .export-btn = primary container + pill + 상시 elevation 3 → hover 4 ── */
+.export-btn{
+  background:var(--m3-pc); color:var(--m3-on-pc);
+  border-radius:var(--m3-pill); box-shadow:var(--m3-e3); font-weight:700;
+  transition:box-shadow var(--m3-ease);
+}
+.export-btn:hover{
+  box-shadow:var(--m3-e4);
+  background-image:linear-gradient(var(--m3-state),var(--m3-state));
+}
+
+/* ── ①② 배너 = container-high 톤(가장 눈에 띄는 알림 서피스) + elevation, hover 상승 ── */
+.banner{
+  background:var(--m3-surf3); border:0; box-shadow:var(--m3-e1);
+  transition:box-shadow var(--m3-ease);
+}
+.banner:hover{ box-shadow:var(--m3-e2); }
+
+/* ── ①② KPI: 그리드 간격 + 카드 토널 서피스 + elevation 1, hover 2단 상승 + 상태 레이어 ── */
+.kpi-grid{ gap:calc(var(--space)*.9); }   /* region "kpi" 커버(kpi-grid) */
+.kpi-card{
+  background:var(--m3-surf1); border:0; box-shadow:var(--m3-e1);
+  transition:transform var(--m3-ease), box-shadow var(--m3-ease);
+}
+.kpi-card:hover{
+  transform:translateY(-2px); box-shadow:var(--m3-e2);
+  background-image:linear-gradient(var(--m3-state),var(--m3-state));
+}
+
+/* ── ①② 차트 카드(추이·구성비) = 토널 서피스 + elevation 1, hover 2단 상승 ── */
+.charts-row{ gap:calc(var(--space)*.9); }
+.chart-trend,.chart-part{
+  background:var(--m3-surf1); border:0; box-shadow:var(--m3-e1);
+  transition:box-shadow var(--m3-ease);
+}
+.chart-trend:hover,.chart-part:hover{ box-shadow:var(--m3-e2); }
+
+/* ── ①② 목표 카드 = 토널 서피스 + elevation 1 ── */
+.goal{ background:var(--m3-surf1); border:0; box-shadow:var(--m3-e1); }
+/* 진행바 트랙 = 낮은 톤 well + 아웃라인(수치 대비 유지) */
+.goal-bar{ border-color:var(--m3-outline); }
+
+/* ── ①② 정산 테이블 카드 = 토널 서피스 + elevation 1, hover 2단 ── */
+.table-section{                            /* region "table" 커버(table-section) */
+  background:var(--m3-surf1); border:0; box-shadow:var(--m3-e1);
+  transition:box-shadow var(--m3-ease);
+}
+.table-section:hover{ box-shadow:var(--m3-e2); }
+/* 헤더행 = container-highest 톤(카드 안에서 가장 높은 톤 계단) */
+.settle-table th{ background:var(--m3-surf4); border-bottom-color:var(--m3-outline); }
+.settle-table td{ border-bottom-color:var(--m3-outline); }
+/* 리스트 행 hover = M3 상태 레이어 */
+.settle-table tbody tr{ transition:background var(--m3-ease); }
+.settle-table tbody tr:hover{ background-image:linear-gradient(var(--m3-state),var(--m3-state)); }
+
+/* ── ①③ 빈 상태 = 큰 토널 컨테이너(반경 28) + 실선 톤 아웃라인 ── */
+.empty{
+  background:var(--m3-surf1); border:1px solid var(--m3-outline);
+  border-radius:calc(var(--radius)*1.75);
+}
+.empty-illust{ border-color:var(--accent); }
+/* filled tonal 버튼 — pill + elevation 1, hover 2단 + 상태 레이어 */
+.empty-cta{
+  background:var(--m3-pc); color:var(--m3-on-pc); border:0;
+  border-radius:var(--m3-pill); box-shadow:var(--m3-e1);
+  transition:box-shadow var(--m3-ease);
+}
+.empty-cta:hover{
+  box-shadow:var(--m3-e2);
+  background-image:linear-gradient(var(--m3-state),var(--m3-state));
+}
+
 </style>
 </head>
 <body>

@@ -1,0 +1,102 @@
+/* signature/style-22--A.css — 22 De Stijl / 몬드리안의 "구조적 시그니처" (원형 A · 핀테크 정산 대시보드).
+   토큰(--accent 빨강 · --border/--ink 검정 · --radius 0)만으론 안 되는 것 =
+   ① 검은 굵은 격자선이 주인공 — kpi-grid 셀 사이·charts-row·표/섹션 경계를 4~6px solid 검정 선이 실제로 가른다.
+      부모 배경을 검정으로 깔고 gap·바깥테를 굵게(gap=선폭) → 카드 사이 여백이 곧 격자선. base 의 얇은 1px
+      헤어라인·inset 하이라이트·pill 을 걷어내고 굵은 검은 선의 규율로 재편. base 컬럼/반응형은 그대로 상속.
+   ② 원색 3블록 비대칭 배치 — 빨강(--accent)·파랑(#0B4EA2)·노랑(#F4C500)을 KPI 카드·도넛 세그먼트·
+      goal-bar·상태 배지·배너에 "손으로 고른 몇 곳"만 flat 하게 채운다(nth-child 비대칭 — 균등 반복 금지).
+      원색 위 수치는 흰/검 대비로 가독성 유지. 나머지는 흰 여백.
+   ③ 곡선 전멸 — base 가 직접 박은 원형 잔재(아바타 50%·delta/goal/status pill 999px·범례점·빈상태 일러스트)를
+      전부 각지게 환수. 도넛 링만 예외(차트 형태). 소프트 섀도·그라디언트 0.
+   화면의 색은 원색 3(빨/파/노) + 검정 + 흰(+토큰 캔버스) 뿐. (이 파일 없이는 그냥 핀테크 대시보드) */
+
+:root{
+  --blue:#0B4EA2;      /* 몬드리안 파랑 */
+  --yellow:#F4C500;    /* 몬드리안 노랑 */
+  --line:6px;          /* 주(主) 격자선 — 격자·섹션 프레임 */
+  --line2:4px;         /* 종(從) 분할선 — 섹션 내부·구분 */
+}
+
+/* ═══ ③ 원형 잔재 각짐 — 몬드리안에 곡선은 없다 (도넛 링만 예외) ═══ */
+.user-av,.kpi-delta.is-down,.note .dot,.legend-dot,
+.goal-bar,.goal-bar-fill,.status,.status::before,.empty-illust{ border-radius:0; }
+
+/* ═══ ① nav — 굵은 검은 우측선으로 사이드바를 못 박는다 ═══ */
+.nav{ border-right:var(--line) solid var(--ink); background:var(--surface); }
+.logo{ border:2px solid var(--ink); color:var(--surface); }              /* 빨강 각블록 로고 */
+.menu-item.is-active{ background:var(--blue); color:var(--surface); box-shadow:none; font-weight:800; }  /* ② 활성 = 파랑 flat 블록 */
+.nav-user{ border-top:var(--line2) solid var(--ink); }
+.user-av{ border:2px solid var(--ink); background:var(--surface); }
+
+/* ═══ ① identity — 굵은 검은 테두리 프레임 ═══ */
+.identity{ border:var(--line2) solid var(--ink); }
+
+/* ═══ ① filter(period-tabs) — 검은 테 + 탭 사이 검은 분할선, 활성 = 원색 블록 ═══ */
+.period-tabs{ background:var(--surface); border:2px solid var(--ink); gap:0; padding:0; }
+.period-tab{ border-right:2px solid var(--ink); color:var(--ink); font-weight:700; }
+.period-tab:last-child{ border-right:0; }
+.period-tab.is-active{ background:var(--accent); color:var(--surface); font-weight:800; }  /* ② 활성 period-tab = 빨강 flat 블록 */
+.channel-select{ border:2px solid var(--ink); }
+.export-btn{ background:var(--ink); color:var(--surface); border:2px solid var(--ink); font-weight:800; }  /* 검정 각블록 CTA */
+
+/* ═══ ② banner — 노랑 flat 블록 + 검은 두른선 (검은 글자 대비) ═══ */
+.banner{ background:var(--yellow); border:var(--line2) solid var(--ink); color:var(--ink); font-weight:700; }
+.banner-ico{ color:var(--ink); }
+
+/* ═══ ① kpi — gap 을 검은 선으로: 연속 검은 격자(카드 사이가 곧 선) ═══
+   부모 배경 검정 + gap·바깥테 굵게 → 카드 사이 여백이 격자선. base 의 repeat(4,1fr)·반응형 그대로 상속. */
+.kpi-grid{ gap:var(--line); background:var(--ink); border:var(--line) solid var(--ink); padding:0; }
+.kpi-card{ border:0; background:var(--surface); }
+/* ② 원색 블록 비대칭(4셀 중 1·3 만 채움 — 손으로 고른 몬드리안 구성, 2·4 는 흰 여백) */
+.kpi-card:nth-child(1){ background:var(--accent); }   /* 빨강 (좌) */
+.kpi-card:nth-child(3){ background:var(--blue);   }   /* 파랑 (우) */
+/* 원색 위 수치 가독성 — 흰 대비 + delta/spark 도 흰색 환수 */
+.kpi-card:nth-child(1) .kpi-label,.kpi-card:nth-child(1) .kpi-value,.kpi-card:nth-child(1) .kpi-delta,
+.kpi-card:nth-child(3) .kpi-label,.kpi-card:nth-child(3) .kpi-value{ color:var(--surface); }
+.kpi-card:nth-child(1) .spark-line,.kpi-card:nth-child(3) .spark-line{ stroke:var(--surface); }
+
+/* ═══ ① charts-row — 두 차트 사이도 검은 격자선으로 프레임 ═══ */
+.charts-row{ gap:var(--line); background:var(--ink); border:var(--line) solid var(--ink); padding:0; }
+.chart-trend,.chart-part{ border:0; background:var(--surface); }
+
+/* ---- trend — 선이 주인공: 소프트 area 제거, 굵은 검은 선 ---- */
+.trend-area{ fill:none; }                                    /* 그라디언트/틴트 area 걷어냄 */
+.trend-line{ stroke:var(--ink); stroke-width:3.5; }          /* 굵은 검은 추세선 */
+.trend-mark--peak{ fill:var(--accent); stroke:var(--ink); } /* 최고점 = 빨강 원색 1점 */
+.trend-mark--trough{ fill:var(--surface); stroke:var(--ink); }
+.note .dot{ background:var(--accent); }                       /* 각진 빨강 점 */
+.note--trough .dot{ background:var(--ink); }
+
+/* ---- donut — 원색 3 세그먼트 + 검정, 각진 범례 블록 ---- */
+.donut-ring{ stroke-width:6; }
+.donut-bg{ stroke:var(--surface); }
+.donut-seg--card{ stroke:var(--accent); }     /* 빨강 */
+.donut-seg--transfer{ stroke:var(--blue); }   /* 파랑 */
+.donut-seg--easypay{ stroke:var(--yellow); }  /* 노랑 */
+.donut-seg--etc{ stroke:var(--ink); }         /* 검정 */
+.legend-dot{ border:1px solid var(--ink); }   /* 각진 색블록 */
+.legend-dot--card{ background:var(--accent); }
+.legend-dot--transfer{ background:var(--blue); }
+.legend-dot--easypay{ background:var(--yellow); }
+.legend-dot--etc{ background:var(--ink); }
+
+/* ═══ ① goal — 굵은 검은 테 + ② 파랑 flat 진행블록(각진 트랙) ═══ */
+.goal{ border:var(--line2) solid var(--ink); }
+.goal-pct{ color:var(--accent); }                                    /* 달성률 = 빨강 원색 1점 */
+.goal-bar{ background:var(--surface); border:2px solid var(--ink); height:18px; overflow:hidden; }
+.goal-bar-fill{ background:var(--blue); }                             /* ② 파랑 flat 블록 */
+
+/* ═══ ① table — 굵은 검은 테 + 행 사이 검은 선(선이 주인공), 상태 = 원색 각배지 ═══ */
+.table-section{ border:var(--line2) solid var(--ink); }
+.settle-table th{ border-bottom:var(--line2) solid var(--ink); color:var(--ink); }
+.settle-table td{ border-bottom:2px solid var(--ink); }
+.status{ border:2px solid var(--ink); font-weight:800; }
+.status--done{ background:var(--blue); color:var(--surface); }        /* 파랑 */
+.status--pending{ background:var(--yellow); color:var(--ink); border:2px solid var(--ink); }  /* 노랑 */
+.status--hold{ background:var(--surface); color:var(--ink); border:2px dashed var(--ink); }
+.status--failed{ background:var(--accent); color:var(--surface); }    /* 빨강 */
+
+/* ═══ empty — 굵은 검은 실선 테 + 각진 일러스트 + 빨강 각블록 CTA ═══ */
+.empty{ border:var(--line2) solid var(--ink); }
+.empty-illust{ border:var(--line2) solid var(--ink); }
+.empty-cta{ background:var(--accent); color:var(--surface); border:2px solid var(--ink); font-weight:800; }
