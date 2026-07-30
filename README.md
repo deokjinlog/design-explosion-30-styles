@@ -23,46 +23,57 @@
 
 ---
 
-## 핵심 모델 — 곱셈 3축
+## 어떻게 설계됐나 — 곱셈 3축
 
 | 축 | 뜻 | 정하는 것 | 노동 |
 |---|---|---|---|
-| **도메인** | 업종 | 무슨 콘텐츠·숫자가 채워지나 (**고정**) | 입력만 |
-| **원형** | 화면 종류 11개 | 어떤 뼈대 HTML인가 (**고정**) | 고르기 |
+| **도메인** | 업종(주제) | 무슨 콘텐츠·숫자가 채워지나 | 입력만 |
+| **원형** | 화면 종류 11개 | 어떤 뼈대 HTML인가 | 고르기 |
 | **스타일** | 디자인 언어 30개 | ← **이것만 변함** | 재사용 |
 
 ```
-도메인 입력  "중고거래 마켓"
+도메인 "중고거래 마켓"
    │
-   ├─① 원형 결정         repo 역산 > Mind2Web 프리셋 > 4문항 인터뷰
-   │    "이 화면에서 하는 단 하나의 행동은? → 고른다" → 원형 D
+   ├─▶ 원형 결정        도메인 → D 컬렉션        "이 화면에서 하는 단 하나의 행동은?"
    │
-   ├─② 스켈레톤 1개 저작  ★ 프로젝트마다 새로 만드는 유일한 것
-   │    원형 D 컴포넌트에 도메인 콘텐츠를 박은 고정 DOM
+   ├─▶ 콘텐츠 채우기      도메인 + 원형 슬롯       "아이폰 ₩780,000"을 item-card에
+   │        └──────────▶ 스켈레톤 1개(고정 HTML)   ★ 프로젝트마다 새로 만드는 유일한 것
    │
-   ├─③ 30 스타일 조립     기존 라이브러리(base·tokens·signature) 재사용
-   │    assemble.py 가 스켈레톤에 30벌 CSS 입힘 → 30장
-   │
-   └─④ coverage 게이트    환각 셀렉터 0 · 누락 영역 0
+   └─▶ CSS 30벌 조립     base + tokens/NN + signature/NN   → assemble.py → style-01~30.html
 ```
 
-**매번 손으로 만드는 건 ②의 스켈레톤 1개뿐.** 스타일 30벌·게이트·조립기는 전부 재사용 — 같은 원형이면 새 도메인도 30 스타일 라이브러리를 그대로 갖다 씁니다.
+**매번 손으로 만드는 건 스켈레톤 1개뿐.** 스타일 30벌·조립기·게이트는 전부 재사용 — 같은 원형이면 새 도메인도 CSS 라이브러리를 그대로 갖다 씁니다.
 
 ---
 
-## 생성 엔진 — Zen Garden 3층
+## 어떻게 만들어지나 — Zen Garden 3층
 
-[CSS Zen Garden](http://www.csszengarden.com/)의 계보(하나의 markup, N개 CSS)를 파이프라인으로. 스타일 1개 = **CSS 3층**을 스켈레톤에 입힌 것 — 세 층은 재사용 범위가 다릅니다:
+[CSS Zen Garden](http://www.csszengarden.com/)의 계보(HTML 한 장 고정 + CSS만 N벌). 스타일 1개 = **CSS 3층**을 스켈레톤에 입힌 것 — 세 층은 **재사용 범위**가 다릅니다:
 
-| 층 | 맡는 것 | 재사용 범위 |
+| 층 | 맡는 것 | 재사용 범위 | 누가 저작 |
+|---|---|---|---|
+| **base** | 원형의 부품 조립(형태·배치, 값은 `var()`로 비움) | 원형당 1개 — 30 스타일 공유 | 손 |
+| **tokens/NN** | 스타일의 값 12개(색·폰트·radius·스케일) | 스타일당 1개 — 원형·도메인 무관 | 손·스크립트 |
+| **signature/NN** | 값으론 안 되는 구조(도형·격자·하드섀도…) | 구조형 스타일만 (D 21·A 10·B 17) | LLM(디자인 판단) |
+
+**저작은 한 번, 이후 고정 라이브러리.** `assemble.py`(스크립트, **LLM 토큰 0**)가 세 층을 스켈레톤에 인라인 → 30장 자립 HTML. 갤러리를 100번 뽑아도 조립은 스크립트라 토큰이 안 듭니다.
+
+이 구조가 주는 세 가지:
+
+- **콘텐츠 동일성 (구조 보장)** — 30장이 `<body>` 바이트까지 동일. AI에게 "똑같이 해줘"라고 부탁하지 않고 스켈레톤 하나를 공유해 강제. 나란히 놓으면 다른 건 오직 스타일.
+- **잘못된 화면 원천 차단** — CSS는 스켈레톤에 **있는 요소만** 꾸밉니다. D 스켈레톤엔 KPI·차트 요소가 0개라, 어떤 스타일을 입혀도 대시보드가 될 수 없음. (사후 린트가 아니라 애초에 사고가 안 남 — `coverage-lint`는 화면 종류가 아니라 CSS 배선만 검사.)
+- **저비용 재사용** — 새 스타일 = 값 12개(+구조형이면 signature 1개), 한 번. 세 원형에 즉시 적용되고, 한 번 고치면 전 갤러리에 반영.
+
+---
+
+## 근거 — 감이 아니라 공개 데이터에 접지
+
+| 축 | 출처 | 왜 |
 |---|---|---|
-| **base** | 원형의 부품 조립(형태·배치, 값은 `var()`로 비움) | 원형당 1개 — 30 스타일 공유 |
-| **tokens/NN** | 스타일의 값 12개(색·폰트·radius·스케일) | 스타일당 1개 — 원형·도메인 무관 |
-| **signature/NN** | 값으론 안 되는 구조(도형·격자·하드섀도…) | 구조형 스타일만(D 21·A 10·B 17) |
-
-`assemble.py`(스크립트, LLM 토큰 0)가 셋을 스켈레톤에 인라인 → **30장 자립 HTML, `<body>`는 바이트까지 동일하고 `<style>`만 다릅니다.** 콘텐츠 동일성을 AI에게 부탁하지 않고 구조로 보장하는 것 — 30장을 나란히 놓으면 다른 건 오직 스타일입니다.
-
-품질은 두 겹: **화면 틀림은 스켈레톤이 구조로 예방**(원형 D엔 대시보드를 넣을 수 없음 — 사후 린트가 아니라 애초에 사고가 안 남), **CSS 배선은 `coverage-lint`가 검사**(환각 셀렉터·누락 영역 0).
+| **구조(1 HTML·N CSS)** | [CSS Zen Garden](http://www.csszengarden.com/) — 한 HTML을 CSS만으로 218 디자인 | "내용 고정·표현만 변수"를 증명한 원조 |
+| **원형 11종** | [Enrico](https://github.com/luileito/enrico) — RICO 72k → 1,460 UI를 사람이 20토픽 분류 | 화면 종류를 감이 아닌 실데이터로 검증·보완(A 대시보드는 추가) |
+| **도메인 프리셋** | [Mind2Web](https://osu-nlp-group.github.io/Mind2Web/) — 136 사이트·2,022 태스크 | 업종→원형 매핑의 근거(덮어쓰기 가능한 기본값) |
+| **스타일 30** | 디자인 시스템·운동 — [출처 문서](docs/design/2026-07-26-type-and-source-grounding.md) | 산업 라벨 대신 문서화된 디자인 언어로 접지 |
 
 ---
 
@@ -77,7 +88,7 @@
 | **E** 폼 | 채운다 | 입력·단계 | | **K** 프로필·설정 | 관리한다 | 행 밀도·토글 |
 | **F** 피드 | 흘려본다 | 시간순 스트림 | | | | |
 
-<sub>임의 분류가 아니라 <a href="https://github.com/luileito/enrico">Enrico</a>(RICO 72k 모바일 UI에서 추린 1,460 UI·사람 20토픽 분류)로 겹침 검증 + 누락 보완(온보딩·인증·설정). A 대시보드는 웹·SaaS 핵심이라 우리가 추가. 도메인→원형 프리셋은 <a href="https://osu-nlp-group.github.io/Mind2Web/">Mind2Web</a>(136 사이트·2,022 태스크) 근거.</sub>
+<sub>행동은 화면 고유 성질 — 도메인과 <b>직교</b>합니다. 패션몰도 중고거래도 "고른다"라 둘 다 D(콘텐츠만 다름). 화면을 바꾸려면 원형을 바꿔야 합니다.</sub>
 
 ---
 
@@ -85,11 +96,11 @@
 
 "헬스케어·핀테크"는 시각 규칙이 없어 기본값(흰 배경+둥근 카드+Inter)으로 수렴합니다. 그래서 **문서화된 디자인 언어**로 접지했습니다:
 
-- **디자인 시스템**: IBM Carbon · Material 3 · Ant Design · Shopify Polaris · GOV.UK · shadcn/ui
-- **디자인 운동**: Swiss · Bauhaus · De Stijl · Memphis · Neubrutalism · Editorial · Riso
-- **모프/시대**: Glassmorphism · Neumorphism · Claymorphism · Y2K · SF HUD · 레트로 픽셀
+- **디자인 시스템** — IBM Carbon · Material 3 · Ant Design · Shopify Polaris · GOV.UK · shadcn/ui
+- **디자인 운동** — Swiss · Bauhaus · De Stijl · Memphis · Neubrutalism · Editorial · Riso
+- **모프/시대** — Glassmorphism · Neumorphism · Claymorphism · Y2K · SF HUD · 레트로 픽셀
 
-**정본 서체 22종을 실제 웹폰트로 로드**(Playfair·Cormorant·IBM Plex·Space Mono·VT323·Roboto·Atkinson…)하고, 세 원형에 **구조 시그니처**(D 21·A 10·B 17)를 저작해 회색조에서도 구조로 갈리게 했습니다 — Material 3·Carbon·Ant·SF HUD는 세 원형에 같은 토큰 어휘로 일관 저작. 출처·서체·차별화 축 전체 → [`docs/design/2026-07-26-type-and-source-grounding.md`](docs/design/2026-07-26-type-and-source-grounding.md).
+**정본 서체 22종을 실제 웹폰트로 로드**(Playfair·Cormorant·IBM Plex·Space Mono·VT323·Roboto·Atkinson…)하고, 세 원형에 **구조 시그니처**(D 21 · A 10 · B 17)를 저작해 회색조에서도 구조로 갈리게 했습니다 — Material 3·Carbon·Ant·SF HUD는 세 원형에 같은 토큰 어휘로 일관 저작.
 
 ---
 
@@ -100,9 +111,9 @@
 | [핀테크 · A 대시보드](https://deokjinlog.github.io/design-explosion-30-styles/design-gallery/2026-07-26-fintech-zen/gallery.html) | [연서 · B 대화](https://deokjinlog.github.io/design-explosion-30-styles/design-gallery/2026-07-26-yeonseo-zen/gallery.html) | [패션 · D 컬렉션](https://deokjinlog.github.io/design-explosion-30-styles/design-gallery/2026-07-26-fashion-zen/gallery.html) |
 |---|---|---|
 
-**같은 원형, 새 도메인** — [중고거래 마켓 · D](https://deokjinlog.github.io/design-explosion-30-styles/design-gallery/2026-07-26-market-zen/gallery.html)는 패션과 구조가 같고(둘 다 D), base·tokens·signature를 그대로 재사용 — 새로 짠 건 스켈레톤 1개뿐. **도메인 무관성**의 증거입니다.
+**같은 원형, 새 도메인** — [중고거래 마켓 · D](https://deokjinlog.github.io/design-explosion-30-styles/design-gallery/2026-07-26-market-zen/gallery.html)는 패션과 같은 D. base·tokens·signature를 그대로 재사용하고 새로 짠 건 **스켈레톤 1개**뿐 — 도메인 무관성의 증거입니다.
 
-📈 [진행 여정 한눈에 보기](https://deokjinlog.github.io/design-explosion-30-styles/progress.html) — 세 데모 · 3층 재설계 · 검증 · 타임라인
+📈 [진행 여정 한눈에 보기](https://deokjinlog.github.io/design-explosion-30-styles/progress.html)
 
 ---
 
@@ -116,7 +127,7 @@
 
 **2. 도메인 던지기** — 아래로 갈수록 정확합니다:
 ```
-핀테크 정산 대시보드 디자인 30개 뽑아줘            ← 도메인만
+핀테크 정산 대시보드 디자인 30개 뽑아줘            ← 도메인만 (원형은 툴이 추론)
 연서, 대화형 원형으로 30 스타일 뽑아줘             ← 원형 직접 지정
 /home/me/myproject 기준으로 디자인 시안 뽑아줘     ← ⭐ 프로젝트 폴더(제일 정확)
 ```
