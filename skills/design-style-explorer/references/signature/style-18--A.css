@@ -115,3 +115,6 @@
 .goal-bar,.goal-bar-fill{ border-radius:0; }
 .empty-illust{ border-radius:0; }
 .empty{ border-style:solid; }                       /* 빈 상태 파선 프레임 → 실선 헤어라인 */
+
+/* WCAG 1.4.10 reflow — 12열 그리드 가이드가 폭 넘겨 가로 스크롤 만드는 것 방지 */
+.app{ overflow-x:hidden }

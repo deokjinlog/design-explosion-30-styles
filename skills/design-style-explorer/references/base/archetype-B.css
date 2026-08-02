@@ -34,7 +34,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14p
 .bubble{background:var(--bubble-ai-bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 13px}
 .msg[data-speaker=me] .bubble{background:var(--bubble-me-bg);color:var(--bubble-me-ink);border-color:transparent}
 .text{font-size:14px}
-.meta{display:block;margin-top:3px;font-size:11px;color:var(--muted)}
+.meta{display:block;margin-top:3px;font-size:11px;color:color-mix(in srgb,var(--ink) 72%,var(--surface))}
+/* me 버블은 강조색 배경이라, 타임스탬프를 버블 ink에 앵커해 가독성 확보(WCAG) */
+.msg[data-speaker=me] .meta{color:color-mix(in srgb,var(--bubble-me-ink) 90%,var(--bubble-me-bg))}
 
 .card{margin:calc(var(--space)*.3) var(--space);border:1px solid var(--border);border-radius:var(--radius);padding:var(--space);background:var(--surface)}
 .card-eyebrow{font-size:11px;color:var(--muted)}
