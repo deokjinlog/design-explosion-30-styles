@@ -1,0 +1,118 @@
+/* signature/style-25--D.css — 25 Shopify Polaris 의 "구조적 시그니처" (원형 D · 커머스 어드민 그리드).
+   토큰(초록 accent #008060 · gray bg #F6F6F7 · surface #FFF · radius 8 · border #E1E3E5)만으론
+   다른 중립 화이트카드 스타일과 뭉갠다. Polaris 정체성을 썸네일에서도 읽히게 하는 4가지를 강제한다:
+   ① 회색 위 흰 카드 계단 — 카드마다 Polaris elevation 그림자 단계(미세 1px 링 + 부드러운 드롭),
+      헤더는 gray 페이지 위에 뜬 흰 top bar(그림자로 분리). radius 8 일관.
+   ② Shopify 그린 존재감 — 주요(primary) 버튼은 그린 채움 버튼(상/하 하이라이트), 선택(selected)
+      필터·칩·페이저 활성은 그린 tint 선택 상태, 성공 배지는 그린. 포커스 링만 Polaris 블루(#005BD3).
+   ③ 상태 배지 = Polaris Badge pill — 재고/세일/신상 배지를 은은한 tint pill(톤별: success 그린 ·
+      info 블루 · attention 오렌지)로. 필드/버튼은 커머스 어드민 감도.
+   ④ 각(角) 규율 + tabular 가격 — base 50% 원형 잔재(하트 등)를 radius 8로 정리(칩·아바타·색스와치·
+      카운트는 Polaris답게 원형 유지), 가격/개수 숫자는 tabular-nums로 정렬.
+   본문 가독 앵커(.name/.price-now/.card-body)는 잉크블랙 유지 — 흰 카드 위 가독성 불변. */
+
+:root{
+  --p-shadow-card:   0 0 0 1px rgba(31,33,36,.04), 0 1px 0 0 rgba(31,33,36,.05), 0 1px 3px -1px rgba(31,33,36,.10);
+  --p-shadow-raised: 0 0 0 1px rgba(31,33,36,.05), 0 2px 4px -1px rgba(31,33,36,.10), 0 8px 20px -8px rgba(31,33,36,.16);
+  --p-focus:        #005BD3;   /* Polaris 포커스 블루 — 그린 UI 위 유일한 블루 앵커 */
+  --p-green-tint:   #F1F8F5;   /* 선택(selected) 상태 배경 */
+  --p-green-strong: #00654E;   /* 그린 텍스트/버튼 hover */
+}
+
+/* ===== identity — gray 페이지 위에 뜬 흰 top bar (Polaris TopBar 분리감) ===== */
+.identity{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 1px 0 0 rgba(31,33,36,.04), 0 1px 3px -1px rgba(31,33,36,.10);
+}
+.logo{ color:#fff; box-shadow:inset 0 -1px 0 rgba(0,0,0,.18); }
+.cat.is-active{ box-shadow:inset 0 -2px 0 var(--accent); font-weight:700; }
+.cat.is-sale{ color:var(--accent); font-weight:700; }
+.search{ background:var(--surface); box-shadow:inset 0 1px 1px rgba(31,33,36,.06); }
+.search:focus-within{ border-color:var(--accent); box-shadow:0 0 0 2px var(--p-focus); }
+.cart-count{ color:#fff; font-variant-numeric:tabular-nums; }
+.avatar{ box-shadow:var(--p-shadow-card); }   /* 아바타 원형 유지 — Polaris Avatar */
+
+/* ===== filter — Polaris Card(흰 면 + 미세 elevation), 선택 상태는 그린 tint ===== */
+.filter{ box-shadow:var(--p-shadow-card); }
+.filter-title{ letter-spacing:.02em; }
+.filter-item{ transition:background .1s; }
+.filter-item.is-active{           /* Polaris 선택 리소스 항목 — 좌측 그린 인디케이터 + 그린 tint */
+  background:var(--p-green-tint); color:var(--accent); font-weight:600;
+  box-shadow:inset 3px 0 0 0 var(--accent), inset 0 0 0 1px var(--border);
+}
+.chip{ border-radius:var(--radius); }
+.chip.is-active{                  /* 선택 칩 = 그린 tint 상태 (ink 채움 대신 Polaris 선택 감) */
+  background:var(--p-green-tint); border-color:var(--accent);
+  color:var(--accent); font-weight:600;
+}
+.colorchip.is-active{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--accent); }   /* 색스와치 원형 유지 */
+.filter-reset{                    /* Polaris secondary 버튼 — 흰 면 + 보더 + 미세 그림자 */
+  background:var(--surface);
+  box-shadow:0 1px 0 0 rgba(31,33,36,.05), inset 0 0 0 1px var(--border);
+}
+.filter-reset:hover{ background:var(--bg); }
+
+/* ===== results — 커머스 어드민 리스트 헤더, 개수는 그린 + tabular ===== */
+.results{ border-bottom:1px solid var(--border); }
+.result-count b{ color:var(--accent); font-variant-numeric:tabular-nums; }
+.sort-select{ box-shadow:inset 0 1px 1px rgba(31,33,36,.06); }
+.sort-select:focus-visible{ border-color:var(--accent); outline:2px solid var(--p-focus); outline-offset:1px; }
+
+/* ===== collection / item-card — 회색 위 흰 카드 계단(elevation 단계) ===== */
+.collection{ gap:calc(var(--space)*1.5); }   /* 섹션 구획 — 회색 배경이 카드를 띄우게 여백 확보 */
+.item-card{ box-shadow:var(--p-shadow-card); }
+.item-card:hover,.item-card:focus-within{ transform:translateY(-2px); box-shadow:var(--p-shadow-raised); }
+.thumb{ box-shadow:inset 0 -1px 0 0 var(--border); }   /* 미디어 영역 하단 헤어라인 */
+
+/* ── 상태 배지 = Polaris Badge pill (은은한 tint · 톤별 색) ── */
+.badge{
+  border-radius:10px; font-weight:600; letter-spacing:0;
+  padding:2px 8px; box-shadow:none; top:10px; left:10px;
+}
+.badge--best{ background:#E3F1EC; color:#0C5A43; box-shadow:inset 0 0 0 1px #B5DFCC; }   /* success 그린 */
+.badge--ship{ background:#E3F1EC; color:#0C5A43; box-shadow:inset 0 0 0 1px #B5DFCC; }   /* success 그린 */
+.badge--new{  background:#EAF2FE; color:#0E4C92; box-shadow:inset 0 0 0 1px #B9D3F5; }   /* info 블루 */
+.badge--low{  background:#FCEBDB; color:#8A5300; box-shadow:inset 0 0 0 1px #F2D2A8; }   /* attention 오렌지 */
+.badge--low::before{ content:"● "; font-size:8px; color:#B98900; }
+
+/* ── 하트 = Polaris plain 아이콘 버튼 (원형 잔재 → radius 8) ── */
+.heart{
+  border-radius:var(--radius);
+  box-shadow:0 1px 0 0 rgba(31,33,36,.05), inset 0 0 0 1px var(--border);
+}
+.heart:hover{ background:var(--bg); }
+
+/* ── 가격 = tabular 정렬(어드민 표 감), 할인 그린 ── */
+.price-was,.price-now,.discount{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }
+.discount{ color:var(--accent); font-weight:700; }
+.swatches i{ box-shadow:inset 0 0 0 1px rgba(31,33,36,.06); }   /* 색점 원형 유지 */
+
+/* ===== action — 어드민 페이지네이션, 활성은 그린 tint 선택 ===== */
+.action{ border-top:1px solid var(--border); }
+.page-btn{ box-shadow:0 1px 0 0 rgba(31,33,36,.05), inset 0 0 0 1px var(--border); }
+.page-btn.is-active{
+  background:var(--p-green-tint); border-color:var(--accent);
+  color:var(--accent); font-weight:700;
+  box-shadow:inset 0 0 0 1px var(--accent); font-variant-numeric:tabular-nums;
+}
+.page-btn:disabled{ box-shadow:inset 0 0 0 1px var(--border); }
+.more-btn{                        /* Polaris secondary 버튼 */
+  background:var(--surface);
+  box-shadow:0 1px 0 0 rgba(31,33,36,.05), inset 0 0 0 1px var(--border);
+}
+.more-btn:hover{ background:var(--bg); }
+
+/* ===== empty — Polaris Card + primary 그린 버튼 ===== */
+.empty{ background:var(--surface); border:1px solid var(--border); box-shadow:var(--p-shadow-card); }
+.empty-illust{ border-radius:var(--radius); border:1px solid var(--border); background:var(--bg); }
+.empty-cta{                       /* Polaris primary(그린) 버튼 — 상단 하이라이트 + 하단 인셋 */
+  background:var(--accent); color:#fff;
+  box-shadow:inset 0 1px 0 0 rgba(255,255,255,.18), inset 0 -1px 0 0 rgba(0,0,0,.20), 0 1px 0 0 rgba(31,33,36,.08);
+}
+.empty-cta:hover{ background:var(--p-green-strong); }
+
+/* ===== 포커스: Polaris 블루 2px 링 (그린 UI 위 유일 블루) ===== */
+:is(.cat,.chip,.colorchip,.filter-item,.filter-reset,.sort-select,.heart,.page-btn,.more-btn,.empty-cta,.cart-btn,.search-btn,.toggle,.price-slider):focus-visible{
+  outline:2px solid var(--p-focus); outline-offset:2px;
+}

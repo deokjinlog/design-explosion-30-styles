@@ -1,0 +1,118 @@
+/* signature/style-07--D.css — 07 "Braun 미니멀"(Dieter Rams)의 구조적 시그니처 (원형 D · 컬렉션/상품 그리드).
+   토큰(오렌지 #E8500E · bg #F4F4F2 · radius 0)만 먹이면 "각진 흰 카드"일 뿐 — 다른 중립 스타일과
+   썸네일에서 뭉갠다. Rams 정본("Weniger, aber besser")의 정체성은 색이 아니라 규율이다:
+   ① 8px 기능 그리드 + 얇은 헤어라인 구획 — 여백은 넓게, 경계는 1px 한 줄로만. 필터는 padding 0 +
+      그룹마다 상단 헤어라인으로 쌓아 "기능 목록"의 리듬을 만든다.
+   ② 오렌지 = 오직 "기능"의 표식 (선택·활성·주요동작·데이터·브랜드). 장식 오렌지는 전부 회수한다 —
+      base 가 토큰으로 흩뿌린 배지 오렌지(무료배송/신상)를 모노 라벨로 되돌려 절제를 회복. 남는
+      오렌지는 하나의 언어: "각진 오렌지 블록/바 = 여기가 선택/주요다". (오렌지 위 글자는 ink #1A1A1A
+      로 고정 — 흰 글씨는 오렌지 대비 3.8:1 로 미달, ink 는 4.6:1 로 AA 통과.)
+   ③ radius 0 예외 없음 — base 가 토큰과 무관하게 남긴 50% 원형(로고칩/카트뱃지/아바타/색상칩/하트/
+      일러스트/스와치) 전부 각지게.
+   ④ 소프트 섀도 0 — 카드 리프트(translateY)+드롭섀도 제거. 깊이는 그림자가 아니라 헤어라인/여백으로.
+   ⑤ 초기능 라벨 — 소형 대문자 + 넓은 트래킹(브랜드·필터·정렬·배지·버튼·타이틀). 숫자는 tabular.
+   색·radius·서체 기준값은 tokens 몫. 여기선 그리드·헤어라인·오렌지 규율·각짐·무섀도·라벨만 강제한다. */
+
+/* ── ③ radius 0 예외 없음: base 의 50% 원형 잔재를 전부 직각으로 ── */
+.logo,
+.cart-count,
+.avatar,
+.colorchip,
+.heart,
+.empty-illust{ border-radius:0; }
+.swatches i{ border-radius:0; }
+
+/* ── identity: 넓은 여백 + 1px 하단 헤어라인. 로고 = 각진 오렌지 브랜드 블록(Braun 마크) ── */
+.identity{ gap:24px; padding:16px 24px; border-bottom:1px solid var(--border); }
+.logo{ background:var(--accent); color:var(--ink); font-weight:800; }
+.brandname{ font-weight:800; letter-spacing:-.01em; }
+.cart-count{ background:var(--accent); color:var(--ink); }
+.avatar{ border:1px solid var(--border); }
+.search{ border:1px solid var(--border); }
+
+/* ── 카테고리: 초기능 대문자. 활성 = 각진 3px 오렌지 하단 바(장식 아닌 기능 표식) ── */
+.cat{ text-transform:uppercase; letter-spacing:.06em; font-size:12px; font-weight:600; }
+.cat.is-active{ color:var(--ink); font-weight:700; box-shadow:inset 0 -3px 0 var(--accent); }
+.cat.is-sale{ color:var(--accent); }   /* 세일 = 유일하게 남긴 기능적 오렌지 텍스트(주의 신호) */
+
+/* ── ① filter: padding 0 + 그룹마다 상단 헤어라인 = "기능 목록"의 8px 그리드 리듬 ── */
+.filter{ background:var(--surface); border:1px solid var(--border); gap:0; padding:0; }
+.filter-group{ padding:20px 16px; gap:12px; border-top:1px solid var(--border); }
+.filter-group:first-child{ border-top:0; }
+.filter-title{ color:var(--muted); font-size:10.5px; font-weight:700; letter-spacing:.12em; }
+
+/* 필터 항목: 활성 = 좌측 각진 오렌지 마커 바(레이아웃 안 밀리는 inset). ink 텍스트로 가독 유지 */
+.filter-item{ border-radius:0; }
+.filter-item.is-active{
+  background:transparent; color:var(--ink); font-weight:700;
+  box-shadow:inset 3px 0 0 0 var(--accent);   /* base 의 1px 회색 링 대체 */
+}
+
+/* 사이즈 칩: 활성 = 각진 오렌지 블록 + ink(4.6:1). base 의 ink 블록을 "선택=오렌지" 언어로 통일 */
+.chip{ border-radius:0; text-transform:uppercase; letter-spacing:.04em; }
+.chip.is-active{ background:var(--accent); border-color:var(--accent); color:var(--ink); font-weight:700; }
+
+/* 색상 칩: 각진 사각 + 활성 = 각진 오렌지 하드 링(소프트 아님) */
+.colorchip.is-active{ box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent); }
+.heart{ border:1px solid var(--border); }
+
+/* 필터 초기화: 풀블리드 + 상단 헤어라인 = 액션 푸터 행. 소형 대문자 */
+.filter-reset{
+  border:0; border-top:1px solid var(--border); border-radius:0;
+  padding:14px; text-transform:uppercase; letter-spacing:.08em; font-size:11px; font-weight:700;
+}
+
+/* ── results: 대문자 헤드라인 + 1px 하단 헤어라인. 개수 = 유일한 오렌지 데이터, tabular ── */
+.results{ border-bottom:1px solid var(--border); }
+.result-count{ text-transform:uppercase; letter-spacing:.02em; font-weight:700; }
+.result-count b{ color:var(--accent); font-variant-numeric:tabular-nums; }
+.sort{ text-transform:uppercase; letter-spacing:.06em; font-size:11px; }
+.sort-select{ border:1px solid var(--border); border-radius:0; }
+
+/* ── ④ collection/card: 리프트·드롭섀도 금지. hover 는 헤어라인이 ink 로 굳는 하드 라인만 ── */
+.collection{ gap:24px; }
+.item-card{ border:1px solid var(--border); border-radius:0; transition:border-color .12s ease; }
+.item-card:hover,
+.item-card:focus-within{ transform:none; box-shadow:none; border-color:var(--ink); }
+.thumb{ border-bottom:1px solid var(--border); }
+
+/* ── ② 배지: 장식 오렌지 회수 → 모노 대문자 헤어라인 라벨(색이 아니라 형태로 위계) ── */
+.badge{ border-radius:0; text-transform:uppercase; letter-spacing:.08em; font-size:10px; font-weight:700; padding:3px 8px; }
+.badge--best{ background:var(--ink); color:var(--surface); border:0; }
+.badge--ship{ background:transparent; color:var(--ink); border:1px solid var(--ink); }
+.badge--new{ background:transparent; color:var(--ink); border:1px solid var(--border); }
+.badge--low{ background:transparent; color:var(--muted); border:1px solid var(--muted); }
+
+/* 카드 본문: 초기능 라벨 + tabular 가격. 오렌지는 카드당 한 곳 — 할인 블록에만 ── */
+.card-body{ padding:16px; gap:8px; }
+.card-body .brand{ text-transform:uppercase; letter-spacing:.08em; font-size:10.5px; }
+.name{ color:var(--ink); }
+.price-row{ gap:8px; }
+.price-now{ color:var(--ink); font-variant-numeric:tabular-nums; }
+.price-was{ font-variant-numeric:tabular-nums; }
+.discount{
+  background:var(--accent); color:var(--ink);   /* 각진 오렌지 라벨 = 카드의 유일한 오렌지 신호 */
+  padding:2px 6px; font-size:11px; letter-spacing:.02em; font-variant-numeric:tabular-nums;
+}
+.rating .stars{ color:var(--ink); }
+
+/* ── action(페이지네이션): 각진 하드 보더. 현재 페이지 = 오렌지 블록 + ink ── */
+.action{ gap:16px; }
+.page-btn{ border:1px solid var(--border); border-radius:0; }
+.page-btn.is-active{ background:var(--accent); border-color:var(--accent); color:var(--ink); font-weight:700; }
+.more-btn{ border:1px solid var(--border); border-radius:0; text-transform:uppercase; letter-spacing:.08em; font-size:11px; font-weight:700; }
+
+/* ── empty: 점선 대신 실선 헤어라인. 주요 버튼 = 각진 오렌지 블록 + ink ── */
+.empty{ border:1px solid var(--border); }
+.empty-illust{ border:1px solid var(--muted); }
+.empty-title{ text-transform:uppercase; letter-spacing:.02em; }
+.empty-cta{
+  background:var(--accent); color:var(--ink); border-radius:0;
+  text-transform:uppercase; letter-spacing:.08em; font-weight:700;
+}
+
+/* ── 키보드 포커스: 각진 2px 오렌지 아웃라인(Rams 기능적 명료성) ── */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }

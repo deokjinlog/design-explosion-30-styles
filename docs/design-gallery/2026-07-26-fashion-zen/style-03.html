@@ -184,6 +184,132 @@ button,input,select{font:inherit;color:inherit}
   --type-scale:1.2;
 }
 
+
+/* ==== style-03--D.css ==== */
+/* signature/style-03--D.css — 03 "shadcn/ui" 의 구조적 시그니처 (원형 D · 컬렉션/상품 그리드).
+   토큰(--accent zinc #18181B · border #E4E4E7 · radius 8)만 먹이면 "흰 배경 + 회색 보더 커머스"라
+   다른 중립 스타일과 뭉개진다. ui.shadcn.com 정본의 정체성은 색이 아니라 "절제된 크리스프함" —
+   base 는 그 크리스프 규율이 없다. 이 파일이 없으면 shadcn 이 안 읽힌다. 과장 없이 아래만 override:
+   ① 오프셋 포커스 링 — 모든 인터랙티브에 ring-2 + ring-offset-2 (outline 2px + offset 2px). shadcn 의
+      유일무이한 시그니처. base 엔 focus 상태가 아예 없다 → 이 링이 shadcn 정체성의 핵.
+   ② 일관 shadow-sm — 카드·인풋·버튼·셀렉트·칩에 0 1px 2px/5% 미세 섀도. "크리스프 표면"의 정본 신호.
+   ③ Badge variant — 컬러 배지 대신 shadcn Badge 4종(default 검정솔리드 / secondary zinc-100 / outline / muted).
+   ④ 절제된 카드 — 제네릭 리프트(translateY) 제거, 정적 카드 → hover 시 shadow-md + zinc-300 보더만.
+   ⑤ zinc 서피스 규율 — hover 는 zinc-100(#F4F4F5) 서피스, 플레이스홀더는 zinc-50(#FAFAFA), 라벨은 muted-fg.
+      네비/필터 활성은 언더라인 대신 zinc-100 pill (커맨드 팔레트/세그먼트 톤).
+   ⑥ radius 일관 + 원형 잔재 정리 — 로고/컬러칩/하트/스와치/일러스트의 50% 원형을 radius 로 (아바타·카운트만 유지).
+   (색·radius 값 자체는 tokens 몫. 여기선 링/섀도/배지/카드/서피스/각짐 구조만 손댄다. 본문 잉크 가독 앵커는 불변.) */
+
+:root{
+  --sh-sm:0 1px 2px 0 rgba(9,9,11,.05);                                   /* shadcn shadow-sm */
+  --sh-md:0 4px 6px -1px rgba(9,9,11,.08),0 2px 4px -2px rgba(9,9,11,.08);/* shadcn shadow-md */
+  --ring:var(--accent);                     /* focus ring = zinc near-black */
+  --z-muted:#F4F4F5;                         /* zinc-100 = secondary/accent 서피스 */
+  --z-subtle:#FAFAFA;                        /* zinc-50  = placeholder */
+  --z-line-strong:#D4D4D8;                   /* zinc-300 = hover 보더 */
+  --primary-hover:#27272A;                   /* zinc-800 = primary/90 */
+}
+
+/* ── ⑥ radius 일관 + 원형 잔재 정리 (아바타 원형·카운트 pill 은 shadcn 도 유지) ── */
+.logo{ border-radius:calc(var(--radius) - 2px); }
+.colorchip{ border-radius:calc(var(--radius) - 2px); }
+.swatches i{ border-radius:3px; }
+.heart{ border-radius:calc(var(--radius) - 2px); }   /* 아이콘 버튼 = rounded-md, 원형 아님 */
+.empty-illust{ border-radius:var(--radius); }
+
+/* ── identity: 크리스프 헤더 경계 · 세그먼트형 네비 ── */
+.identity{ gap:calc(var(--space)*1.1); border-bottom-color:var(--border); background:var(--bg); }
+.cat{ color:var(--muted); font-weight:500; padding:6px 8px; border-radius:calc(var(--radius) - 4px); }
+.cat:hover{ color:var(--ink); background:var(--z-muted); }
+.cat.is-active{ color:var(--ink); font-weight:600; background:var(--z-muted); box-shadow:none; }
+.cat.is-sale{ color:var(--ink); }                    /* 중립 zinc — 세일도 near-black */
+.search{ border-radius:calc(var(--radius) - 2px); background:var(--bg); box-shadow:var(--sh-sm); }
+.search-btn,
+.cart-btn{ border-radius:calc(var(--radius) - 2px); }
+.search-btn:hover,
+.cart-btn:hover{ background:var(--z-muted); }
+
+/* ── filter: 카드형 패널 + muted-fg 라벨 + zinc-100 활성/hover ── */
+.filter{ border-radius:var(--radius); box-shadow:var(--sh-sm); }
+.filter-title{ color:var(--muted); letter-spacing:.04em; }
+.filter-item{ border-radius:calc(var(--radius) - 2px); font-weight:500; }
+.filter-item:hover{ background:var(--z-muted); }
+.filter-item.is-active{ background:var(--z-muted); color:var(--ink); font-weight:600; box-shadow:none; }
+.chip{ border-radius:calc(var(--radius) - 2px); box-shadow:var(--sh-sm); font-weight:500; }
+.chip:hover{ background:var(--z-muted); }
+.chip.is-active{ background:var(--accent); border-color:var(--accent); color:var(--bg); box-shadow:var(--sh-sm); } /* 선택 = primary 솔리드 */
+.filter-reset{ border-radius:calc(var(--radius) - 2px); box-shadow:var(--sh-sm); font-weight:500; }
+.filter-reset:hover{ background:var(--z-muted); }
+
+/* ── results: 정갈한 헤드라인 · muted-fg 정렬 라벨 ── */
+.results{ border-bottom-color:var(--border); }
+.result-count{ font-weight:600; letter-spacing:-.01em; }
+.result-count b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+.sort-select{ border-radius:calc(var(--radius) - 2px); box-shadow:var(--sh-sm); font-weight:500; }
+.sort-select:hover{ background:var(--z-muted); }
+
+/* ── ④ collection/card: 리프트 제거, 정적 크리스프 → hover 는 shadow-md + zinc-300 보더만 ── */
+.collection{ gap:calc(var(--space)*1.25); }
+.item-card{ border-radius:var(--radius); box-shadow:var(--sh-sm); transition:box-shadow .15s ease,border-color .15s ease; }
+.item-card:hover,
+.item-card:focus-within{ transform:none; box-shadow:var(--sh-md); border-color:var(--z-line-strong); }
+.thumb{ background:var(--z-subtle); border-bottom-color:var(--border); }  /* zinc-50 placeholder */
+.thumb-initial{ color:var(--muted); }
+.heart{ box-shadow:var(--sh-sm); }
+.heart:hover{ background:var(--z-muted); }
+.name{ color:var(--ink); }
+.card-body .brand{ color:var(--muted); }
+.price-now{ color:var(--ink); font-variant-numeric:tabular-nums; font-weight:700; }
+.price-was{ font-variant-numeric:tabular-nums; }
+
+/* ── ③ Badge variant (컬러 배지 → shadcn Badge 4종, rounded-md pill · 미세보더) ── */
+.badge{ border-radius:calc(var(--radius) - 2px); border:1px solid transparent; padding:2px 8px; font-weight:600; letter-spacing:0; box-shadow:none; }
+.badge--best{ background:var(--accent); color:var(--bg); border-color:var(--accent); }        /* default / primary */
+.badge--ship{ background:var(--z-muted); color:var(--ink); border-color:transparent; }         /* secondary */
+.badge--new{ background:transparent; color:var(--ink); border-color:var(--border); }           /* outline */
+.badge--low{ background:transparent; color:var(--muted); border:1px solid var(--border); }      /* outline muted (품절임박) */
+
+/* ── ⑤ action(페이지네이션): outline 버튼 패밀리 · 현재 페이지만 primary 솔리드 ── */
+.action{ gap:var(--space); }
+.page-btn{ border-radius:calc(var(--radius) - 2px); box-shadow:var(--sh-sm); font-weight:500; }
+.page-btn:hover{ background:var(--z-muted); }
+.page-btn.is-active{ background:var(--accent); border-color:var(--accent); color:var(--bg); }
+.page-btn:disabled{ box-shadow:none; }
+.more-btn{ border-radius:calc(var(--radius) - 2px); box-shadow:var(--sh-sm); font-weight:500; }
+.more-btn:hover{ background:var(--z-muted); }
+
+/* ── empty: 대시 → 솔리드 크리스프 보더 · primary CTA ── */
+.empty{ border:1px solid var(--border); border-radius:var(--radius); }
+.empty-illust{ border:1px solid var(--border); border-radius:var(--radius); background:var(--z-subtle); }
+.empty-title{ font-weight:600; }
+.empty-desc{ color:var(--muted); }
+.empty-cta{ background:var(--accent); color:var(--bg); border-radius:calc(var(--radius) - 2px); box-shadow:var(--sh-sm); font-weight:500; }
+.empty-cta:hover{ background:var(--primary-hover); }
+.empty-cta:active{ box-shadow:none; }
+
+/* ══ ① shadcn 오프셋 포커스 링 (ring-2 + ring-offset-2) — 시그니처. 파일 끝에 두어 활성/컴포넌트 규칙을 이긴다 ══
+   정본: focus-visible:ring-2 ring-ring ring-offset-2 → 요소와 링 사이 2px 배경 갭 + 2px near-black 링. */
+a:focus-visible,
+.cat:focus-visible,
+.filter-item:focus-visible,
+.chip:focus-visible,
+.colorchip:focus-visible,
+.toggle:focus-visible,
+.price-slider:focus-visible,
+.filter-reset:focus-visible,
+.sort-select:focus-visible,
+.page-btn:focus-visible,
+.more-btn:focus-visible,
+.heart:focus-visible,
+.cart-btn:focus-visible,
+.search-btn:focus-visible,
+.empty-cta:focus-visible{
+  outline:2px solid var(--ring);
+  outline-offset:2px;
+}
+/* 검색창은 내부 input outline 대신 컨테이너가 링을 받는다(가독성 유지) */
+.search:focus-within{ outline:2px solid var(--ring); outline-offset:2px; border-color:var(--ring); }
+
 </style>
 </head>
 <body>
