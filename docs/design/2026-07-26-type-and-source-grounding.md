@@ -118,3 +118,29 @@
 - coverage-lint: **120/120 PASS**(환각 셀렉터 0).
 - body 바이트 동일: 갤러리별 30/30 유지(폰트 `<link>`는 head, DOM 불변).
 - 회색조 테스트: 헤드리스 렌더러 부재로 토큰 휘도 프록시로 대체 — 서체 22종은 desaturate에도 살아남는 축.
+
+---
+
+## 30 목록의 접지 강도 — 정직한 회계 (2026-08-03 조사)
+
+**핵심 정직 고백**: 원형(Enrico 데이터)·도메인(Mind2Web 데이터)과 달리, **"30 UI 스타일"을 분류한 단일 데이터셋은 존재하지 않는다.** "이게 THE 30"이라 데이터로 못 댄다. 30 목록 선택은 **큐레이션(편집 판단)** — 이 프로젝트에서 접지가 제일 약한 축.
+- 가장 근접한 학술 연구도 UI를 3분류(Professional 53% · Creative 28% · Minimalist 18%)에 그침 — "30 디자인 언어" 해상도가 아님.
+
+**단, 계열별로는 실제 카탈로그에 접지된다** ("느낌" → "세 카탈로그에서 큐레이션"):
+
+| 계열 | 근거 카탈로그 |
+|---|---|
+| 디자인 시스템 (Carbon·Material·Ant·Polaris·GOV.UK·shadcn) | [designsystems.one](https://www.designsystems.one/design-systems) **88개**(우리 6개 전부 수록 확인) · [Adele](https://adele.uxpin.com/) 100+ · [Design Systems Directory](https://designsystems.directory/sites/) 244 |
+| 디자인 운동 (Swiss·Bauhaus·De Stijl·Memphis·Editorial·Riso) | 확립된 그래픽 디자인 운동 taxonomy — [14 주요](https://madegooddesigns.com/graphic-design-styles/) · [Kittl 60+](https://www.kittl.com/blogs/design-styles-name-stl/) · [Aesthetics Wiki](https://aesthetics.fandom.com/) |
+| 모프/트렌드 (Glass·Neu·Clay·Bento·Neubrutal·Y2K) | 2025 웹디자인 트렌드 리포트 다수 합의 — [DepositPhotos](https://blog.depositphotos.com/web-design-trends-2025.html) 등 "최상위 트렌드"로 반복 인용 |
+
+**드러난 갭**: 운동 계열에 미포함 다수 — Art Deco·Art Nouveau·Modernism·Constructivism 등. "어떤 운동을 넣나"는 여전히 선택이나, 이제 **"문서화된 60+ 중에서 골랐다"**라 방어 가능.
+
+## 게이트의 학술 뒷받침
+
+"스크린샷 → 품질 판정"(우리 VLM 심판 + visual-gate)은 지어낸 게 아니라 연구 계보에 있다:
+- [**UIClip**](https://uimodeling.github.io/uiclip/) — 230만 UI 스크린샷으로 훈련한 "UI 디자인 품질 평가 모델". 우리 VLM 심판의 **학술 버전** (데이터로 UI 품질 자동 평가).
+- [**UICrit**](https://arxiv.org/html/2407.08850v2) — 디자이너 7명의 **3,059 비평 + 미학·사용성 점수**. 루브릭 **보정(calibration)**의 실물 데이터셋.
+- 대비·타깃·리플로 기준은 [WCAG](https://www.w3.org/WAI/standards-guidelines/wcag/)(W3C, 각국 법제화), 사용성 루브릭은 Nielsen 10 휴리스틱.
+
+→ **접지 위계 요약**: 원형=Enrico(강) · 도메인=Mind2Web(강) · **스타일 30 목록=큐레이션(약, 단 세 카탈로그 기반)** · 각 스타일 정의=디자인시스템·운동 문서(강) · 게이트=WCAG·UIClip·UICrit(강).

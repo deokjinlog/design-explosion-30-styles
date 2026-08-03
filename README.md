@@ -87,7 +87,7 @@ LLM이 만든 CSS를 자동으로 검증합니다. 앞 둘은 스크립트(결�
 | **구조(1 HTML·N CSS)** | [CSS Zen Garden](http://www.csszengarden.com/) — 한 HTML을 CSS만으로 218 디자인 | "내용 고정·표현만 변수"를 증명한 원조 |
 | **원형 11종** | [Enrico](https://github.com/luileito/enrico) — RICO 72k → 1,460 UI를 사람이 20토픽 분류 | 화면 종류를 감이 아닌 실데이터로 검증·보완(A 대시보드는 추가) |
 | **도메인 프리셋** | [Mind2Web](https://osu-nlp-group.github.io/Mind2Web/) — 136 사이트·2,022 태스크 | 업종→원형 매핑의 근거(덮어쓰기 가능한 기본값) |
-| **스타일 30** | 디자인 시스템·운동 — [출처 문서](docs/design/2026-07-26-type-and-source-grounding.md) | 산업 라벨 대신 문서화된 디자인 언어로 접지 |
+| **스타일 30** | [designsystems.one](https://www.designsystems.one/design-systems)(88 시스템) + 디자인 운동 taxonomy + 트렌드 리포트에서 큐레이션 — [출처 문서](docs/design/2026-07-26-type-and-source-grounding.md) | 각 스타일은 문서 접지 / 목록 선택은 큐레이션(정직) |
 
 ---
 
