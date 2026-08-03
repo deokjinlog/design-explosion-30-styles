@@ -213,6 +213,126 @@ table{border-collapse:collapse;width:100%}
   --type-scale:1.2;
 }
 
+
+/* ==== style-25--A.css ==== */
+/* signature/style-25--A.css — 25 Shopify Polaris 의 "구조적 시그니처" (원형 A · 커머스/커널 대시보드).
+   토큰(초록 accent #008060 · gray bg #F6F6F7 · surface #FFF · radius 8 · border #E1E3E5)만으론
+   다른 라이트 대시보드(핀테크 소프트·머티리얼·데이터리치 라이트)와 뭉갠다. polaris.shopify.com 의
+   대시보드 정체성을 썸네일에서도 읽히게 하는 4가지를 강제한다:
+   ① 회색 위 흰 카드 계단 — 회색 페이지(#F6F6F7) 위에 kpi·차트·표를 미세 1px 링 + 부드러운 elevation
+      그림자로 띄워 "떠 있는 흰 카드" 계단을 만든다. identity 는 gray 위에 뜬 흰 top bar(그림자 분리).
+      섹션 간 여백을 넉넉히 줘 회색 거터가 카드를 확실히 가른다. radius 8 일관.
+   ② Shopify 그린 존재감 — export-btn 은 그린 primary(상단 하이라이트+하단 인셋), 활성 period-tab 그린,
+      상승 델타(success)·goal-bar-fill·성공 상태 그린, nav 선택 항목은 그린 tint. 포커스만 Polaris 블루(#005BD3).
+   ③ 상태 배지 = Polaris Badge pill — 표 상태(완료/대기/보류/실패)와 KPI 델타를 은은한 tint pill
+      (톤별: success 그린 · info 블루 · attention 오렌지 · critical 레드) + 어두운 글자 + 1px 인셋 링으로.
+   ④ tabular 수치 · 명확한 섹션 구획 · 각(角) 규율 — 표 숫자 컬럼은 우측정렬 tabular(Polaris IndexTable),
+      행 hover 하이라이트, base 의 50% 원형 잔재(빈상태 일러스트)·999px 알약(상태/델타)은 radius 8 로 환수.
+      (아바타·데이터 점은 Polaris답게 원형 유지 — D 시그니처와 정합.)
+   본문 가독 앵커(.kpi-value)는 잉크블랙(#202223) 유지 — 흰 카드 위 헤드라인 수치 가독성 불변. */
+
+:root{
+  --p-shadow-card:   0 0 0 1px rgba(31,33,36,.05), 0 1px 0 0 rgba(31,33,36,.05), 0 1px 3px -1px rgba(31,33,36,.10);
+  --p-shadow-topbar: 0 1px 0 0 rgba(31,33,36,.04), 0 1px 3px -1px rgba(31,33,36,.12);
+  --p-focus:        #005BD3;   /* Polaris 포커스 블루 — 그린 UI 위 유일한 블루 앵커 */
+  --p-green-tint:   #F1F8F5;   /* 선택(selected) 상태 배경 */
+  --p-green-strong: #00654E;   /* 그린 버튼 hover */
+  /* Polaris Badge 톤(tint bg · 어두운 글자 · 1px 인셋 링) */
+  --p-t-success-bg:#E3F1EC; --p-t-success-fg:#0C5A43; --p-t-success-ring:#B5DFCC;
+  --p-t-info-bg:   #EAF2FE; --p-t-info-fg:   #0E4C92; --p-t-info-ring:   #B9D3F5;
+  --p-t-warn-bg:   #FCEBDB; --p-t-warn-fg:   #8A5300; --p-t-warn-ring:   #F2D2A8;
+  --p-t-crit-bg:   #FDEAE7; --p-t-crit-fg:   #8E1F0B; --p-t-crit-ring:   #F5C7BE;
+  --p-t-neut-bg:   #EDEEEF; --p-t-neut-fg:   #43474C; --p-t-neut-ring:   #D2D5D8;
+}
+
+/* ═══════════════ ① 회색 위 흰 카드 계단 (elevation + 넉넉한 거터) ═══════════════ */
+.dashboard{ gap:16px; padding:16px; }                 /* 회색 거터를 넓혀 카드가 떠 보이게 */
+.identity{ box-shadow:var(--p-shadow-topbar); }        /* gray 위에 뜬 흰 Polaris TopBar */
+.banner,.kpi-card,.chart-trend,.chart-part,.goal,.table-section{
+  box-shadow:var(--p-shadow-card);                     /* Polaris Card elevation — 미세 링 + 부드러운 드롭 */
+}
+
+/* ═══════════════ ② Shopify 그린 존재감 ═══════════════ */
+/* -- nav: 로고 흰 글자 + 선택 항목 그린 tint(좌측 그린 인디케이터) -- */
+.nav .logo{ color:#fff; box-shadow:inset 0 -1px 0 rgba(0,0,0,.18); }
+.menu-item.is-active{                                   /* Polaris 선택 리소스 항목 */
+  background:var(--p-green-tint); color:var(--accent); font-weight:700;
+  box-shadow:inset 3px 0 0 0 var(--accent);
+}
+
+/* -- export-btn: Polaris primary(그린) — 상단 하이라이트 + 하단 인셋 -- */
+.export-btn{
+  color:#fff; border-radius:var(--radius);
+  box-shadow:inset 0 1px 0 0 rgba(255,255,255,.18), inset 0 -1px 0 0 rgba(0,0,0,.20), 0 1px 0 0 rgba(31,33,36,.08);
+}
+.export-btn:hover{ background:var(--p-green-strong); }
+
+/* -- period-tabs: 흰 top bar 안 gray 세그먼트 트랙, 활성 세그먼트는 그린 채움 -- */
+.period-tabs{ box-shadow:inset 0 0 0 1px var(--border); }
+.period-tab.is-active{                                  /* 그린 배경은 base, primary 하이라이트만 덧댐 */
+  color:#fff; font-weight:700;
+  box-shadow:inset 0 1px 0 0 rgba(255,255,255,.18), inset 0 -1px 0 0 rgba(0,0,0,.18);
+}
+.channel-select{ border-radius:var(--radius); box-shadow:inset 0 1px 1px rgba(31,33,36,.06); }
+
+/* -- banner: Polaris highlight 배너 — 그린 tint + 좌측 그린 인디케이터 -- */
+.banner{ background:var(--p-green-tint); border-color:#C6E5D8; }
+.banner{ box-shadow:inset 3px 0 0 0 var(--accent), 0 1px 2px -1px rgba(31,33,36,.10); }
+.banner-ico{ color:var(--accent); }
+
+/* -- goal: 그린 진행바(상단 하이라이트) + 그린 퍼센트, 수치 tabular -- */
+.goal-bar{ box-shadow:inset 0 1px 2px rgba(31,33,36,.08); }
+.goal-bar-fill{ box-shadow:inset 0 1px 0 rgba(255,255,255,.28); }
+.goal-current,.goal-target,.goal-pct{ font-variant-numeric:tabular-nums; }
+
+/* ═══════════════ ③ 상태 배지 = Polaris Badge pill (tint + 어두운 글자 + 인셋 링) ═══════════════ */
+/* -- 표 상태: 999px 알약 → radius 8 Polaris Badge, 톤별 색 -- */
+.status{ border-radius:var(--radius); box-shadow:none; letter-spacing:0; }
+.status--done,.status--pending,.status--hold,.status--failed{ border:0; font-weight:600; }
+.status--done{    background:var(--p-t-success-bg); color:var(--p-t-success-fg); box-shadow:inset 0 0 0 1px var(--p-t-success-ring); }  /* 완료 = success 그린 */
+.status--pending{ background:var(--p-t-info-bg);    color:var(--p-t-info-fg);    box-shadow:inset 0 0 0 1px var(--p-t-info-ring); }     /* 대기 = info 블루 */
+.status--hold{    background:var(--p-t-warn-bg);    color:var(--p-t-warn-fg);    box-shadow:inset 0 0 0 1px var(--p-t-warn-ring); }     /* 보류 = attention 오렌지 */
+.status--failed{  background:var(--p-t-crit-bg);    color:var(--p-t-crit-fg);    box-shadow:inset 0 0 0 1px var(--p-t-crit-ring); }     /* 실패 = critical 레드 */
+
+/* -- KPI 델타: 텍스트/무보더 잉여 → 전부 Polaris Badge pill(상승=success 그린) -- */
+.kpi-delta.is-up{
+  display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:var(--radius);
+  font-size:12px; font-weight:600;
+  background:var(--p-t-success-bg); color:var(--p-t-success-fg); box-shadow:inset 0 0 0 1px var(--p-t-success-ring);
+}
+.kpi-delta.is-down{                                    /* base 잉크 채움/999px → critical tint 8px pill */
+  padding:2px 8px; border-radius:var(--radius); font-size:12px; font-weight:600;
+  background:var(--p-t-crit-bg); color:var(--p-t-crit-fg); box-shadow:inset 0 0 0 1px var(--p-t-crit-ring);
+}
+.kpi-delta.is-flat{
+  display:inline-flex; align-items:center; padding:2px 8px; border-radius:var(--radius);
+  font-size:12px; font-weight:600;
+  background:var(--p-t-neut-bg); color:var(--p-t-neut-fg); box-shadow:inset 0 0 0 1px var(--p-t-neut-ring);
+}
+
+/* ═══════════════ ④ tabular 수치 · 섹션 구획 · 각(角) 규율 ═══════════════ */
+/* -- 표: Polaris IndexTable — 숫자 컬럼(거래액·건수·승인율) 우측정렬 tabular, 행 hover -- */
+.settle-table th:nth-child(2),.settle-table th:nth-child(3),.settle-table th:nth-child(4){ text-align:right; }
+.cell-amount,.cell-count,.cell-rate{ text-align:right; font-variant-numeric:tabular-nums; }
+.settle-table tbody tr:hover{ background:var(--bg); }   /* Polaris 리소스 행 hover */
+
+/* -- kpi-value: 잉크 헤드라인 유지(가독 앵커), tabular 정렬 -- */
+.kpi-value{ color:var(--ink); font-variant-numeric:tabular-nums; }
+
+/* -- 빈 상태: Polaris EmptyState 카드(파선→실선 + elevation), 일러스트 원형→radius 8, secondary 버튼 -- */
+.empty{ border-style:solid; box-shadow:var(--p-shadow-card); }
+.empty-illust{ border-radius:var(--radius); border-style:solid; border-color:var(--border); background:var(--bg); }
+.empty-cta{                                             /* Polaris secondary — 흰 면 + 보더 + 미세 그림자 */
+  background:var(--surface); color:var(--ink); border-radius:var(--radius);
+  box-shadow:0 1px 0 0 rgba(31,33,36,.05), inset 0 0 0 1px var(--border);
+}
+.empty-cta:hover{ background:var(--bg); }
+
+/* ═══════════════ 포커스: Polaris 블루 2px 링 (그린 UI 위 유일 블루) ═══════════════ */
+:is(.menu-item,.period-tab,.channel-select,.export-btn,.empty-cta):focus-visible{
+  outline:2px solid var(--p-focus); outline-offset:2px;
+}
+
 </style>
 </head>
 <body>

@@ -213,6 +213,138 @@ table{border-collapse:collapse;width:100%}
   --type-scale:1.2;
 }
 
+
+/* ==== style-02--A.css ==== */
+/* signature/style-02--A.css — 02 "GOV.UK 공공"의 구조적 시그니처 (원형 A · 대시보드).
+   base(라이트 대시보드) + tokens(파랑 #1D70B8 · radius 0 · border #B1B4B6) 만으론 "그냥 각진 라이트 대시보드"라
+   다른 라이트 대시보드(핀테크 소프트·엔터프라이즈 B2B·데이터 리치 라이트)와 뭉갠다. GOV.UK Design System
+   (design-system.service.gov.uk) 의 정체성은 색이 아니라 "상호작용의 규율"이다 — 썸네일에서도 읽히게:
+   ① 노란 포커스 스테이트(유일무이 시그니처) — a/button/select/period-tab :focus 에
+      outline 3px #FFDD00 + box-shadow(위 노랑 2px / 아래 검정 4px). base 는 focus 가 아예 없어 이 파일 없이는
+      GOV.UK 접근성 정체성이 통째로 빔. 파일 맨 끝에 두어 활성/컴포넌트 규칙을 확실히 이긴다.
+   ② 좌측 굵은 파란 마커(4~5px) — 활성 메뉴 / 페이지 타이틀 / 섹션 타이틀 / 알림 배너에 파란 하드 바
+      (box-shadow inset 또는 border-left = 레이아웃 안 미는 마커). GOV.UK 서브내비·섹션 표시의 정본.
+   ③ 두꺼운 검정(#0B0C0C) + 굵은 대문자 헤드라인 + radius 0 예외 없음 — base 가 남긴 50%/999px 원형 잔재
+      (아바타·범례점·추이 도트·상태칩·델타뱃지·목표바·빈상태 일러스트) 전부 각지게. 소프트 섀도 금지, 1~2px 하드 라인만.
+   ④ GOV.UK 버튼 — export-btn = 파란 솔리드 + 하단 2px 어두운 그림자 바, :active 눌림. empty-cta = 검은 보더 secondary.
+      section-title 은 좌측 파란 마커 + 굵은 대문자 = GOV.UK 스타일 룰.
+   ⑤ 활성 period-tab = 노랑 하이라이트 + 검은 하단 바(포커스 색과 한 몸 — GOV.UK 상호작용 색 규율).
+   (색·radius 값 자체는 tokens 몫. 여기선 포커스/마커/각짐/헤드라인/버튼 구조만 override. kpi-value 는 두꺼운 검정으로 가독성 유지) */
+
+/* ── ③ radius 0 예외 없음: base 의 50%/999px 원형 잔재를 전부 직각으로 ── */
+.user-av,
+.legend-dot,
+.note .dot,
+.empty-illust,
+.status,
+.status::before,
+.kpi-delta.is-down,
+.goal-bar,
+.goal-bar-fill{ border-radius:0; }
+
+/* ── nav: GOV.UK 서브내비(파란 링크) + 활성 = 좌측 굵은 파란 마커 + 굵은 검정 ── */
+.nav{ border-right:1px solid var(--border); }
+.logo{ background:var(--accent); color:#FFFFFF; }
+.brandname{ color:#0B0C0C; font-weight:800; letter-spacing:-.01em; }
+.user-av{ border:1px solid #0B0C0C; color:#0B0C0C; }
+.menu-item{ color:var(--accent); font-weight:600; }         /* GOV 링크색 */
+.menu-item.is-active{
+  background:transparent; color:#0B0C0C; font-weight:700;
+  box-shadow:inset 5px 0 0 0 var(--accent);                 /* ② 좌측 굵은 파란 마커 */
+}
+
+/* ── identity + 페이지 타이틀: 좌측 파란 마커 + 굵은 대문자 헤드라인 ── */
+.identity{ border:1px solid var(--border); box-shadow:none; }
+.page-title{
+  color:#0B0C0C; font-weight:800; text-transform:uppercase; letter-spacing:-.01em;
+  border-left:4px solid var(--accent); padding-left:12px;   /* ② 좌측 파란 마커 */
+}
+
+/* ── ⑤ period-tab: 각진 트랙 + 활성 노랑 하이라이트(검은 하단 바) ── */
+.period-tabs{ background:transparent; padding:0; gap:6px; }
+.period-tab{ border:1px solid var(--border); color:#0B0C0C; font-weight:600; }
+.period-tab.is-active{
+  background:#FFDD00; color:#0B0C0C; font-weight:700;
+  border-color:#0B0C0C; box-shadow:0 2px 0 #0B0C0C;
+}
+
+/* ── 폼필드: GOV.UK 인풋 = 2px 검은 보더 ── */
+.channel-select{ border:2px solid #0B0C0C; color:#0B0C0C; font-weight:600; }
+
+/* ── ④ GOV.UK 주요 버튼: 파란 솔리드 + 하단 2px 어두운 그림자 바, :active 눌림 ── */
+.export-btn{
+  background:var(--accent); color:#FFFFFF; font-weight:700;
+  box-shadow:0 2px 0 #0B0C0C;
+}
+.export-btn:hover{ background:#155A92; }
+.export-btn:active{ box-shadow:0 0 0 #0B0C0C; transform:translateY(2px); }
+
+/* ── ② 알림 배너: 좌측 굵은 파란 마커(GOV.UK notification banner) + 검정 텍스트 ── */
+.banner{ border:1px solid var(--border); border-left:5px solid var(--accent); color:#0B0C0C; font-weight:600; }
+
+/* ── ③ KPI: 각진 카드 · 소프트 섀도 0 · 두꺼운 검정 수치(가독성 유지) · 각진 검은 델타 뱃지 ── */
+.kpi-grid{ gap:var(--space); }
+.kpi-card{ border:1px solid var(--border); box-shadow:none; }
+.kpi-label{ color:var(--muted); text-transform:uppercase; letter-spacing:.03em; font-size:11.5px; }
+.kpi-value{ color:#0B0C0C; }                                /* 가독성 유지 = 두꺼운 검정 */
+.kpi-delta.is-up{ color:var(--accent); }
+.kpi-delta.is-down{ background:#0B0C0C; color:#FFFFFF; }     /* 각진 검은 뱃지 */
+
+/* ── ②④ 섹션 타이틀: 좌측 굵은 파란 마커 + 굵은 대문자 = GOV.UK 룰 ── */
+.section-title{
+  color:#0B0C0C; font-weight:800; text-transform:uppercase; letter-spacing:-.005em;
+  border-left:4px solid var(--accent); padding-left:10px;
+}
+/* ── ③ 카드 크롬: 소프트 섀도 금지, 1px 하드 라인만 ── */
+.chart-trend,.chart-part,.goal,.table-section{ border:1px solid var(--border); box-shadow:none; }
+
+/* ── 목표: 각진 게이지 + 검정/파랑 규율 ── */
+.goal-current{ color:#0B0C0C; }
+.goal-pct{ color:var(--accent); }
+.goal-bar{ border:1px solid #0B0C0C; background:#FFFFFF; }
+.goal-bar-fill{ background:var(--accent); }
+
+/* ── 정산 테이블: GOV.UK 헤더 검은 하단 룰 + 굵은 검정 헤더 · 각진 상태칩 ── */
+.settle-table th{ color:#0B0C0C; border-bottom:2px solid #0B0C0C; }
+.status--done{ background:var(--accent); color:#FFFFFF; }
+.status--pending{ color:var(--accent); border:1px solid var(--accent); }
+.status--failed{ background:#0B0C0C; color:#FFFFFF; }
+
+/* ── 빈 상태: 각진 솔리드 프레임 + 각진 일러스트 + secondary 버튼 ── */
+.empty{ border:2px solid var(--border); box-shadow:none; }
+.empty-illust{ border:1px solid #0B0C0C; }
+.empty-title{ color:#0B0C0C; font-weight:800; text-transform:uppercase; letter-spacing:.01em; }
+.empty-cta{ border:2px solid #0B0C0C; color:#0B0C0C; font-weight:700; box-shadow:0 2px 0 #929191; }
+.empty-cta:hover{ background:#F3F2F1; }
+.empty-cta:active{ box-shadow:0 0 0 #929191; transform:translateY(2px); }
+
+/* ══ ① GOV.UK 노란 포커스 스테이트 (시그니처) — 파일 맨 끝: 활성/컴포넌트 규칙을 확실히 이긴다 ══
+   정본: outline 3px 노랑 + box-shadow(위 노랑 2px / 아래 검정 4px) = 노란 하이라이트 + 검은 하단 바.
+   select 는 노란 배경을 주지 않아(링 + 하단 바만) 선택값 텍스트 가독성 보존. */
+a:focus,
+button:focus,
+select:focus,
+.menu-item:focus,
+.period-tab:focus,
+.export-btn:focus,
+.empty-cta:focus,
+.channel-select:focus{
+  outline:3px solid #FFDD00;
+  outline-offset:0;
+  box-shadow:0 -2px #FFDD00, 0 4px #0B0C0C;
+}
+/* 링크·버튼만 노란 하이라이트(배경). select 는 제외해 가독성 유지. */
+a:focus,
+button:focus,
+.menu-item:focus,
+.period-tab:focus,
+.export-btn:focus,
+.empty-cta:focus{
+  background-color:#FFDD00;
+  color:#0B0C0C;
+  text-decoration:none;
+}
+
 </style>
 </head>
 <body>

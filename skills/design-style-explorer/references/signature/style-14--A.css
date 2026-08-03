@@ -1,0 +1,91 @@
+/* signature/style-14--A.css — 14 벤토 그리드 × 원형 A(대시보드)의 "구조적 시그니처".
+   토큰(흰 카드·인디고 #6366F1·radius 22)만으론 "또 하나의 라이트 대시보드"에 뭉개진다.
+   벤토의 정체성 = "크기가 다른 타일이 맞물린 모자이크" — 대시보드에 특히 잘 맞는다.
+   그래서 여기서 base 의 균등 4열 kpi-grid 를 벤토 모자이크로 재편하고(레이아웃 재편이 핵심),
+   charts-row 도 비대칭으로 벌리고, 각 영역을 뚜렷한 흰 타일(큰 라운드+미세 그림자)로 갈라놓는다.
+   콘텐츠(body)는 Zen Garden 고정 → 순수 CSS grid-span + 타이포 스케일만으로 크기 차등.
+
+   ── KPI 벤토 정본 배치 (스켈레톤에 kpi-card 정확히 4장) ──
+   3열 그리드 + grid-auto-flow:dense 로 빈틈 없이 테셀레이션(3×3=9칸 = 4+1+1+3):
+     ┌───────────┬─────┐
+     │           │  ②  │   ① 총거래액(GMV) = 2×2 히어로(핵심 수치 크게)
+     │     ①     ├─────┤   ② 결제건수      = 1×1 소형
+     │           │  ③  │   ③ 승인율        = 1×1 소형
+     ├───────────┴─────┤   ④ 정산대기액    = 3×1 와이드 스트립(긴 수치에 폭 부여)
+     │        ④        │
+     └─────────────────┘
+   히어로가 좌측을 2×2로 채우고, 소형 2장이 우측 열을 쌓고, 하단 와이드가 폭을 다 먹는다.
+   긴 금액(₩…,000)이 붙는 ①·④에 폭을 몰아줘 수치 가독성을 지킨다(가벼운 소형엔 짧은 값만).
+
+   반응형: base 의 max-width 폴백을 signature 의 non-media 규칙(nth-child span)이 덮는
+   "카스케이드 함정"을 피하려고, 좁아지면 균일 그리드로 되돌리는 미디어쿼리를 여기서 재선언한다.
+   ( .kpi-grid .kpi-card = span 규칙(nth-child, 0,2,0)과 동일 특정도 + 소스상 뒤 → 이김 ) */
+
+:root{
+  /* 뚜렷한 흰 타일을 띄우는 미세 그림자 — 라이트 배경 위 카드가 "떠 있는" 벤토 톤 */
+  --bento-shadow:0 1px 2px rgba(24,24,27,.05), 0 12px 28px -16px rgba(24,24,27,.22);
+  --bento-gap:var(--space);
+}
+
+/* ═══════════ 공통: 모든 흰 서피스 = 뚜렷한 벤토 타일(큰 라운드는 토큰 radius 22 + 미세 그림자) ═══════════ */
+.identity,.banner,.kpi-card,.chart-trend,.chart-part,.goal,.table-section,.empty{
+  box-shadow:var(--bento-shadow);
+}
+
+/* ═══════════ ① KPI 벤토 모자이크 — 균등 4열 → 크기 다른 타일이 맞물린 모자이크 ═══════════ */
+.kpi-grid{
+  grid-template-columns:repeat(3,1fr);
+  grid-auto-rows:132px;            /* 고정 행높이 → span 이 곧 타일 크기(히어로=2행=넉넉) */
+  grid-auto-flow:dense;            /* 홀 방지 — 소형 2장이 히어로 옆 우측 열에 딱 물림 */
+  gap:var(--bento-gap);            /* 넉넉한 gap 으로 타일 사이를 확실히 가름 */
+}
+
+/* ----- 타일 크기 3종: 히어로(2×2) · 소형(1×1)×2 · 와이드(3×1) ----- */
+.kpi-card:nth-child(1){ grid-column:span 2; grid-row:span 2; }  /* ① 히어로 */
+.kpi-card:nth-child(2){ grid-column:span 1; grid-row:span 1; }  /* ② 소형 */
+.kpi-card:nth-child(3){ grid-column:span 1; grid-row:span 1; }  /* ③ 소형 */
+.kpi-card:nth-child(4){ grid-column:span 3; grid-row:span 1; }  /* ④ 와이드 스트립 */
+
+/* 히어로: 내용을 위·아래로 벌리고(레이블↑·스파크↓), 핵심 수치를 크게 — 가독성 우선 */
+.kpi-card:nth-child(1){
+  justify-content:space-between;
+  padding:calc(var(--space)*1.3);
+}
+.kpi-card:nth-child(1) .kpi-label{ font-size:13px; }
+.kpi-card:nth-child(1) .kpi-value{ font-size:34px; line-height:1.08; }  /* 큰 타일 = 큰 수치 */
+.kpi-card:nth-child(1) .kpi-delta{ font-size:13.5px; }
+.kpi-card:nth-child(1) .kpi-spark{ height:46px; }
+
+/* 와이드 스트립: 폭이 넉넉하니 수치를 한 단계 키우고, 스파크는 가로로 길게 뻗는 띠 */
+.kpi-card:nth-child(4){ justify-content:center; }
+.kpi-card:nth-child(4) .kpi-value{ font-size:26px; }
+.kpi-card:nth-child(4) .kpi-spark{ height:38px; }
+
+/* ═══════════ ② charts-row 비대칭 — 트렌드 크게, 도넛 작게(base 2fr:1fr 을 더 벌림) ═══════════ */
+.charts-row{
+  grid-template-columns:2.6fr 1fr;
+  gap:var(--bento-gap);
+}
+
+/* ═══════════ ③ base 의 50% 원형 잔재 정리 — 벤토는 라운드-스퀘어 기하로 통일 ═══════════ */
+/* 큰 원형(아바타·빈상태 일러스트)을 타일 라운드 언어로 맞춤. 작은 상태/범례 점은 지시자라 원형 유지. */
+.user-av{ border-radius:calc(var(--radius)*.45); }
+.empty-illust{ border-radius:calc(var(--radius)*.7); }
+
+/* ═══════════ ▼ 반응형 — base 폴백을 non-media span 규칙이 덮는 함정을 막으려 재선언 ═══════════
+   좁아지면 벤토를 버리고 균일 그리드로 폴백: span 전부 리셋 + auto-rows 해제 + 히어로 확대 되돌림.
+   ( .kpi-grid .kpi-card = nth-child span 과 동일 특정도(0,2,0) + 소스상 뒤 → 안전하게 이김 ) */
+@media (max-width:1100px){
+  .kpi-grid{ grid-template-columns:repeat(2,1fr); grid-auto-rows:auto; grid-auto-flow:row; }
+  .kpi-grid .kpi-card{ grid-column:auto; grid-row:auto; justify-content:flex-start; padding:calc(var(--space)*1.1); }
+  .charts-row{ grid-template-columns:1fr; }
+  /* 히어로 타이포 확대 되돌림(0,3,0 규칙은 0,4,0 로 확실히 덮음) */
+  .kpi-grid .kpi-card:nth-child(1) .kpi-value{ font-size:22px; }
+  .kpi-grid .kpi-card:nth-child(1) .kpi-label{ font-size:12px; }
+  .kpi-grid .kpi-card:nth-child(1) .kpi-spark{ height:32px; }
+  .kpi-grid .kpi-card:nth-child(4) .kpi-value{ font-size:22px; }
+  .kpi-grid .kpi-card:nth-child(4) .kpi-spark{ height:32px; }
+}
+@media (max-width:640px){
+  .kpi-grid{ grid-template-columns:1fr; }
+}

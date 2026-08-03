@@ -213,6 +213,131 @@ table{border-collapse:collapse;width:100%}
   --type-scale:1.5;
 }
 
+
+/* ==== style-07--A.css ==== */
+/* signature/style-07--A.css — 07 "Braun 미니멀"(Dieter Rams)의 구조적 시그니처 (원형 A · 정산 대시보드).
+   토큰(오렌지 #E8500E · bg #F4F4F2 · surface #fff · radius 0)만 먹이면 "각진 흰 카드"일 뿐 —
+   다른 라이트 대시보드(핀테크 소프트·엔터프라이즈 B2B·데이터리치 라이트)와 썸네일에서 뭉갠다.
+   Rams 정본("Weniger, aber besser")의 정체성은 색이 아니라 규율이다:
+
+   ① 오렌지 = 오직 하나의 언어 "여기가 선택/주요/주의다" 의 각진 블록/바. base 가 토큰으로 흩뿌린
+      오렌지(모든 상승델타 텍스트·모든 완료 배지·상승 스파크라인)를 회수해 절제를 회복한다. 남는
+      오렌지는 열거된 기능 표식에만: 활성 period-tab · KPI 상승델타 칩 · goal-bar-fill · export-btn ·
+      추이 강조선 · nav 현재위치 바 · 실패 상태 · 도넛 주력 세그먼트. 나머지는 전부 잉크/회색.
+   ② 오렌지 위 글자는 ink #1A1A1A 고정 — base 는 활성탭·export·완료배지에 흰 글자(--bg=#F4F4F2)를
+      얹어 오렌지 대비 3.76:1 로 미달. ink 는 4.6:1 로 AA 통과. 흰 글자는 잉크 블록 위에서만.
+   ③ radius 0 예외 없음 — base 가 토큰과 무관하게 남긴 50%/999px 잔재(아바타·델타알약·goal-bar·
+      상태알약·상태점·범례점·추이점·빈일러스트) 전부 직각으로. 알약 세그먼트 컨트롤 → 각진 분할.
+   ④ 하드 헤어라인 구획 · 소프트섀도 0 — 깊이는 그림자가 아니라 1px 헤어라인/여백으로. period-tabs 의
+      함몰 well 을 벗겨 1px 테두리 분할 컨트롤로, nav/배너 활성은 각진 오렌지 엣지 바로.
+   ⑤ 8px 기능 그리드 + 초기능 소형 대문자 라벨 + tabular 수치 — 여백은 8배수로 스냅, 라벨은 넓은
+      트래킹의 소형 캡스, 숫자는 tabular. kpi-value 는 크게 유지(가독성).
+   색·radius·서체 기준값은 tokens 몫. 여기선 오렌지 규율·각짐·헤어라인·그리드·라벨만 강제한다. */
+
+/* ── ③ radius 0 예외 없음: base 의 50%/999px 잔재를 전부 직각으로 ── */
+.logo,
+.user-av,
+.menu-item,
+.period-tabs,
+.period-tab,
+.channel-select,
+.export-btn,
+.kpi-delta.is-up,
+.kpi-delta.is-down,
+.goal-bar,
+.goal-bar-fill,
+.status,
+.status::before,
+.legend-dot,
+.empty-illust,
+.empty-cta{ border-radius:0; }
+.note .dot{ border-radius:0; }   /* 추이 노트의 원형 점 → 각진 마커 */
+
+/* ── nav: 브랜드 = 각진 오렌지 블록(Braun 마크). 현재 항목 = 각진 3px 오렌지 엣지 바(채움 아닌 표식) ── */
+.nav .logo{ background:var(--accent); color:var(--ink); font-weight:800; }
+.brandname{ font-weight:800; letter-spacing:-.01em; }
+.user-av{ border:1px solid var(--border); }
+.menu-item{ font-weight:600; }
+.menu-item.is-active{
+  background:transparent; color:var(--ink); font-weight:700;
+  box-shadow:inset 3px 0 0 0 var(--accent);   /* base 의 채운 pill 대신 오렌지 좌측 마커만 */
+}
+
+/* ── ⑤④ identity: 8px 그리드 여백 + 하단 헤어라인. 페이지 타이틀 타이트 ── */
+.identity{ gap:16px; padding:16px 24px; }
+.page-title{ font-weight:800; letter-spacing:-.01em; }
+
+/* ①④ period-tabs = 각진 1px 분할 컨트롤(함몰 well 벗김). 활성 = 오렌지 블록 + ink 글자(②) */
+.period-tabs{ background:transparent; border:1px solid var(--border); padding:0; gap:0; }
+.period-tab{
+  padding:7px 14px; text-transform:uppercase; letter-spacing:.04em; font-size:12px; font-weight:700;
+}
+.period-tab + .period-tab{ border-left:1px solid var(--border); }   /* 탭 사이 하드 헤어라인 */
+.period-tab.is-active{ background:var(--accent); color:var(--ink); font-weight:800; }
+
+/* 채널 필터 = 초기능 소형 캡스 라벨 + 각진 하드 필드 */
+.channel-filter{ text-transform:uppercase; letter-spacing:.08em; font-size:10.5px; font-weight:700; }
+.channel-select{ border:1px solid var(--border); }
+
+/* ①② export = 주요동작 오렌지 블록 + ink 글자 + 소형 캡스(각짐은 ③에서) */
+.export-btn{ background:var(--accent); color:var(--ink); font-weight:800; text-transform:uppercase; letter-spacing:.06em; }
+
+/* ── ④ banner: 좌측 각진 오렌지 주의 바 + 오렌지 정보 마커. 나머지는 잉크 헤어라인 카드 ── */
+.banner{ box-shadow:inset 3px 0 0 0 var(--accent); }
+.banner-ico{ color:var(--accent); }
+
+/* ── ⑤ kpi: 8px 그리드 + 소형 캡스 라벨 + tabular. 오렌지는 상승델타 칩에만 집약 ── */
+.kpi-grid{ gap:16px; }
+.kpi-card{ padding:20px; }
+.kpi-label{ text-transform:uppercase; letter-spacing:.08em; font-size:10.5px; font-weight:700; }
+.kpi-value{ letter-spacing:-.015em; }   /* 크게 유지 — 가독성 */
+.kpi-delta{ font-variant-numeric:tabular-nums; }
+/* ① 상승델타 = 각진 오렌지 칩 + ink(②). base 의 오렌지 "텍스트" 를 오렌지 "블록" 으로 통일 */
+.kpi-delta.is-up{
+  display:inline-flex; align-items:center; gap:4px;
+  background:var(--accent); color:var(--ink); padding:2px 8px; font-weight:700;
+}
+.kpi-delta.is-down{ padding:2px 8px; }   /* base 의 잉크 블록 유지, 각짐만(③) */
+/* ① 스파크라인 오렌지 회수 → 전부 잉크/회색(중립). 유일한 오렌지 추이선은 큰 차트 몫(아래) */
+.spark-line.is-up{ stroke:var(--ink); }
+
+/* ── charts: 8px 그리드. ① 추이 강조선 = 유일한 오렌지 선. 도넛 = 주력 세그 1개만 오렌지 ── */
+.charts-row{ gap:16px; }
+.chart-trend,.chart-part{ padding:20px; }
+.section-title{ font-weight:800; letter-spacing:.01em; }
+.trend-line{ stroke-width:2.5; }                 /* 오렌지(base) 강조선 굵게 — 썸네일 가독 */
+.trend-notes .note em{ font-variant-numeric:tabular-nums; }
+/* 도넛 범례 = 소형 캡스 + tabular. 색은 base(주력 카드=오렌지, 나머지 잉크/회색 램프) 유지 */
+.legend-label{ text-transform:uppercase; letter-spacing:.04em; font-size:11px; }
+.legend-pct{ font-variant-numeric:tabular-nums; }
+
+/* ── ① goal: 진행바 = 각진 오렌지 바(③). 달성률 = 유일 오렌지 수치. 나머지 잉크 tabular ── */
+.goal{ padding:20px; }
+.goal-current,.goal-target,.goal-pct{ font-variant-numeric:tabular-nums; }
+.goal-current{ color:var(--ink); letter-spacing:-.01em; }
+.goal-pct{ color:var(--accent); font-weight:800; }
+.goal-bar-fill{ background:var(--accent); }      /* 각진 오렌지 성취 바(③) */
+
+/* ── table: 헤더 = 소형 캡스 넓은 트래킹. 상태 = 각진 하드 라벨(①③), 오렌지는 실패 1건에만 ── */
+.table-section{ padding:20px; }
+.settle-table th{ letter-spacing:.08em; font-weight:700; }
+.status{ text-transform:uppercase; letter-spacing:.06em; font-weight:700; padding:3px 8px; }
+.status--done{ background:var(--ink); color:var(--surface); border:0; }        /* 완료 = 잉크 블록(오렌지 회수) */
+.status--pending{ background:transparent; color:var(--ink); border:1px solid var(--border); }
+.status--hold{ background:transparent; color:var(--muted); border:1px solid var(--muted); }  /* 점선 → 실선 헤어라인 */
+.status--failed{ background:var(--accent); color:var(--ink); border:0; }        /* ① 실패 = 유일한 오렌지 주의 블록 */
+
+/* ── empty: 점선 대신 실선 헤어라인. 주요 버튼 = 각진 오렌지 블록 + ink(②) ── */
+.empty{ border:1px solid var(--border); }
+.empty-illust{ border:1px solid var(--muted); }
+.empty-title{ font-weight:800; letter-spacing:.01em; }
+.empty-cta{ background:var(--accent); color:var(--ink); border:0; font-weight:800; text-transform:uppercase; letter-spacing:.06em; }
+
+/* ── ④ 키보드 포커스: 각진 2px 오렌지 아웃라인(Rams 기능적 명료성) ── */
+a:focus-visible,
+button:focus-visible,
+select:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
 </style>
 </head>
 <body>
