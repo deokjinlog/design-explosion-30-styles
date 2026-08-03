@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.5.0-ec4899?style=flat-square&labelColor=0d1117">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.6.0-ec4899?style=flat-square&labelColor=0d1117">
   <img alt="Claude Code" src="https://img.shields.io/badge/Claude%20Code-Plugin-a78bfa?style=flat-square&labelColor=0d1117">
   <img alt="Styles" src="https://img.shields.io/badge/styles-30-ec4899?style=flat-square&labelColor=0d1117">
   <img alt="Zero deps" src="https://img.shields.io/badge/dependencies-zero-22c55e?style=flat-square&labelColor=0d1117">
@@ -54,7 +54,7 @@
 |---|---|---|---|
 | **base** | 원형의 부품 조립(형태·배치, 값은 `var()`로 비움) | 원형당 1개 — 30 스타일 공유 | 손 |
 | **tokens/NN** | 스타일의 값 12개(색·폰트·radius·스케일) | 스타일당 1개 — 원형·도메인 무관 | 손·스크립트 |
-| **signature/NN** | 값으론 안 되는 구조(도형·격자·하드섀도…) | 구조형 스타일만 (D 21·A 10·B 17) | LLM(디자인 판단) |
+| **signature/NN** | 값으론 안 되는 구조(도형·격자·하드섀도…) | 구조형 스타일만 (D 26·A 14·B 17) | LLM(디자인 판단) |
 
 **저작은 한 번, 이후 고정 라이브러리.** `assemble.py`(스크립트, **LLM 토큰 0**)가 세 층을 스켈레톤에 인라인 → 30장 자립 HTML. 갤러리를 100번 뽑아도 조립은 스크립트라 토큰이 안 듭니다.
 
@@ -63,6 +63,20 @@
 - **콘텐츠 동일성 (구조 보장)** — 30장이 `<body>` 바이트까지 동일. AI에게 "똑같이 해줘"라고 부탁하지 않고 스켈레톤 하나를 공유해 강제. 나란히 놓으면 다른 건 오직 스타일.
 - **잘못된 화면 원천 차단** — CSS는 스켈레톤에 **있는 요소만** 꾸밉니다. D 스켈레톤엔 KPI·차트 요소가 0개라, 어떤 스타일을 입혀도 대시보드가 될 수 없음. (사후 린트가 아니라 애초에 사고가 안 남 — `coverage-lint`는 화면 종류가 아니라 CSS 배선만 검사.)
 - **저비용 재사용** — 새 스타일 = 값 12개(+구조형이면 signature 1개), 한 번. 세 원형에 즉시 적용되고, 한 번 고치면 전 갤러리에 반영.
+
+---
+
+## 품질을 어떻게 지키나 — 게이트 3겹
+
+LLM이 만든 CSS를 자동으로 검증합니다. 앞 둘은 스크립트(결정적, LLM 토큰 0), 셋째는 비전 모델:
+
+| 겹 | 무엇을 잡나 | 기준 |
+|---|---|---|
+| **coverage-lint** | CSS 배선(없는 클래스 지어냄·빠뜨린 구역) | 스켈레톤 실존 클래스 |
+| **visual-gate** (Playwright 헤드리스 렌더) | 글자 대비·레이아웃 깨짐 | WCAG AA(대비 4.5·타깃 44px·리플로) |
+| **VLM 심판** (스크린샷 판정) | 변별력("다 비슷")·깨짐·스타일 충실도 | Nielsen 휴리스틱·디자인 시스템 스펙 |
+
+**"깨짐"은 스크립트가 결정적으로 잡고, "취향"은 사람이 최종 판단.** 실측으로 오버플로 3건·타임스탬프 대비를 수정하고, VLM 재판정으로 "다 비슷"을 **D 18→3 · A 6→3**으로 밀어냈습니다. → [상세 문서](docs/design/2026-08-02-visual-quality-gates.md)
 
 ---
 
